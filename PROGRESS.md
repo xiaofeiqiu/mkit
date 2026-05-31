@@ -207,20 +207,100 @@ Move with WASD/Arrows, melee with Space/J, cast fireball with Q. Expected consol
 `[STATUS] tick: status.burn` every second,
 `[ABILITY] cast failed: ability.fireball_basic — on_cooldown: ...` if cast during cooldown.
 
-## Phase 3 — Inventory, Equipment, Loot, Reward ⬜
+## Phase 3 — Inventory, Equipment, Loot, Reward ✅
 
-- [ ] ItemDefinition / ItemInstance / InventoryModel / InventoryController
-- [ ] EquipmentSlot / EquipmentController
-- [ ] LootTableDefinition / LootEntry / LootSystem
-- [ ] RewardDefinition / RewardOption / RewardSystem
-- [ ] GrantItemEffect / ApplyStatModifierEffect
-- [ ] EventRouter: `item_collected` signal + emitter
+Read: [07 Inventory, Equipment, Loot, Rewards](spec/combined/07_inventory_equipment_loot_rewards.md)
 
-## Phase 4 — Room, Run, Procedural Generation ⬜
+Validation target:
 
-- [ ] RoomDefinition / RoomController
-- [ ] RunState / RunDirector
-- [ ] DungeonGenerator / RoomGraph / GenerationRules
+```text
+Enemy or chest produces loot. Player collects and equips an item.
+Stats change through modifiers. Reward options can be generated and applied.
+```
+
+### Inventory module (doc 14)
+
+- [x] ItemDefinition (`modules/inventory/item_definition.gd`)
+- [x] ItemInstance (`modules/inventory/item_instance.gd`) — `create()`, `to_save_data()`, `from_save_data()`
+- [x] InventorySlot (`modules/inventory/inventory_slot.gd`)
+- [x] InventoryModel (`modules/inventory/inventory_model.gd`)
+- [x] InventoryController (`modules/inventory/inventory_controller.gd`) — add/remove/stack/find/save/load
+- [x] EquipmentController (`modules/inventory/equipment_controller.gd`) — equip/unequip, applies StatModifiers via StatsComponent
+
+### Loot & Reward module (doc 15)
+
+- [x] LootEntry (`modules/loot/loot_entry.gd`)
+- [x] LootTableDefinition (`modules/loot/loot_table_definition.gd`)
+- [x] LootRollResult (`modules/loot/loot_roll_result.gd`)
+- [x] LootSystem (`modules/loot/loot_system.gd`) — weighted roll, condition filtering, quantity range
+- [x] RewardOption (`modules/loot/reward_option.gd`)
+- [x] RewardDefinition (`modules/loot/reward_definition.gd`)
+- [x] RewardSystem (`modules/loot/reward_system.gd`) — weighted pick, condition filtering, apply via EffectExecutor
+
+### Kernel additions
+
+- [x] GrantItemEffect (`kernel/effects/builtin/grant_item_effect.gd`)
+- [x] ApplyStatModifierEffect (`kernel/effects/builtin/apply_stat_modifier_effect.gd`)
+
+### Phase 3 validation demo
+
+- [x] `game/demo/entities/player/player.tscn` — added Controllers/InventoryController (cap 20) + Controllers/EquipmentController
+- [x] `game/demo/phase3_inventory_slice.tscn` + `phase3_inventory_slice.gd`
+  - kill enemy → LootSystem rolls `loot.goblin_common` (2 rolls, empty_weight=3, sword w=5, potion w=10) → auto-pickup
+  - `E` → equip iron sword from inventory → StatsComponent +8 attack_power
+  - `F` → use small potion → HealEffect 25 HP, removes one stack from inventory
+  - `R` → RewardSystem generates 3 options → `1/2/3` → ApplyStatModifierEffect applied to player
+- [x] `game/demo/bootstrap.tscn` → `phase3_inventory_slice.tscn`
+
+**How to run:** press Play. Kill the enemy (WASD + Space/J or Q fireball). Loot auto-picked up.
+Press `E` to equip sword (attack stat updates), `F` to use a potion, `R` then `1/2/3` to pick a run reward.
+Stats displayed live in the HUD top-right panel.
+
+## Phase 4 — Room, Run, Procedural Generation ✅
+
+Read: [08 Room, Run, and Procedural Generation](spec/combined/08_room_run_and_generation.md)
+
+Validation target:
+
+```text
+Start a run. Enter a generated room.
+Detect room clear. Choose reward. Advance to the next room.
+```
+
+### Entity module additions (doc 05 §8.3–8.4)
+
+- [x] EntityDefinition (`modules/entity/entity_definition.gd`) — static definition: scene_path, faction, base_stats, ability IDs, loot table
+- [x] EntitySpawner (`modules/entity/entity_spawner.gd`) — loads scene, initialises EntityIdentity/StatsComponent/AbilityController from definition; auto-generates unique runtime_id when none provided
+
+### Room module (doc 16)
+
+- [x] RoomDefinition (`modules/room/room_definition.gd`) — room_id, scene_path, room_type, enemy_spawn_ids, reward_pool_ids
+- [x] RoomRuntime (`modules/room/room_runtime.gd`) — per-run room state: cleared, entered, active_enemy_ids, reward_options; `create(definition_id)`
+- [x] RoomController (`modules/room/room_controller.gd`) — spawns enemies via EntitySpawner, tracks active enemies, calls check_clear_condition on entity_died, generates rewards; `spawn_positions` export for demo positioning
+
+### Run module (doc 16)
+
+- [x] RunState (`modules/room/run_state.gd`) — run_id, seed, floor, room_index, status, history, `to_save_data()`
+- [x] RunDirector (`modules/room/run_director.gd`) — starts run, calls DungeonGenerator, loads room scenes into container, handles reward selection, emits run_started/choosing_reward/run_finished; detects player death via entity_died
+
+### Procedural Generation module (doc 17)
+
+- [x] RoomNode (`modules/room/room_node.gd`) — graph node: node_id, room_definition_id, next/previous links
+- [x] RoomGraph (`modules/room/room_graph.gd`) — nodes array, start_node, boss_node, `get_room_at(index)`
+- [x] DungeonGenerator (`modules/room/dungeon_generator.gd`) — `generate_linear(pool_ids, seed, length)`: deterministic seeded linear room sequence
+
+### Phase 4 validation demo
+
+- [x] `game/demo/rooms/combat_room_01.tscn` — room scene (RoomController + EntitySpawner + Enemies container, 2 spawn positions)
+- [x] `game/demo/rooms/combat_room_02.tscn` — alternate room scene (3 spawn positions)
+- [x] `game/demo/phase4_run_slice.tscn` + `phase4_run_slice.gd` — registers `enemy.goblin_basic` EntityDefinition + two RoomDefinitions + four RewardDefinitions; RunDirector with 3-room linear run (seed=12345, pool=[room.combat_01, room.combat_02])
+- [x] `game/demo/bootstrap.tscn` → `phase4_run_slice.tscn`
+
+**How to run:** press Play. GameBootstrap boots services then enters `phase4_run_slice.tscn`.
+RunDirector generates a 3-room run, loads the first combat room, and spawns goblins via EntitySpawner.
+Move with WASD/Arrows, melee with Space/J. Kill all enemies → room cleared event fires, reward options
+printed to console. Press 1/2/3 to pick a reward → next room loads. After all 3 rooms: run completed.
+Player death triggers run failed. (Not yet run here — no Godot binary available in this environment.)
 
 ## Phase 5 — Save & Meta Progression ⬜
 

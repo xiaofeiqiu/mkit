@@ -5,13 +5,13 @@
 [ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="3_recv"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="4_sm"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state.gd" id="5_state"]
-[ext_resource type="Script" path="res://game/demo/player/states/player_idle_state.gd" id="6_idle"]
-[ext_resource type="Script" path="res://game/demo/player/states/player_move_state.gd" id="7_move"]
-[ext_resource type="Script" path="res://game/demo/player/states/player_attack_state.gd" id="8_attack"]
+[ext_resource type="Script" path="res://game/demo/entities/player/states/player_idle_state.gd" id="6_idle"]
+[ext_resource type="Script" path="res://game/demo/entities/player/states/player_move_state.gd" id="7_move"]
+[ext_resource type="Script" path="res://game/demo/entities/player/states/player_attack_state.gd" id="8_attack"]
 [ext_resource type="Script" path="res://addons/mkit/modules/stats/stats_component.gd" id="9_stats"]
 [ext_resource type="Script" path="res://addons/mkit/modules/health/health_component.gd" id="10_health"]
 [ext_resource type="Script" path="res://addons/mkit/modules/combat/hitbox_component.gd" id="11_hitbox"]
-[ext_resource type="Script" path="res://game/demo/player/player_input_reader.gd" id="12_input"]
+[ext_resource type="Script" path="res://game/demo/entities/player/player_input_reader.gd" id="12_input"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_hit"]
 size = Vector2(36, 36)

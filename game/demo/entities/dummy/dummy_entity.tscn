@@ -3,9 +3,9 @@
 [ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="1_recv"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="2_sm"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state.gd" id="3_state"]
-[ext_resource type="Script" path="res://game/demo/states/dummy_idle_state.gd" id="4_idle"]
-[ext_resource type="Script" path="res://game/demo/states/dummy_move_state.gd" id="5_move"]
-[ext_resource type="Script" path="res://game/demo/states/dummy_attack_state.gd" id="6_attack"]
+[ext_resource type="Script" path="res://game/demo/entities/dummy/states/dummy_idle_state.gd" id="4_idle"]
+[ext_resource type="Script" path="res://game/demo/entities/dummy/states/dummy_move_state.gd" id="5_move"]
+[ext_resource type="Script" path="res://game/demo/entities/dummy/states/dummy_attack_state.gd" id="6_attack"]
 
 [node name="DummyEntity" type="CharacterBody2D"]
 

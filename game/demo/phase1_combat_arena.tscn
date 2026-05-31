@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://game/demo/combat_arena.gd" id="1_arena"]
-[ext_resource type="PackedScene" path="res://game/demo/player/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" path="res://game/demo/enemy/enemy.tscn" id="3_enemy"]
+[ext_resource type="Script" path="res://game/demo/phase1_combat_arena.gd" id="1_arena"]
+[ext_resource type="PackedScene" path="res://game/demo/entities/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://game/demo/entities/enemy/enemy.tscn" id="3_enemy"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/debug/debug_overlay.gd" id="4_debug"]
 
 [node name="CombatArena" type="Node2D"]

@@ -49,7 +49,7 @@ state_id = "Move"
 script = ExtResource("8_attack")
 state_id = "Attack"
 
-[node name="Components" type="Node" parent="."]
+[node name="Components" type="Node2D" parent="."]
 
 [node name="StatsComponent" type="Node" parent="Components"]
 script = ExtResource("9_stats")

@@ -16,7 +16,7 @@ entity_id = "enemy_001"
 faction = "enemy"
 tags = Array[String](["enemy", "living"])
 
-[node name="Components" type="Node" parent="."]
+[node name="Components" type="Node2D" parent="."]
 
 [node name="StatsComponent" type="Node" parent="Components"]
 script = ExtResource("2_stats")

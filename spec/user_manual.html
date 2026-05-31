@@ -1,0 +1,1749 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Godot Mkit 用户手册</title>
+  <style>
+    :root {
+      --bg: #f4efe5;
+      --paper: #fffaf0;
+      --paper-strong: #fff3d2;
+      --ink: #1f2520;
+      --muted: #687069;
+      --line: #d8cdb7;
+      --accent: #c65f2f;
+      --accent-dark: #873b24;
+      --green: #2f7d5c;
+      --blue: #315f7f;
+      --gold: #b9821b;
+      --danger: #9f352f;
+      --code: #202821;
+      --code-bg: #eef0df;
+      --shadow: 0 16px 40px rgba(73, 53, 28, 0.12);
+      --radius: 18px;
+      --mono: "SFMono-Regular", "Cascadia Code", "Liberation Mono", Menlo, monospace;
+      --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --serif: Georgia, "Times New Roman", "Songti SC", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.72;
+      background:
+        radial-gradient(circle at top left, rgba(198, 95, 47, 0.18), transparent 32rem),
+        radial-gradient(circle at 82% 8%, rgba(47, 125, 92, 0.16), transparent 28rem),
+        linear-gradient(135deg, #f8f1df 0%, #efe5cf 100%);
+    }
+
+    a {
+      color: var(--accent-dark);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.18em;
+    }
+
+    code {
+      padding: 0.1rem 0.34rem;
+      border-radius: 0.35rem;
+      background: var(--code-bg);
+      font-family: var(--mono);
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 1rem 1.1rem;
+      border: 1px solid #d3c5ab;
+      border-radius: 14px;
+      color: #f2f1df;
+      background: #1f281f;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    pre code {
+      padding: 0;
+      color: inherit;
+      background: transparent;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.96rem;
+      background: rgba(255, 250, 240, 0.78);
+    }
+
+    th,
+    td {
+      padding: 0.72rem 0.8rem;
+      vertical-align: top;
+      border: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      color: #2a332d;
+      background: #efe0c1;
+      font-weight: 800;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 1.4rem 1.2rem;
+      overflow-y: auto;
+      border-right: 1px solid rgba(88, 64, 35, 0.18);
+      background: rgba(255, 250, 240, 0.78);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fff8e8, #f0dfbc);
+    }
+
+    .brand .label {
+      color: var(--accent-dark);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .brand h1 {
+      margin: 0.12rem 0 0;
+      font-family: var(--serif);
+      font-size: 1.62rem;
+      line-height: 1.08;
+    }
+
+    .brand p {
+      margin: 0.55rem 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .toc {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .toc a {
+      display: block;
+      padding: 0.44rem 0.6rem;
+      border-radius: 10px;
+      color: #323a33;
+      text-decoration: none;
+      font-size: 0.92rem;
+    }
+
+    .toc a:hover {
+      background: #efe2c8;
+    }
+
+    main {
+      width: min(100%, 1180px);
+      padding: 2rem clamp(1rem, 4vw, 4rem) 5rem;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      padding: clamp(1.4rem, 4vw, 3rem);
+      border: 1px solid rgba(118, 80, 35, 0.22);
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(255, 250, 240, 0.96), rgba(244, 222, 182, 0.92)),
+        repeating-linear-gradient(90deg, rgba(135, 59, 36, 0.08) 0 1px, transparent 1px 34px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -6rem;
+      top: -7rem;
+      width: 20rem;
+      height: 20rem;
+      border: 2rem solid rgba(47, 125, 92, 0.12);
+      border-radius: 50%;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding: 0.25rem 0.7rem;
+      border: 1px solid rgba(198, 95, 47, 0.34);
+      border-radius: 999px;
+      color: var(--accent-dark);
+      background: #fff4d8;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero h2 {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(2.1rem, 5vw, 4.6rem);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+    }
+
+    .hero .summary {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 1.1rem 0 0;
+      color: #39433b;
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+    }
+
+    .principle {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.4rem;
+    }
+
+    .principle div {
+      padding: 1rem;
+      border: 1px solid rgba(104, 112, 105, 0.22);
+      border-radius: 16px;
+      background: rgba(255, 250, 240, 0.8);
+    }
+
+    section {
+      margin: 2rem 0;
+      padding: clamp(1.1rem, 2.5vw, 2rem);
+      border: 1px solid rgba(108, 82, 47, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 250, 240, 0.84);
+      box-shadow: 0 10px 28px rgba(73, 53, 28, 0.07);
+    }
+
+    section h2 {
+      margin: 0 0 0.8rem;
+      font-family: var(--serif);
+      font-size: clamp(1.7rem, 3vw, 2.55rem);
+      line-height: 1.08;
+      letter-spacing: -0.025em;
+    }
+
+    section h3 {
+      margin: 1.55rem 0 0.55rem;
+      color: #24352b;
+      font-size: 1.3rem;
+      line-height: 1.25;
+    }
+
+    section h4 {
+      margin: 1.15rem 0 0.4rem;
+      color: var(--accent-dark);
+      font-size: 1.05rem;
+    }
+
+    .lead {
+      max-width: 980px;
+      color: #3e493f;
+      font-size: 1.06rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 248, 229, 0.9);
+    }
+
+    .card h3,
+    .card h4 {
+      margin-top: 0;
+    }
+
+    .tag {
+      display: inline-block;
+      margin: 0.12rem;
+      padding: 0.1rem 0.5rem;
+      border: 1px solid #cbb990;
+      border-radius: 999px;
+      background: #f6ebcf;
+      color: #4f513e;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+
+    .note {
+      padding: 0.9rem 1rem;
+      border-left: 5px solid var(--accent);
+      border-radius: 12px;
+      background: #fff1d1;
+    }
+
+    .ok {
+      border-left-color: var(--green);
+      background: #e9f2df;
+    }
+
+    .warn {
+      border-left-color: var(--danger);
+      background: #f8e2d8;
+    }
+
+    .diagram {
+      margin: 1rem 0 1.4rem;
+      padding: 1rem;
+      border: 1px solid #d8c8a8;
+      border-radius: 18px;
+      background: #fff8e7;
+      overflow-x: auto;
+    }
+
+    .diagram svg {
+      min-width: 720px;
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .component-table td:first-child,
+    .component-table th:first-child {
+      width: 13rem;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+    }
+
+    .flow-list {
+      display: grid;
+      gap: 0.55rem;
+      margin: 1rem 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .flow-list li {
+      position: relative;
+      padding: 0.65rem 0.8rem 0.65rem 2.3rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 250, 240, 0.9);
+    }
+
+    .flow-list li::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 0.65rem;
+      top: 0.68rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      border-radius: 50%;
+      color: #fffaf0;
+      background: var(--accent);
+      font-size: 0.68rem;
+      font-weight: 900;
+      line-height: 1.1rem;
+      text-align: center;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 0.45rem;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      padding-left: 1.6rem;
+      position: relative;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .footer {
+      margin-top: 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 960px) {
+      .shell {
+        display: block;
+      }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+      }
+
+      main {
+        padding: 1rem;
+      }
+
+      .principle,
+      .grid,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .shell {
+        display: block;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      main {
+        width: 100%;
+        padding: 0;
+      }
+
+      section,
+      .hero {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="label">Godot 4.x Kit</div>
+        <h1>Mkit 用户手册</h1>
+        <p>面向 2D RPG、roguelike、动作地牢和 survivor-like 的可复用运行时框架。</p>
+      </div>
+      <nav class="toc" aria-label="目录">
+        <a href="#overview">总览</a>
+        <a href="#quick-start">Quick Start</a>
+        <a href="#architecture">High Level Architecture</a>
+        <a href="#concepts">核心概念</a>
+        <a href="#kernel">Runtime Kernel</a>
+        <a href="#entity-combat">Entity / Stats / Combat</a>
+        <a href="#ability-status">Ability / Status</a>
+        <a href="#inventory-reward">Inventory / Reward</a>
+        <a href="#run-room">Run / Room / Generation</a>
+        <a href="#ai-ui-feedback">AI / UI / Feedback</a>
+        <a href="#save-platform">Save / Platform</a>
+        <a href="#flows">常见流程</a>
+        <a href="#content-guides">内容制作指南</a>
+        <a href="#debugging">调试和排错</a>
+        <a href="#boundaries">边界和反模式</a>
+        <a href="#roadmap">推荐开发顺序</a>
+        <a href="#appendix">附录</a>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero" id="overview">
+        <div class="eyebrow">User Manual</div>
+        <h2>Godot Mkit 用户手册</h2>
+        <p class="summary">Mkit 是一个 Godot 4.x 2D gameplay kit。它提供可复用的 runtime kernel 和 gameplay modules，用来构建 RPG、roguelike、roguelite、action RPG、dungeon crawler 和 survivor-like 游戏。它不是固定模板，不应该硬编码任何具体游戏内容。</p>
+        <div class="principle">
+          <div>
+            <strong>Mkit 提供机制</strong>
+            <p>Command、HFSM、Action、Effect、Stats、Combat、Inventory、Run、Save、UI feedback 等可复用机制属于 kit。</p>
+          </div>
+          <div>
+            <strong>Game 提供内容</strong>
+            <p>具体玩家、敌人、Boss、关卡、技能、物品、剧情、数值、UI 风格、广告经济和平台策略属于你的游戏。</p>
+          </div>
+        </div>
+      </header>
+
+      <section>
+        <h2>这份手册如何使用</h2>
+        <p class="lead">本手册按照目标设计说明 Mkit 的完整使用方式，不以当前实现进度为边界。你可以把它当成接入指南、设计约束和开发 checklist。</p>
+        <table>
+          <thead>
+            <tr>
+              <th>读者</th>
+              <th>重点章节</th>
+              <th>你应该产出的东西</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Gameplay programmer</td>
+              <td>Architecture、Runtime Kernel、Entity / Combat、Flows</td>
+              <td>实体状态机、Action、Effect、Combat、Run 和 Room 流程</td>
+            </tr>
+            <tr>
+              <td>Game designer</td>
+              <td>核心概念、Content Guides、Inventory / Reward、Progression</td>
+              <td>AbilityDefinition、ItemDefinition、RoomDefinition、RewardDefinition、UpgradeDefinition</td>
+            </tr>
+            <tr>
+              <td>UI / Technical artist</td>
+              <td>UI / Feedback、EventRouter、Debugging</td>
+              <td>HUD、Reward UI、Inventory UI、VFX、Audio、DamageNumber、debug view</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick Start</h2>
+        <p class="lead">这部分不是纯代码教程。Mkit 的接入首先是 Godot 项目配置、文件边界、输入、碰撞层和内容数据库。先把这些基础设好，后面的系统才会稳定。</p>
+
+        <h3>1. 安装 addon</h3>
+        <pre><code>res://addons/mkit/</code></pre>
+        <p>推荐项目布局：</p>
+        <pre><code>res://addons/mkit/     # kit 本体，只放可复用机制
+res://game/            # 当前游戏的实体、关卡、内容资源、UI、音频、美术
+res://project.godot</code></pre>
+        <div class="note">
+          <strong>边界规则：</strong> <code>res://game/</code> 可以依赖 <code>res://addons/mkit/</code>，但 addon 内不能引用 <code>res://game/</code> 的具体内容。
+        </div>
+
+        <h3>2. 启用插件</h3>
+        <p>在 Godot 中打开：</p>
+        <pre><code>Project &gt; Project Settings &gt; Plugins</code></pre>
+        <p>启用 <code>Mkit</code> 插件。插件只注册一个真正的全局 autoload：</p>
+        <pre><code>ServiceRegistry</code></pre>
+        <p>不要把 EventRouter、CommandRouter、SaveManager、RunDirector 等都做成 Autoload。它们应该由 <code>GameBootstrap</code> 创建，并注册到 <code>ServiceRegistry</code>。</p>
+
+        <h3>3. 创建 Bootstrap 场景</h3>
+        <p>创建一个极小的启动场景：</p>
+        <pre><code>res://game/bootstrap.tscn</code></pre>
+        <p>推荐结构：</p>
+        <pre><code>Bootstrap
+  GameBootstrap</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>Inspector 字段</th>
+              <th>配置</th>
+              <th>原因</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>resource_databases</code></td>
+              <td>items、abilities、enemies、rooms、rewards、upgrades 等数据库资源</td>
+              <td>启动时把所有 definition 加入 ContentRegistry，之后用 stable ID 查找</td>
+            </tr>
+            <tr>
+              <td><code>initial_scene_path</code></td>
+              <td>主菜单、测试场景或第一张 gameplay 场景</td>
+              <td>Bootstrap 完成服务注册后再进入真正场景</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>设置主场景：</p>
+        <pre><code>Project &gt; Project Settings &gt; Application &gt; Run &gt; Main Scene
+res://game/bootstrap.tscn</code></pre>
+        <div class="note warn">
+          <strong>不要</strong>把 <code>initial_scene_path</code> 指向 bootstrap 场景本身，否则会重复启动。
+        </div>
+
+        <h3>4. 配置 Input Map</h3>
+        <p>打开：</p>
+        <pre><code>Project &gt; Project Settings &gt; Input Map</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>建议按键</th>
+              <th>转换成的 Command</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>move_left</code></td><td>A / Left</td><td><code>move</code></td></tr>
+            <tr><td><code>move_right</code></td><td>D / Right</td><td><code>move</code></td></tr>
+            <tr><td><code>move_up</code></td><td>W / Up</td><td><code>move</code></td></tr>
+            <tr><td><code>move_down</code></td><td>S / Down</td><td><code>move</code></td></tr>
+            <tr><td><code>attack</code></td><td>Space / J</td><td><code>attack</code></td></tr>
+            <tr><td><code>dash</code></td><td>Shift / K</td><td><code>dash</code></td></tr>
+            <tr><td><code>cast_ability_1</code></td><td>Q</td><td><code>cast_ability</code></td></tr>
+            <tr><td><code>interact</code></td><td>E</td><td><code>interact</code></td></tr>
+            <tr><td><code>open_inventory</code></td><td>I</td><td><code>open_inventory</code></td></tr>
+            <tr><td><code>pause</code></td><td>Escape</td><td><code>pause</code></td></tr>
+          </tbody>
+        </table>
+        <div class="note ok">
+          输入层只创建 command。它不直接改 HP、背包、状态、冷却或场景。
+        </div>
+
+        <h3>5. 配置物理碰撞层</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>名称</th>
+              <th>用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>World</td><td>墙、障碍、地形</td></tr>
+            <tr><td>2</td><td>Player</td><td>玩家身体</td></tr>
+            <tr><td>3</td><td>Enemy</td><td>敌人身体</td></tr>
+            <tr><td>4</td><td>PlayerHitbox</td><td>玩家攻击判定</td></tr>
+            <tr><td>5</td><td>EnemyHitbox</td><td>敌人攻击判定</td></tr>
+            <tr><td>6</td><td>PlayerHurtbox</td><td>玩家受击判定</td></tr>
+            <tr><td>7</td><td>EnemyHurtbox</td><td>敌人受击判定</td></tr>
+            <tr><td>8</td><td>Pickup</td><td>掉落物和可拾取物</td></tr>
+            <tr><td>9</td><td>Interaction</td><td>NPC、门、宝箱、机关</td></tr>
+          </tbody>
+        </table>
+        <p><code>HitboxComponent</code> 检测 <code>HurtboxComponent</code>，然后创建 <code>DamageRequest</code>。动画、输入和 UI 都不应该直接计算伤害。</p>
+
+        <h3>6. 创建内容数据库</h3>
+        <pre><code>res://game/content/db_items.tres
+res://game/content/db_abilities.tres
+res://game/content/db_enemies.tres
+res://game/content/db_rooms.tres
+res://game/content/db_rewards.tres</code></pre>
+        <p>所有可复用内容都必须有 stable ID：</p>
+        <div>
+          <span class="tag">item.sword_iron</span>
+          <span class="tag">ability.fireball_basic</span>
+          <span class="tag">enemy.goblin_basic</span>
+          <span class="tag">room.dungeon_small_01</span>
+          <span class="tag">upgrade.attack_plus_20</span>
+          <span class="tag">status.burn</span>
+          <span class="tag">loot.goblin_common</span>
+        </div>
+
+        <h3>7. 创建玩家实体</h3>
+        <pre><code>PlayerEntity.tscn
+  CharacterBody2D
+    EntityIdentity
+    Components
+      StatsComponent
+      HealthComponent
+      HurtboxComponent
+      HitboxComponent
+      StatusEffectController
+    Controllers
+      AbilityController
+      InventoryController
+      EquipmentController
+      InteractionComponent
+    Behavior
+      CommandReceiver
+      StateMachine
+        Player
+          Alive
+            Locomotion
+              Idle
+              Move
+              Dash
+            Combat
+              BasicAttack
+              Cast
+          Dead
+    Presentation
+      SpriteRoot
+      AnimationPlayer
+      AudioEmitter
+      VFXAnchor
+    InputReader</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>节点</th>
+              <th>必须配置</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>EntityIdentity</code></td><td><code>entity_id</code>、<code>definition_id</code>、<code>faction = player</code>、tags</td></tr>
+            <tr><td><code>CommandReceiver</code></td><td>receiver id，通常等于 entity id</td></tr>
+            <tr><td><code>StateMachine</code></td><td>initial state path，例如 <code>Player/Alive/Locomotion/Idle</code></td></tr>
+            <tr><td><code>StatsComponent</code></td><td>基础属性，例如 max_hp、move_speed、attack_power</td></tr>
+            <tr><td><code>HealthComponent</code></td><td>当前 HP，并监听 max_hp 变化</td></tr>
+            <tr><td><code>HitboxComponent</code></td><td>伤害、目标 faction、active frame 开关</td></tr>
+            <tr><td><code>HurtboxComponent</code></td><td>owner path、damage multiplier、damage tags</td></tr>
+          </tbody>
+        </table>
+
+        <h3>8. 创建敌人实体</h3>
+        <pre><code>Goblin.tscn
+  CharacterBody2D
+    EntityIdentity
+    Components
+      StatsComponent
+      HealthComponent
+      HurtboxComponent
+      HitboxComponent
+      StatusEffectController
+    Controllers
+      AbilityController
+      LootController
+    Behavior
+      CommandReceiver
+      EnemyBrain
+      StateMachine
+        Enemy
+          Alive
+            Idle
+            Chase
+            Attack
+            Stunned
+          Dead
+    Presentation
+      SpriteRoot
+      AnimationPlayer
+      AudioEmitter
+      VFXAnchor</code></pre>
+        <p>AI 不直接修改玩家 HP 或自身状态。AI 产生 command，HFSM 决定是否接受，Action 和 Effect 执行结果。</p>
+
+        <h3>9. 创建 Run 场景</h3>
+        <pre><code>RunScene.tscn
+  RunDirector
+  RoomContainer
+  PlayerSpawnPoint
+  Camera2D
+  UI
+    HUD
+    RewardSelectionUI
+  DebugOverlay</code></pre>
+        <p><code>RunDirector</code> 负责开始 run、进入房间、清场奖励、推进下一房间、失败和通关。<code>RoomController</code> 负责单个房间内的刷怪、门、清场条件和奖励请求。</p>
+
+        <h3>10. 验证第一条完整链路</h3>
+        <pre><code>玩家输入
+  -&gt; GameCommand
+  -&gt; CommandRouter / CommandReceiver
+  -&gt; HFSM
+  -&gt; GameAction
+  -&gt; GameEffect / Hitbox
+  -&gt; CombatResolver
+  -&gt; HealthComponent
+  -&gt; EventRouter
+  -&gt; UI / Audio / VFX / Debug</code></pre>
+        <ul class="checklist">
+          <li>玩家可以移动。</li>
+          <li>玩家可以攻击。</li>
+          <li>敌人可以受伤。</li>
+          <li>敌人可以死亡。</li>
+          <li>死亡事件可以被房间监听。</li>
+          <li>房间清理后可以出现奖励。</li>
+          <li>玩家选择奖励后 run 可以推进。</li>
+          <li>DebugOverlay 能显示 state、command、events、damage trace。</li>
+        </ul>
+      </section>
+
+      <section id="architecture">
+        <h2>High Level Architecture</h2>
+        <p class="lead">Mkit 的架构分为四层。依赖只能向下，具体游戏内容永远在 <code>game/</code>，可复用机制永远在 <code>addons/mkit/</code>。</p>
+
+        <h3>分层架构图</h3>
+        <div class="diagram" aria-label="Layered architecture diagram">
+          <svg viewBox="0 0 980 560" role="img">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#fff3d2"></stop>
+                <stop offset="100%" stop-color="#f2d8a7"></stop>
+              </linearGradient>
+              <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#dff0dc"></stop>
+                <stop offset="100%" stop-color="#bad7bc"></stop>
+              </linearGradient>
+              <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#dcebf1"></stop>
+                <stop offset="100%" stop-color="#aac7d5"></stop>
+              </linearGradient>
+              <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#f3d8cd"></stop>
+                <stop offset="100%" stop-color="#dca38b"></stop>
+              </linearGradient>
+              <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                <path d="M2,2 L10,6 L2,10 Z" fill="#873b24"></path>
+              </marker>
+            </defs>
+            <rect x="80" y="30" width="820" height="95" rx="18" fill="url(#g1)" stroke="#c8a765"></rect>
+            <text x="110" y="66" font-size="26" font-weight="800" fill="#1f2520">Game Layer</text>
+            <text x="110" y="100" font-size="18" fill="#4d544c">具体玩家、敌人、Boss、房间、技能、物品、UI、数值、剧情、商业规则</text>
+
+            <rect x="80" y="165" width="820" height="110" rx="18" fill="url(#g2)" stroke="#8fb38f"></rect>
+            <text x="110" y="202" font-size="26" font-weight="800" fill="#1f2520">Gameplay Modules Layer</text>
+            <text x="110" y="236" font-size="18" fill="#3f5342">Entity / Stats / Combat / Ability / Status / Inventory / Loot / Reward / Run / Room / AI / UI</text>
+
+            <rect x="80" y="315" width="820" height="110" rx="18" fill="url(#g3)" stroke="#88a9ba"></rect>
+            <text x="110" y="352" font-size="26" font-weight="800" fill="#1f2520">Runtime Kernel Layer</text>
+            <text x="110" y="386" font-size="18" fill="#374a53">Lifecycle / ServiceRegistry / ContentRegistry / EventRouter / CommandRouter / HFSM / Action / Effect / Save / Debug</text>
+
+            <rect x="80" y="465" width="820" height="70" rx="18" fill="url(#g4)" stroke="#c88469"></rect>
+            <text x="110" y="508" font-size="26" font-weight="800" fill="#1f2520">Platform / Infrastructure Layer</text>
+            <text x="565" y="508" font-size="18" fill="#5b3a2e">Ads / IAP / Analytics / Cloud Save / File System</text>
+
+            <line x1="490" y1="132" x2="490" y2="158" stroke="#873b24" stroke-width="4" marker-end="url(#arrow)"></line>
+            <line x1="490" y1="282" x2="490" y2="308" stroke="#873b24" stroke-width="4" marker-end="url(#arrow)"></line>
+            <line x1="490" y1="432" x2="490" y2="458" stroke="#873b24" stroke-width="4" marker-end="url(#arrow)"></line>
+            <text x="525" y="150" font-size="15" fill="#873b24">depends on</text>
+            <text x="525" y="300" font-size="15" fill="#873b24">depends on</text>
+            <text x="525" y="450" font-size="15" fill="#873b24">depends on</text>
+          </svg>
+        </div>
+
+        <h3>核心运行管线</h3>
+        <div class="diagram" aria-label="Runtime pipeline diagram">
+          <svg viewBox="0 0 1120 260" role="img">
+            <defs>
+              <marker id="pipeArrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                <path d="M2,2 L10,6 L2,10 Z" fill="#2f7d5c"></path>
+              </marker>
+            </defs>
+            <g font-family="Avenir Next, Segoe UI, Arial" font-size="16" text-anchor="middle">
+              <rect x="20" y="75" width="115" height="70" rx="16" fill="#fff3d2" stroke="#c8a765"></rect>
+              <text x="77" y="104" font-weight="800">Input</text>
+              <text x="77" y="128" fill="#60685e">AI / Script</text>
+
+              <rect x="165" y="75" width="115" height="70" rx="16" fill="#f0e7cf" stroke="#c8a765"></rect>
+              <text x="222" y="104" font-weight="800">Command</text>
+              <text x="222" y="128" fill="#60685e">Intent</text>
+
+              <rect x="310" y="75" width="115" height="70" rx="16" fill="#dff0dc" stroke="#8fb38f"></rect>
+              <text x="367" y="104" font-weight="800">Router</text>
+              <text x="367" y="128" fill="#60685e">Receiver</text>
+
+              <rect x="455" y="75" width="115" height="70" rx="16" fill="#dcebf1" stroke="#88a9ba"></rect>
+              <text x="512" y="104" font-weight="800">HFSM</text>
+              <text x="512" y="128" fill="#60685e">Behavior</text>
+
+              <rect x="600" y="75" width="115" height="70" rx="16" fill="#f3d8cd" stroke="#c88469"></rect>
+              <text x="657" y="104" font-weight="800">Action</text>
+              <text x="657" y="128" fill="#60685e">Timed</text>
+
+              <rect x="745" y="75" width="115" height="70" rx="16" fill="#fff3d2" stroke="#c8a765"></rect>
+              <text x="802" y="104" font-weight="800">Effect</text>
+              <text x="802" y="128" fill="#60685e">Outcome</text>
+
+              <rect x="890" y="75" width="115" height="70" rx="16" fill="#dff0dc" stroke="#8fb38f"></rect>
+              <text x="947" y="104" font-weight="800">Domain</text>
+              <text x="947" y="128" fill="#60685e">System</text>
+
+              <rect x="1035" y="75" width="65" height="70" rx="16" fill="#dcebf1" stroke="#88a9ba"></rect>
+              <text x="1067" y="104" font-weight="800">Event</text>
+              <text x="1067" y="128" fill="#60685e">UI</text>
+            </g>
+            <g stroke="#2f7d5c" stroke-width="4" marker-end="url(#pipeArrow)">
+              <line x1="138" y1="110" x2="158" y2="110"></line>
+              <line x1="283" y1="110" x2="303" y2="110"></line>
+              <line x1="428" y1="110" x2="448" y2="110"></line>
+              <line x1="573" y1="110" x2="593" y2="110"></line>
+              <line x1="718" y1="110" x2="738" y2="110"></line>
+              <line x1="863" y1="110" x2="883" y2="110"></line>
+              <line x1="1008" y1="110" x2="1028" y2="110"></line>
+            </g>
+            <text x="560" y="205" text-anchor="middle" font-size="20" fill="#2f3a32">Input / AI / Script → GameCommand → CommandRouter / CommandReceiver → HFSM → Action → Effect → Domain System → EventRouter → UI / Audio / VFX / Analytics</text>
+          </svg>
+        </div>
+
+        <h3>Definition 到 System 的数据模型</h3>
+        <div class="diagram" aria-label="Data model diagram">
+          <svg viewBox="0 0 980 260" role="img">
+            <defs>
+              <marker id="dataArrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                <path d="M2,2 L10,6 L2,10 Z" fill="#315f7f"></path>
+              </marker>
+            </defs>
+            <g font-family="Avenir Next, Segoe UI, Arial" text-anchor="middle">
+              <rect x="35" y="55" width="200" height="105" rx="18" fill="#fff3d2" stroke="#c8a765"></rect>
+              <text x="135" y="92" font-size="21" font-weight="800">Definition Resource</text>
+              <text x="135" y="122" font-size="15" fill="#60685e">静态、可复用、可查表</text>
+              <text x="135" y="145" font-size="14" fill="#60685e">Ability / Item / Room</text>
+
+              <rect x="280" y="55" width="200" height="105" rx="18" fill="#dff0dc" stroke="#8fb38f"></rect>
+              <text x="380" y="92" font-size="21" font-weight="800">Runtime Instance</text>
+              <text x="380" y="122" font-size="15" fill="#60685e">冷却、数量、耐久、层数</text>
+              <text x="380" y="145" font-size="14" fill="#60685e">AbilityInstance / ItemInstance</text>
+
+              <rect x="525" y="55" width="200" height="105" rx="18" fill="#dcebf1" stroke="#88a9ba"></rect>
+              <text x="625" y="92" font-size="21" font-weight="800">Controller / Component</text>
+              <text x="625" y="122" font-size="15" fill="#60685e">实体能力和局部状态</text>
+              <text x="625" y="145" font-size="14" fill="#60685e">AbilityController / Health</text>
+
+              <rect x="770" y="55" width="180" height="105" rx="18" fill="#f3d8cd" stroke="#c88469"></rect>
+              <text x="860" y="92" font-size="21" font-weight="800">System / Resolver</text>
+              <text x="860" y="122" font-size="15" fill="#60685e">跨实体规则</text>
+              <text x="860" y="145" font-size="14" fill="#60685e">Combat / Loot / Run</text>
+            </g>
+            <g stroke="#315f7f" stroke-width="4" marker-end="url(#dataArrow)">
+              <line x1="238" y1="108" x2="273" y2="108"></line>
+              <line x1="483" y1="108" x2="518" y2="108"></line>
+              <line x1="728" y1="108" x2="763" y2="108"></line>
+            </g>
+            <text x="490" y="215" text-anchor="middle" font-size="18" fill="#374a53">Resource = 内容定义；Instance = 运行时状态；Node = 场景树行为；System = 跨实体规则</text>
+          </svg>
+        </div>
+
+        <h3>实体组成关系</h3>
+        <pre><code>EntityRoot / CharacterBody2D
+  EntityIdentity
+  Components
+    HealthComponent
+    StatsComponent
+    HurtboxComponent
+    HitboxComponent
+    StatusEffectController
+  Controllers
+    AbilityController
+    InventoryController
+    EquipmentController
+    InteractionComponent
+  Behavior
+    CommandReceiver
+    StateMachine
+    EnemyBrain
+  Presentation
+    SpriteRoot
+    AnimationPlayer
+    AudioEmitter
+    VFXAnchor</code></pre>
+        <p>实体通过组合获得能力。不要靠深继承制造 <code>PlayerWithFireSwordAndPoisonAndDash</code> 这种不可维护类型。</p>
+      </section>
+
+      <section id="concepts">
+        <h2>核心概念</h2>
+        <p class="lead">这些概念是 Mkit 的共同语言。团队中所有 gameplay、UI、数据和工具代码都应该遵守同一套边界。</p>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Definition Resource</h3>
+            <p><strong>是什么：</strong>静态内容数据，通常是 Godot Resource。</p>
+            <p><strong>为什么需要：</strong>设计师可以在 Inspector 配置；同一份定义可生成多个实例；存档可以保存 stable ID。</p>
+            <p><strong>什么时候需要：</strong>物品、技能、状态、房间、敌人、升级、掉落表、奖励选项。</p>
+            <p><strong>用例：</strong><code>item.sword_iron</code> 定义攻击 +5，掉落三把时生成三个不同 <code>ItemInstance</code>。</p>
+          </div>
+
+          <div class="card">
+            <h3>Runtime Instance</h3>
+            <p><strong>是什么：</strong>definition 在运行时产生的可变实例。</p>
+            <p><strong>为什么需要：</strong>技能冷却、物品数量、状态层数、房间清理状态、run 进度都不能写回静态定义。</p>
+            <p><strong>什么时候需要：</strong>只要数据会变化，就创建 instance。</p>
+            <p><strong>用例：</strong><code>ability.fireball_basic</code> 是定义；玩家身上的火球剩余冷却 3 秒是 <code>AbilityInstance</code>。</p>
+          </div>
+
+          <div class="card">
+            <h3>Component</h3>
+            <p><strong>是什么：</strong>挂在实体上的局部能力和状态。</p>
+            <p><strong>为什么需要：</strong>用组合替代继承，让 Health、Stats、Hitbox、Hurtbox 可以复用。</p>
+            <p><strong>什么时候需要：</strong>某项能力属于一个实体，并随实体生命周期存在。</p>
+            <p><strong>用例：</strong><code>HealthComponent</code> 同时可用于玩家、敌人、箱子和召唤物。</p>
+          </div>
+
+          <div class="card">
+            <h3>Controller</h3>
+            <p><strong>是什么：</strong>挂在实体或系统节点上的流程协调器。</p>
+            <p><strong>为什么需要：</strong>能力、背包、装备、状态要管理多个 runtime instance。</p>
+            <p><strong>什么时候需要：</strong>一个实体拥有多项可管理能力时。</p>
+            <p><strong>用例：</strong><code>AbilityController</code> 检查冷却、消耗、条件，然后启动 <code>CastAction</code>。</p>
+          </div>
+
+          <div class="card">
+            <h3>System / Resolver</h3>
+            <p><strong>是什么：</strong>跨实体规则和全局流程。</p>
+            <p><strong>为什么需要：</strong>伤害、掉落、奖励、存档、房间推进不能散落在实体内部。</p>
+            <p><strong>什么时候需要：</strong>逻辑涉及多个实体、全局配置、随机种子或跨模块协调。</p>
+            <p><strong>用例：</strong><code>CombatResolver</code> 根据 attacker stats 和 target stats 产出 <code>DamageResult</code>。</p>
+          </div>
+
+          <div class="card">
+            <h3>Command</h3>
+            <p><strong>是什么：</strong>意图，不是结果。</p>
+            <p><strong>为什么需要：</strong>统一玩家输入、AI、脚本、自动化测试和回放。</p>
+            <p><strong>什么时候需要：</strong>移动、攻击、施法、交互、选择奖励、打开背包、暂停。</p>
+            <p><strong>用例：</strong>玩家按 Space 发 <code>attack</code>，Dead 状态拒绝，Idle 状态进入 BasicAttack。</p>
+          </div>
+
+          <div class="card">
+            <h3>HFSM</h3>
+            <p><strong>是什么：</strong>层级有限状态机，管理行为模式。</p>
+            <p><strong>为什么需要：</strong>复杂角色会有 Alive、Dead、Locomotion、Combat、Casting、Stunned 等层级关系。</p>
+            <p><strong>什么时候需要：</strong>实体行为、房间生命周期、run 生命周期。</p>
+            <p><strong>用例：</strong><code>Player/Alive/Combat/BasicAttack</code> 可以被 death 事件全局打断到 <code>Player/Dead</code>。</p>
+          </div>
+
+          <div class="card">
+            <h3>Action</h3>
+            <p><strong>是什么：</strong>随时间执行、可取消、可完成的过程。</p>
+            <p><strong>为什么需要：</strong>攻击前摇/生效/后摇、冲刺、施法读条、等待动画、持续引导都不是瞬时结果。</p>
+            <p><strong>什么时候需要：</strong>任何需要 update、cancel、complete 的 gameplay 过程。</p>
+            <p><strong>用例：</strong><code>TimedAttackAction</code> 在 active frame 打开 hitbox，结束后通知状态返回 Idle。</p>
+          </div>
+
+          <div class="card">
+            <h3>Condition</h3>
+            <p><strong>是什么：</strong>可复用规则检查。</p>
+            <p><strong>为什么需要：</strong>技能、装备、奖励、AI、状态转换都会重复检查条件。</p>
+            <p><strong>什么时候需要：</strong>目标范围、冷却、魔法、标签、生命比例、房间清理、随机概率。</p>
+            <p><strong>用例：</strong>Fireball 同时要求 cooldown ready、mana enough、target in range。</p>
+          </div>
+
+          <div class="card">
+            <h3>Effect</h3>
+            <p><strong>是什么：</strong>声明式 gameplay 结果。</p>
+            <p><strong>为什么需要：</strong>技能、物品、奖励、状态 tick 都会产生类似结果，应该复用。</p>
+            <p><strong>什么时候需要：</strong>伤害、治疗、应用状态、生成场景、发物品、修改属性、播放 VFX。</p>
+            <p><strong>用例：</strong>Poison 每秒执行 <code>DealDamageEffect</code>，药水执行 <code>HealEffect</code>。</p>
+          </div>
+
+          <div class="card">
+            <h3>Event</h3>
+            <p><strong>是什么：</strong>已经发生的事实。</p>
+            <p><strong>为什么需要：</strong>UI、音频、VFX、分析、成就和任务系统都需要解耦监听。</p>
+            <p><strong>什么时候需要：</strong><code>damage_applied</code>、<code>entity_died</code>、<code>room_cleared</code>、<code>reward_selected</code>。</p>
+            <p><strong>用例：</strong>Health 到 0 发 <code>entity_died</code>，RoomController 和 FeedbackSystem 同时监听。</p>
+          </div>
+
+          <div class="card">
+            <h3>GameplayContext</h3>
+            <p><strong>是什么：</strong>一次行为执行时的上下文对象。</p>
+            <p><strong>为什么需要：</strong>比散乱 Dictionary 更清晰，减少 key 拼写错误。</p>
+            <p><strong>什么时候需要：</strong>Action、Effect、Condition、Ability、Reward。</p>
+            <p><strong>用例：</strong><code>source=player</code>、<code>target=goblin</code>、<code>ability_id=fireball</code>、<code>position=mouse_pos</code>。</p>
+          </div>
+        </div>
+
+        <h3>Stable ID、Runtime ID、Tag、Faction</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>概念</th>
+              <th>用途</th>
+              <th>示例</th>
+              <th>规则</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Stable ID</td>
+              <td>长期内容标识，可存档、查表、分析</td>
+              <td><code>item.sword_iron</code></td>
+              <td>进入存档或发布后不要随意改名</td>
+            </tr>
+            <tr>
+              <td>Runtime ID</td>
+              <td>某个运行时实例的唯一标识</td>
+              <td><code>item_instance_000123</code></td>
+              <td>用于区分同一 definition 的多个实例</td>
+            </tr>
+            <tr>
+              <td>Tag</td>
+              <td>横向分类、条件判断、抗性、AI 策略</td>
+              <td><code>fire</code>、<code>boss</code>、<code>projectile</code></td>
+              <td>适合组合，不适合表达唯一身份</td>
+            </tr>
+            <tr>
+              <td>Faction</td>
+              <td>阵营和敌我判断</td>
+              <td><code>player</code>、<code>enemy</code>、<code>neutral</code></td>
+              <td>Hitbox target filtering 优先使用 faction</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="kernel">
+        <h2>Runtime Kernel Components</h2>
+        <p class="lead">Runtime Kernel 是所有 gameplay modules 依赖的底层机制。它应该保持通用，不引用具体游戏内容。</p>
+        <table class="component-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>概念解释</th>
+              <th>为什么需要</th>
+              <th>什么时候需要</th>
+              <th>场景用例</th>
+              <th>交互关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>GameBootstrap</td><td>游戏启动协调节点，创建服务、加载内容、进入初始场景。</td><td>启动顺序明确，避免多个 Autoload 互相依赖。</td><td>每个项目主场景都需要。</td><td>启动后注册 EventRouter、ContentRegistry、CommandRouter、RunDirector。</td><td>写入 ServiceRegistry，读取 ResourceDatabase，调用 SceneRouter。</td></tr>
+            <tr><td>ServiceRegistry</td><td>单一全局服务定位器。</td><td>允许系统按 ID 获取服务，方便 mock 和平台替换。</td><td>获取 random、time、events、content、save、analytics 等服务时。</td><td><code>ServiceRegistry.get_service("events")</code>。</td><td>被所有模块读取，但不应存放普通 gameplay 对象。</td></tr>
+            <tr><td>ContentRegistry</td><td>stable ID 到 Resource 的索引。</td><td>大量 RPG 内容需要统一查找和校验。</td><td>技能、物品、房间、敌人、奖励、升级都用 ID 引用时。</td><td>存档保存 <code>item.sword_iron</code>，加载时查 Resource。</td><td>由 GameBootstrap 加载 ResourceDatabase，被各系统查询。</td></tr>
+            <tr><td>ResourceDatabase</td><td>一组 Resource 的数据库资源。</td><td>让设计师分批组织内容。</td><td>每类内容可有一个或多个数据库。</td><td><code>db_abilities.tres</code> 收集所有 AbilityDefinition。</td><td>被 ContentRegistry 加载。</td></tr>
+            <tr><td>ContentValidationResult</td><td>内容校验结果。</td><td>发现重复 ID、空 ID、缺失引用。</td><td>编辑器校验、启动校验、CI 测试。</td><td>启动时输出 duplicate content id。</td><td>由 ContentRegistry 产生。</td></tr>
+            <tr><td>EventRouter</td><td>领域事件路由器。</td><td>UI、音频、VFX、分析可以解耦监听 gameplay。</td><td>当某件事已经发生，需要通知旁观系统。</td><td><code>damage_applied</code> 后 DamageNumberSystem 显示数字。</td><td>Domain system 发事件，Feedback/UI/Analytics 监听。</td></tr>
+            <tr><td>DomainEvent</td><td>通用事件数据结构。</td><td>便于日志、调试、回放、遥测。</td><td>需要统一事件流时。</td><td>DebugOverlay 显示最近 5 个 event type。</td><td>由 EventRouter 保存 recent events。</td></tr>
+            <tr><td>GameCommand</td><td>意图数据对象。</td><td>统一输入、AI、脚本、测试来源。</td><td>任何 gameplay 请求入口。</td><td><code>cast_ability</code> 携带 ability_id 和 target_id。</td><td>由 InputReader/AI 创建，交给 CommandRouter。</td></tr>
+            <tr><td>CommandRouter</td><td>command 分发器。</td><td>按 target_id 找到对应 CommandReceiver。</td><td>多个实体都能接收 command 时。</td><td>AI 对 <code>goblin_01</code> 发 attack command。</td><td>维护 receiver map，发出 command_failed。</td></tr>
+            <tr><td>CommandReceiver</td><td>实体上的 command 接收节点。</td><td>把外部意图交给实体 HFSM。</td><td>每个可被控制或被 AI 驱动的实体。</td><td>玩家、敌人、RunDirector、UI 都可以有 receiver。</td><td>调用 StateMachine.handle_command。</td></tr>
+            <tr><td>StateMachine</td><td>HFSM 运行器。</td><td>管理当前状态、层级转换、update、transition guard。</td><td>实体、房间、run 的行为模式复杂时。</td><td>Player 从 Move 切到 BasicAttack。</td><td>持有 Blackboard，调用 State。</td></tr>
+            <tr><td>State</td><td>行为模式节点。</td><td>封装 enter、exit、update、command 处理。</td><td>Idle、Move、Attack、Dead、RoomCombat 等模式。</td><td>AttackState 启动 TimedAttackAction。</td><td>可请求 StateMachine transition。</td></tr>
+            <tr><td>Blackboard</td><td>状态机共享临时数据。</td><td>sibling state 之间需要共享方向、目标、临时参数。</td><td>facing、move_direction、current_target。</td><td>MoveState 写入 facing，AttackState 使用 facing 摆放 hitbox。</td><td>属于 StateMachine，被 State 读写。</td></tr>
+            <tr><td>GameAction</td><td>可更新、可取消、可完成的过程。</td><td>攻击、冲刺、施法、等待动画都需要时间。</td><td>任何不是瞬时的行为。</td><td>DashAction 持续 0.2 秒。</td><td>由 State 或 Controller 创建，交给 ActionRunner。</td></tr>
+            <tr><td>ActionRunner</td><td>更新所有 active action。</td><td>将 timed process 从 State 中抽离。</td><td>需要统一暂停、time scale、cancel 时。</td><td>暂停游戏后 action delta 变 0。</td><td>读取 TimeService，发 action_completed。</td></tr>
+            <tr><td>ActionContext</td><td>action 执行上下文。</td><td>Action 需要 source、target、direction、duration。</td><td>启动任意 action。</td><td>CastAction 读取 ability_id 和 source。</td><td>继承 GameplayContext。</td></tr>
+            <tr><td>Condition</td><td>可配置条件 Resource。</td><td>减少重复规则判断。</td><td>技能、装备、奖励、AI、transition guard。</td><td>TargetInRangeCondition。</td><td>被 ConditionEvaluator 调用。</td></tr>
+            <tr><td>ConditionEvaluator</td><td>条件组评估器。</td><td>统一 all/any/failure reason 规则。</td><td>检查多个条件时。</td><td>AbilityController 检查 cooldown、mana、range。</td><td>被 GameEffect、AbilityController、RewardSystem 使用。</td></tr>
+            <tr><td>GameEffect</td><td>声明式 gameplay 结果。</td><td>可复用、可配置、可调试。</td><td>技能、物品、奖励、状态 tick。</td><td>DealDamageEffect、HealEffect、GrantItemEffect。</td><td>被 EffectExecutor 执行。</td></tr>
+            <tr><td>EffectExecutor</td><td>effect 执行器和 trace 记录。</td><td>集中记录成功、失败、child results。</td><td>一次执行一个或多个 effects 时。</td><td>RewardSystem apply selected option。</td><td>调用 ConditionEvaluator，返回 EffectResult。</td></tr>
+            <tr><td>EffectResult</td><td>effect 执行结果。</td><td>调试失败原因和下游逻辑。</td><td>effect 可能失败或需要返回数据时。</td><td>GrantItemEffect 返回 instance_id。</td><td>被 EffectExecutor 和 DebugOverlay 使用。</td></tr>
+            <tr><td>GameplayContext</td><td>行为上下文。</td><td>避免散乱 Dictionary 和 key 拼写错误。</td><td>effect、condition、ability、reward 都需要上下文。</td><td><code>source=player,target=goblin,ability_id=fireball</code>。</td><td>贯穿 Action、Condition、Effect、Domain System。</td></tr>
+            <tr><td>RandomService</td><td>可种子的随机服务。</td><td>roguelike 需要可复现随机。</td><td>掉落、房间生成、暴击、奖励权重。</td><td>同 seed 生成同一条地牢路线。</td><td>被 LootSystem、DungeonGenerator、CombatResolver 使用。</td></tr>
+            <tr><td>TimeService</td><td>gameplay 时间服务。</td><td>支持暂停、慢动作、time scale。</td><td>action、status tick、cooldown 都要受暂停影响。</td><td>打开奖励选择时暂停 gameplay timer。</td><td>被 ActionRunner、StatusEffectController、RunDirector 使用。</td></tr>
+            <tr><td>SceneRouter</td><td>场景切换服务。</td><td>控制转场、避免重复切换。</td><td>从菜单进 run、重开、回主菜单。</td><td>Run failed 后切到 GameOverScene。</td><td>被 GameBootstrap、RunDirector、UIManager 使用。</td></tr>
+            <tr><td>ObjectPool</td><td>对象池。</td><td>投射物、伤害数字、VFX 频繁创建销毁。</td><td>高频 spawn/despawn 对象。</td><td>火球 projectile 从 pool 获取。</td><td>被 SpawnSceneEffect、VFXSpawner、ProjectileSystem 使用。</td></tr>
+            <tr><td>DebugOverlay</td><td>调试显示层。</td><td>可复用框架必须可观察。</td><td>开发和 QA 验证 vertical slice。</td><td>显示 state path、last command、HP、recent events。</td><td>读取 StateMachine、CommandReceiver、EventRouter。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="entity-combat">
+        <h2>Entity / Stats / Health / Combat</h2>
+        <p class="lead">这些模块构成动作 RPG 的基础战斗闭环。HFSM 负责行为模式，Action 负责时序，CombatResolver 负责公式，HealthComponent 负责 HP 状态，EventRouter 负责通知。</p>
+        <table class="component-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>概念解释</th>
+              <th>为什么需要</th>
+              <th>什么时候需要</th>
+              <th>场景用例</th>
+              <th>交互关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>EntityIdentity</td><td>实体身份、definition、faction、tags。</td><td>让系统稳定识别实体。</td><td>所有可参与 gameplay 的实体。</td><td><code>goblin_01</code>，faction enemy，tag melee。</td><td>被 CommandReceiver、Hitbox、EventRouter、Save 使用。</td></tr>
+            <tr><td>EntityRoot</td><td>实体根节点和组件访问入口。</td><td>统一查找 Components、Controllers、Identity。</td><td>玩家、敌人、召唤物、陷阱、NPC。</td><td><code>get_component("HealthComponent")</code>。</td><td>持有子组件，不承担具体规则。</td></tr>
+            <tr><td>EntityDefinition</td><td>实体静态定义。</td><td>数据驱动生成敌人、NPC、掉落物。</td><td>需要从 ID 生成实体时。</td><td><code>enemy.goblin_basic</code> 指向 goblin scene。</td><td>被 EntitySpawner 和 ContentRegistry 使用。</td></tr>
+            <tr><td>EntitySpawner</td><td>实体生成器。</td><td>统一 spawn、初始化 identity、挂接父节点。</td><td>房间刷怪、召唤物、投射物、掉落物。</td><td>RoomController 根据 spawn rules 生成 enemy。</td><td>读取 EntityDefinition，可能使用 ObjectPool。</td></tr>
+            <tr><td>StatsComponent</td><td>基础属性和 modifier 计算。</td><td>RPG 数值都需要统一计算。</td><td>HP、攻击、防御、移速、暴击、冷却、幸运。</td><td>装备剑后 attack_power 增加。</td><td>被 CombatResolver、HealthComponent、AbilityController 使用。</td></tr>
+            <tr><td>StatDefinition</td><td>属性定义。</td><td>让属性有显示名、默认值、上下限、是否百分比。</td><td>设计属性系统、UI 显示和校验。</td><td><code>crit_chance</code> 是百分比。</td><td>被 ContentRegistry 和 Stats UI 使用。</td></tr>
+            <tr><td>StatModifierDefinition</td><td>静态 modifier 配置。</td><td>装备、buff、升级都能复用。</td><td>需要定义一个固定属性加成。</td><td><code>upgrade.attack_plus_20</code> 给 attack_power +20%。</td><td>生成 StatModifier。</td></tr>
+            <tr><td>StatModifier</td><td>运行时 modifier。</td><td>有 source、duration、stacking rule。</td><td>临时 buff、装备加成、状态 debuff。</td><td>burn 降低 defense 5 秒。</td><td>被 StatsComponent 管理。</td></tr>
+            <tr><td>HealthComponent</td><td>HP 状态和死亡入口。</td><td>HP 是独立于伤害公式的实体状态。</td><td>玩家、敌人、可破坏物。</td><td>apply DamageResult 后 HP 到 0，emit died。</td><td>读取 StatsComponent max_hp，发 EventRouter event。</td></tr>
+            <tr><td>DamageRequest</td><td>伤害请求。</td><td>把攻击来源、目标、基础伤害、类型、tag 放在一起。</td><td>hitbox、projectile、damage effect 都可创建。</td><td>火球命中敌人创建 fire damage request。</td><td>输入给 CombatResolver。</td></tr>
+            <tr><td>DamageResult</td><td>伤害计算结果。</td><td>记录 final damage、crit、block、evade、trace。</td><td>需要应用伤害和显示反馈时。</td><td>UI 显示暴击 48，Debug 显示公式 trace。</td><td>输入给 HealthComponent 和 EventRouter。</td></tr>
+            <tr><td>CombatResolver</td><td>战斗公式解析器。</td><td>集中处理攻击、防御、暴击、抗性、格挡、闪避。</td><td>任意伤害发生前。</td><td>读取 source attack_power 和 target defense。</td><td>输出 DamageResult，不播放 VFX，不发 loot。</td></tr>
+            <tr><td>HitboxComponent</td><td>攻击判定区域。</td><td>动作帧和碰撞检测需要解耦。</td><td>近战攻击、陷阱、范围技能。</td><td>active frame 打开 hitbox。</td><td>创建 DamageRequest，调用 CombatResolver。</td></tr>
+            <tr><td>HurtboxComponent</td><td>受击判定区域。</td><td>目标受击区域可能和身体不同。</td><td>玩家、敌人、弱点、盾牌。</td><td>Boss 头部 hurtbox 有 damage_multiplier 1.5。</td><td>被 HitboxComponent 检测。</td></tr>
+          </tbody>
+        </table>
+        <h3>战斗交互关系</h3>
+        <pre><code>InputReader
+  -&gt; AttackCommand
+  -&gt; CommandReceiver
+  -&gt; Player HFSM
+  -&gt; BasicAttackState
+  -&gt; TimedAttackAction
+  -&gt; HitboxComponent active frame
+  -&gt; HurtboxComponent overlap
+  -&gt; DamageRequest
+  -&gt; CombatResolver
+  -&gt; DamageResult
+  -&gt; HealthComponent.apply_damage()
+  -&gt; EventRouter.damage_applied / entity_died
+  -&gt; FeedbackSystem / RoomController / Analytics</code></pre>
+      </section>
+
+      <section id="ability-status">
+        <h2>Ability / Status Effect</h2>
+        <p class="lead">Ability 负责主动或被动技能，Status Effect 负责 buff、debuff、dot、hot 和临时机制。两者都依赖 Condition、Action、Effect 和 GameplayContext。</p>
+        <table class="component-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>概念解释</th>
+              <th>为什么需要</th>
+              <th>什么时候需要</th>
+              <th>场景用例</th>
+              <th>交互关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>AbilityDefinition</td><td>技能静态数据。</td><td>设计师可配置 cooldown、cost、range、effects。</td><td>主动技能、被动技能、怪物技能。</td><td><code>ability.fireball_basic</code>。</td><td>被 ContentRegistry 查找，生成 AbilityInstance。</td></tr>
+            <tr><td>AbilityInstance</td><td>技能运行时状态。</td><td>冷却、充能、等级、启用状态会变化。</td><td>玩家或敌人拥有技能后。</td><td>火球剩余冷却 2.4 秒。</td><td>被 AbilityController 管理。</td></tr>
+            <tr><td>AbilityController</td><td>实体技能控制器。</td><td>集中检查条件、消耗、冷却和施法。</td><td>玩家、敌人、Boss、召唤物可释放技能。</td><td>收到 cast_ability command 后启动 CastAction。</td><td>调用 ConditionEvaluator、ActionRunner、EffectExecutor。</td></tr>
+            <tr><td>CastAction</td><td>施法过程。</td><td>读条、动画、打断、施法完成时机。</td><td>有 cast_time 或 channel 的技能。</td><td>火球读条 0.4 秒，沉默可打断。</td><td>由 AbilityController 或 State 启动。</td></tr>
+            <tr><td>Projectile</td><td>投射物实体或场景。</td><td>许多技能需要空间移动和碰撞。</td><td>火球、箭、飞刀、弹幕。</td><td>SpawnSceneEffect 生成 projectile。</td><td>命中后创建 DamageRequest 或执行 effects。</td></tr>
+            <tr><td>StatusEffectDefinition</td><td>状态静态配置。</td><td>duration、tick、stack、modifier、effects 可配置。</td><td>burn、poison、slow、stun、shield、rage。</td><td><code>status.burn</code> 每秒伤害。</td><td>被 ContentRegistry 查找。</td></tr>
+            <tr><td>StatusEffectInstance</td><td>状态运行时实例。</td><td>剩余时间、层数、tick timer 会变化。</td><td>状态应用到实体后。</td><td>毒有 3 层，剩余 4.5 秒。</td><td>被 StatusEffectController 管理。</td></tr>
+            <tr><td>StatusEffectController</td><td>实体状态控制器。</td><td>处理 apply、remove、stack、tick、modifier。</td><td>任何可被 buff/debuff 的实体。</td><td>敌人被 burn，tick 执行 DealDamageEffect。</td><td>调用 StatsComponent 和 EffectExecutor。</td></tr>
+            <tr><td>CooldownReadyCondition</td><td>冷却条件。</td><td>技能和物品使用需要冷却限制。</td><td>能力或道具有 cooldown。</td><td>火球 cooldown 未完成则不能施放。</td><td>被 AbilityController 检查。</td></tr>
+            <tr><td>TargetInRangeCondition</td><td>距离条件。</td><td>技能、AI、交互都需要范围判断。</td><td>近战攻击、法术、NPC 对话。</td><td>敌人在 64 px 内才可攻击。</td><td>被 ConditionEvaluator 使用。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Ability cast flow</h3>
+        <ol class="flow-list">
+          <li data-step="1">InputReader 或 AI 创建 <code>CastAbilityCommand</code>。</li>
+          <li data-step="2">HFSM 检查当前状态是否允许施法，例如 Dead、Stunned、Silenced 状态拒绝。</li>
+          <li data-step="3">AbilityController 检查 cooldown、cost、conditions 和 range。</li>
+          <li data-step="4">CastAction 播放动画、进入读条，并允许被 stun、death、silence 等 cancel tag 打断。</li>
+          <li data-step="5">到达配置的 effect timing 后，EffectExecutor 执行 effects。</li>
+          <li data-step="6">技能启动 cooldown，EventRouter 发 ability_cast / cooldown_started。</li>
+          <li data-step="7">HUD 更新技能图标和冷却遮罩。</li>
+        </ol>
+
+        <h3>Status tick flow</h3>
+        <ol class="flow-list">
+          <li data-step="1">ApplyStatusEffect 或 DamageRequest.on_hit_statuses 请求应用状态。</li>
+          <li data-step="2">StatusEffectController 根据 stack rule 刷新、叠层、替换、忽略或独立存在。</li>
+          <li data-step="3">执行 effects_on_apply，并把 stat_modifiers 添加到 StatsComponent。</li>
+          <li data-step="4">每到 tick_interval 执行 effects_on_tick。</li>
+          <li data-step="5">duration 结束时执行 effects_on_remove，并移除 stat_modifiers。</li>
+        </ol>
+      </section>
+
+      <section id="inventory-reward">
+        <h2>Inventory / Equipment / Loot / Reward</h2>
+        <p class="lead">Inventory 和 Equipment 处理玩家拥有的物品，Loot 负责生成结果，Reward 负责玩家面前的选择。UI 只展示和提交意图，不直接修改属性或背包。</p>
+        <table class="component-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>概念解释</th>
+              <th>为什么需要</th>
+              <th>什么时候需要</th>
+              <th>场景用例</th>
+              <th>交互关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>ItemDefinition</td><td>物品静态定义。</td><td>名称、图标、稀有度、效果、装备加成都应数据化。</td><td>装备、消耗品、材料、货币、钥匙。</td><td><code>item.potion_small</code> 有 HealEffect。</td><td>被 ContentRegistry、LootSystem、Inventory 使用。</td></tr>
+            <tr><td>ItemInstance</td><td>物品运行时实例。</td><td>数量、耐久、词缀、升级等级会变化。</td><td>背包中实际拥有的物品。</td><td>一把 +12% crit 的铁剑。</td><td>保存 definition_id 和 runtime metadata。</td></tr>
+            <tr><td>InventorySlot</td><td>背包格子。</td><td>slot-based inventory 需要位置和堆叠。</td><td>格子背包、快捷栏、仓库。</td><td>slot 3 有 5 个 potion。</td><td>属于 InventoryModel。</td></tr>
+            <tr><td>InventoryModel</td><td>背包数据模型。</td><td>UI 和 Controller 都需要纯数据结构。</td><td>需要序列化或预览背包。</td><td>保存 slots 数组。</td><td>被 InventoryController 修改。</td></tr>
+            <tr><td>InventoryController</td><td>背包操作控制器。</td><td>添加、移除、堆叠、移动、保存、发事件。</td><td>玩家、宝箱、商店库存。</td><td>拾取药水后 add_item。</td><td>发 inventory_changed，供 UI 刷新。</td></tr>
+            <tr><td>EquipmentController</td><td>装备控制器。</td><td>校验槽位、装备、卸下、应用属性。</td><td>武器、防具、饰品、符文。</td><td>装备 Iron Sword 后 attack_power +5。</td><td>调用 StatsComponent 添加 modifier。</td></tr>
+            <tr><td>LootEntry</td><td>掉落条目。</td><td>定义权重、数量、条件。</td><td>敌人掉落和宝箱奖励。</td><td>goblin 有 20% 掉 potion。</td><td>属于 LootTableDefinition。</td></tr>
+            <tr><td>LootTableDefinition</td><td>掉落表。</td><td>数据化掉落池。</td><td>敌人、Boss、房间、商店库存。</td><td><code>loot.goblin_common</code>。</td><td>被 LootSystem 读取。</td></tr>
+            <tr><td>LootRollResult</td><td>掉落结果。</td><td>掉落生成不应立刻修改背包。</td><td>需要先生成再决定落地或直接发放。</td><td>宝箱打开生成 3 个选项。</td><td>传给 PickupSpawner 或 RewardSystem。</td></tr>
+            <tr><td>LootSystem</td><td>掉落生成系统。</td><td>集中处理权重、幸运、条件、随机种子。</td><td>击杀、开箱、商店刷新。</td><td>Boss 死亡 roll 稀有装备。</td><td>使用 RandomService 和 ContentRegistry。</td></tr>
+            <tr><td>RewardDefinition</td><td>奖励池定义。</td><td>房间奖励、升级奖励、广告奖励需要配置。</td><td>三选一、宝箱、商店、通关奖励。</td><td>room clear reward pool。</td><td>被 RewardSystem 使用。</td></tr>
+            <tr><td>RewardOption</td><td>玩家可选奖励。</td><td>UI 需要显示和执行一组选项。</td><td>选择升级、选择物品、选择技能。</td><td><code>+20% attack</code> 作为一张卡。</td><td>包含 display data、conditions、effects、weight。</td></tr>
+            <tr><td>RewardSystem</td><td>奖励生成和应用系统。</td><td>选择逻辑不能写在 UI 里。</td><td>房间清理后、升级时、商店购买时。</td><td>生成三选一并 apply selected option。</td><td>调用 EffectExecutor，发 reward_selected。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Reward interaction</h3>
+        <pre><code>Enemy died
+  -&gt; RoomController remaining enemies = 0
+  -&gt; EventRouter.room_cleared
+  -&gt; RunDirector enters ChoosingReward
+  -&gt; RewardSystem.generate_options()
+  -&gt; UIManager opens RewardSelectionUI
+  -&gt; Player selects RewardOption
+  -&gt; RewardSystem.apply_selected()
+  -&gt; EffectExecutor executes effects
+  -&gt; RunDirector advances to next room</code></pre>
+      </section>
+
+      <section id="run-room">
+        <h2>Run / Room / Procedural Generation / Progression</h2>
+        <p class="lead">这些模块构成 roguelike 局内循环。Room 处理当前房间，Run 处理整局游戏，DungeonGenerator 根据 seed 生成路径，Progression 处理局内和局外成长。</p>
+        <table class="component-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>概念解释</th>
+              <th>为什么需要</th>
+              <th>什么时候需要</th>
+              <th>场景用例</th>
+              <th>交互关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>RoomDefinition</td><td>房间静态定义。</td><td>房间场景、类型、难度、大小、spawn rules 数据化。</td><td>地牢房间、Boss 房、商店、事件房。</td><td><code>room.dungeon_small_01</code>。</td><td>被 DungeonGenerator 和 RoomController 使用。</td></tr>
+            <tr><td>RoomRuntime</td><td>房间运行时状态。</td><td>当前是否清理、敌人实例、奖励状态会变化。</td><td>进入房间后。</td><td>active enemy count = 3。</td><td>被 RoomController 持有。</td></tr>
+            <tr><td>RoomController</td><td>单房间生命周期控制器。</td><td>管理刷怪、门、清场、奖励请求。</td><td>每个 gameplay room。</td><td>清理敌人后打开门并通知 RunDirector。</td><td>监听 entity_died，发 room_cleared。</td></tr>
+            <tr><td>Room HFSM</td><td>房间状态机。</td><td>房间从加载到完成有明确生命周期。</td><td>复杂房间、Boss 房、事件房。</td><td>Unloaded -&gt; Loading -&gt; Active -&gt; Cleared。</td><td>被 RoomController 驱动。</td></tr>
+            <tr><td>RunState</td><td>一局 run 的状态。</td><td>seed、层数、房间历史、局内升级都属于 run。</td><td>roguelike run 开始后。</td><td>current_floor = 2，temporary_upgrades 有 4 个。</td><td>被 RunDirector 和 SaveManager 使用。</td></tr>
+            <tr><td>RunDirector</td><td>Run 流程总控。</td><td>开始、进房、奖励、失败、通关必须集中协调。</td><td>roguelike 主循环。</td><td>房间清理后进入 ChoosingReward。</td><td>使用 RoomController、RewardSystem、SceneRouter。</td></tr>
+            <tr><td>Run HFSM</td><td>Run 状态机。</td><td>run 有 NotStarted、Active、Paused、Completed、Failed。</td><td>run 流程复杂时。</td><td>Active/InCombat -&gt; ChoosingReward -&gt; Exploring。</td><td>被 RunDirector 驱动。</td></tr>
+            <tr><td>DungeonGenerator</td><td>地牢生成器。</td><td>同 seed 可复现房间路径和奖励结构。</td><td>程序化地牢。</td><td>生成线性路径和 Boss room。</td><td>使用 RandomService 和 RoomDefinition。</td></tr>
+            <tr><td>RoomGraph</td><td>房间拓扑。</td><td>支持分支、商店、事件、Boss。</td><td>地图选择或 dungeon graph。</td><td>玩家选择左路或右路。</td><td>被 DungeonGenerator 和 UI 地图使用。</td></tr>
+            <tr><td>GenerationRules</td><td>生成规则数据。</td><td>难度曲线和房型权重需要配置。</td><td>不同 biome、floor、run mode。</td><td>floor 3 更高概率 elite room。</td><td>被 DungeonGenerator 读取。</td></tr>
+            <tr><td>UpgradeDefinition</td><td>升级静态定义。</td><td>局内和局外成长都可用同一模型。</td><td>+攻击、+投射物、解锁技能。</td><td><code>upgrade.projectile_plus_1</code>。</td><td>被 RewardSystem 和 ProgressionSystem 使用。</td></tr>
+            <tr><td>ProgressionState</td><td>长期进度状态。</td><td>永久升级、解锁、货币需要持久化。</td><td>meta progression。</td><td>已解锁 fireball，金币 120。</td><td>被 SaveManager 保存。</td></tr>
+            <tr><td>ProgressionSystem</td><td>长期成长系统。</td><td>购买升级、解锁内容、应用永久加成。</td><td>roguelite meta。</td><td>通关后发放 currency 并解锁新物品池。</td><td>使用 SaveManager、ContentRegistry、EffectExecutor。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>推荐 Room HFSM</h3>
+        <pre><code>Room
+  Unloaded
+  Loading
+  Entering
+  Active
+    Spawning
+    Combat
+    WaitingForClear
+  Cleared
+    GeneratingReward
+    RewardAvailable
+  Completed</code></pre>
+
+        <h3>推荐 Run HFSM</h3>
+        <pre><code>Run
+  NotStarted
+  Starting
+  Active
+    Exploring
+    InCombat
+    ChoosingReward
+    Paused
+  Completed
+  Failed</code></pre>
+      </section>
+
+      <section id="ai-ui-feedback">
+        <h2>AI / Interaction / UI / Feedback</h2>
+        <p class="lead">这些模块把 gameplay 和玩家体验连接起来，但不应该破坏核心边界。AI 产生 command；UI 表达用户意图并响应事件；Feedback 监听事件并播放表现。</p>
+        <table class="component-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>概念解释</th>
+              <th>为什么需要</th>
+              <th>什么时候需要</th>
+              <th>场景用例</th>
+              <th>交互关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>EnemyBrain</td><td>AI 决策入口。</td><td>敌人需要根据环境产生意图。</td><td>敌人、Boss、召唤物、NPC。</td><td>看到玩家后发 chase command。</td><td>创建 GameCommand，不直接改状态。</td></tr>
+            <tr><td>SimpleAI</td><td>简单规则 AI。</td><td>快速验证战斗循环。</td><td>追玩家、近身攻击、低血逃跑。</td><td>goblin if in range attack else chase。</td><td>使用 Condition 和 CommandRouter。</td></tr>
+            <tr><td>BehaviorTreeAI</td><td>行为树 AI。</td><td>Boss 和复杂敌人需要结构化决策。</td><td>多阶段、巡逻、技能组合。</td><td>Selector: attack if in range else chase。</td><td>叶子节点发 command。</td></tr>
+            <tr><td>UtilityAI</td><td>效用 AI。</td><td>高级动态选择行为。</td><td>后期复杂 Boss 或策略敌人。</td><td>在逃跑、攻击、召唤中选最高效用。</td><td>不应早于核心循环实现。</td></tr>
+            <tr><td>InteractionComponent</td><td>交互能力组件。</td><td>玩家和世界对象需要统一交互入口。</td><td>NPC、门、宝箱、祭坛、拾取物。</td><td>玩家按 E 发 interact command。</td><td>调用 Interactable 或发 domain request。</td></tr>
+            <tr><td>Interactable</td><td>可交互对象接口。</td><td>世界对象需要暴露交互条件和结果。</td><td>门、宝箱、商店、NPC。</td><td>宝箱打开后请求 LootSystem。</td><td>使用 Condition 和 Effect。</td></tr>
+            <tr><td>UIManager</td><td>UI 流程管理。</td><td>弹窗、暂停、输入阻挡、screen stack 需要集中处理。</td><td>inventory、reward、pause、shop。</td><td>打开奖励界面并阻止 gameplay input。</td><td>监听 events，发送 commands 或调用 domain API。</td></tr>
+            <tr><td>RewardSelectionUI</td><td>奖励选择界面。</td><td>三选一奖励是 roguelike 核心体验。</td><td>房间清理、升级、Boss 奖励。</td><td>显示 3 张 RewardOption 卡。</td><td>用户点击后通知 RewardSystem。</td></tr>
+            <tr><td>HUD</td><td>局内状态展示。</td><td>玩家需要 HP、技能冷却、资源、run 进度。</td><td>所有 gameplay 场景。</td><td>显示 HP bar 和 cooldown icons。</td><td>监听 Health、Ability、Run events。</td></tr>
+            <tr><td>FeedbackSystem</td><td>反馈协调器。</td><td>gameplay 不应直接播放所有 VFX/audio。</td><td>命中、暴击、死亡、拾取、奖励。</td><td>damage_applied 后播放 hit feedback。</td><td>监听 EventRouter，调用 Audio/VFX/DamageNumber。</td></tr>
+            <tr><td>AudioManager</td><td>音频服务。</td><td>音量、bus、随机音效、优先级需要集中。</td><td>hit、death、ui click、reward。</td><td>播放 sword_hit_01。</td><td>由 FeedbackSystem 或 UIManager 调用。</td></tr>
+            <tr><td>VFXSpawner</td><td>VFX 生成器。</td><td>VFX 需要 pooling、anchor、layer 管理。</td><td>命中、爆炸、治疗、拾取。</td><td>在 hurtbox position 生成 hit spark。</td><td>使用 ObjectPool。</td></tr>
+            <tr><td>DamageNumberSystem</td><td>伤害数字系统。</td><td>战斗反馈需要统一格式和 pooling。</td><td>damage_applied、heal、crit。</td><td>暴击数字更大更亮。</td><td>监听 EventRouter，读取 DamageResult。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>UI flow</h3>
+        <pre><code>玩家点击装备按钮
+  -&gt; InventoryUI 发送 EquipItemCommand 或调用 EquipmentController API
+  -&gt; EquipmentController 校验槽位并装备
+  -&gt; StatsComponent 重新计算属性
+  -&gt; EventRouter 发 inventory_changed / equipment_changed / stat_changed
+  -&gt; UI 从 view model 刷新</code></pre>
+
+        <h3>Feedback flow</h3>
+        <pre><code>Combat event emitted
+  -&gt; FeedbackSystem receives event
+  -&gt; VFXSpawner spawns hit effect
+  -&gt; AudioManager plays hit sound
+  -&gt; DamageNumberSystem displays number</code></pre>
+      </section>
+
+      <section id="save-platform">
+        <h2>Save / Progression / Platform Services</h2>
+        <p class="lead">这些模块让游戏从 demo 变成可发布产品。先接 mock 服务，再接真实平台 SDK。</p>
+        <table class="component-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>概念解释</th>
+              <th>为什么需要</th>
+              <th>什么时候需要</th>
+              <th>场景用例</th>
+              <th>交互关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Saveable</td><td>可保存对象契约。</td><td>SaveManager 不应了解每个系统内部结构。</td><td>需要持久化的系统。</td><td>InventoryController 实现 to_save_data。</td><td>被 SaveManager 扫描或注册。</td></tr>
+            <tr><td>SaveManager</td><td>存档协调器。</td><td>统一写文件、读文件、版本、profile。</td><td>任何需要持久化的游戏。</td><td>保存 player、inventory、progression、settings。</td><td>调用 Saveable，使用 File System 和 SaveMigration。</td></tr>
+            <tr><td>SaveMigration</td><td>存档迁移。</td><td>游戏更新后旧存档结构可能变化。</td><td>版本升级。</td><td>save_version 1 升到 2。</td><td>被 SaveManager 在 load 时调用。</td></tr>
+            <tr><td>AnalyticsService</td><td>分析接口。</td><td>记录 run、死亡、奖励选择、留存事件。</td><td>需要产品数据时。</td><td>track <code>run_finished</code>。</td><td>监听 EventRouter 或由 systems 调用。</td></tr>
+            <tr><td>AnalyticsServiceMock</td><td>分析 mock。</td><td>本地开发不能依赖外部 SDK。</td><td>开发、测试、CI。</td><td>print analytics payload。</td><td>注册到 ServiceRegistry。</td></tr>
+            <tr><td>AdService</td><td>广告接口。</td><td>移动端 rewarded ad、interstitial。</td><td>需要广告变现。</td><td>看广告复活或双倍奖励。</td><td>UI 调用服务，RewardSystem 发放结果。</td></tr>
+            <tr><td>AdServiceMock</td><td>广告 mock。</td><td>本地验证广告流程。</td><td>Editor 和测试。</td><td>立即返回 rewarded success。</td><td>替换真实 AdService。</td></tr>
+            <tr><td>IAPService</td><td>内购接口。</td><td>商品、购买、恢复购买。</td><td>有付费商品时。</td><td>购买 starter pack。</td><td>调用平台 SDK，发 purchase event。</td></tr>
+            <tr><td>IAPServiceMock</td><td>内购 mock。</td><td>不接 SDK 也能开发商城。</td><td>Editor 和测试。</td><td>假购买成功。</td><td>替换真实 IAPService。</td></tr>
+            <tr><td>CloudSaveService</td><td>云存档接口。</td><td>跨设备保存和冲突解决。</td><td>移动端或平台账户。</td><td>上传 profile save。</td><td>被 SaveManager 可选调用。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Save rules</h3>
+        <ul class="checklist">
+          <li>存 stable ID，不存脆弱节点路径。</li>
+          <li>存长期状态，不存短暂动画帧。</li>
+          <li>mid-run save 只存能安全恢复的 run state。</li>
+          <li>读取后把实体行为恢复到安全状态，例如 Idle。</li>
+        </ul>
+        <pre><code>{
+  "save_version": 1,
+  "game_version": "0.1.0",
+  "timestamp": "2026-05-30T18:00:00",
+  "profile_id": "profile_001",
+  "payload": {
+    "player": {},
+    "inventory": {},
+    "equipment": {},
+    "meta_progression": {},
+    "run": {},
+    "settings": {}
+  }
+}</code></pre>
+      </section>
+
+      <section id="flows">
+        <h2>常见 Gameplay 流程</h2>
+
+        <h3>玩家攻击</h3>
+        <pre><code>InputReader 读取 attack
+  -&gt; 创建 AttackCommand
+  -&gt; CommandRouter 派发给 Player CommandReceiver
+  -&gt; Player HFSM 检查当前状态
+  -&gt; 进入 Alive / Combat / BasicAttack
+  -&gt; BasicAttackState 启动 TimedAttackAction
+  -&gt; active frame 打开 Hitbox
+  -&gt; Hitbox 命中 Hurtbox
+  -&gt; CombatResolver 计算 DamageResult
+  -&gt; HealthComponent 应用伤害
+  -&gt; EventRouter 发 damage_applied / entity_died
+  -&gt; Audio / VFX / UI / Analytics 响应</code></pre>
+
+        <h3>释放技能</h3>
+        <pre><code>InputReader 或 AI 创建 CastAbilityCommand
+  -&gt; HFSM 检查状态是否允许施法
+  -&gt; AbilityController 检查 cost、cooldown、conditions
+  -&gt; CastAction 播放动画和读条
+  -&gt; EffectExecutor 执行技能 effects
+  -&gt; Projectile / Damage / Status 发生
+  -&gt; cooldown 开始
+  -&gt; UI 更新技能图标</code></pre>
+
+        <h3>敌人 AI</h3>
+        <pre><code>EnemyBrain 评估距离、视线、HP、cooldown
+  -&gt; 创建 ChaseCommand 或 AttackCommand
+  -&gt; CommandRouter 派发给敌人
+  -&gt; Enemy HFSM 进入 Chase 或 Attack
+  -&gt; Action 执行移动或攻击
+  -&gt; Combat 系统解析结果</code></pre>
+
+        <h3>房间清理和奖励</h3>
+        <pre><code>敌人死亡
+  -&gt; HealthComponent 发 entity_died
+  -&gt; RoomController 更新敌人计数
+  -&gt; 计数为 0 时发 room_cleared
+  -&gt; RunDirector 进入 ChoosingReward
+  -&gt; RewardSystem 生成 RewardOption
+  -&gt; UIManager 打开奖励选择界面
+  -&gt; 玩家选择奖励
+  -&gt; RewardSystem 执行 effects
+  -&gt; RunDirector 进入下一房间</code></pre>
+
+        <h3>物品拾取和装备</h3>
+        <pre><code>玩家碰到 Pickup
+  -&gt; Pickup 创建 CollectItemRequest
+  -&gt; InventoryController 检查容量和堆叠
+  -&gt; 创建或合并 ItemInstance
+  -&gt; 发 inventory_changed
+  -&gt; 玩家在 UI 中装备物品
+  -&gt; EquipmentController 校验 slot
+  -&gt; StatsComponent 应用 stat modifiers
+  -&gt; UI 刷新属性和装备槽</code></pre>
+
+        <h3>死亡</h3>
+        <pre><code>DamageResult 标记 lethal
+  -&gt; HealthComponent HP 到 0
+  -&gt; HealthComponent 发 died
+  -&gt; EntityDeathSystem 或对应 Controller 处理死亡流程
+  -&gt; Enemy HFSM 进入 Dead
+  -&gt; LootSystem 生成掉落
+  -&gt; RoomController 更新清场条件
+  -&gt; FeedbackSystem 播放死亡反馈</code></pre>
+      </section>
+
+      <section id="content-guides">
+        <h2>内容制作指南</h2>
+
+        <h3>命名和 ID</h3>
+        <pre><code>item.sword_iron
+item.potion_small
+ability.fireball_basic
+ability.dash_shadow
+status.burn
+status.poison
+enemy.goblin_basic
+enemy.goblin_elite
+room.forest_small_01
+loot.goblin_common
+reward.room_common
+upgrade.attack_plus_20</code></pre>
+        <ul class="checklist">
+          <li>ID 一旦进入存档或发布版本，不要随意改名。</li>
+          <li>显示名可以本地化，ID 不要本地化。</li>
+          <li>ID 不要包含随机后缀。</li>
+          <li>Runtime instance 另有 instance_id。</li>
+        </ul>
+
+        <h3>创建一个新技能</h3>
+        <ol class="flow-list">
+          <li data-step="1">创建 <code>AbilityDefinition</code>。</li>
+          <li data-step="2">设置 <code>ability_id</code>、display name、cooldown、cost、cast time、range。</li>
+          <li data-step="3">添加 conditions，例如 cooldown ready、mana enough、target in range。</li>
+          <li data-step="4">添加 effects，例如 SpawnSceneEffect、DealDamageEffect、ApplyStatusEffect。</li>
+          <li data-step="5">把 AbilityDefinition 加入 ResourceDatabase。</li>
+          <li data-step="6">在玩家或敌人的 AbilityController 中注册该 ability。</li>
+          <li data-step="7">在 InputReader 或 AI 中发 <code>cast_ability</code> command。</li>
+          <li data-step="8">在 HUD 中监听 cooldown 和 ability events。</li>
+        </ol>
+
+        <h3>创建一个新状态效果</h3>
+        <ol class="flow-list">
+          <li data-step="1">创建 <code>StatusEffectDefinition</code>。</li>
+          <li data-step="2">设置 status_id、duration、tick_interval、max_stacks、stack_rule。</li>
+          <li data-step="3">配置 stat_modifiers，例如 slow 降低 move_speed。</li>
+          <li data-step="4">配置 effects_on_apply、effects_on_tick、effects_on_remove。</li>
+          <li data-step="5">把 StatusEffectDefinition 加入 ResourceDatabase。</li>
+          <li data-step="6">用 ApplyStatusEffect 或 DamageRequest.on_hit_statuses 应用状态。</li>
+          <li data-step="7">在 UI 中监听 status events 显示图标和层数。</li>
+        </ol>
+
+        <h3>创建一个新物品</h3>
+        <ol class="flow-list">
+          <li data-step="1">创建 <code>ItemDefinition</code>。</li>
+          <li data-step="2">设置 item_id、type、rarity、icon、stackable、max_stack。</li>
+          <li data-step="3">消耗品配置 use_conditions 和 use_effects。</li>
+          <li data-step="4">装备配置 equipment slot 和 stat_modifiers。</li>
+          <li data-step="5">把 ItemDefinition 加入 ResourceDatabase。</li>
+          <li data-step="6">把 item_id 加入 LootTableDefinition 或 RewardDefinition。</li>
+          <li data-step="7">实现 UI 显示和使用入口。</li>
+        </ol>
+
+        <h3>创建一个新敌人</h3>
+        <ol class="flow-list">
+          <li data-step="1">创建敌人 scene。</li>
+          <li data-step="2">配置 EntityIdentity，faction = enemy。</li>
+          <li data-step="3">添加 StatsComponent、HealthComponent、HurtboxComponent、HitboxComponent。</li>
+          <li data-step="4">添加 CommandReceiver、EnemyBrain、StateMachine。</li>
+          <li data-step="5">实现 Idle、Chase、Attack、Dead 状态。</li>
+          <li data-step="6">创建 EntityDefinition，指向该 scene。</li>
+          <li data-step="7">配置 loot table 和 spawn weight。</li>
+          <li data-step="8">把 EntityDefinition 加入 ResourceDatabase。</li>
+          <li data-step="9">在 RoomDefinition.spawn_rules 中引用敌人 ID。</li>
+        </ol>
+
+        <h3>创建一个新房间</h3>
+        <ol class="flow-list">
+          <li data-step="1">创建 room scene。</li>
+          <li data-step="2">添加 RoomController、spawn points、doors、reward anchor。</li>
+          <li data-step="3">创建 RoomDefinition，设置 room_id、scene_path、room_type、difficulty、size、tags。</li>
+          <li data-step="4">配置 spawn_rules 和 reward_rules。</li>
+          <li data-step="5">把 RoomDefinition 加入 ResourceDatabase。</li>
+          <li data-step="6">在 DungeonGenerator 的 generation rules 中允许该 room type。</li>
+        </ol>
+
+        <h3>创建一个奖励池</h3>
+        <ol class="flow-list">
+          <li data-step="1">创建 RewardDefinition。</li>
+          <li data-step="2">配置候选 RewardOption 或引用 upgrade/item/ability pools。</li>
+          <li data-step="3">给每个 option 设置 weight、rarity、conditions、effects。</li>
+          <li data-step="4">把 RewardDefinition 加入 ResourceDatabase。</li>
+          <li data-step="5">RoomController 或 RunDirector 在 room clear 后请求 RewardSystem 生成 choices。</li>
+          <li data-step="6">RewardSelectionUI 展示 choices。</li>
+          <li data-step="7">玩家选择后 RewardSystem 应用 effects。</li>
+        </ol>
+      </section>
+
+      <section id="debugging">
+        <h2>调试和排错</h2>
+        <p class="lead">Mkit 的调试能力不是可选项。可复用 framework 如果不可观察，就很难用于真实项目。</p>
+        <h3>DebugOverlay 至少显示</h3>
+        <ul class="checklist">
+          <li>当前 HFSM state path。</li>
+          <li>上一个 state path。</li>
+          <li>最后收到的 command。</li>
+          <li>最后 transition reason。</li>
+          <li>失败 transition reason。</li>
+          <li>active actions。</li>
+          <li>active status effects。</li>
+          <li>当前 stat values。</li>
+          <li>active stat modifiers。</li>
+          <li>最近 damage calculation trace。</li>
+          <li>当前 room state。</li>
+          <li>当前 run state。</li>
+          <li>random seed 和 stream state。</li>
+          <li>最近 domain events。</li>
+        </ul>
+
+        <h3>战斗 trace 示例</h3>
+        <pre><code>Player
+  State: Player / Alive / Locomotion / Move
+  Last Command: move
+  Active Action: None
+  HP: 82 / 100
+  Attack: 15.0
+  Modifiers:
+    sword_iron_attack +5 flat
+    upgrade_attack_20 +20% additive
+
+Combat Trace
+  Source: player
+  Target: goblin_01
+  Base Damage: 10
+  Attack Modifier: +5
+  Crit: false
+  Defense Reduction: -3
+  Final Damage: 12</code></pre>
+
+        <h3>常见问题</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>现象</th>
+              <th>优先检查</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>command 没反应</td><td>target_id 是否匹配 CommandReceiver receiver_id。</td></tr>
+            <tr><td>状态没有切换</td><td>State path 是否正确，can_enter/can_exit 是否返回 false。</td></tr>
+            <tr><td>攻击打不到</td><td>collision layer/mask、hitbox active frame、hurtbox owner_path。</td></tr>
+            <tr><td>伤害为 0</td><td>DamageRequest source/target、StatsComponent、defense、damage tags。</td></tr>
+            <tr><td>UI 不刷新</td><td>是否监听 EventRouter 或对应 component signal。</td></tr>
+            <tr><td>存档读不回内容</td><td>stable ID 是否还存在于 ContentRegistry。</td></tr>
+            <tr><td>随机结果不可复现</td><td>是否所有随机都走 RandomService。</td></tr>
+            <tr><td>暂停后 action 还在跑</td><td>action 是否通过 TimeService scaled delta 更新。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="boundaries">
+        <h2>设计边界和反模式</h2>
+        <div class="note ok">
+          <strong>必须保持的边界：</strong> Mkit 提供可复用机制，game/ 提供具体内容和规则。
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Mkit 应该知道</h3>
+            <p><code>AbilityDefinition</code>、<code>ItemDefinition</code>、<code>DamageRequest</code>、<code>RewardOption</code>、<code>RunState</code>、<code>RoomDefinition</code>、<code>Condition</code>、<code>Effect</code>、<code>Command</code>、<code>State</code>。</p>
+          </div>
+          <div class="card">
+            <h3>Mkit 不应该知道</h3>
+            <p>Red Mage 的 Fireball 剧情特效、Goblin King 的具体掉落、第二章 Iron Sword 文案、某个广告复活经济规则、某个商店具体定价策略、某条故事线进度。</p>
+          </div>
+        </div>
+
+        <h3>反模式和替代方案</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>反模式</th>
+              <th>问题</th>
+              <th>替代方案</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>InputReader 直接改 HP</td><td>绕过状态和战斗系统。</td><td>发 command，由 HFSM 和 Combat 处理。</td></tr>
+            <tr><td>CombatResolver 播放音效</td><td>战斗和表现耦合。</td><td>发 event，FeedbackSystem 播放。</td></tr>
+            <tr><td>Reward UI 直接改 Stats</td><td>UI 和规则耦合。</td><td>RewardSystem apply effects。</td></tr>
+            <tr><td>SaveManager 硬编码 Player scene</td><td>无法复用和迁移。</td><td>Saveable contract。</td></tr>
+            <tr><td>所有系统都 Autoload</td><td>启动顺序混乱，难测试。</td><td>只 Autoload ServiceRegistry。</td></tr>
+            <tr><td>Definition 存运行时状态</td><td>多实例互相污染。</td><td>Definition + Runtime Instance 分离。</td></tr>
+            <tr><td>AI 直接调用状态函数</td><td>绕过 command pipeline。</td><td>AI 只产生 GameCommand。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="roadmap">
+        <h2>推荐开发顺序</h2>
+        <p class="lead">按 vertical slice 开发，不要按系统孤岛开发。第一阶段不要追求所有系统完整，先证明核心管线。</p>
+        <pre><code>Command -&gt; HFSM -&gt; Action -&gt; Effect -&gt; Combat -&gt; Event -&gt; UI/VFX</code></pre>
+        <table>
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>目标</th>
+              <th>验收</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>0</td><td>Kernel prototype</td><td>command 进入 HFSM，action 执行，effect 记录，debug 可见。</td></tr>
+            <tr><td>1</td><td>Combat vertical slice</td><td>玩家移动攻击，敌人受伤死亡，事件发出。</td></tr>
+            <tr><td>2</td><td>Ability and status</td><td>火球、冷却、投射物、burn/poison tick。</td></tr>
+            <tr><td>3</td><td>Inventory and equipment</td><td>掉落、拾取、背包、装备、属性变化。</td></tr>
+            <tr><td>4</td><td>Room and run</td><td>进入房间、清场、奖励、下一房间、失败或通关。</td></tr>
+            <tr><td>5</td><td>Save and progression</td><td>通关获得货币，购买永久升级，重启后保留。</td></tr>
+            <tr><td>6</td><td>Platform services</td><td>analytics、ads、iap、cloud save 先接 mock，再接 SDK。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="appendix">
+        <h2>附录</h2>
+        <p>详细设计和接口草案：</p>
+        <ul>
+          <li><a href="implementation_spec.md">Implementation Spec</a></li>
+          <li><a href="architecture/high_level_design_summary.md">High-Level Design Summary</a></li>
+          <li><a href="architecture/high_level_design.md">Detailed Architecture</a></li>
+          <li><a href="combined/00_foundation_and_folder_structure.md">00 Foundation and Folder Structure</a></li>
+          <li><a href="combined/01_runtime_kernel.md">01 Runtime Kernel</a></li>
+          <li><a href="combined/02_content_registry.md">02 Content Registry</a></li>
+          <li><a href="combined/03_hfsm_and_actions.md">03 HFSM and Actions</a></li>
+          <li><a href="combined/04_conditions_and_effects.md">04 Conditions and Effects</a></li>
+          <li><a href="combined/05_entity_stats_health_combat.md">05 Entity, Stats, Health, and Combat</a></li>
+          <li><a href="combined/06_ability_and_status_effects.md">06 Ability and Status Effects</a></li>
+          <li><a href="combined/07_inventory_equipment_loot_rewards.md">07 Inventory, Equipment, Loot, and Rewards</a></li>
+          <li><a href="combined/08_room_run_and_generation.md">08 Room, Run, and Procedural Generation</a></li>
+          <li><a href="combined/09_ai_and_interaction.md">09 AI and Interaction</a></li>
+          <li><a href="combined/10_ui_feedback.md">10 UI and Feedback</a></li>
+          <li><a href="combined/11_save_and_platform_services.md">11 Save, Progression, and Platform Services</a></li>
+          <li><a href="combined/12_core_flows_mvp_debug_and_agent_instructions.md">12 Core Flows, MVP Plan, Debug, and Agent Instructions</a></li>
+        </ul>
+        <p class="footer">本手册是目标架构使用手册，用于指导 kit 的接入、扩展和实现。</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

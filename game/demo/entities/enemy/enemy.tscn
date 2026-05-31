@@ -23,12 +23,12 @@ tags = Array[String](["enemy", "living"])
 script = ExtResource("2_stats")
 base_stats = {
 "defense": 0.0,
-"max_hp": 30.0
+"max_hp": 150.0
 }
 
 [node name="HealthComponent" type="Node" parent="Components"]
 script = ExtResource("3_health")
-current_hp = 30.0
+current_hp = 150.0
 destroy_on_death = true
 
 [node name="HurtboxComponent" type="Area2D" parent="Components"]

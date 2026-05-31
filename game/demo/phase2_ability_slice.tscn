@@ -27,3 +27,24 @@ offset_right = 500.0
 offset_bottom = 240.0
 text = "Move: WASD / Arrows     Melee: Space / J     Fireball: Q (3s CD, costs 15 mana)
 Fireball deals 30 magic dmg + applies Burn (5 fire dmg/s × 4s)."
+
+[node name="StatsPanel" type="VBoxContainer" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 320.0
+offset_bottom = 140.0
+
+[node name="EnemyHP" type="Label" parent="HUD/StatsPanel"]
+text = "Enemy HP: -- / --"
+
+[node name="PlayerMana" type="Label" parent="HUD/StatsPanel"]
+text = "Mana: -- / --"
+
+[node name="BurnStatus" type="Label" parent="HUD/StatsPanel"]
+text = "Burn: inactive"
+
+[node name="LastDamage" type="Label" parent="HUD/StatsPanel"]
+text = ""
+
+[node name="DamageNumbers" type="CanvasLayer" parent="."]
+layer = 10

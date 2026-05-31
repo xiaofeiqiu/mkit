@@ -29,10 +29,13 @@ text = "Move: WASD / Arrows     Melee: Space / J     Fireball: Q (3s CD, costs 1
 Fireball deals 30 magic dmg + applies Burn (5 fire dmg/s × 4s)."
 
 [node name="StatsPanel" type="VBoxContainer" parent="HUD"]
-offset_left = 16.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
 offset_top = 16.0
-offset_right = 320.0
+offset_right = -16.0
 offset_bottom = 140.0
+grow_horizontal = 0
 
 [node name="EnemyHP" type="Label" parent="HUD/StatsPanel"]
 text = "Enemy HP: -- / --"

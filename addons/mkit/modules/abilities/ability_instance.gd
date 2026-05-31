@@ -9,16 +9,21 @@ var runtime_level: int = 1
 var enabled: bool = true
 var temporary_modifiers: Dictionary = {}
 
+var _definition: AbilityDefinition = null
+
 
 func setup(definition: AbilityDefinition, owner_entity: Node) -> void:
 	definition_id = definition.ability_id
 	owner = owner_entity
 	current_charges = definition.charges
+	_definition = definition
 
 
 func tick(delta: float) -> void:
 	if cooldown_remaining > 0.0:
 		cooldown_remaining = max(0.0, cooldown_remaining - delta)
+		if cooldown_remaining <= 0.0 and _definition != null:
+			restore_charge(_definition)
 
 
 func is_cooldown_ready() -> bool:

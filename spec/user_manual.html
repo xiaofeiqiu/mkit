@@ -31,6 +31,11 @@
       box-sizing: border-box;
     }
 
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     html {
       scroll-behavior: smooth;
       background: var(--bg);
@@ -41,6 +46,7 @@
       color: var(--ink);
       font-family: var(--sans);
       line-height: 1.72;
+      overflow-x: hidden;
       background:
         radial-gradient(circle at top left, rgba(198, 95, 47, 0.18), transparent 32rem),
         radial-gradient(circle at 82% 8%, rgba(47, 125, 92, 0.16), transparent 28rem),
@@ -64,6 +70,7 @@
     pre {
       overflow-x: auto;
       padding: 1rem 1.1rem;
+      max-width: 100%;
       border: 1px solid #d3c5ab;
       border-radius: 14px;
       color: #f2f1df;
@@ -79,10 +86,17 @@
 
     table {
       width: 100%;
+      max-width: 100%;
       border-collapse: collapse;
       margin: 1rem 0 1.5rem;
       font-size: 0.96rem;
       background: rgba(255, 250, 240, 0.78);
+    }
+
+    table thead,
+    table tbody,
+    table tr {
+      width: 100%;
     }
 
     th,
@@ -91,6 +105,7 @@
       vertical-align: top;
       border: 1px solid var(--line);
       text-align: left;
+      overflow-wrap: anywhere;
     }
 
     th {
@@ -165,6 +180,7 @@
     }
 
     main {
+      min-width: 0;
       width: min(100%, 1180px);
       padding: 2rem clamp(1rem, 4vw, 4rem) 5rem;
     }
@@ -337,6 +353,7 @@
     .diagram {
       margin: 1rem 0 1.4rem;
       padding: 1rem;
+      max-width: 100%;
       border: 1px solid #d8c8a8;
       border-radius: 18px;
       background: #fff8e7;
@@ -421,18 +438,225 @@
       }
 
       .sidebar {
-        position: relative;
+        position: sticky;
+        z-index: 20;
         height: auto;
+        max-height: 42vh;
+        padding: 0.75rem;
+        border-right: 0;
+        border-bottom: 1px solid rgba(88, 64, 35, 0.18);
       }
 
       main {
+        width: 100%;
         padding: 1rem;
+      }
+
+      .brand {
+        margin-bottom: 0.65rem;
+        padding: 0.75rem;
+      }
+
+      .brand h1 {
+        font-size: 1.25rem;
+      }
+
+      .brand p {
+        display: none;
+      }
+
+      .toc {
+        display: flex;
+        gap: 0.35rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .toc a {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        white-space: nowrap;
       }
 
       .principle,
       .grid,
       .grid-3 {
         grid-template-columns: 1fr;
+      }
+
+      .diagram svg {
+        min-width: 0;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        line-height: 1.62;
+      }
+
+      main {
+        padding: 0.75rem;
+      }
+
+      .hero {
+        margin-bottom: 1rem;
+        padding: 1.1rem;
+        border-radius: 20px;
+      }
+
+      .hero::after {
+        display: none;
+      }
+
+      .hero h2 {
+        font-size: clamp(2rem, 13vw, 3rem);
+        line-height: 1.02;
+      }
+
+      section {
+        margin: 1rem 0;
+        padding: 1rem;
+        border-radius: 16px;
+      }
+
+      section h2 {
+        font-size: 1.65rem;
+      }
+
+      section h3 {
+        font-size: 1.12rem;
+      }
+
+      pre {
+        padding: 0.8rem;
+        font-size: 0.82rem;
+      }
+
+      pre code {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .diagram {
+        padding: 0.45rem;
+      }
+
+      table,
+      table thead,
+      table tbody,
+      table tr,
+      table th,
+      table td {
+        display: block;
+      }
+
+      table {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+      }
+
+      table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      table tr {
+        margin: 0 0 0.8rem;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(255, 250, 240, 0.92);
+        box-shadow: 0 8px 20px rgba(73, 53, 28, 0.06);
+        overflow: hidden;
+      }
+
+      table td {
+        border: 0;
+        border-top: 1px solid rgba(216, 205, 183, 0.7);
+      }
+
+      table td:first-child {
+        border-top: 0;
+        color: #24352b;
+        background: #efe0c1;
+        font-weight: 800;
+      }
+
+      .component-table td {
+        display: grid;
+        grid-template-columns: minmax(7.5rem, 38%) minmax(0, 1fr);
+        gap: 0.75rem;
+        align-items: start;
+      }
+
+      .component-table td::before {
+        color: var(--accent-dark);
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .component-table td:nth-child(1)::before {
+        content: "Component";
+      }
+
+      .component-table td:nth-child(2)::before {
+        content: "概念";
+      }
+
+      .component-table td:nth-child(3)::before {
+        content: "为什么";
+      }
+
+      .component-table td:nth-child(4)::before {
+        content: "何时使用";
+      }
+
+      .component-table td:nth-child(5)::before {
+        content: "用例";
+      }
+
+      .component-table td:nth-child(6)::before {
+        content: "交互";
+      }
+
+      .component-table td:first-child {
+        display: block;
+        font-size: 1rem;
+      }
+
+      .component-table td:first-child::before {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .sidebar {
+        max-height: 36vh;
+      }
+
+      .component-table td {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+      }
+
+      .flow-list li {
+        padding-left: 2rem;
       }
     }
 
@@ -669,6 +893,7 @@ res://game/content/db_rewards.tres</code></pre>
     Components
       StatsComponent
       HealthComponent
+      ResourcePoolComponent
       HurtboxComponent
       HitboxComponent
       StatusEffectController
@@ -709,10 +934,35 @@ res://game/content/db_rewards.tres</code></pre>
             <tr><td><code>StateMachine</code></td><td>initial state path，例如 <code>Player/Alive/Locomotion/Idle</code></td></tr>
             <tr><td><code>StatsComponent</code></td><td>基础属性，例如 max_hp、move_speed、attack_power</td></tr>
             <tr><td><code>HealthComponent</code></td><td>当前 HP，并监听 max_hp 变化</td></tr>
+            <tr><td><code>ResourcePoolComponent</code></td><td>当前 mana、stamina、energy、rage 等资源值；最大值从 <code>StatsComponent</code> 的 <code>max_mana</code>、<code>max_stamina</code> 等属性读取</td></tr>
             <tr><td><code>HitboxComponent</code></td><td>伤害、目标 faction、active frame 开关</td></tr>
             <tr><td><code>HurtboxComponent</code></td><td>owner path、damage multiplier、damage tags</td></tr>
           </tbody>
         </table>
+
+        <h3>7.1 配置资源池</h3>
+        <p>如果角色有 mana、stamina、energy 或 rage，不要把当前资源值放在 <code>StatsComponent</code>。最大值放在 stats，当前值放在 <code>ResourcePoolComponent</code>。</p>
+        <pre><code>StatsComponent.base_stats
+  max_hp = 100
+  max_mana = 50
+  max_stamina = 100
+
+ResourcePoolComponent.starting_values
+  mana = 50
+  stamina = 100</code></pre>
+        <p>技能定义通过 <code>cost_type</code> 和 <code>cost_amount</code> 消耗资源：</p>
+        <pre><code>AbilityDefinition
+  ability_id = "ability.fireball_basic"
+  cost_type = "mana"
+  cost_amount = 15
+
+AbilityDefinition
+  ability_id = "ability.dash"
+  cost_type = "stamina"
+  cost_amount = 25</code></pre>
+        <div class="note">
+          <strong>关键规则：</strong>最大资源随装备、升级、buff 变化时由 StatsComponent 计算；当前资源由 ResourcePoolComponent clamp 到新的最大值。这样 UI、AbilityController、SaveManager 都有稳定数据来源。
+        </div>
 
         <h3>8. 创建敌人实体</h3>
         <pre><code>Goblin.tscn
@@ -721,6 +971,7 @@ res://game/content/db_rewards.tres</code></pre>
     Components
       StatsComponent
       HealthComponent
+      ResourcePoolComponent
       HurtboxComponent
       HitboxComponent
       StatusEffectController
@@ -930,6 +1181,7 @@ res://game/content/db_rewards.tres</code></pre>
   EntityIdentity
   Components
     HealthComponent
+    ResourcePoolComponent
     StatsComponent
     HurtboxComponent
     HitboxComponent
@@ -1162,6 +1414,7 @@ res://game/content/db_rewards.tres</code></pre>
             <tr><td>StatModifierDefinition</td><td>静态 modifier 配置。</td><td>装备、buff、升级都能复用。</td><td>需要定义一个固定属性加成。</td><td><code>upgrade.attack_plus_20</code> 给 attack_power +20%。</td><td>生成 StatModifier。</td></tr>
             <tr><td>StatModifier</td><td>运行时 modifier。</td><td>有 source、duration、stacking rule。</td><td>临时 buff、装备加成、状态 debuff。</td><td>burn 降低 defense 5 秒。</td><td>被 StatsComponent 管理。</td></tr>
             <tr><td>HealthComponent</td><td>HP 状态和死亡入口。</td><td>HP 是独立于伤害公式的实体状态。</td><td>玩家、敌人、可破坏物。</td><td>apply DamageResult 后 HP 到 0，emit died。</td><td>读取 StatsComponent max_hp，发 EventRouter event。</td></tr>
+            <tr><td>ResourcePoolComponent</td><td>实体的可消耗资源池，例如 mana、stamina、energy、rage。</td><td>AbilityController 有 cost_type/cost_amount；没有统一资源池时，技能消耗会被写死在玩家脚本里。</td><td>任何有技能消耗、冲刺体力、怒气、能量、读档恢复资源的实体。</td><td>火球 cost_type=mana、cost_amount=15，释放前检查 mana，成功后扣除。</td><td>当前值存在 ResourcePoolComponent；最大值从 StatsComponent 读取 <code>max_mana</code>、<code>max_stamina</code>；AbilityController 调用 has_resource/spend；HUD 监听 resource_changed。</td></tr>
             <tr><td>DamageRequest</td><td>伤害请求。</td><td>把攻击来源、目标、基础伤害、类型、tag 放在一起。</td><td>hitbox、projectile、damage effect 都可创建。</td><td>火球命中敌人创建 fire damage request。</td><td>输入给 CombatResolver。</td></tr>
             <tr><td>DamageResult</td><td>伤害计算结果。</td><td>记录 final damage、crit、block、evade、trace。</td><td>需要应用伤害和显示反馈时。</td><td>UI 显示暴击 48，Debug 显示公式 trace。</td><td>输入给 HealthComponent 和 EventRouter。</td></tr>
             <tr><td>CombatResolver</td><td>战斗公式解析器。</td><td>集中处理攻击、防御、暴击、抗性、格挡、闪避。</td><td>任意伤害发生前。</td><td>读取 source attack_power 和 target defense。</td><td>输出 DamageResult，不播放 VFX，不发 loot。</td></tr>
@@ -1203,7 +1456,7 @@ res://game/content/db_rewards.tres</code></pre>
           <tbody>
             <tr><td>AbilityDefinition</td><td>技能静态数据。</td><td>设计师可配置 cooldown、cost、range、effects。</td><td>主动技能、被动技能、怪物技能。</td><td><code>ability.fireball_basic</code>。</td><td>被 ContentRegistry 查找，生成 AbilityInstance。</td></tr>
             <tr><td>AbilityInstance</td><td>技能运行时状态。</td><td>冷却、充能、等级、启用状态会变化。</td><td>玩家或敌人拥有技能后。</td><td>火球剩余冷却 2.4 秒。</td><td>被 AbilityController 管理。</td></tr>
-            <tr><td>AbilityController</td><td>实体技能控制器。</td><td>集中检查条件、消耗、冷却和施法。</td><td>玩家、敌人、Boss、召唤物可释放技能。</td><td>收到 cast_ability command 后启动 CastAction。</td><td>调用 ConditionEvaluator、ActionRunner、EffectExecutor。</td></tr>
+            <tr><td>AbilityController</td><td>实体技能控制器。</td><td>集中检查条件、资源消耗、冷却、施法和效果执行。</td><td>玩家、敌人、Boss、召唤物可释放技能。</td><td>收到 cast_ability command 后检查 mana/stamina，启动 CastAction，完成后执行 effects。</td><td>调用 ResourcePoolComponent 检查并扣除 cost，调用 ConditionEvaluator、ActionRunner、EffectExecutor。</td></tr>
             <tr><td>CastAction</td><td>施法过程。</td><td>读条、动画、打断、施法完成时机。</td><td>有 cast_time 或 channel 的技能。</td><td>火球读条 0.4 秒，沉默可打断。</td><td>由 AbilityController 或 State 启动。</td></tr>
             <tr><td>Projectile</td><td>投射物实体或场景。</td><td>许多技能需要空间移动和碰撞。</td><td>火球、箭、飞刀、弹幕。</td><td>SpawnSceneEffect 生成 projectile。</td><td>命中后创建 DamageRequest 或执行 effects。</td></tr>
             <tr><td>StatusEffectDefinition</td><td>状态静态配置。</td><td>duration、tick、stack、modifier、effects 可配置。</td><td>burn、poison、slow、stun、shield、rage。</td><td><code>status.burn</code> 每秒伤害。</td><td>被 ContentRegistry 查找。</td></tr>
@@ -1218,11 +1471,34 @@ res://game/content/db_rewards.tres</code></pre>
         <ol class="flow-list">
           <li data-step="1">InputReader 或 AI 创建 <code>CastAbilityCommand</code>。</li>
           <li data-step="2">HFSM 检查当前状态是否允许施法，例如 Dead、Stunned、Silenced 状态拒绝。</li>
-          <li data-step="3">AbilityController 检查 cooldown、cost、conditions 和 range。</li>
-          <li data-step="4">CastAction 播放动画、进入读条，并允许被 stun、death、silence 等 cancel tag 打断。</li>
-          <li data-step="5">到达配置的 effect timing 后，EffectExecutor 执行 effects。</li>
-          <li data-step="6">技能启动 cooldown，EventRouter 发 ability_cast / cooldown_started。</li>
-          <li data-step="7">HUD 更新技能图标和冷却遮罩。</li>
+          <li data-step="3">AbilityController 读取 AbilityDefinition，检查 cooldown、charges、conditions、range 和 <code>cost_type/cost_amount</code>。</li>
+          <li data-step="4">如果技能需要资源，AbilityController 通过 ResourcePoolComponent.has_resource() 检查 mana、stamina、energy 或 rage；确认释放后调用 spend() 扣除。</li>
+          <li data-step="5">CastAction 播放动画、进入读条，并允许被 stun、death、silence 等 cancel tag 打断。</li>
+          <li data-step="6">到达配置的 effect timing 后，EffectExecutor 执行 effects。</li>
+          <li data-step="7">技能启动 cooldown，EventRouter 发 ability_cast / cooldown_started，HUD 更新资源条和技能冷却。</li>
+        </ol>
+
+        <h3>Ability resource interaction</h3>
+        <p>资源消耗分为最大值和当前值两个来源：最大值是 stat，例如 <code>max_mana</code>、<code>max_stamina</code>；当前值是 resource pool，例如当前 mana=35、当前 stamina=80。这样装备、buff、升级可以通过 StatsComponent 改最大资源，而技能释放、药水、读档只修改当前资源。</p>
+        <pre><code>AbilityDefinition
+  cost_type = "mana"
+  cost_amount = 15
+  cooldown = 3.0
+  effects = [DealDamageEffect, ApplyStatusEffect]
+
+AbilityController.cast()
+  -&gt; get AbilityInstance
+  -&gt; check cooldown / charges
+  -&gt; ConditionEvaluator.evaluate_all()
+  -&gt; ResourcePoolComponent.has_resource("mana", 15)
+  -&gt; ResourcePoolComponent.spend("mana", 15)
+  -&gt; CastAction or immediate effects
+  -&gt; AbilityInstance.start_cooldown()</code></pre>
+        <ol class="flow-list">
+          <li data-step="1">资源不足时，<code>cast()</code> 应该失败并发出明确 reason，例如 <code>Not enough resource: mana</code>。</li>
+          <li data-step="2">资源不足时不应该启动 cast action，不应该执行 effects，也不应该进入 cooldown。</li>
+          <li data-step="3">HUD 应该同时监听 <code>resource_changed</code> 和 <code>cooldown_started</code>，资源条和技能图标分别刷新。</li>
+          <li data-step="4">SaveManager 保存当前资源值；StatsComponent 或 ProgressionSystem 恢复最大资源来源。</li>
         </ol>
 
         <h3>Status tick flow</h3>
@@ -1416,6 +1692,7 @@ res://game/content/db_rewards.tres</code></pre>
         <ul class="checklist">
           <li>存 stable ID，不存脆弱节点路径。</li>
           <li>存长期状态，不存短暂动画帧。</li>
+          <li>ResourcePoolComponent 保存当前 mana/stamina/energy/rage；StatsComponent 或 ProgressionSystem 保存最大资源的来源。</li>
           <li>mid-run save 只存能安全恢复的 run state。</li>
           <li>读取后把实体行为恢复到安全状态，例如 Idle。</li>
         </ul>
@@ -1428,6 +1705,7 @@ res://game/content/db_rewards.tres</code></pre>
     "player": {},
     "inventory": {},
     "equipment": {},
+    "resource_pools": {},
     "meta_progression": {},
     "run": {},
     "settings": {}
@@ -1531,12 +1809,13 @@ upgrade.attack_plus_20</code></pre>
         <ol class="flow-list">
           <li data-step="1">创建 <code>AbilityDefinition</code>。</li>
           <li data-step="2">设置 <code>ability_id</code>、display name、cooldown、cost、cast time、range。</li>
-          <li data-step="3">添加 conditions，例如 cooldown ready、mana enough、target in range。</li>
-          <li data-step="4">添加 effects，例如 SpawnSceneEffect、DealDamageEffect、ApplyStatusEffect。</li>
-          <li data-step="5">把 AbilityDefinition 加入 ResourceDatabase。</li>
-          <li data-step="6">在玩家或敌人的 AbilityController 中注册该 ability。</li>
-          <li data-step="7">在 InputReader 或 AI 中发 <code>cast_ability</code> command。</li>
-          <li data-step="8">在 HUD 中监听 cooldown 和 ability events。</li>
+          <li data-step="3">如果技能消耗资源，设置 <code>cost_type</code> 为 mana、stamina、energy 或 rage，并确保实体有 ResourcePoolComponent。</li>
+          <li data-step="4">添加 conditions，例如 cooldown ready、target in range、has tag；资源检查由 AbilityController 通过 ResourcePoolComponent 处理。</li>
+          <li data-step="5">添加 effects，例如 SpawnSceneEffect、DealDamageEffect、ApplyStatusEffect。</li>
+          <li data-step="6">把 AbilityDefinition 加入 ResourceDatabase。</li>
+          <li data-step="7">在玩家或敌人的 AbilityController 中注册该 ability。</li>
+          <li data-step="8">在 InputReader 或 AI 中发 <code>cast_ability</code> command。</li>
+          <li data-step="9">在 HUD 中监听 cooldown、ability events 和 ResourcePoolComponent.resource_changed。</li>
         </ol>
 
         <h3>创建一个新状态效果</h3>
@@ -1560,6 +1839,7 @@ upgrade.attack_plus_20</code></pre>
           <li data-step="6">把 item_id 加入 LootTableDefinition 或 RewardDefinition。</li>
           <li data-step="7">实现 UI 显示和使用入口。</li>
         </ol>
+        <p>如果物品恢复资源，例如 mana potion，不要直接改 <code>StatsComponent.max_mana</code>。应通过 effect 或 inventory use flow 调用 <code>ResourcePoolComponent.restore("mana", amount)</code>。</p>
 
         <h3>创建一个新敌人</h3>
         <ol class="flow-list">
@@ -1607,6 +1887,7 @@ upgrade.attack_plus_20</code></pre>
           <li>最后 transition reason。</li>
           <li>失败 transition reason。</li>
           <li>active actions。</li>
+          <li>当前 resource pools，例如 mana 35 / 50、stamina 80 / 100。</li>
           <li>active status effects。</li>
           <li>当前 stat values。</li>
           <li>active stat modifiers。</li>
@@ -1623,6 +1904,8 @@ upgrade.attack_plus_20</code></pre>
   Last Command: move
   Active Action: None
   HP: 82 / 100
+  Mana: 35 / 50
+  Stamina: 80 / 100
   Attack: 15.0
   Modifiers:
     sword_iron_attack +5 flat
@@ -1651,6 +1934,7 @@ Combat Trace
             <tr><td>攻击打不到</td><td>collision layer/mask、hitbox active frame、hurtbox owner_path。</td></tr>
             <tr><td>伤害为 0</td><td>DamageRequest source/target、StatsComponent、defense、damage tags。</td></tr>
             <tr><td>UI 不刷新</td><td>是否监听 EventRouter 或对应 component signal。</td></tr>
+            <tr><td>技能一直提示资源不足</td><td>实体是否有 ResourcePoolComponent；<code>cost_type</code> 是否和 resource_id 一致；StatsComponent 是否提供 <code>max_mana</code>、<code>max_stamina</code> 等最大值。</td></tr>
             <tr><td>存档读不回内容</td><td>stable ID 是否还存在于 ContentRegistry。</td></tr>
             <tr><td>随机结果不可复现</td><td>是否所有随机都走 RandomService。</td></tr>
             <tr><td>暂停后 action 还在跑</td><td>action 是否通过 TimeService scaled delta 更新。</td></tr>

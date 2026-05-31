@@ -89,20 +89,70 @@ no Godot binary available in this environment.)
 
 ---
 
-## Phase 1 — Combat Vertical Slice ⬜
+## Phase 1 — Combat Vertical Slice ✅ (slice)
 
 Read: [05 Entity, Stats, Health, Combat](spec/combined/05_entity_stats_health_combat.md),
 [12 Core Flows / MVP / Debug](spec/combined/12_core_flows_mvp_debug_and_agent_instructions.md)
 
-- [ ] EntityIdentity / EntityLifecycle
-- [ ] StatDefinition / StatModifier / StatsComponent
-- [ ] HealthComponent
-- [ ] DamageRequest / DamageResult / CombatResolver
-- [ ] HitboxComponent / HurtboxComponent
-- [ ] TimedAttackAction (combat-dependent action from doc 03)
-- [ ] DealDamageEffect / HealEffect
-- [ ] EventRouter: `damage_applied` signal + emitter
-- [ ] Player move / attack; enemy takes damage and dies; damage + death events emitted
+Validation target:
+
+```text
+Player moves. Player attacks. Enemy takes damage. Enemy dies.
+Damage and death events are emitted.
+```
+
+### Entity module (doc 05 §8)
+
+- [x] EntityIdentity (`modules/entity/entity_identity.gd`)
+- [x] EntityRoot (`modules/entity/entity_root.gd`)
+- [ ] EntityDefinition / EntitySpawner — deferred (EntitySpawner depends on AbilityController from Phase 2; demo places entities directly in scene)
+
+### Stats module (doc 05 §9)
+
+- [x] StatDefinition (`modules/stats/stat_definition.gd`)
+- [x] StatModifierDefinition (`modules/stats/stat_modifier_definition.gd`)
+- [x] StatModifier (`modules/stats/stat_modifier.gd`)
+- [x] StatsComponent (`modules/stats/stats_component.gd`)
+
+### Health module (doc 05 §10)
+
+- [x] HealthComponent (`modules/health/health_component.gd`) — on-hit status application duck-types StatusEffectController (Phase 2)
+- [ ] ResourcePoolComponent — deferred to Phase 2 (mana/stamina for abilities)
+
+### Combat module (doc 05 §11)
+
+- [x] DamageRequest (`modules/combat/damage_request.gd`)
+- [x] DamageResult (`modules/combat/damage_result.gd`)
+- [x] CombatResolver (`modules/combat/combat_resolver.gd`)
+- [x] HitboxComponent (`modules/combat/hitbox_component.gd`) — monitoring kept on + scan-on-activate so a stationary already-overlapping target is still hit
+- [x] HurtboxComponent (`modules/combat/hurtbox_component.gd`)
+
+### Kernel additions
+
+- [x] TimedAttackAction (`kernel/actions/builtin/timed_attack_action.gd`) — now that HitboxComponent exists
+- [x] EventRouter: `damage_applied` signal + `emit_damage_applied` (param left untyped to keep kernel below the combat module) + `_get_entity_id`
+- [x] GameBootstrap: parents kernel services under the persistent `ServiceRegistry` autoload (so they survive the scene change), idempotent re-boot guard
+- [x] **Framework fix:** GameBootstrap refuses an `initial_scene_path` that resolves to the scene already containing it (prevents the infinite bootstrap-reload loop); normalizes `uid://` paths
+- [ ] DealDamageEffect / HealEffect — deferred (Hitbox→CombatResolver path is used directly in the slice; the declarative damage Effect lands with the ability system in Phase 2)
+
+### Phase 1 validation demo (bootstrap → initial scene)
+
+- [x] `game/demo/bootstrap.tscn` — minimal scene: just GameBootstrap, `initial_scene_path` → combat_arena
+- [x] `game/demo/combat_arena.tscn` + `combat_arena.gd` — green player + red enemy, logs `damage_applied` / `entity_died`
+- [x] `game/demo/player/player.tscn` (green square) — EntityIdentity, CommandReceiver, HFSM (Idle/Move/Attack), StatsComponent, HealthComponent, HitboxComponent, keyboard input reader
+- [x] `game/demo/enemy/enemy.tscn` (red square) — EntityIdentity, StatsComponent (max_hp 30), HealthComponent (destroy_on_death), HurtboxComponent
+- [x] `project.godot` main scene → `bootstrap.tscn`
+
+**How to run:** press Play. GameBootstrap boots services then enters `combat_arena.tscn`.
+Move the green square with WASD/Arrows, attack with Space/J. Each hit prints
+`[EVENT] damage_applied -> N damage to Enemy`; after enough hits the red square
+disappears and `[EVENT] entity_died -> enemy_001` prints. The DebugOverlay shows
+the player's live state path, last command, HP, and recent events. (Not yet run
+here — no Godot binary available in this environment.)
+
+The earlier kernel-only [phase0_demo.tscn](game/demo/phase0_demo.tscn) still
+exists as a standalone scene for inspecting the bare command→state→action→effect
+pipeline.
 
 ## Phase 2 — Ability & Status Slice ⬜
 

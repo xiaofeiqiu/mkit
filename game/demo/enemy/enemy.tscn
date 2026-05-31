@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="1_identity"]
+[ext_resource type="Script" path="res://addons/mkit/modules/stats/stats_component.gd" id="2_stats"]
+[ext_resource type="Script" path="res://addons/mkit/modules/health/health_component.gd" id="3_health"]
+[ext_resource type="Script" path="res://addons/mkit/modules/combat/hurtbox_component.gd" id="4_hurtbox"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_hurt"]
+size = Vector2(32, 32)
+
+[node name="Enemy" type="CharacterBody2D"]
+
+[node name="EntityIdentity" type="Node" parent="."]
+script = ExtResource("1_identity")
+entity_id = "enemy_001"
+faction = "enemy"
+tags = Array[String](["enemy", "living"])
+
+[node name="Components" type="Node" parent="."]
+
+[node name="StatsComponent" type="Node" parent="Components"]
+script = ExtResource("2_stats")
+base_stats = {
+"defense": 0.0,
+"max_hp": 30.0
+}
+
+[node name="HealthComponent" type="Node" parent="Components"]
+script = ExtResource("3_health")
+current_hp = 30.0
+destroy_on_death = true
+
+[node name="HurtboxComponent" type="Area2D" parent="Components"]
+script = ExtResource("4_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Components/HurtboxComponent"]
+shape = SubResource("RectShape_hurt")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.85, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)

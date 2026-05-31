@@ -1,0 +1,75 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="2_identity"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="3_recv"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="4_sm"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state.gd" id="5_state"]
+[ext_resource type="Script" path="res://game/demo/player/states/player_idle_state.gd" id="6_idle"]
+[ext_resource type="Script" path="res://game/demo/player/states/player_move_state.gd" id="7_move"]
+[ext_resource type="Script" path="res://game/demo/player/states/player_attack_state.gd" id="8_attack"]
+[ext_resource type="Script" path="res://addons/mkit/modules/stats/stats_component.gd" id="9_stats"]
+[ext_resource type="Script" path="res://addons/mkit/modules/health/health_component.gd" id="10_health"]
+[ext_resource type="Script" path="res://addons/mkit/modules/combat/hitbox_component.gd" id="11_hitbox"]
+[ext_resource type="Script" path="res://game/demo/player/player_input_reader.gd" id="12_input"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_hit"]
+size = Vector2(36, 36)
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_root")
+
+[node name="EntityIdentity" type="Node" parent="."]
+script = ExtResource("2_identity")
+entity_id = "player_001"
+faction = "player"
+tags = Array[String](["player", "living", "controllable"])
+
+[node name="CommandReceiver" type="Node" parent="."]
+script = ExtResource("3_recv")
+receiver_id = "player_001"
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("4_sm")
+initial_state_path = "Player/Idle"
+
+[node name="Player" type="Node" parent="StateMachine"]
+script = ExtResource("5_state")
+state_id = "Player"
+
+[node name="Idle" type="Node" parent="StateMachine/Player"]
+script = ExtResource("6_idle")
+state_id = "Idle"
+
+[node name="Move" type="Node" parent="StateMachine/Player"]
+script = ExtResource("7_move")
+state_id = "Move"
+
+[node name="Attack" type="Node" parent="StateMachine/Player"]
+script = ExtResource("8_attack")
+state_id = "Attack"
+
+[node name="Components" type="Node" parent="."]
+
+[node name="StatsComponent" type="Node" parent="Components"]
+script = ExtResource("9_stats")
+
+[node name="HealthComponent" type="Node" parent="Components"]
+script = ExtResource("10_health")
+current_hp = 100.0
+
+[node name="HitboxComponent" type="Area2D" parent="Components"]
+position = Vector2(28, 0)
+script = ExtResource("11_hitbox")
+base_damage = 12.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Components/HitboxComponent"]
+shape = SubResource("RectShape_hit")
+
+[node name="InputReader" type="Node" parent="."]
+script = ExtResource("12_input")
+target_id = "player_001"
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.2, 0.8, 0.25, 1)
+polygon = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)

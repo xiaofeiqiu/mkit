@@ -321,13 +321,6 @@ func _try_equip_sword() -> void:
 
 
 func _generate_rewards() -> void:
-	if _reward_used:
-		_log("[REWARD] already used this run")
-		return
-	if not _pending_rewards.is_empty():
-		_log("[REWARD] pick from current options first (1/2/3)")
-		return
-
 	var ctx := GameplayContext.new()
 	ctx.source = player
 
@@ -363,7 +356,6 @@ func _pick_reward(index: int) -> void:
 			_get_player_stat("move_speed")
 		])
 		_pending_rewards.clear()
-		_reward_used = true
 		_reward_label.text = "Reward applied: %s" % option.display_name
 	else:
 		_log("[REWARD] apply failed")

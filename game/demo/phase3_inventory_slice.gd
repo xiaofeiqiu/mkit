@@ -9,6 +9,7 @@ extends Node2D
 #           E = equip sword from inventory, R = generate rewards, 1/2/3 = pick reward
 
 @onready var player: Node = $Player
+@onready var _instructions_label: Label = $HUD/Instructions
 @onready var enemy: Node = $Enemy
 @onready var _hp_label: Label = $HUD/StatsPanel/EnemyHP
 @onready var _inv_label: Label = $HUD/StatsPanel/Inventory
@@ -28,9 +29,7 @@ func _ready() -> void:
 	_register_content()
 	_register_player_abilities()
 	_connect_events()
-	_log("=== Inventory Slice ===")
-	_log("Move: WASD   Melee: Space/J   Fireball: Q")
-	_log("E = equip sword   R = rewards   1/2/3 = pick")
+	_instructions_label.text = "Move: WASD / Arrows     Melee: Space / J     Fireball: Q\nKill enemy → loot auto-picked.  E = equip sword  F = use potion  R = rewards  1/2/3 = pick"
 
 
 func _process(_delta: float) -> void:
@@ -42,6 +41,8 @@ func _input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_E:
 				_try_equip_sword()
+			KEY_F:
+				_try_use_potion()
 			KEY_R:
 				_generate_rewards()
 			KEY_1:
@@ -318,6 +319,35 @@ func _try_equip_sword() -> void:
 		_log("[EQUIP] sword equipped  atk=%.1f" % _get_player_stat("attack_power"))
 	else:
 		_log("[EQUIP] equip failed")
+
+
+func _try_use_potion() -> void:
+	var inv := player.get_node_or_null("Controllers/InventoryController") as InventoryController
+	if inv == null:
+		return
+
+	var potion := inv.find_item_by_definition("item.potion_small")
+	if potion == null:
+		_log("[USE] no potion in inventory")
+		return
+
+	var definition := inv.get_item_definition("item.potion_small")
+	if definition == null or definition.use_effects.is_empty():
+		_log("[USE] potion has no effects")
+		return
+
+	var health := player.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var hp_before := health.current_hp if health != null else 0.0
+
+	var executor := ServiceRegistry.get_service("effects") as EffectExecutor
+	var ctx := GameplayContext.new()
+	ctx.source = player
+	ctx.target = player
+	executor.execute_many(definition.use_effects, ctx, true)
+
+	var hp_after := health.current_hp if health != null else 0.0
+	inv.remove_item_by_instance_id(potion.instance_id, 1)
+	_log("[USE] potion used  HP %.0f → %.0f" % [hp_before, hp_after])
 
 
 func _generate_rewards() -> void:

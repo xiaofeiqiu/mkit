@@ -25,8 +25,7 @@ offset_left = 16.0
 offset_top = 160.0
 offset_right = 560.0
 offset_bottom = 240.0
-text = "Move: WASD / Arrows     Melee: Space / J     Fireball: Q
-Kill enemy → loot auto-picked.  E = equip sword  R = rewards  1/2/3 = pick"
+text = ""
 
 [node name="StatsPanel" type="VBoxContainer" parent="HUD"]
 anchor_left = 1.0

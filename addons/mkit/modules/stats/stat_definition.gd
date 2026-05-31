@@ -1,3 +1,9 @@
+## What: StatDefinition describes one authored stat and its default/clamp/display metadata.
+## Responsibilities: define stat id, display name, default value, min/max bounds, and percentage display behavior.
+## Upstream: content databases and editor tooling register stat definitions.
+## Downstream: StatsComponent, UI, validators, and balancing tools use these definitions as stat metadata.
+## When to use: Use it to document and constrain stats such as max_hp, attack_power, armor, crit_chance, or move_speed.
+## Example: create `max_hp.tres` with `stat_id = "max_hp"`, `default_value = 100`, `min_value = 1`.
 class_name StatDefinition
 extends Resource
 

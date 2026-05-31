@@ -1,3 +1,9 @@
+## What: CommandRouter maps target ids to CommandReceiver nodes and dispatches GameCommand objects.
+## Responsibilities: register/unregister receivers, deliver targeted commands, broadcast commands, and emit success/failure signals.
+## Upstream: input readers, AI controllers, UI, cutscenes, or tests submit commands.
+## Downstream: CommandReceiver nodes and their StateMachine/State handlers process the command.
+## When to use: Use it when one system needs to send intent to another system without holding a node reference.
+## Example: `commands.dispatch(GameCommand.create(BuiltinCommands.ATTACK, "player_input", "player_001"))`.
 class_name CommandRouter
 extends Node
 

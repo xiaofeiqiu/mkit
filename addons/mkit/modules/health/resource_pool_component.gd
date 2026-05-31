@@ -1,3 +1,9 @@
+## What: ResourcePoolComponent manages spendable resources such as mana, stamina, energy, or ammo.
+## Responsibilities: initialize pools, query current/max values, spend/restore resources, emit changes, and serialize state.
+## Upstream: AbilityController, items, pickups, save/load, or UI interactions spend and restore resource values.
+## Downstream: StatsComponent supplies max resources and UI listens to resource change signals.
+## When to use: Attach it to entities that have costs or regenerating pools separate from HP.
+## Example: `$ResourcePoolComponent.spend("mana", 25.0)` before casting `"fireball"`.
 class_name ResourcePoolComponent
 extends Node
 

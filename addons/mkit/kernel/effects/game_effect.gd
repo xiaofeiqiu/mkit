@@ -1,3 +1,9 @@
+## What: GameEffect is the base Resource for data-driven gameplay effects.
+## Responsibilities: hold shared metadata, evaluate preconditions, and delegate actual behavior to _apply_impl.
+## Upstream: ability, item, reward, status, and upgrade definitions store arrays of GameEffect resources.
+## Downstream: EffectExecutor calls apply(), while subclasses such as DealDamageEffect and HealEffect implement behavior.
+## When to use: Extend it when a new content action should be reusable from multiple systems.
+## Example: `class_name KnockbackEffect extends GameEffect` and override `_apply_impl(ctx)` to push `ctx.target`.
 class_name GameEffect
 extends Resource
 

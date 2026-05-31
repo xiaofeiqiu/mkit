@@ -1,3 +1,9 @@
+## What: CastAction is a timed GameAction for abilities that have wind-up or casting feedback before effects resolve.
+## Responsibilities: wait for duration, optionally play/stop cast feedback, and complete or cancel cleanly.
+## Upstream: AbilityController creates it when an AbilityDefinition has cast_time greater than zero.
+## Downstream: ActionRunner ticks it and AbilityController listens for completed/cancelled to finish the cast.
+## When to use: Use it for spells or interact actions that should be interruptible before applying effects.
+## Example: an ability with `ability_id = "meteor"` and `cast_time = 1.2` runs CastAction before damage is applied.
 class_name CastAction
 extends GameAction
 

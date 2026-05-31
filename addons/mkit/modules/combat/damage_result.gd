@@ -1,3 +1,9 @@
+## What: DamageResult is the output payload from CombatResolver and the input applied by HealthComponent.
+## Responsibilities: store final damage, roll outcomes, source/target, applied statuses, and calculation trace.
+## Upstream: CombatResolver creates it from DamageRequest.
+## Downstream: HealthComponent, EventRouter, UI feedback, tests, and debug logs inspect or apply it.
+## When to use: Use it to pass complete hit resolution data between combat calculation and health application.
+## Example: `if result.was_critical: spawn_text("CRIT %d" % int(result.final_amount))`.
 class_name DamageResult
 extends RefCounted
 

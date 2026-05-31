@@ -1,3 +1,9 @@
+## What: AbilityInstance is the runtime state for one registered AbilityDefinition on an entity.
+## Responsibilities: track owner, cooldown remaining, charges, level, enabled state, and temporary modifiers.
+## Upstream: AbilityController creates and ticks instances when abilities are registered.
+## Downstream: AbilityController reads cooldown/charge state before casting and when starting cooldowns.
+## When to use: Use it internally to represent per-entity ability state separate from shared definition resources.
+## Example: after `register_ability("blink")`, `abilities["blink"].cooldown_remaining` tracks that entity only.
 class_name AbilityInstance
 extends RefCounted
 

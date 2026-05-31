@@ -1,3 +1,9 @@
+## What: DungeonGenerator creates RoomGraph data from room pools and a deterministic seed.
+## Responsibilities: pick room ids, create RoomNode objects, link them, and mark start/boss nodes for linear runs.
+## Upstream: RunDirector calls it when starting a run.
+## Downstream: RoomGraph and RoomNode feed room loading and progression decisions.
+## When to use: Use it when a run should be generated from room definition ids rather than hand-authored sequence nodes.
+## Example: `var graph := DungeonGenerator.new().generate_linear(["combat_01", "event_01"], 2026, 4)`.
 class_name DungeonGenerator
 extends RefCounted
 

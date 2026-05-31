@@ -1,3 +1,9 @@
+## What: InventoryModel is the plain data container for inventory slots and owner id.
+## Responsibilities: create slots, find empty or stackable slots, and return current item instances.
+## Upstream: InventoryController owns and initializes the model.
+## Downstream: inventory UI, save/load, and add/remove operations inspect the model state.
+## When to use: Use it as the non-node data model behind an InventoryController.
+## Example: `model.setup(30); var empty := model.find_first_empty_slot()`.
 class_name InventoryModel
 extends RefCounted
 

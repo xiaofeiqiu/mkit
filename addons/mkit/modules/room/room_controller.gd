@@ -1,3 +1,9 @@
+## What: RoomController manages one loaded room instance during a run.
+## Responsibilities: enter the room, spawn enemies, track active enemies, detect clear condition, and generate reward options.
+## Upstream: RunDirector or scene setup calls setup/enter_room for a RoomDefinition id.
+## Downstream: EntitySpawner, RewardSystem, EventRouter, RunDirector, and reward UI react to room lifecycle events.
+## When to use: Add it to room scenes that need enemy spawning, clear detection, and reward generation.
+## Example: `$RoomController.setup("combat_01"); $RoomController.spawn_positions = [Vector2(200, 120), Vector2(360, 120)]`.
 class_name RoomController
 extends Node
 

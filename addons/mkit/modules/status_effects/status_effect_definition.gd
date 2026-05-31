@@ -1,3 +1,9 @@
+## What: StatusEffectDefinition is authored content for a buff, debuff, damage-over-time, or other timed status.
+## Responsibilities: define duration, tick interval, stack behavior, tags, apply/tick/remove effects, and stat modifiers.
+## Upstream: designers create resources and effects reference them by status id.
+## Downstream: StatusEffectController applies definitions and runs their effects/modifiers over time.
+## When to use: Use it for poison, burning, shielded, stunned, haste, slow, or any reusable status effect.
+## Example: `status_id = "poison"`, `duration = 6.0`, `tick_interval = 1.0`, `effects_on_tick = [poison_damage]`.
 class_name StatusEffectDefinition
 extends Resource
 

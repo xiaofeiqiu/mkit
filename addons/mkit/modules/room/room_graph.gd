@@ -1,3 +1,9 @@
+## What: RoomGraph is the runtime graph of RoomNode objects for a generated run floor.
+## Responsibilities: store ordered room nodes, start node, boss node, and room lookup by index.
+## Upstream: DungeonGenerator creates it from room pools and a seed.
+## Downstream: RunDirector advances through it and loads RoomDefinition ids.
+## When to use: Use it when run flow needs a generated sequence or graph of rooms instead of a single scene.
+## Example: `var graph := DungeonGenerator.new().generate_linear(["combat_01", "combat_02"], 42, 3)`.
 class_name RoomGraph
 extends RefCounted
 

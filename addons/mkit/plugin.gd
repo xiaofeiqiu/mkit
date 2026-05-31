@@ -1,4 +1,10 @@
 @tool
+## What: MKit editor plugin installs the minimal autoload required by the addon.
+## Responsibilities: add ServiceRegistry when the addon is enabled and remove it when disabled.
+## Upstream: Godot editor plugin lifecycle calls _enter_tree and _exit_tree.
+## Downstream: project runtime code can access the global ServiceRegistry singleton after the plugin is enabled.
+## When to use: Enable the addon in Project Settings so MKit services can be registered by GameBootstrap.
+## Example: after enabling the addon, runtime code can call `ServiceRegistry.register_service("events", EventRouter.new())`.
 extends EditorPlugin
 
 # Mkit registers only a single global service locator autoload when the addon is

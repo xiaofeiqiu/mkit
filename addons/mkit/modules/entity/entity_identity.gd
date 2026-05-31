@@ -1,3 +1,9 @@
+## What: EntityIdentity stores stable identity, display, faction, and tags for one entity instance.
+## Responsibilities: expose entity id, definition id, display name, faction checks, and tag matching helpers.
+## Upstream: EntitySpawner initializes identity from EntityDefinition and runtime ids.
+## Downstream: combat targeting, events, rooms, inventory ownership, and UI read identity metadata.
+## When to use: Add it to entity scenes that need stable ids, factions, or tag-based logic.
+## Example: set `entity_id = "enemy_003"`, `definition_id = "slime"`, `faction = "enemy"`, `tags = ["beast"]`.
 class_name EntityIdentity
 extends Node
 

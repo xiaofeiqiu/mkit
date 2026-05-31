@@ -1,3 +1,9 @@
+## What: GameAction is the base class for cancellable, time-ticked gameplay actions.
+## Responsibilities: store context, track elapsed/finished/cancelled state, emit completion/cancel signals, and expose override hooks.
+## Upstream: ActionRunner starts and updates GameAction instances created by abilities, states, or commands.
+## Downstream: subclasses such as DashAction, CastAction, and TimedAttackAction implement action behavior.
+## When to use: Extend it when gameplay needs a reusable action with lifecycle and cancellation semantics.
+## Example: `var action := DashAction.new(); action.cancel_tags = ["stun"]; action_runner.start_action(action, ctx)`.
 class_name GameAction
 extends RefCounted
 

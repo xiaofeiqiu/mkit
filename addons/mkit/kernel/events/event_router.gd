@@ -1,3 +1,9 @@
+## What: EventRouter is the shared event bus for facts that already happened in gameplay.
+## Responsibilities: emit typed signals, mirror them into DomainEvent objects, and keep recent event history.
+## Upstream: combat, inventory, rooms, rewards, runs, and custom systems publish events through it.
+## Downstream: UI, audio, analytics, debug tools, save hooks, and tests subscribe without coupling to publishers.
+## When to use: Use it for notifications such as damage_applied, entity_died, room_cleared, or run_finished.
+## Example: `events.entity_died.connect(_on_entity_died); events.emit_room_cleared("room_01")`.
 class_name EventRouter
 extends Node
 

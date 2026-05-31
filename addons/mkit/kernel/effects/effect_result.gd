@@ -1,3 +1,9 @@
+## What: EffectResult is the standard return object for GameEffect execution.
+## Responsibilities: report success/failure, identify the effect, carry payload data, and nest child effect results.
+## Upstream: GameEffect subclasses and EffectExecutor create it after each effect attempt.
+## Downstream: debuggers, tests, UI feedback, and stop-on-failure effect chains inspect the result.
+## When to use: Use it whenever effect code needs to return structured status instead of only true/false.
+## Example: `return EffectResult.ok("heal", {"amount": 25})` from a custom healing effect.
 class_name EffectResult
 extends RefCounted
 

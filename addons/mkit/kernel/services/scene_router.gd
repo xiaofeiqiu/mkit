@@ -1,3 +1,9 @@
+## What: SceneRouter centralizes scene changes and exposes success/failure signals around transitions.
+## Responsibilities: lock concurrent transitions, request tree scene changes, track the current scene path, and reload scenes.
+## Upstream: menus, run flow, GameBootstrap, or platform services ask it to change scenes.
+## Downstream: the SceneTree performs the actual scene switch and UI/audio systems listen to transition signals.
+## When to use: Use it whenever code outside a scene needs to move the player to another scene safely.
+## Example: `ServiceRegistry.get_service("scene_router").change_scene("res://game/demo/phase1_combat_arena.tscn")`.
 class_name SceneRouter
 extends Node
 

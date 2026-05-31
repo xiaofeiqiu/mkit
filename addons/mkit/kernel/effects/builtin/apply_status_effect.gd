@@ -1,3 +1,9 @@
+## What: ApplyStatusEffect applies a StatusEffectDefinition to a target StatusEffectController.
+## Responsibilities: choose stacks/duration, find the target status controller, and request application.
+## Upstream: attacks, spells, items, traps, and rewards can include this effect.
+## Downstream: StatusEffectController creates/refreshes StatusEffectInstance objects and runs status effects.
+## When to use: Use it for poison, burn, stun, buffs, debuffs, or any timed status driven by content.
+## Example: set `status_id = "burning"`, `stacks = 2`, `duration_override = 4.0` on a fire attack effect.
 class_name ApplyStatusEffect
 extends GameEffect
 

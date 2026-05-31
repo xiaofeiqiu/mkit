@@ -1,3 +1,9 @@
+## What: StatusEffectInstance is the runtime state of one active StatusEffectDefinition on an entity.
+## Responsibilities: store source/target, remaining duration, tick timer, stacks, definition id, and applied modifier ids.
+## Upstream: StatusEffectController creates and updates instances.
+## Downstream: StatusEffectController and save/debug code read instance state for ticking and cleanup.
+## When to use: Use it internally as the mutable state for an active buff, debuff, dot, or aura.
+## Example: after applying `"burning"`, the instance tracks `stacks = 2` and `remaining_duration = 4.0`.
 class_name StatusEffectInstance
 extends RefCounted
 

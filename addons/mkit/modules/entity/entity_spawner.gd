@@ -1,3 +1,9 @@
+## What: EntitySpawner instantiates entity scenes from EntityDefinition ids and initializes core components.
+## Responsibilities: fetch definitions, load PackedScene paths, place nodes, set identity, base stats, and starting abilities.
+## Upstream: RoomController, RunDirector, scripted spawns, or tests request entities by definition id.
+## Downstream: spawned EntityRoot scenes and their components become active in the target parent node.
+## When to use: Use it whenever rooms or systems need content-driven entity spawning.
+## Example: `$EntitySpawner.spawn_entity("slime", $Enemies, Vector2(320, 180), "slime_01")`.
 class_name EntitySpawner
 extends Node
 

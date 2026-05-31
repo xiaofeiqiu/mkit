@@ -1,3 +1,9 @@
+## What: EntityRoot is the root CharacterBody2D for an MKit entity scene.
+## Responsibilities: expose entity id lookup and standardized access to Components and Controllers child nodes.
+## Upstream: EntitySpawner or hand-authored scenes instantiate it as player/enemy/entity roots.
+## Downstream: states, abilities, combat, UI, and tests fetch child components through helper methods.
+## When to use: Use it as the scene root for entities that share MKit components and controllers.
+## Example: `var health := enemy_root.get_component("HealthComponent") as HealthComponent`.
 class_name EntityRoot
 extends CharacterBody2D
 

@@ -1,3 +1,9 @@
+## What: DamageRequest is the input payload for CombatResolver damage calculation.
+## Responsibilities: carry source/target, base amount, damage and element types, allowed defensive rolls, tags, statuses, and payload.
+## Upstream: HitboxComponent, DealDamageEffect, abilities, or tests fill it before resolving combat.
+## Downstream: CombatResolver reads it and produces a DamageResult.
+## When to use: Use it when a hit or effect wants the shared combat pipeline to compute final damage.
+## Example: `request.source = player; request.target = enemy; request.base_amount = 20; request.element_type = "fire"`.
 class_name DamageRequest
 extends RefCounted
 

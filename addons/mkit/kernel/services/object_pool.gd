@@ -1,3 +1,9 @@
+## What: ObjectPool reuses scene instances keyed by scene path to reduce runtime allocation spikes.
+## Responsibilities: warm scenes, acquire active nodes, release inactive nodes, and clear cached instances by path.
+## Upstream: projectile spawners, VFX systems, or room controllers request pooled instances.
+## Downstream: instantiated scenes receive activate/deactivate lifecycle calls when those methods exist.
+## When to use: Use it for frequently spawned short-lived objects such as hit sparks, arrows, pickups, or damage popups.
+## Example: `var orb := pool.acquire("res://game/fx/orb.tscn", fx_root)` and later `pool.release("res://game/fx/orb.tscn", orb)`.
 class_name ObjectPool
 extends Node
 

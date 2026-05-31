@@ -1,3 +1,9 @@
+## What: LootEntry is one weighted item or content entry inside a LootTableDefinition.
+## Responsibilities: define content id, weight, min/max quantity, and optional conditions.
+## Upstream: designers add entries to loot table resources.
+## Downstream: LootSystem filters valid entries and rolls quantities from them.
+## When to use: Use it for each possible drop in an enemy, chest, or room loot table.
+## Example: `content_id = "health_potion"`, `weight = 3.0`, `min_quantity = 1`, `max_quantity = 2`.
 class_name LootEntry
 extends Resource
 

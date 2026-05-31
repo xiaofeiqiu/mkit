@@ -1,3 +1,9 @@
+## What: TargetInRangeCondition checks whether context source and target nodes are close enough.
+## Responsibilities: read node positions, compare distance against range, and provide a clear failure reason.
+## Upstream: abilities, items, loot, rewards, or effects include it in their conditions arrays.
+## Downstream: ConditionEvaluator calls it before allowing a cast or effect execution.
+## When to use: Use it for melee attacks, short-range spells, interactions, or pickups that need distance gating.
+## Example: set `range = 96.0` on a melee AbilityDefinition condition before `AbilityController.cast("slash", ctx)`.
 class_name TargetInRangeCondition
 extends Condition
 

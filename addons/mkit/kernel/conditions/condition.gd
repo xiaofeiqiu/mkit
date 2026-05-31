@@ -1,3 +1,9 @@
+## What: Condition is the base Resource for content gates that answer whether a GameplayContext is allowed.
+## Responsibilities: expose shared ids/inversion, call subclass evaluation, and provide a failure reason hook.
+## Upstream: abilities, items, rewards, loot entries, and effects store Condition arrays.
+## Downstream: ConditionEvaluator and custom Condition subclasses perform the actual checks.
+## When to use: Extend it for reusable content rules such as range checks, resource checks, or room-state checks.
+## Example: create `HasKeyCondition.gd` extending Condition and return false when `ctx.source` lacks `"boss_key"`.
 class_name Condition
 extends Resource
 

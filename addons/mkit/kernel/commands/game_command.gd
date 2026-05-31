@@ -1,3 +1,9 @@
+## What: GameCommand is a structured request for gameplay intent, such as move, attack, cast, or equip.
+## Responsibilities: carry type/source/target/payload metadata, expose typed payload readers, and track consumption.
+## Upstream: input readers, AI planners, UI, network adapters, and scripted demos create commands.
+## Downstream: CommandRouter and CommandReceiver deliver commands to state machines or gameplay systems.
+## When to use: Use it when gameplay intent should be routed instead of directly calling entity methods.
+## Example: `var cmd := GameCommand.create(BuiltinCommands.MOVE, "input", "player_001", {"direction": Vector2.RIGHT})`.
 class_name GameCommand
 extends RefCounted
 

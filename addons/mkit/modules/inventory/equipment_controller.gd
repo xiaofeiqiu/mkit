@@ -1,3 +1,9 @@
+## What: EquipmentController manages equipped ItemInstance objects by equipment slot.
+## Responsibilities: validate slots/item definitions, equip/unequip items, apply/remove stat modifiers, and emit equipment changes.
+## Upstream: inventory UI, commands, loot/reward choices, or tests call equip and unequip.
+## Downstream: StatsComponent receives item stat modifiers and UI listens for equipment_changed.
+## When to use: Attach it to entities that can wear gear or weapons affecting stats.
+## Example: `$EquipmentController.equip(sword_instance, "weapon"); var ring := $EquipmentController.unequip("ring")`.
 class_name EquipmentController
 extends Node
 

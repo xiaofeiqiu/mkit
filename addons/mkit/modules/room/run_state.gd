@@ -1,3 +1,9 @@
+## What: RunState stores the serializable runtime progress of a roguelite run.
+## Responsibilities: track run id, seed, floor, current room, elapsed time, temporary upgrades, currency, history, RNG state, and status.
+## Upstream: RunDirector creates and mutates it as the run starts, advances, succeeds, or fails.
+## Downstream: save/load, UI, analytics, reward systems, and room flow read the run state.
+## When to use: Use it as the single data object representing an active run.
+## Example: `var run := RunState.create(12345); run.current_room_id = "combat_01"; run.status = "running"`.
 class_name RunState
 extends RefCounted
 

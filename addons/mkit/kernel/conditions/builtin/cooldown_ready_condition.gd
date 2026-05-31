@@ -1,3 +1,9 @@
+## What: CooldownReadyCondition checks whether an ability is registered and off cooldown on the source entity.
+## Responsibilities: find AbilityController, inspect cooldown remaining, and provide a failure reason.
+## Upstream: AbilityDefinition conditions or custom ability gates reference this resource.
+## Downstream: ConditionEvaluator invokes it before casts or effect execution.
+## When to use: Use it when content wants an explicit reusable cooldown gate separate from AbilityController.can_cast().
+## Example: set `ability_id = "blink"` and include this condition on an item that refreshes only when Blink is ready.
 class_name CooldownReadyCondition
 extends Condition
 

@@ -1,3 +1,9 @@
+## What: DealDamageEffect is a content resource that converts a GameplayContext into a combat damage application.
+## Responsibilities: build a DamageRequest, call CombatResolver, apply damage to HealthComponent, and report the result.
+## Upstream: AbilityDefinition, ItemDefinition, StatusEffectDefinition, or RewardDefinition can include this effect.
+## Downstream: CombatResolver, HealthComponent, StatusEffectController, and EventRouter receive the resolved hit data.
+## When to use: Use it for any content entry that should deal typed damage to the context target.
+## Example: set `base_amount = 35`, `damage_type = "spell"`, `element_type = "fire"` on a Fireball effect resource.
 class_name DealDamageEffect
 extends GameEffect
 

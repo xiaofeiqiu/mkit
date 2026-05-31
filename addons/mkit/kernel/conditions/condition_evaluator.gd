@@ -1,3 +1,9 @@
+## What: ConditionEvaluator is a static helper for checking arrays of Condition resources.
+## Responsibilities: evaluate all conditions and collect failure reasons for UI or logs.
+## Upstream: AbilityController, LootSystem, RewardSystem, ItemDefinition usage, and tests pass condition arrays.
+## Downstream: Condition subclasses such as CooldownReadyCondition and TargetInRangeCondition perform specific checks.
+## When to use: Use it when content has multiple gates that must all pass before execution.
+## Example: `if ConditionEvaluator.evaluate_all(ability.conditions, ctx): ability_controller.cast("fireball", ctx)`.
 class_name ConditionEvaluator
 extends RefCounted
 

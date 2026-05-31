@@ -1,3 +1,9 @@
+## What: Blackboard is a small key-value store shared by state machines and behavior code.
+## Responsibilities: set/get/erase arbitrary values, check key existence, clear state, and expose debug data.
+## Upstream: StateMachine, State nodes, AI logic, or tests write transient decision data.
+## Downstream: other states and debug tooling read values without adding direct references.
+## When to use: Use it for transient runtime facts such as current target, last hit time, or desired move direction.
+## Example: `$StateMachine.blackboard.set_value("target", enemy); var target = blackboard.get_value("target")`.
 class_name Blackboard
 extends RefCounted
 

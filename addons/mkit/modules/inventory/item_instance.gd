@@ -1,3 +1,9 @@
+## What: ItemInstance is the runtime copy of an ItemDefinition in inventory, equipment, or loot.
+## Responsibilities: store unique instance id, definition id, quantity, rolled affixes, durability, upgrade level, metadata, and save data.
+## Upstream: LootSystem, GrantItemEffect, InventoryController, shops, or tests create item instances.
+## Downstream: InventoryController, EquipmentController, save/load, and UI use item instance state.
+## When to use: Use it whenever the game owns a concrete item stack or individual item.
+## Example: `var potion := ItemInstance.create("health_potion", 3); inventory.add_item(potion)`.
 class_name ItemInstance
 extends RefCounted
 

@@ -1,3 +1,9 @@
+## What: TimedAttackAction models an attack with startup, active, and recovery phases.
+## Responsibilities: tick phase timing, enable/disable the configured HitboxComponent, and play matching animation hooks.
+## Upstream: StateMachine states, input commands, or AI behavior start it through ActionRunner.
+## Downstream: HitboxComponent scans overlaps during the active window and combat systems resolve hits.
+## When to use: Use it for melee attacks or short active-window hitboxes that need deterministic timing.
+## Example: set `startup_duration = 0.12`, `active_duration = 0.10`, `recovery_duration = 0.25` for a sword slash action.
 class_name TimedAttackAction
 extends GameAction
 

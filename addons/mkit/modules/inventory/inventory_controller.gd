@@ -1,3 +1,9 @@
+## What: InventoryController is the node-facing API for an entity or profile inventory.
+## Responsibilities: initialize capacity, add/stack/remove/find items, fetch definitions, emit item/inventory signals, and save/load inventory data.
+## Upstream: loot, rewards, item pickups, UI, commands, shops, and SaveManager call inventory operations.
+## Downstream: InventoryModel stores slots, ContentRegistry provides item definitions, and UI listens to change signals.
+## When to use: Attach it to any owner that can carry items.
+## Example: `$InventoryController.add_item(ItemInstance.create("iron_sword", 1)); var potion = $InventoryController.find_item_by_definition("health_potion")`.
 class_name InventoryController
 extends Node
 

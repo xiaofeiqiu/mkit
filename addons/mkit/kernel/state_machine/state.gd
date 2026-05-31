@@ -1,3 +1,9 @@
+## What: State is the base node for one state inside a hierarchical StateMachine.
+## Responsibilities: expose lifecycle hooks, guard transitions, route commands, request transitions, and report full state paths.
+## Upstream: StateMachine initializes and calls State nodes during updates and transitions.
+## Downstream: concrete player/enemy states override enter, exit, update, physics_update, and handle_command.
+## When to use: Extend it for entity behavior modes such as idle, move, attack, cast, stagger, or dead.
+## Example: `class_name PlayerAttackState extends State` and call `request_transition("root/idle")` when the attack action completes.
 class_name State
 extends Node
 

@@ -1,3 +1,9 @@
+## What: StateMachine is a hierarchical finite state machine for entity behavior.
+## Responsibilities: initialize state trees, route commands, perform guarded transitions, update active state chains, and emit transition signals.
+## Upstream: entities, CommandReceiver, AI, or input-driven code request transitions or send commands.
+## Downstream: State nodes implement enter/exit/update/command behavior and share a Blackboard.
+## When to use: Use it for player, enemy, or interactable behavior that benefits from explicit state transitions.
+## Example: set `initial_state_path = "root/idle"`; then call `$StateMachine.transition_to("root/combat/attack", {"target": enemy})`.
 class_name StateMachine
 extends Node
 

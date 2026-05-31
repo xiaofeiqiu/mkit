@@ -2,6 +2,12 @@
 # IMPORTANT: do NOT declare `class_name ServiceRegistry` here — in Godot 4 an
 # autoload name cannot collide with a class_name. Access it everywhere through
 # the autoload global (e.g. ServiceRegistry.get_service("events")).
+## What: ServiceRegistry is the single MKit autoload that stores runtime services by id.
+## Responsibilities: register, fetch, type-check, unregister, and clear shared services without per-system autoloads.
+## Upstream: plugin.gd installs this autoload and GameBootstrap registers services into it during boot.
+## Downstream: gameplay systems resolve services such as `content`, `events`, `commands`, `effects`, `actions`, and `scene_router`.
+## When to use: Use it when systems need shared service access without direct node references.
+## Example: `var events := ServiceRegistry.get_service("events") as EventRouter; events.emit_room_cleared("room_01")`.
 extends Node
 
 var _services: Dictionary = {}

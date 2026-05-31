@@ -1,3 +1,9 @@
+## What: RoomNode is one node in a generated RoomGraph.
+## Responsibilities: store graph node id, RoomDefinition id, room type, next nodes, and previous nodes.
+## Upstream: DungeonGenerator creates RoomNode instances while building a run path.
+## Downstream: RunDirector reads nodes to decide which room definition to load next.
+## When to use: Use it as graph data for linear or branching room progression.
+## Example: `node.room_definition_id = "combat_02"; node.next_nodes.append(boss_node)`.
 class_name RoomNode
 extends RefCounted
 

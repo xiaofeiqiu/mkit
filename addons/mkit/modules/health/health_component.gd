@@ -1,3 +1,9 @@
+## What: HealthComponent tracks HP, applies DamageResult values, healing, death, and revival for an entity.
+## Responsibilities: clamp health, query max HP from StatsComponent, emit health/death signals, and apply on-hit statuses.
+## Upstream: CombatResolver, DealDamageEffect, HealEffect, pickups, or scripts call apply_damage/heal/revive.
+## Downstream: EventRouter, StatusEffectController, UI, room clear logic, and death handling consume its signals.
+## When to use: Attach it to any damageable entity such as player, enemy, destructible prop, or dummy.
+## Example: `var result := CombatResolver.get_default().resolve(request); $HealthComponent.apply_damage(result)`.
 class_name HealthComponent
 extends Node
 

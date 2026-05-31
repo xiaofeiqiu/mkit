@@ -1,3 +1,9 @@
+## What: LootTableDefinition is authored loot content made of weighted LootEntry resources.
+## Responsibilities: define table id, roll count, entries, empty-roll behavior, and empty weight.
+## Upstream: designers attach entries and register the table in ContentRegistry.
+## Downstream: LootSystem rolls the table and creates LootRollResult item/currency outputs.
+## When to use: Use it for enemy drops, chest loot, room rewards, or destructible prop drops.
+## Example: `loot_table_id = "slime_drops"`, `rolls = 2`, `entries = [gel_entry, coin_entry]`, `allow_empty = true`.
 class_name LootTableDefinition
 extends Resource
 

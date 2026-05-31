@@ -1,3 +1,9 @@
+## What: HealEffect restores HP on the source or target carried by a GameplayContext.
+## Responsibilities: locate a HealthComponent, apply a fixed heal amount, and return an EffectResult.
+## Upstream: consumables, shrine rewards, support abilities, or status effects include this effect.
+## Downstream: HealthComponent emits healed/health_changed and any UI listening to health updates refreshes.
+## When to use: Use it when a content resource should restore health without custom script code.
+## Example: set `base_amount = 50` on a potion ItemDefinition use_effect.
 class_name HealEffect
 extends GameEffect
 

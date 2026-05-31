@@ -1,3 +1,9 @@
+## What: RoomRuntime stores the live state for one room instance during a run.
+## Responsibilities: track runtime id, definition id, cleared/entered flags, active enemies, and generated reward options.
+## Upstream: RoomController creates and mutates it when a room is entered and cleared.
+## Downstream: RunDirector, save/load, UI, and reward flow read its room progress.
+## When to use: Use it as the mutable runtime companion to immutable RoomDefinition content.
+## Example: `var runtime := RoomRuntime.create("combat_01"); runtime.active_enemy_ids = ["slime_01", "slime_02"]`.
 class_name RoomRuntime
 extends RefCounted
 

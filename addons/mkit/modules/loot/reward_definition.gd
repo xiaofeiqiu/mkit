@@ -1,3 +1,9 @@
+## What: RewardDefinition is authored content for a selectable reward.
+## Responsibilities: define id, display data, rarity, weight, conditions, and effects to apply when selected.
+## Upstream: designers author reward resources and register them in content databases.
+## Downstream: RewardSystem builds RewardOption objects and applies selected effects through EffectExecutor.
+## When to use: Use it for run upgrades, item grants, healing choices, currency bonuses, or unlock rewards.
+## Example: `reward_id = "gain_iron_sword"`, `rarity = "rare"`, `effects = [grant_iron_sword_effect]`.
 class_name RewardDefinition
 extends Resource
 

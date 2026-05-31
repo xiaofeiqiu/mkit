@@ -1,3 +1,9 @@
+## What: StatsComponent stores base stats and computes final stat values after runtime modifiers.
+## Responsibilities: manage base stats, apply stacking rules, cache calculated values, expire timed modifiers, and emit stat changes.
+## Upstream: EntitySpawner, equipment, status effects, progression upgrades, and stat modifier effects write stats/modifiers.
+## Downstream: combat, health, resource pools, movement, cooldowns, and UI query final stat values.
+## When to use: Attach it to entities whose gameplay numbers can be modified by content or runtime effects.
+## Example: `$StatsComponent.set_base_stat("max_hp", 150); var power := $StatsComponent.get_stat_value("attack_power", 10)`.
 class_name StatsComponent
 extends Node
 

@@ -1,3 +1,9 @@
+## What: GrantItemEffect adds an ItemInstance to an InventoryController from content-driven execution.
+## Responsibilities: create the requested item instance, find source or target inventory, and add the quantity.
+## Upstream: rewards, loot choices, quests, or interactables include it as an effect.
+## Downstream: InventoryController updates slots and emits item/inventory change signals.
+## When to use: Use it when rewards or scripted events should grant items by item definition id.
+## Example: `item_id = "iron_sword"`, `quantity = 1`, `give_to_source = true` in a chest reward effect.
 class_name GrantItemEffect
 extends GameEffect
 

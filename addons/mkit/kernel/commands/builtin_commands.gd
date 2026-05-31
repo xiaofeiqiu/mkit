@@ -1,3 +1,9 @@
+## What: BuiltinCommands is the central list of command type string constants used by the command system.
+## Responsibilities: prevent typo-prone command ids and document the command vocabulary shipped with MKit.
+## Upstream: input readers, AI brains, UI buttons, and tests create GameCommand objects using these constants.
+## Downstream: CommandRouter, CommandReceiver, StateMachine, and State subclasses switch on command types.
+## When to use: Use it whenever code creates or compares a built-in gameplay command.
+## Example: `CommandRouter.dispatch(GameCommand.create(BuiltinCommands.CAST_ABILITY, "player", "enemy", {"ability_id":"fireball"}))`.
 class_name BuiltinCommands
 extends Object
 

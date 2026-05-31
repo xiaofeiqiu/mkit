@@ -1,3 +1,9 @@
+## What: RoomDefinition is the authored data for a room that can appear in a run.
+## Responsibilities: define scene path, room type, difficulty, size, tags, enemy spawns, and reward pools.
+## Upstream: designers create resources and add them to ResourceDatabase entries.
+## Downstream: DungeonGenerator, RunDirector, RoomController, and EntitySpawner use it to build runtime rooms.
+## When to use: Use it for each reusable combat, elite, shop, event, rest, or boss room template.
+## Example: `room_id = "combat_01"`, `scene_path = "res://game/demo/rooms/combat_room_01.tscn"`, `enemy_spawn_ids = ["slime"]`.
 class_name RoomDefinition
 extends Resource
 

@@ -1,3 +1,9 @@
+## What: ItemDefinition is authored content describing an item type.
+## Responsibilities: define display data, type, rarity, icon, stack rules, equipment slot, tags, use conditions/effects, and stat modifiers.
+## Upstream: designers create item resources and ContentRegistry registers them.
+## Downstream: InventoryController, EquipmentController, LootSystem, GrantItemEffect, and UI query item metadata.
+## When to use: Use it for every inventory/equipment/consumable/material item id.
+## Example: `item_id = "iron_sword"`, `item_type = "weapon"`, `equipment_slot = "weapon"`, `stat_modifiers = [attack_plus_5]`.
 class_name ItemDefinition
 extends Resource
 

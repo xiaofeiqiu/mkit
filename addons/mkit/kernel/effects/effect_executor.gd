@@ -1,3 +1,9 @@
+## What: EffectExecutor runs GameEffect resources and optionally keeps a short trace of recent results.
+## Responsibilities: execute one or many effects, honor stop-on-failure, and record EffectResult history for debugging.
+## Upstream: abilities, items, rewards, status effects, and progression upgrades submit effects with a GameplayContext.
+## Downstream: concrete effects mutate health, inventory, stats, scene nodes, or event streams.
+## When to use: Use it whenever content-driven resources need to apply a list of effects consistently.
+## Example: `executor.execute_many(fireball.effects, GameplayContext.new().with_source(caster).with_target(enemy))`.
 class_name EffectExecutor
 extends RefCounted
 

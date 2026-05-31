@@ -1,3 +1,9 @@
+## What: ResourceDatabase is a Resource container for loading authored content into ContentRegistry.
+## Responsibilities: group direct Resource references and resource paths under a database id.
+## Upstream: designers and GameBootstrap assign databases for items, abilities, rooms, stats, or rewards.
+## Downstream: ContentRegistry reads all listed resources and registers them by content id.
+## When to use: Use it to organize content bundles per feature, phase, demo, or DLC pack.
+## Example: create `combat_database.tres` with `database_id = "combat"` and `resources = [fireball_ability, poison_status]`.
 class_name ResourceDatabase
 extends Resource
 

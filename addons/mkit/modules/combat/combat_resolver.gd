@@ -1,3 +1,9 @@
+## What: CombatResolver converts a DamageRequest into a finalized DamageResult.
+## Responsibilities: apply attacker/defender stats, roll crit/evade/block, compute final damage, and select on-hit statuses.
+## Upstream: HitboxComponent, DealDamageEffect, abilities, or tests create DamageRequest objects.
+## Downstream: HealthComponent applies the DamageResult and EventRouter/UI/debug tools inspect the trace.
+## When to use: Use it whenever damage needs to follow the shared combat formula instead of ad hoc subtraction.
+## Example: `var result := CombatResolver.get_default().resolve(DamageRequest.new())` after filling source, target, and base_amount.
 class_name CombatResolver
 extends RefCounted
 

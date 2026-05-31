@@ -1,3 +1,9 @@
+## What: RandomService wraps Godot RNG so gameplay randomness can be seeded and replayed consistently.
+## Responsibilities: own the seed, provide random ranges/chance rolls, and pick weighted entries.
+## Upstream: run generation, loot, combat rolls, and tests set or randomize the seed.
+## Downstream: dungeon generation, reward selection, and combat calculations consume deterministic random values.
+## When to use: Use it for gameplay decisions that must be reproducible from a run seed.
+## Example: `random.set_seed(1842); var rare_drop := random.chance(0.15)`.
 class_name RandomService
 extends RefCounted
 

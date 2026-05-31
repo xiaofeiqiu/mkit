@@ -1,3 +1,9 @@
+## What: DashAction is a GameAction that moves a CharacterBody2D quickly for a fixed duration.
+## Responsibilities: read dash direction/speed, move the source body each update, and complete when time expires.
+## Upstream: State, AbilityController, or CommandReceiver can start it through ActionRunner.
+## Downstream: the source CharacterBody2D receives velocity/move behavior during the dash window.
+## When to use: Use it for player or enemy dash abilities that need cancellable action timing.
+## Example: `var dash := DashAction.new(); dash.direction = Vector2.RIGHT; actions.start_action(dash, ActionContext.from_command(cmd, player))`.
 class_name DashAction
 extends GameAction
 

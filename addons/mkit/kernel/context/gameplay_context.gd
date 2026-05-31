@@ -1,3 +1,9 @@
+## What: GameplayContext carries common runtime references and metadata through commands, effects, conditions, and actions.
+## Responsibilities: hold source/target/instigator, ids, position/direction/amount, tags, and custom payload values.
+## Upstream: commands, abilities, hitboxes, rooms, rewards, and tests create or enrich contexts.
+## Downstream: Condition, GameEffect, GameAction, and system APIs read the context instead of requiring many parameters.
+## When to use: Use it whenever a gameplay call needs shared source-target-payload information.
+## Example: `var ctx := GameplayContext.new().with_source(player).with_target(enemy).with_payload_value("crit_bonus", 0.2)`.
 class_name GameplayContext
 extends RefCounted
 

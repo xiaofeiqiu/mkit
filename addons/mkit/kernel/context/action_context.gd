@@ -1,3 +1,9 @@
+## What: ActionContext extends GameplayContext with action-specific timing and phase metadata.
+## Responsibilities: carry action id, duration, elapsed time, phase, source, target, and payload into GameAction objects.
+## Upstream: CommandReceiver, AbilityController, State objects, or tests create it before starting an action.
+## Downstream: GameAction subclasses such as DashAction, CastAction, and TimedAttackAction read it while running.
+## When to use: Use it whenever an action needs both generic gameplay context and action timing data.
+## Example: `var ctx := ActionContext.from_command(cmd, player, enemy); ctx.duration = 0.35`.
 class_name ActionContext
 extends GameplayContext
 

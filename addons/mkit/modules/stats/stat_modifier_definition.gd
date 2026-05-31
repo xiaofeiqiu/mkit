@@ -1,3 +1,9 @@
+## What: StatModifierDefinition is the authored Resource form of a stat modifier.
+## Responsibilities: define operation, value, priority, stacking rule, tags, target stat id, and stable modifier id.
+## Upstream: designers attach it to items, statuses, rewards, upgrades, or effect resources.
+## Downstream: StatModifier.from_definition and StatsComponent turn it into runtime stat changes.
+## When to use: Use it for reusable buffs or item affixes that should be authored as content.
+## Example: create a definition with `stat_id = "attack_power"`, `operation = FLAT_ADD`, `value = 5.0` for an iron sword.
 class_name StatModifierDefinition
 extends Resource
 

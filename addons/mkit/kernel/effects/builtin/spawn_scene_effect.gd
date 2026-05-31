@@ -1,3 +1,9 @@
+## What: SpawnSceneEffect is a content effect that instantiates a scene during effect execution.
+## Responsibilities: load a PackedScene path, choose a spawn parent/position, add the instance, and return spawn metadata.
+## Upstream: abilities, rewards, room scripts, or items trigger it through EffectExecutor.
+## Downstream: the spawned scene enters the active tree and can continue with its own scripts/components.
+## When to use: Use it for traps, summoned allies, projectiles, VFX, or interactables created by data-driven content.
+## Example: set `scene_path = "res://game/fx/explosion.tscn"` and `spawn_at_target = true` in an ability effect.
 class_name SpawnSceneEffect
 extends GameEffect
 

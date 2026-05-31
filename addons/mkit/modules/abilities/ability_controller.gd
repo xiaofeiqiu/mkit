@@ -1,3 +1,9 @@
+## What: AbilityController manages the abilities owned by one entity at runtime.
+## Responsibilities: register ability definitions, check costs/conditions/cooldowns, cast abilities, start cooldowns, and emit ability signals.
+## Upstream: EntitySpawner, player input, AI, commands, or state machines ask it to register or cast abilities.
+## Downstream: ContentRegistry, ResourcePoolComponent, ConditionEvaluator, ActionRunner, and EffectExecutor do the supporting work.
+## When to use: Attach it to an entity that can cast skills, attacks, spells, or interact abilities defined as resources.
+## Example: `var ctx := GameplayContext.new().with_source(player).with_target(enemy); $AbilityController.cast("fireball", ctx)`.
 class_name AbilityController
 extends Node
 

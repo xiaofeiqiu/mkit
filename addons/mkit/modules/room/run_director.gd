@@ -1,3 +1,9 @@
+## What: RunDirector coordinates high-level roguelite run flow from start to room loading to rewards to finish.
+## Responsibilities: create RunState, generate RoomGraph, load rooms, react to room clears/deaths, present rewards, and complete/fail runs.
+## Upstream: boot scenes, menus, or tests call start_run/enter_next_room/select_reward.
+## Downstream: DungeonGenerator, RoomController, RewardSystem, SceneTree room container, EventRouter, and UI receive run flow events.
+## When to use: Place it in run scenes that need a multi-room progression loop.
+## Example: `$RunDirector.first_floor_room_pool = ["combat_01", "combat_02"]; $RunDirector.start_run(9876)`.
 class_name RunDirector
 extends Node
 

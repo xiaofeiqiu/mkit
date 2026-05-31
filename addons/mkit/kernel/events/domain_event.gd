@@ -1,3 +1,9 @@
+## What: DomainEvent is a lightweight record describing a gameplay fact with ids and arbitrary payload data.
+## Responsibilities: carry event type, source/target ids, timestamp, event id, and debug payload.
+## Upstream: EventRouter and systems that need generic event logs create DomainEvent instances.
+## Downstream: analytics, debug overlay, save systems, replay tools, and tests read the normalized event data.
+## When to use: Use it when a gameplay event should be recorded or routed without a custom signal type.
+## Example: `EventRouter.emit_domain_event(DomainEvent.create("door_opened", "lever_01", "door_a", {"room":"crypt"}))`.
 class_name DomainEvent
 extends RefCounted
 

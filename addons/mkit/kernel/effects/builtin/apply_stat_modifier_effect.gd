@@ -1,3 +1,9 @@
+## What: ApplyStatModifierEffect adds a runtime StatModifier to a StatsComponent.
+## Responsibilities: build a modifier from exported values, choose source or target, and mark affected stats dirty.
+## Upstream: abilities, equipment, consumables, upgrades, and status effects can trigger it.
+## Downstream: StatsComponent recalculates values and notifies systems such as combat or movement.
+## When to use: Use it for temporary buffs, debuffs, aura effects, or upgrades that alter numeric stats.
+## Example: set `stat_id = "move_speed"`, `operation = PERCENT_ADD`, `value = 0.25`, `duration = 5.0` for a haste buff.
 class_name ApplyStatModifierEffect
 extends GameEffect
 

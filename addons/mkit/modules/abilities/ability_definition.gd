@@ -1,3 +1,9 @@
+## What: AbilityDefinition is authored content for one castable ability.
+## Responsibilities: define id, display data, cooldown, charges, cost, cast time, range, tags, conditions, and effects.
+## Upstream: designers create resources and add them to ResourceDatabase/ContentRegistry.
+## Downstream: AbilityController reads definitions to register, validate, cast, execute effects, and start cooldowns.
+## When to use: Use it for player skills, enemy abilities, interact powers, spells, or weapon attacks.
+## Example: `ability_id = "fireball"`, `cooldown = 3.0`, `cost_type = "mana"`, `effects = [fire_damage_effect]`.
 class_name AbilityDefinition
 extends Resource
 

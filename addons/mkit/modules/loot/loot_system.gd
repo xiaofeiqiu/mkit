@@ -1,3 +1,9 @@
+## What: LootSystem rolls LootTableDefinition resources into concrete LootRollResult outputs.
+## Responsibilities: fetch tables, filter entries by conditions, weighted-pick entries, roll quantities, and create item instances.
+## Upstream: enemy death, chest opening, room clear rewards, or tests request loot rolls.
+## Downstream: InventoryController, reward UI, analytics, or debug tools consume the LootRollResult.
+## When to use: Use it whenever drops should be authored through weighted loot tables.
+## Example: `var drop := loot_system.roll_table("goblin_drops", GameplayContext.new().with_source(goblin))`.
 class_name LootSystem
 extends RefCounted
 

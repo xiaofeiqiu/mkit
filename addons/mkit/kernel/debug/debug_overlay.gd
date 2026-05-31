@@ -1,3 +1,9 @@
+## What: DebugOverlay is a lightweight CanvasLayer for showing live runtime state during local development.
+## Responsibilities: read selected entity data, format debug text, and toggle visibility without changing gameplay logic.
+## Upstream: GameBootstrap or a debug scene adds this overlay and sets watch_entity_path to the player or test entity.
+## Downstream: designers, QA, and demo scenes consume the rendered text while gameplay systems stay decoupled.
+## When to use: Use it in prototype slices or internal builds when you need quick inspection of HP, state, stats, or services.
+## Example: `$DebugOverlay.watch_entity_path = NodePath("../Player")` then call `$DebugOverlay.toggle()` from a debug key.
 class_name DebugOverlay
 extends CanvasLayer
 

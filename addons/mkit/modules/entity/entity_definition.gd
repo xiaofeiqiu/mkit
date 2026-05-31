@@ -1,3 +1,9 @@
+## What: EntityDefinition is authored data for spawning an entity prefab with default runtime setup.
+## Responsibilities: define scene path, display name, faction, tags, base stats, starting abilities, and loot table.
+## Upstream: designers register entity definitions in ContentRegistry.
+## Downstream: EntitySpawner loads scenes and initializes EntityIdentity, StatsComponent, and AbilityController.
+## When to use: Use it for every spawnable player, enemy, NPC, summon, or destructible template.
+## Example: `entity_definition_id = "slime"`, `scene_path = "res://game/demo/entities/enemy/enemy.tscn"`, `default_faction = "enemy"`.
 class_name EntityDefinition
 extends Resource
 

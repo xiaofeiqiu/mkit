@@ -1,3 +1,9 @@
+## What: TimeService is the shared gameplay clock for pause state, gameplay time scale, and accumulated gameplay time.
+## Responsibilities: apply pause/time-scale rules, advance elapsed gameplay time, and expose wall-clock timestamps.
+## Upstream: pause menus, slow-motion effects, and GameBootstrap configure it.
+## Downstream: actions, cooldowns, status effects, and simulations can consume scaled delta values.
+## When to use: Use it when gameplay systems need consistent pause-aware timing instead of raw engine delta.
+## Example: `var scaled_delta := time_service.advance(delta)` before ticking combat cooldowns.
 class_name TimeService
 extends RefCounted
 

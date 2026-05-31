@@ -1,3 +1,9 @@
+## What: GameBootstrap wires the kernel services and optional initial scene for a playable MKit runtime.
+## Responsibilities: register services, load content databases, validate content, initialize runtime systems, and enter the first scene.
+## Upstream: boot scenes place this node and configure resource_databases/initial_scene_path in the Inspector.
+## Downstream: ServiceRegistry exposes content, events, commands, effects, actions, scene routing, RNG, time, and pooling.
+## When to use: Put one GameBootstrap in a boot scene to initialize a demo slice or full game session.
+## Example: set `resource_databases = [combat_db, item_db]` and `initial_scene_path = "res://game/demo/phase4_run_slice.tscn"`.
 class_name GameBootstrap
 extends Node
 
@@ -56,6 +62,10 @@ func _register_kernel_services() -> void:
 	var object_pool := ObjectPool.new()
 	var save_manager := SaveManager.new()
 	var progression := ProgressionSystem.new()
+	var analytics := AnalyticsServiceMock.new()
+	var ads := AdServiceMock.new()
+	var iap := IAPServiceMock.new()
+	var cloud_save := CloudSaveServiceMock.new()
 
 	events.name = "EventRouter"
 	content.name = "ContentRegistry"
@@ -65,6 +75,10 @@ func _register_kernel_services() -> void:
 	object_pool.name = "ObjectPool"
 	save_manager.name = "SaveManager"
 	progression.name = "ProgressionSystem"
+	analytics.name = "AnalyticsService"
+	ads.name = "AdService"
+	iap.name = "IAPService"
+	cloud_save.name = "CloudSaveService"
 
 	# Parent the Node-based services under the persistent ServiceRegistry autoload,
 	# NOT under this bootstrap node. The bootstrap node is freed when it changes to
@@ -78,6 +92,10 @@ func _register_kernel_services() -> void:
 	ServiceRegistry.add_child(object_pool)
 	ServiceRegistry.add_child(save_manager)
 	ServiceRegistry.add_child(progression)
+	ServiceRegistry.add_child(analytics)
+	ServiceRegistry.add_child(ads)
+	ServiceRegistry.add_child(iap)
+	ServiceRegistry.add_child(cloud_save)
 
 	ServiceRegistry.register_service("events", events)
 	ServiceRegistry.register_service("content", content)
@@ -90,6 +108,10 @@ func _register_kernel_services() -> void:
 	ServiceRegistry.register_service("pool", object_pool)
 	ServiceRegistry.register_service("save", save_manager)
 	ServiceRegistry.register_service("progression", progression)
+	ServiceRegistry.register_service("analytics", analytics)
+	ServiceRegistry.register_service("ads", ads)
+	ServiceRegistry.register_service("iap", iap)
+	ServiceRegistry.register_service("cloud_save", cloud_save)
 
 
 func _load_content() -> void:

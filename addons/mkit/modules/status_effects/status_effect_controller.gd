@@ -1,3 +1,9 @@
+## What: StatusEffectController owns timed status effects active on one entity.
+## Responsibilities: apply/refresh/remove statuses, tick durations, run apply/tick/remove effects, and manage stat modifiers.
+## Upstream: ApplyStatusEffect, HealthComponent on-hit logic, abilities, traps, or scripted events request statuses.
+## Downstream: StatusEffectInstance, StatusEffectDefinition, StatsComponent, and EffectExecutor handle runtime behavior.
+## When to use: Attach it to entities that can receive buffs, debuffs, dots, stuns, or stacking status effects.
+## Example: `$StatusEffectController.apply_status("burning", caster, 2, 4.0)` applies two stacks for four seconds.
 class_name StatusEffectController
 extends Node
 

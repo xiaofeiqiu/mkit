@@ -1,3 +1,9 @@
+## What: RewardSystem generates reward choices and applies the selected reward effects.
+## Responsibilities: filter RewardDefinition resources by pool/conditions, weighted-pick options, build RewardOption objects, and execute selection effects.
+## Upstream: RoomController or RunDirector request reward options after clearing rooms.
+## Downstream: reward UI displays RewardOption values and EffectExecutor applies selected reward effects.
+## When to use: Use it for choose-one-of-N reward screens after combat, events, bosses, or milestones.
+## Example: `var options := reward_system.generate_options(["starter_rewards"], 3, ctx)`.
 class_name RewardSystem
 extends RefCounted
 

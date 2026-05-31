@@ -1,3 +1,9 @@
+## What: RewardOption is the runtime choice object shown to the player after reward generation.
+## Responsibilities: carry display data, rarity, source, effects, and payload for one selectable reward.
+## Upstream: RewardSystem builds options from RewardDefinition resources.
+## Downstream: reward UI renders options and RunDirector/RewardSystem applies the chosen option.
+## When to use: Use it as the runtime presentation object for reward selection screens.
+## Example: render `option.display_name`, `option.rarity`, and call `reward_system.apply_selected(option, ctx)` on click.
 class_name RewardOption
 extends RefCounted
 

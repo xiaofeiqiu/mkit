@@ -1,3 +1,9 @@
+## What: HurtboxComponent is an Area2D marker for damage-receiving space on an entity.
+## Responsibilities: expose the owning entity, damage receive toggle, multiplier, and damage tags.
+## Upstream: HitboxComponent detects HurtboxComponent overlaps during active attack windows.
+## Downstream: CombatResolver and HealthComponent use the resolved owner entity and damage metadata.
+## When to use: Attach it to enemies, players, weak points, shields, or destructible parts that can be hit.
+## Example: set `owner_path = NodePath("../..")` and `damage_multiplier = 1.5` for a weak-point hurtbox.
 class_name HurtboxComponent
 extends Area2D
 

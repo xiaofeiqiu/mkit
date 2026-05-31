@@ -1,3 +1,9 @@
+## What: CommandReceiver is a node component that accepts GameCommand objects for one entity or system.
+## Responsibilities: register with CommandRouter, keep command history, forward commands to StateMachine, and allow overrides.
+## Upstream: CommandRouter dispatches commands from input, AI, cutscenes, or tests.
+## Downstream: StateMachine or subclass-specific handlers consume commands and decide whether they were handled.
+## When to use: Attach it to controllable entities or managers that need addressable command handling.
+## Example: set `receiver_id = "player_001"`; then dispatch `GameCommand.create(BuiltinCommands.DASH, "input", "player_001")`.
 class_name CommandReceiver
 extends Node
 

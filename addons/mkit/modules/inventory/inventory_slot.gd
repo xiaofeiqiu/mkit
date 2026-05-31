@@ -1,3 +1,9 @@
+## What: InventorySlot is one indexed slot in an InventoryModel.
+## Responsibilities: hold an ItemInstance, report empty state, and clear slot contents.
+## Upstream: InventoryModel creates slots during setup.
+## Downstream: InventoryController reads and mutates slots while adding/removing items.
+## When to use: Use it as the small data object backing grid or list inventory storage.
+## Example: `if slot.is_empty(): slot.item = ItemInstance.create("health_potion", 1)`.
 class_name InventorySlot
 extends RefCounted
 

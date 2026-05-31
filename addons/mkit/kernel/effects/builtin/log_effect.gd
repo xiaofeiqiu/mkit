@@ -1,3 +1,9 @@
+## What: LogEffect emits a structured DomainEvent and print-style trace for debugging content execution.
+## Responsibilities: format context-aware messages, emit through EventRouter when available, and return success.
+## Upstream: test abilities, scripted rewards, and demo content use it to verify effect chains.
+## Downstream: EventRouter, debug overlays, logs, or tests observe the emitted event type and payload.
+## When to use: Use it to prove content wiring before replacing placeholder behavior with real effects.
+## Example: set `event_type = "reward_preview"` and `message = "selected starter reward"` in a RewardDefinition.
 class_name LogEffect
 extends GameEffect
 

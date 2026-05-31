@@ -1,3 +1,9 @@
+## What: HitboxComponent is an Area2D that converts overlap events into DamageRequest applications.
+## Responsibilities: track active windows, filter target factions, prevent duplicate hits, resolve damage, and apply statuses.
+## Upstream: TimedAttackAction, animation events, or scripts toggle hitbox activity.
+## Downstream: HurtboxComponent, CombatResolver, HealthComponent, and EventRouter process the hit.
+## When to use: Attach it to weapons, melee arcs, projectiles, or temporary attack areas.
+## Example: `$SwordHitbox.base_damage = 18; $SwordHitbox.target_factions = ["enemy"]; $SwordHitbox.set_active(true)`.
 class_name HitboxComponent
 extends Area2D
 

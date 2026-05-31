@@ -1,3 +1,9 @@
+## What: ContentRegistry is the runtime lookup table for authored Resource content by stable content id.
+## Responsibilities: load ResourceDatabase objects, register resources, fetch typed resources, list resources by type, and validate ids.
+## Upstream: GameBootstrap loads databases and content authoring tools create Resource files.
+## Downstream: abilities, loot, rooms, inventory, progression, and entity spawning query definitions from it.
+## When to use: Use it whenever runtime logic needs a content definition by id instead of a hard reference.
+## Example: `var ability := content.get_typed_resource("fireball", AbilityDefinition) as AbilityDefinition`.
 class_name ContentRegistry
 extends Node
 

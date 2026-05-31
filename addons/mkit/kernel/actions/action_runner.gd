@@ -1,3 +1,9 @@
+## What: ActionRunner owns active GameAction instances and ticks them each frame.
+## Responsibilities: start actions, connect completion/cancel signals, update active actions, and cancel actions by source.
+## Upstream: abilities, states, command receivers, or scripted encounters submit GameAction instances.
+## Downstream: GameAction subclasses execute movement, attacks, casts, or other timed behaviors.
+## When to use: Use it as the shared service for cancellable time-based gameplay actions.
+## Example: `actions.start_action(TimedAttackAction.new(), ActionContext.from_command(attack_cmd, player, enemy))`.
 class_name ActionRunner
 extends Node
 

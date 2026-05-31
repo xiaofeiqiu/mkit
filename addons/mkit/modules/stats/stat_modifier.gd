@@ -1,3 +1,9 @@
+## What: StatModifier is a runtime instance of a stat change applied to a StatsComponent.
+## Responsibilities: carry modifier id, stat id, source id, operation, value, priority, stack rule, duration, and tags.
+## Upstream: StatModifierDefinition, status effects, equipment, effects, and upgrades create modifiers.
+## Downstream: StatsComponent sorts, stacks, expires, and applies modifiers during stat calculation.
+## When to use: Use it for the live applied form of authored or scripted stat changes.
+## Example: `stats.add_modifier(StatModifier.from_definition(haste_def, "potion_speed", 8.0))`.
 class_name StatModifier
 extends RefCounted
 

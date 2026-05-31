@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://b0mkitphase0demo"]
+[gd_scene format=3 uid="uid://ioou2uth2o5c"]
 
 [ext_resource type="Script" path="res://addons/mkit/kernel/bootstrap/game_bootstrap.gd" id="1_boot"]
 [ext_resource type="PackedScene" uid="uid://b0mkitdummyent01" path="res://game/demo/entities/dummy/dummy_entity.tscn" id="2_dummy"]

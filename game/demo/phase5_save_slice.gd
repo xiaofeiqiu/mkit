@@ -22,6 +22,7 @@ var _pending_rewards: Array[RewardOption] = []
 var _log_lines: Array[String] = []
 var _progression: ProgressionSystem = null
 var _save_manager: SaveManager = null
+var _experience: ExperienceComponent = null
 
 
 func _ready() -> void:
@@ -39,6 +40,7 @@ func _ready() -> void:
 		_save_manager.save_failed.connect(func(p, r): _log("[SAVE] ERROR save failed: %s" % r))
 		_save_manager.load_failed.connect(func(p, r): _log("[SAVE] no save file yet: %s" % r))
 
+	_setup_experience()
 	_connect_signals()
 	_instructions_label.text = (
 		"Move: WASD / Arrows     Melee: Space / J     Fireball: Q\n" +
@@ -153,6 +155,26 @@ func _register_reward(registry: ContentRegistry, reward_id: String, display_name
 	registry.register_resource(reward)
 
 
+# ── experience ─────────────────────────────────────────────────────────────────
+
+func _setup_experience() -> void:
+	var exp_curve := ExperienceCurve.new()
+	exp_curve.base_xp = 50
+	exp_curve.growth_factor = 1.4
+	exp_curve.max_level = 10
+
+	_experience = ExperienceComponent.new()
+	_experience.save_id = "player_experience"
+	_experience.curve = exp_curve
+	player.add_child(_experience)
+	_experience.level_up.connect(_on_player_level_up)
+	_experience.xp_changed.connect(func(xp, to_next): _log("[XP] %d / %d" % [xp, xp + to_next]))
+
+
+func _on_player_level_up(old_level: int, new_level: int) -> void:
+	_log("[LEVEL UP] %d → %d" % [old_level, new_level])
+
+
 # ── signals ────────────────────────────────────────────────────────────────────
 
 func _connect_signals() -> void:
@@ -199,6 +221,8 @@ func _on_run_finished(result: String) -> void:
 
 func _on_entity_died(entity_id: String, _ref: Node) -> void:
 	_log("[DIED] %s" % entity_id)
+	if _experience != null:
+		_experience.add_xp(30)
 
 
 func _on_room_cleared(room_id: String) -> void:

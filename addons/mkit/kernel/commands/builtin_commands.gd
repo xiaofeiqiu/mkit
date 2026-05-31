@@ -1,0 +1,16 @@
+class_name BuiltinCommands
+extends Object
+
+const MOVE := "move"
+const STOP_MOVE := "stop_move"
+const ATTACK := "attack"
+const CAST_ABILITY := "cast_ability"
+const DASH := "dash"
+const INTERACT := "interact"
+const SELECT_REWARD := "select_reward"
+const OPEN_INVENTORY := "open_inventory"
+const CLOSE_INVENTORY := "close_inventory"
+const EQUIP_ITEM := "equip_item"
+const UNEQUIP_ITEM := "unequip_item"
+const PAUSE := "pause"
+const RESUME := "resume"

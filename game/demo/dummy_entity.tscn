@@ -1,0 +1,34 @@
+[gd_scene load_steps=7 format=3 uid="uid://b0mkitdummyent01"]
+
+[ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="1_recv"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="2_sm"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state.gd" id="3_state"]
+[ext_resource type="Script" path="res://game/demo/states/dummy_idle_state.gd" id="4_idle"]
+[ext_resource type="Script" path="res://game/demo/states/dummy_move_state.gd" id="5_move"]
+[ext_resource type="Script" path="res://game/demo/states/dummy_attack_state.gd" id="6_attack"]
+
+[node name="DummyEntity" type="CharacterBody2D"]
+
+[node name="CommandReceiver" type="Node" parent="."]
+script = ExtResource("1_recv")
+receiver_id = "dummy_001"
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")
+initial_state_path = "Dummy/Idle"
+
+[node name="Dummy" type="Node" parent="StateMachine"]
+script = ExtResource("3_state")
+state_id = "Dummy"
+
+[node name="Idle" type="Node" parent="StateMachine/Dummy"]
+script = ExtResource("4_idle")
+state_id = "Idle"
+
+[node name="Move" type="Node" parent="StateMachine/Dummy"]
+script = ExtResource("5_move")
+state_id = "Move"
+
+[node name="Attack" type="Node" parent="StateMachine/Dummy"]
+script = ExtResource("6_attack")
+state_id = "Attack"

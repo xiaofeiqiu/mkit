@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://b0mkitphase0demo"]
+
+[ext_resource type="Script" path="res://addons/mkit/kernel/bootstrap/game_bootstrap.gd" id="1_boot"]
+[ext_resource type="PackedScene" uid="uid://b0mkitdummyent01" path="res://game/demo/dummy_entity.tscn" id="2_dummy"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/debug/debug_overlay.gd" id="3_debug"]
+[ext_resource type="Script" path="res://game/demo/phase0_demo.gd" id="4_demo"]
+
+[node name="Phase0Demo" type="Node2D"]
+script = ExtResource("4_demo")
+
+[node name="GameBootstrap" type="Node" parent="."]
+script = ExtResource("1_boot")
+
+[node name="DummyEntity" parent="." instance=ExtResource("2_dummy")]
+position = Vector2(400, 300)
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("3_debug")
+watch_entity_path = NodePath("../DummyEntity")

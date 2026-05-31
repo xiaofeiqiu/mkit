@@ -1,11 +1,26 @@
 class_name StatusEffectController
 extends Node
 
+## Purpose: Emits the `status_applied` signal to notify external listeners of a state change.
+## Example: `self.status_applied.connect(_on_status_applied)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal status_applied(status_id: String, stacks: int)
+## Purpose: Emits the `status_removed` signal to notify external listeners of a state change.
+## Example: `self.status_removed.connect(_on_status_removed)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal status_removed(status_id: String)
+## Purpose: Emits the `status_ticked` signal to notify external listeners of a state change.
+## Example: `self.status_ticked.connect(_on_status_ticked)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal status_ticked(status_id: String)
 
+## Purpose: Public runtime field `active_statuses`.
+## Example: `self.active_statuses = {}`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var active_statuses: Dictionary = {}
+## Purpose: Public runtime field `content`.
+## Example: `self.content = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var content: ContentRegistry = null
 
 
@@ -31,6 +46,9 @@ func _process(delta: float) -> void:
 			remove_status(status_id)
 
 
+## Purpose: Public method `apply_status` for external gameplay integration.
+## Example: `self.apply_status(<status_id>, <source>, <stacks>, <duration_override>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func apply_status(status_id: String, source: Node, stacks: int = 1, duration_override: float = -1.0) -> bool:
 	var definition := get_definition(status_id)
 	if definition == null:
@@ -52,6 +70,9 @@ func apply_status(status_id: String, source: Node, stacks: int = 1, duration_ove
 	return true
 
 
+## Purpose: Public method `remove_status` for external gameplay integration.
+## Example: `self.remove_status(<status_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func remove_status(status_id: String) -> void:
 	if not active_statuses.has(status_id):
 		return
@@ -64,10 +85,16 @@ func remove_status(status_id: String) -> void:
 	status_removed.emit(status_id)
 
 
+## Purpose: Public method `has_status` for external gameplay integration.
+## Example: `self.has_status(<status_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func has_status(status_id: String) -> bool:
 	return active_statuses.has(status_id)
 
 
+## Purpose: Public method `get_definition` for external gameplay integration.
+## Example: `self.get_definition(<status_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_definition(status_id: String) -> StatusEffectDefinition:
 	if content == null:
 		content = ServiceRegistry.get_service("content") as ContentRegistry

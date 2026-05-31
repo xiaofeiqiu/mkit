@@ -1,7 +1,13 @@
 class_name DebugOverlay
 extends CanvasLayer
 
+## Purpose: Inspector-exposed configuration `watch_entity_path`.
+## Example: `self.watch_entity_path = NodePath(".")`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var watch_entity_path: NodePath
+## Purpose: Inspector-exposed configuration `visible_on_start`.
+## Example: `self.visible_on_start = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var visible_on_start: bool = true
 
 var _label: Label = null
@@ -23,6 +29,9 @@ func _process(_delta: float) -> void:
 		_label.text = _build_text()
 
 
+## Purpose: Public method `toggle` for external gameplay integration.
+## Example: `self.toggle()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func toggle() -> void:
 	visible = not visible
 

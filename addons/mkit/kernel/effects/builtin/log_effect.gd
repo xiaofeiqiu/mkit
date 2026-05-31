@@ -8,7 +8,13 @@ extends GameEffect
 # event) before combat/inventory effects exist. Concrete games keep using the
 # real domain effects (DealDamageEffect, HealEffect, ...) added in later phases.
 
+## Purpose: Inspector-exposed configuration `message`.
+## Example: `self.message = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var message: String = "log"
+## Purpose: Inspector-exposed configuration `event_type`.
+## Example: `self.event_type = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var event_type: String = "log"
 
 

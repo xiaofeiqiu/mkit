@@ -2,6 +2,9 @@ class_name LootSystem
 extends RefCounted
 
 
+## Purpose: Public method `roll_table` for external gameplay integration.
+## Example: `self.roll_table(<table_id>, <context>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 	var content := ServiceRegistry.get_service("content") as ContentRegistry
 	var table := content.get_resource(table_id) as LootTableDefinition
@@ -10,6 +13,9 @@ func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 	return roll(table, context)
 
 
+## Purpose: Public method `roll` for external gameplay integration.
+## Example: `self.roll(<table>, <context>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func roll(table: LootTableDefinition, context: GameplayContext) -> LootRollResult:
 	var result := LootRollResult.new()
 	var random := ServiceRegistry.get_service("random") as RandomService

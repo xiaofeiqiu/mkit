@@ -1,22 +1,61 @@
 class_name RunDirector
 extends Node
 
+## Purpose: Emits the `run_started` signal to notify external listeners of a state change.
+## Example: `self.run_started.connect(_on_run_started)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal run_started(run_state: RunState)
+## Purpose: Emits the `room_enter_requested` signal to notify external listeners of a state change.
+## Example: `self.room_enter_requested.connect(_on_room_enter_requested)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal room_enter_requested(room_id: String)
+## Purpose: Emits the `choosing_reward` signal to notify external listeners of a state change.
+## Example: `self.choosing_reward.connect(_on_choosing_reward)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal choosing_reward(options: Array[RewardOption])
+## Purpose: Emits the `run_finished` signal to notify external listeners of a state change.
+## Example: `self.run_finished.connect(_on_run_finished)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal run_finished(result: String)
 
+## Purpose: Inspector-exposed configuration `first_floor_room_pool`.
+## Example: `self.first_floor_room_pool = []`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var first_floor_room_pool: Array[String] = []
+## Purpose: Inspector-exposed configuration `room_scene_container_path`.
+## Example: `self.room_scene_container_path = NodePath(".")`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var room_scene_container_path: NodePath = NodePath("../RoomRoot")
+## Purpose: Inspector-exposed configuration `player_group`.
+## Example: `self.player_group = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var player_group: String = "player"
+## Purpose: Inspector-exposed configuration `player_entity_id`.
+## Example: `self.player_entity_id = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var player_entity_id: String = "player_001"
+## Purpose: Inspector-exposed configuration `run_length`.
+## Example: `self.run_length = 1`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var run_length: int = 3
 
+## Purpose: Public runtime field `run_state`.
+## Example: `self.run_state = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var run_state: RunState = null
+## Purpose: Public runtime field `room_graph`.
+## Example: `self.room_graph = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var room_graph: RoomGraph = null
+## Purpose: Public runtime field `current_room_controller`.
+## Example: `self.current_room_controller = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var current_room_controller: RoomController = null
 var _events_connected: bool = false
 
+## Purpose: Public method `start_run` for external gameplay integration.
+## Example: `self.start_run(<seed>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func start_run(seed: int = 0) -> void:
 	if seed == 0:
 		seed = Time.get_ticks_usec()
@@ -46,6 +85,9 @@ func _on_entity_died(entity_id: String, _entity_ref: Node) -> void:
 	if entity_id == player_entity_id:
 		fail_run("player_died")
 
+## Purpose: Public method `enter_next_room` for external gameplay integration.
+## Example: `self.enter_next_room()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func enter_next_room() -> void:
 	if room_graph == null:
 		fail_run("missing_room_graph")
@@ -61,10 +103,16 @@ func enter_next_room() -> void:
 	room_enter_requested.emit(room_node.room_definition_id)
 	_load_room(room_node.room_definition_id)
 
+## Purpose: Public method `on_room_cleared` for external gameplay integration.
+## Example: `self.on_room_cleared(<room_controller>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func on_room_cleared(room_controller: RoomController) -> void:
 	run_state.status = "choosing_reward"
 	choosing_reward.emit(room_controller.runtime.reward_options)
 
+## Purpose: Public method `select_reward` for external gameplay integration.
+## Example: `self.select_reward(<option>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func select_reward(option: RewardOption) -> void:
 	var reward_system := RewardSystem.new()
 	var ctx := GameplayContext.new()
@@ -79,6 +127,9 @@ func select_reward(option: RewardOption) -> void:
 		run_state.status = "active"
 		enter_next_room()
 
+## Purpose: Public method `complete_run` for external gameplay integration.
+## Example: `self.complete_run()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func complete_run() -> void:
 	run_state.status = "completed"
 	run_finished.emit("completed")
@@ -86,6 +137,9 @@ func complete_run() -> void:
 	if events != null:
 		events.emit_run_finished(run_state.run_id, "completed")
 
+## Purpose: Public method `fail_run` for external gameplay integration.
+## Example: `self.fail_run(<reason>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func fail_run(reason: String) -> void:
 	if run_state != null:
 		run_state.status = "failed"

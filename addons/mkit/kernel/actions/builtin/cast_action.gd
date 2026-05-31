@@ -1,7 +1,13 @@
 class_name CastAction
 extends GameAction
 
+## Purpose: Public runtime field `duration`.
+## Example: `self.duration = 1.0`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var duration: float = 0.0
+## Purpose: Public runtime field `animation_name`.
+## Example: `self.animation_name = "value"`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var animation_name: String = "cast"
 var _started_animation: bool = false
 

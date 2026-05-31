@@ -1,8 +1,14 @@
 class_name StatsComponent
 extends Node
 
+## Purpose: Emits the `stat_changed` signal to notify external listeners of a state change.
+## Example: `self.stat_changed.connect(_on_stat_changed)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal stat_changed(stat_id: String, old_value: float, new_value: float)
 
+## Purpose: Inspector-exposed configuration `base_stats`.
+## Example: `self.base_stats = {}`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var base_stats: Dictionary = {
 	"max_hp": 100.0,
 	"attack_power": 10.0,
@@ -19,8 +25,17 @@ signal stat_changed(stat_id: String, old_value: float, new_value: float)
 	"healing_multiplier": 1.0
 }
 
+## Purpose: Public runtime field `modifiers_by_stat`.
+## Example: `self.modifiers_by_stat = {}`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var modifiers_by_stat: Dictionary = {}
+## Purpose: Public runtime field `cached_values`.
+## Example: `self.cached_values = {}`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var cached_values: Dictionary = {}
+## Purpose: Public runtime field `dirty_stats`.
+## Example: `self.dirty_stats = {}`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var dirty_stats: Dictionary = {}
 
 
@@ -28,6 +43,9 @@ func _ready() -> void:
 	mark_all_dirty()
 
 
+## Purpose: Public method `get_stat_value` for external gameplay integration.
+## Example: `self.get_stat_value(<stat_id>, <default_value>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	if not base_stats.has(stat_id) and not modifiers_by_stat.has(stat_id):
 		return default_value
@@ -39,6 +57,9 @@ func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	return cached_values[stat_id]
 
 
+## Purpose: Public method `set_base_stat` for external gameplay integration.
+## Example: `self.set_base_stat(<stat_id>, <value>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func set_base_stat(stat_id: String, value: float) -> void:
 	var old := get_stat_value(stat_id, value)
 	base_stats[stat_id] = value
@@ -47,6 +68,9 @@ func set_base_stat(stat_id: String, value: float) -> void:
 	stat_changed.emit(stat_id, old, new_value)
 
 
+## Purpose: Public method `add_modifier` for external gameplay integration.
+## Example: `self.add_modifier(<modifier>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func add_modifier(modifier: StatModifier) -> void:
 	if modifier == null or modifier.stat_id == "":
 		return
@@ -61,6 +85,9 @@ func add_modifier(modifier: StatModifier) -> void:
 	_emit_stat_changed(modifier.stat_id)
 
 
+## Purpose: Public method `remove_modifier` for external gameplay integration.
+## Example: `self.remove_modifier(<modifier_id>, <source_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array = modifiers_by_stat[stat_id]
@@ -74,6 +101,9 @@ func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 			_emit_stat_changed(stat_id)
 
 
+## Purpose: Public method `remove_modifiers_from_source` for external gameplay integration.
+## Example: `self.remove_modifiers_from_source(<source_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func remove_modifiers_from_source(source_id: String) -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array = modifiers_by_stat[stat_id]
@@ -87,6 +117,9 @@ func remove_modifiers_from_source(source_id: String) -> void:
 			_emit_stat_changed(stat_id)
 
 
+## Purpose: Public method `tick_modifiers` for external gameplay integration.
+## Example: `self.tick_modifiers(<delta>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func tick_modifiers(delta: float) -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array = modifiers_by_stat[stat_id]
@@ -102,10 +135,16 @@ func tick_modifiers(delta: float) -> void:
 			_emit_stat_changed(stat_id)
 
 
+## Purpose: Public method `mark_dirty` for external gameplay integration.
+## Example: `self.mark_dirty(<stat_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func mark_dirty(stat_id: String) -> void:
 	dirty_stats[stat_id] = true
 
 
+## Purpose: Public method `mark_all_dirty` for external gameplay integration.
+## Example: `self.mark_all_dirty()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func mark_all_dirty() -> void:
 	for stat_id in base_stats.keys():
 		dirty_stats[stat_id] = true

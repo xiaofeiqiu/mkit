@@ -1,6 +1,9 @@
 class_name DungeonGenerator
 extends RefCounted
 
+## Purpose: Public method `generate_linear` for external gameplay integration.
+## Example: `self.generate_linear(<room_pool_ids>, <seed>, <length>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func generate_linear(room_pool_ids: Array[String], seed: int, length: int) -> RoomGraph:
 	var graph := RoomGraph.new()
 	var rng := RandomNumberGenerator.new()

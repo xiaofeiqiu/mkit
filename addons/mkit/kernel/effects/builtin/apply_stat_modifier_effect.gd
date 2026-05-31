@@ -1,11 +1,29 @@
 class_name ApplyStatModifierEffect
 extends GameEffect
 
+## Purpose: Inspector-exposed configuration `stat_id`.
+## Example: `self.stat_id = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var stat_id: String = ""
+## Purpose: Inspector-exposed configuration `operation`.
+## Example: `self.operation = null`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var operation: StatModifierDefinition.Operation = StatModifierDefinition.Operation.FLAT_ADD
+## Purpose: Inspector-exposed configuration `value`.
+## Example: `self.value = 1.0`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var value: float = 0.0
+## Purpose: Inspector-exposed configuration `duration`.
+## Example: `self.duration = 1.0`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var duration: float = -1.0
+## Purpose: Inspector-exposed configuration `stacking_rule`.
+## Example: `self.stacking_rule = null`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var stacking_rule: StatModifierDefinition.StackingRule = StatModifierDefinition.StackingRule.STACK
+## Purpose: Inspector-exposed configuration `apply_to_source`.
+## Example: `self.apply_to_source = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var apply_to_source: bool = true
 
 

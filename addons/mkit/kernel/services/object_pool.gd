@@ -4,6 +4,9 @@ extends Node
 var _pools: Dictionary = {} # scene_path -> Array[Node]
 
 
+## Purpose: Public method `warmup` for external gameplay integration.
+## Example: `self.warmup(<scene_path>, <count>, <parent>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 	for i in range(count):
 		var node := _instantiate(scene_path)
@@ -15,6 +18,9 @@ func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 		release(scene_path, node)
 
 
+## Purpose: Public method `acquire` for external gameplay integration.
+## Example: `self.acquire(<scene_path>, <parent>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func acquire(scene_path: String, parent: Node = null) -> Node:
 	var pool: Array = _pools.get(scene_path, [])
 	var node: Node = null
@@ -33,6 +39,9 @@ func acquire(scene_path: String, parent: Node = null) -> Node:
 	return node
 
 
+## Purpose: Public method `release` for external gameplay integration.
+## Example: `self.release(<scene_path>, <node>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func release(scene_path: String, node: Node) -> void:
 	if node == null:
 		return
@@ -44,6 +53,9 @@ func release(scene_path: String, node: Node) -> void:
 	_pools[scene_path] = pool
 
 
+## Purpose: Public method `clear_pool` for external gameplay integration.
+## Example: `self.clear_pool(<scene_path>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func clear_pool(scene_path: String) -> void:
 	if not _pools.has(scene_path):
 		return

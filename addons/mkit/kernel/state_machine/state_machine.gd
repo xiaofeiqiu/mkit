@@ -1,18 +1,51 @@
 class_name StateMachine
 extends Node
 
+## Purpose: Emits the `state_changed` signal to notify external listeners of a state change.
+## Example: `self.state_changed.connect(_on_state_changed)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal state_changed(previous_path: String, current_path: String)
+## Purpose: Emits the `transition_failed` signal to notify external listeners of a state change.
+## Example: `self.transition_failed.connect(_on_transition_failed)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal transition_failed(from_path: String, to_path: String, reason: String)
 
+## Purpose: Inspector-exposed configuration `initial_state_path`.
+## Example: `self.initial_state_path = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var initial_state_path: String = ""
+## Purpose: Inspector-exposed configuration `auto_start`.
+## Example: `self.auto_start = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var auto_start: bool = true
 
+## Purpose: Public runtime field `owner_entity`.
+## Example: `self.owner_entity = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var owner_entity: Node = null
+## Purpose: Public runtime field `root_state`.
+## Example: `self.root_state = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var root_state: State = null
+## Purpose: Public runtime field `current_leaf_state`.
+## Example: `self.current_leaf_state = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var current_leaf_state: State = null
+## Purpose: Public runtime field `blackboard`.
+## Example: `self.blackboard = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var blackboard: Blackboard = Blackboard.new()
+## Purpose: Public runtime field `previous_path`.
+## Example: `self.previous_path = "value"`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var previous_path: String = ""
+## Purpose: Public runtime field `last_transition_reason`.
+## Example: `self.last_transition_reason = "value"`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var last_transition_reason: String = ""
+## Purpose: Public runtime field `last_failed_transition_reason`.
+## Example: `self.last_failed_transition_reason = "value"`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var last_failed_transition_reason: String = ""
 
 
@@ -35,6 +68,9 @@ func _physics_process(delta: float) -> void:
 		_update_state_chain(current_leaf_state, delta, true)
 
 
+## Purpose: Public method `handle_command` for external gameplay integration.
+## Example: `self.handle_command(<command>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func handle_command(command: GameCommand) -> bool:
 	if current_leaf_state == null:
 		return false
@@ -48,6 +84,9 @@ func handle_command(command: GameCommand) -> bool:
 	return false
 
 
+## Purpose: Public method `transition_to` for external gameplay integration.
+## Example: `self.transition_to(<target_path>, <context>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func transition_to(target_path: String, context: Dictionary = {}) -> bool:
 	var target := find_state_by_path(target_path)
 	if target == null:
@@ -76,12 +115,18 @@ func transition_to(target_path: String, context: Dictionary = {}) -> bool:
 	return true
 
 
+## Purpose: Public method `get_current_path` for external gameplay integration.
+## Example: `self.get_current_path()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_current_path() -> String:
 	if current_leaf_state == null:
 		return ""
 	return current_leaf_state.get_full_path()
 
 
+## Purpose: Public method `find_state_by_path` for external gameplay integration.
+## Example: `self.find_state_by_path(<path>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func find_state_by_path(path: String) -> State:
 	if root_state == null:
 		return null

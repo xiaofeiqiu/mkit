@@ -1,14 +1,26 @@
 class_name EntitySpawner
 extends Node
 
+## Purpose: Emits the `entity_spawned` signal to notify external listeners of a state change.
+## Example: `self.entity_spawned.connect(_on_entity_spawned)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal entity_spawned(entity: Node, definition_id: String)
+## Purpose: Emits the `entity_spawn_failed` signal to notify external listeners of a state change.
+## Example: `self.entity_spawn_failed.connect(_on_entity_spawn_failed)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal entity_spawn_failed(definition_id: String, reason: String)
 
+## Purpose: Public runtime field `content`.
+## Example: `self.content = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var content: ContentRegistry = null
 
 func _ready() -> void:
 	content = ServiceRegistry.get_service("content") as ContentRegistry
 
+## Purpose: Public method `spawn_entity` for external gameplay integration.
+## Example: `self.spawn_entity(<definition_id>, <parent>, <position>, <runtime_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func spawn_entity(definition_id: String, parent: Node, position: Vector2 = Vector2.ZERO, runtime_id: String = "") -> Node:
 	var definition := _get_definition(definition_id)
 	if definition == null:

@@ -58,19 +58,20 @@ Effect logs a result. Debug trace shows state path and recent events.
 - [x] ActionRunner (`kernel/actions/action_runner.gd`)
 - [x] DashAction (`kernel/actions/builtin/dash_action.gd`)
 - [x] CastAction (`kernel/actions/builtin/cast_action.gd`)
-- [ ] TimedAttackAction — deferred to Phase 1 (depends on HitboxComponent from the combat module)
+- [x] TimedAttackAction — completed in Phase 1 (`kernel/actions/builtin/timed_attack_action.gd`)
 
 ### Conditions & Effects (doc 04)
 
 - [x] Condition (`kernel/conditions/condition.gd`)
 - [x] ConditionEvaluator (`kernel/conditions/condition_evaluator.gd`)
 - [x] TargetInRangeCondition (`kernel/conditions/builtin/target_in_range_condition.gd`)
-- [ ] CooldownReadyCondition — deferred to Phase 2 (depends on AbilityController)
+- [x] CooldownReadyCondition — completed in Phase 2 (`kernel/conditions/builtin/cooldown_ready_condition.gd`)
 - [x] EffectResult (`kernel/effects/effect_result.gd`)
 - [x] GameEffect (`kernel/effects/game_effect.gd`)
 - [x] EffectExecutor (`kernel/effects/effect_executor.gd`)
 - [x] LogEffect (`kernel/effects/builtin/log_effect.gd`) — Phase 0 game-agnostic effect for the validation pipeline
-- [ ] DealDamageEffect / HealEffect / ApplyStatusEffect / SpawnSceneEffect / GrantItemEffect / ApplyStatModifierEffect — deferred to their owning phases (depend on combat / status / inventory / stats modules)
+- [x] DealDamageEffect / HealEffect / ApplyStatusEffect / SpawnSceneEffect — completed in Phase 2 (`kernel/effects/builtin/`)
+- [x] GrantItemEffect / ApplyStatModifierEffect — completed in Phase 3 (`kernel/effects/builtin/`)
 
 ### Phase 0 validation demo
 
@@ -105,7 +106,7 @@ Damage and death events are emitted.
 
 - [x] EntityIdentity (`modules/entity/entity_identity.gd`)
 - [x] EntityRoot (`modules/entity/entity_root.gd`)
-- [ ] EntityDefinition / EntitySpawner — deferred (EntitySpawner depends on AbilityController from Phase 2; demo places entities directly in scene)
+- [x] EntityDefinition / EntitySpawner — completed in Phase 4 (`modules/entity/entity_definition.gd`, `modules/entity/entity_spawner.gd`)
 
 ### Stats module (doc 05 §9)
 
@@ -117,7 +118,7 @@ Damage and death events are emitted.
 ### Health module (doc 05 §10)
 
 - [x] HealthComponent (`modules/health/health_component.gd`) — on-hit status application duck-types StatusEffectController (Phase 2)
-- [ ] ResourcePoolComponent — deferred to Phase 2 (mana/stamina for abilities)
+- [x] ResourcePoolComponent — completed in Phase 2 (`modules/health/resource_pool_component.gd`)
 
 ### Combat module (doc 05 §11)
 
@@ -133,7 +134,7 @@ Damage and death events are emitted.
 - [x] EventRouter: `damage_applied` signal + `emit_damage_applied` (param left untyped to keep kernel below the combat module) + `_get_entity_id`
 - [x] GameBootstrap: parents kernel services under the persistent `ServiceRegistry` autoload (so they survive the scene change), idempotent re-boot guard
 - [x] **Framework fix:** GameBootstrap refuses an `initial_scene_path` that resolves to the scene already containing it (prevents the infinite bootstrap-reload loop); normalizes `uid://` paths
-- [ ] DealDamageEffect / HealEffect — deferred (Hitbox→CombatResolver path is used directly in the slice; the declarative damage Effect lands with the ability system in Phase 2)
+- [x] DealDamageEffect / HealEffect — completed in Phase 2 (`kernel/effects/builtin/`)
 
 ### Phase 1 validation demo (bootstrap → initial scene)
 
@@ -293,8 +294,6 @@ Detect room clear. Choose reward. Advance to the next room.
 
 - [x] `game/demo/rooms/combat_room_01.tscn` — room scene (RoomController + EntitySpawner + Enemies container, 2 spawn positions)
 - [x] `game/demo/rooms/combat_room_02.tscn` — alternate room scene (3 spawn positions)
-- [x] `game/demo/rooms/combat_room_01.tscn` — room scene (RoomController + EntitySpawner + Enemies container, 2 spawn positions)
-- [x] `game/demo/rooms/combat_room_02.tscn` — alternate room scene (3 spawn positions)
 - [x] `game/demo/phase4_run_slice.tscn` + `phase4_run_slice.gd` — registers `enemy.goblin_basic` EntityDefinition + two RoomDefinitions + four RewardDefinitions; RunDirector with 3-room linear run (seed=12345, pool=[room.combat_01, room.combat_02])
 - [x] `game/demo/bootstrap_phase4.tscn` — dedicated Phase 4 bootstrap → `phase4_run_slice.tscn`
 - [x] `game/demo/entities/player/player.tscn` — added `groups=["player"]` so `RunDirector.select_reward` can locate the player node via `get_first_node_in_group`
@@ -306,11 +305,40 @@ room. Move with WASD/Arrows, melee with Space/J. Kill all enemies → room clear
 Press 1/2/3 to pick reward → next room loads. Repeat for all 3 rooms → run completed printed.
 **Validated:** full 3-room run completes; reward selection correctly advances room index each time.
 
-## Phase 5 — Save & Meta Progression ⬜
+## Phase 5 — Save & Meta Progression ✅
 
-- [ ] SaveManager / Saveable / SaveMigration
-- [ ] UpgradeDefinition / ProgressionSystem
-- [ ] GameBootstrap: register `save` + `progression` services
+Read: [Save, Progression, and Platform Services](spec/combined/11_save_and_platform_services.md)
+
+Validation target:
+
+```text
+Complete a run. Gain currency or unlocks.
+Restart game. Persistent state restores correctly.
+```
+
+### Save module (doc 21 §21.1–21.3, 21.6)
+
+- [x] Saveable (`kernel/save/saveable.gd`) — base contract: save_id, to_save_data, from_save_data
+- [x] SaveManager (`kernel/save/save_manager.gd`) — collect/restore Saveables, JSON file I/O, versioned migrations
+- [x] SaveMigration (`kernel/save/save_migration.gd`) — per-version migration base with migrate / _migrate_impl
+
+### Progression module (doc 21 §21.3–21.5)
+
+- [x] UpgradeDefinition (`modules/progression/upgrade_definition.gd`) — static definition: upgrade_id, max_level, currency_id, cost_by_level, effects
+- [x] ProgressionState (`modules/progression/progression_state.gd`) — pure data: currencies, upgrade_levels, unlocked_content_ids; to/from_save_data
+- [x] ProgressionSystem (`modules/progression/progression_system.gd`) — extends Saveable; manages ProgressionState, validates prerequisites, applies upgrade effects via EffectExecutor
+
+### Kernel additions
+
+- [x] GameBootstrap: registers `SaveManager` + `ProgressionSystem` as persistent services under ServiceRegistry
+- [x] GameBootstrap `_load_profile()`: auto-loads save on boot if save file exists
+
+### Phase 5 validation demo
+
+- [x] `game/demo/phase5_save_slice.tscn` + `phase5_save_slice.gd` — 3-room run; on run_finished awards 120 (completed) or 40 (failed) meta_currency and auto-saves; `S` = manual save, `L` = load, `U` = unlock Attack Mastery upgrade (100 meta_currency, max lv3, +20% attack_power)
+- [x] `game/demo/bootstrap_phase5.tscn` — dedicated Phase 5 bootstrap → `phase5_save_slice.tscn`
+
+**How to run:** open `bootstrap_phase5.tscn` as main scene and press Play. GameBootstrap boots services (auto-loading save if `user://save.json` exists), then enters `phase5_save_slice.tscn`. Complete all 3 rooms to earn 120 meta_currency → auto-save fires. Press `U` to spend 100 meta_currency on Attack Mastery. Press `S` to save, `L` to load and verify currency/upgrade level persists. MetaInfo label in the HUD tracks currency and upgrade level live.
 
 ## Phase 6 — Platform Services ⬜
 

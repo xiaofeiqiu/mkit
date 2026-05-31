@@ -1,8 +1,17 @@
 class_name GrantItemEffect
 extends GameEffect
 
+## Purpose: Inspector-exposed configuration `item_id`.
+## Example: `self.item_id = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var item_id: String = ""
+## Purpose: Inspector-exposed configuration `quantity`.
+## Example: `self.quantity = 1`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var quantity: int = 1
+## Purpose: Inspector-exposed configuration `give_to_source`.
+## Example: `self.give_to_source = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var give_to_source: bool = true
 
 

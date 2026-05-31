@@ -1,13 +1,31 @@
 class_name InventoryController
 extends Node
 
+## Purpose: Emits the `inventory_changed` signal to notify external listeners of a state change.
+## Example: `self.inventory_changed.connect(_on_inventory_changed)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal inventory_changed
+## Purpose: Emits the `item_added` signal to notify external listeners of a state change.
+## Example: `self.item_added.connect(_on_item_added)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal item_added(item: ItemInstance)
+## Purpose: Emits the `item_removed` signal to notify external listeners of a state change.
+## Example: `self.item_removed.connect(_on_item_removed)`
+## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal item_removed(item: ItemInstance)
 
+## Purpose: Inspector-exposed configuration `capacity`.
+## Example: `self.capacity = 1`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var capacity: int = 30
 
+## Purpose: Public runtime field `model`.
+## Example: `self.model = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var model := InventoryModel.new()
+## Purpose: Public runtime field `content`.
+## Example: `self.content = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var content: ContentRegistry = null
 
 
@@ -17,6 +35,9 @@ func _ready() -> void:
 	model.owner_id = _get_owner_id()
 
 
+## Purpose: Public method `can_add_item` for external gameplay integration.
+## Example: `self.can_add_item(<item>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func can_add_item(item: ItemInstance) -> bool:
 	var definition := get_item_definition(item.definition_id)
 	if definition == null:
@@ -26,6 +47,9 @@ func can_add_item(item: ItemInstance) -> bool:
 	return model.find_first_empty_slot() != null
 
 
+## Purpose: Public method `add_item` for external gameplay integration.
+## Example: `self.add_item(<item>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func add_item(item: ItemInstance) -> bool:
 	var definition := get_item_definition(item.definition_id)
 	if definition == null:
@@ -63,6 +87,9 @@ func add_item(item: ItemInstance) -> bool:
 	return true
 
 
+## Purpose: Public method `remove_item_by_instance_id` for external gameplay integration.
+## Example: `self.remove_item_by_instance_id(<instance_id>, <quantity>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
@@ -76,6 +103,9 @@ func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	return false
 
 
+## Purpose: Public method `find_item` for external gameplay integration.
+## Example: `self.find_item(<instance_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func find_item(instance_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
@@ -83,6 +113,9 @@ func find_item(instance_id: String) -> ItemInstance:
 	return null
 
 
+## Purpose: Public method `find_item_by_definition` for external gameplay integration.
+## Example: `self.find_item_by_definition(<definition_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func find_item_by_definition(definition_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.definition_id == definition_id:
@@ -90,12 +123,18 @@ func find_item_by_definition(definition_id: String) -> ItemInstance:
 	return null
 
 
+## Purpose: Public method `get_item_definition` for external gameplay integration.
+## Example: `self.get_item_definition(<item_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_item_definition(item_id: String) -> ItemDefinition:
 	if content == null:
 		content = ServiceRegistry.get_service("content") as ContentRegistry
 	return content.get_resource(item_id) as ItemDefinition
 
 
+## Purpose: Public method `to_save_data` for external gameplay integration.
+## Example: `self.to_save_data()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func to_save_data() -> Dictionary:
 	var items: Array = []
 	for slot in model.slots:
@@ -103,6 +142,9 @@ func to_save_data() -> Dictionary:
 	return {"capacity": capacity, "items": items}
 
 
+## Purpose: Public method `from_save_data` for external gameplay integration.
+## Example: `self.from_save_data(<data>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func from_save_data(data: Dictionary) -> void:
 	capacity = int(data.get("capacity", capacity))
 	model.setup(capacity)

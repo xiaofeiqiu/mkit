@@ -2,6 +2,9 @@ class_name RewardSystem
 extends RefCounted
 
 
+## Purpose: Public method `generate_options` for external gameplay integration.
+## Example: `self.generate_options(<pool_ids>, <count>, <context>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func generate_options(pool_ids: Array[String], count: int, context: GameplayContext) -> Array[RewardOption]:
 	var content := ServiceRegistry.get_service("content") as ContentRegistry
 	var candidates: Array[RewardDefinition] = []
@@ -20,6 +23,9 @@ func generate_options(pool_ids: Array[String], count: int, context: GameplayCont
 	return result
 
 
+## Purpose: Public method `apply_selected` for external gameplay integration.
+## Example: `self.apply_selected(<option>, <context>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	if option == null:
 		return false

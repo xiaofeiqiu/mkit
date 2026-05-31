@@ -4,12 +4,18 @@ extends RefCounted
 static var _default: CombatResolver = null
 
 
+## Purpose: Public method `get_default` for external gameplay integration.
+## Example: `CombatResolver.get_default()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 static func get_default() -> CombatResolver:
 	if _default == null:
 		_default = CombatResolver.new()
 	return _default
 
 
+## Purpose: Public method `resolve` for external gameplay integration.
+## Example: `self.resolve(<request>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func resolve(request: DamageRequest) -> DamageResult:
 	var result := DamageResult.new()
 	result.source = request.source

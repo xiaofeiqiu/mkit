@@ -9,7 +9,13 @@ extends Node
 # (Save / Meta progression); this file is extended at that point rather than
 # rewritten.
 
+## Purpose: Inspector-exposed configuration `resource_databases`.
+## Example: `self.resource_databases = []`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var resource_databases: Array[ResourceDatabase] = []
+## Purpose: Inspector-exposed configuration `initial_scene_path`.
+## Example: `self.initial_scene_path = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var initial_scene_path: String = ""
 
 
@@ -17,6 +23,9 @@ func _ready() -> void:
 	boot()
 
 
+## Purpose: Public method `boot` for external gameplay integration.
+## Example: `self.boot()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func boot() -> void:
 	_register_kernel_services()
 	_load_content()
@@ -45,6 +54,8 @@ func _register_kernel_services() -> void:
 	var command_router := CommandRouter.new()
 	var scene_router := SceneRouter.new()
 	var object_pool := ObjectPool.new()
+	var save_manager := SaveManager.new()
+	var progression := ProgressionSystem.new()
 
 	events.name = "EventRouter"
 	content.name = "ContentRegistry"
@@ -52,6 +63,8 @@ func _register_kernel_services() -> void:
 	command_router.name = "CommandRouter"
 	scene_router.name = "SceneRouter"
 	object_pool.name = "ObjectPool"
+	save_manager.name = "SaveManager"
+	progression.name = "ProgressionSystem"
 
 	# Parent the Node-based services under the persistent ServiceRegistry autoload,
 	# NOT under this bootstrap node. The bootstrap node is freed when it changes to
@@ -63,6 +76,8 @@ func _register_kernel_services() -> void:
 	ServiceRegistry.add_child(command_router)
 	ServiceRegistry.add_child(scene_router)
 	ServiceRegistry.add_child(object_pool)
+	ServiceRegistry.add_child(save_manager)
+	ServiceRegistry.add_child(progression)
 
 	ServiceRegistry.register_service("events", events)
 	ServiceRegistry.register_service("content", content)
@@ -73,6 +88,8 @@ func _register_kernel_services() -> void:
 	ServiceRegistry.register_service("commands", command_router)
 	ServiceRegistry.register_service("scenes", scene_router)
 	ServiceRegistry.register_service("pool", object_pool)
+	ServiceRegistry.register_service("save", save_manager)
+	ServiceRegistry.register_service("progression", progression)
 
 
 func _load_content() -> void:
@@ -94,7 +111,11 @@ func _initialize_runtime_systems() -> void:
 
 
 func _load_profile() -> void:
-	pass
+	var save_manager := ServiceRegistry.get_service("save") as SaveManager
+	if save_manager == null:
+		return
+	if FileAccess.file_exists(save_manager.save_path):
+		save_manager.load_game(get_tree().root)
 
 
 func _enter_initial_scene() -> void:

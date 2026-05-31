@@ -1,8 +1,17 @@
 class_name DashAction
 extends GameAction
 
+## Purpose: Public runtime field `duration`.
+## Example: `self.duration = 1.0`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var duration: float = 0.18
+## Purpose: Public runtime field `speed`.
+## Example: `self.speed = 1.0`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var speed: float = 480.0
+## Purpose: Public runtime field `direction`.
+## Example: `self.direction = Vector2.ZERO`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var direction: Vector2 = Vector2.ZERO
 
 

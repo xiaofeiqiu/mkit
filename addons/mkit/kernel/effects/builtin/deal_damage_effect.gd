@@ -1,11 +1,29 @@
 class_name DealDamageEffect
 extends GameEffect
 
+## Purpose: Inspector-exposed configuration `base_amount`.
+## Example: `self.base_amount = 1.0`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var base_amount: float = 10.0
+## Purpose: Inspector-exposed configuration `damage_type`.
+## Example: `self.damage_type = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var damage_type: String = "physical"
+## Purpose: Inspector-exposed configuration `element_type`.
+## Example: `self.element_type = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var element_type: String = "none"
+## Purpose: Inspector-exposed configuration `can_crit`.
+## Example: `self.can_crit = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var can_crit: bool = true
+## Purpose: Inspector-exposed configuration `hit_tags`.
+## Example: `self.hit_tags = []`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var hit_tags: Array[String] = []
+## Purpose: Inspector-exposed configuration `on_hit_statuses`.
+## Example: `self.on_hit_statuses = []`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var on_hit_statuses: Array[Dictionary] = []
 
 

@@ -6,9 +6,21 @@ extends GameAction
 # pattern is reusable; it talks to HitboxComponent (combat module) but only
 # through set_active(), so it stays a thin, content-agnostic action.
 
+## Purpose: Public runtime field `startup_duration`.
+## Example: `self.startup_duration = 1.0`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var startup_duration: float = 0.12
+## Purpose: Public runtime field `active_duration`.
+## Example: `self.active_duration = 1.0`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var active_duration: float = 0.10
+## Purpose: Public runtime field `recovery_duration`.
+## Example: `self.recovery_duration = 1.0`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var recovery_duration: float = 0.25
+## Purpose: Public runtime field `hitbox_path`.
+## Example: `self.hitbox_path = NodePath(".")`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var hitbox_path: NodePath = NodePath("Components/HitboxComponent")
 var _hitbox_enabled: bool = false
 

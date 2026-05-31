@@ -1,6 +1,9 @@
 class_name HealEffect
 extends GameEffect
 
+## Purpose: Inspector-exposed configuration `base_amount`.
+## Example: `self.base_amount = 1.0`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var base_amount: float = 20.0
 
 

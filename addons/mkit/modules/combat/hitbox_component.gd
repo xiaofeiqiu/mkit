@@ -1,16 +1,46 @@
 class_name HitboxComponent
 extends Area2D
 
+## Purpose: Inspector-exposed configuration `active`.
+## Example: `self.active = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var active: bool = false
+## Purpose: Inspector-exposed configuration `base_damage`.
+## Example: `self.base_damage = 1.0`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var base_damage: float = 1.0
+## Purpose: Inspector-exposed configuration `damage_type`.
+## Example: `self.damage_type = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var damage_type: String = "physical"
+## Purpose: Inspector-exposed configuration `element_type`.
+## Example: `self.element_type = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var element_type: String = "none"
+## Purpose: Inspector-exposed configuration `hit_once_per_activation`.
+## Example: `self.hit_once_per_activation = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var hit_once_per_activation: bool = true
+## Purpose: Inspector-exposed configuration `target_factions`.
+## Example: `self.target_factions = []`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var target_factions: Array[String] = ["enemy"]
+## Purpose: Inspector-exposed configuration `hit_tags`.
+## Example: `self.hit_tags = []`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var hit_tags: Array[String] = []
+## Purpose: Inspector-exposed configuration `on_hit_statuses`.
+## Example: `self.on_hit_statuses = []`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var on_hit_statuses: Array[Dictionary] = [] # 每项: {status_id, chance, stacks, duration}
 
+## Purpose: Public runtime field `source_entity`.
+## Example: `self.source_entity = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var source_entity: Node = null
+## Purpose: Public runtime field `already_hit`.
+## Example: `self.already_hit = {}`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var already_hit: Dictionary = {}
 
 
@@ -26,6 +56,9 @@ func _ready() -> void:
 	monitoring = true
 
 
+## Purpose: Public method `set_active` for external gameplay integration.
+## Example: `self.set_active(<value>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func set_active(value: bool) -> void:
 	active = value
 	if value:

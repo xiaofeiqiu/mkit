@@ -6,11 +6,17 @@ var _by_type: Dictionary = {}
 var _resource_path_by_id: Dictionary = {}
 
 
+## Purpose: Public method `load_database` for external gameplay integration.
+## Example: `self.load_database(<database>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func load_database(database: ResourceDatabase) -> void:
 	for res in database.get_all_resources():
 		register_resource(res)
 
 
+## Purpose: Public method `register_resource` for external gameplay integration.
+## Example: `self.register_resource(<res>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func register_resource(res: Resource) -> void:
 	var content_id := _extract_content_id(res)
 	if content_id == "":
@@ -32,6 +38,9 @@ func register_resource(res: Resource) -> void:
 		_resource_path_by_id[content_id] = res.resource_path
 
 
+## Purpose: Public method `get_resource` for external gameplay integration.
+## Example: `self.get_resource(<content_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_resource(content_id: String) -> Resource:
 	if not _by_id.has(content_id):
 		push_warning("Content id not found: %s" % content_id)
@@ -39,6 +48,9 @@ func get_resource(content_id: String) -> Resource:
 	return _by_id[content_id]
 
 
+## Purpose: Public method `get_typed_resource` for external gameplay integration.
+## Example: `self.get_typed_resource(<content_id>, <expected_script>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_typed_resource(content_id: String, expected_script: Script) -> Resource:
 	var res := get_resource(content_id)
 	if res == null:
@@ -49,16 +61,25 @@ func get_typed_resource(content_id: String, expected_script: Script) -> Resource
 	return res
 
 
+## Purpose: Public method `get_all_by_type` for external gameplay integration.
+## Example: `self.get_all_by_type(<type_name>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_all_by_type(type_name: String) -> Array:
 	if not _by_type.has(type_name):
 		return []
 	return _by_type[type_name]
 
 
+## Purpose: Public method `has` for external gameplay integration.
+## Example: `self.has(<content_id>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func has(content_id: String) -> bool:
 	return _by_id.has(content_id)
 
 
+## Purpose: Public method `validate_all` for external gameplay integration.
+## Example: `self.validate_all()`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func validate_all() -> ContentValidationResult:
 	var result := ContentValidationResult.new()
 	result.success = true

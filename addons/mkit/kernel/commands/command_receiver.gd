@@ -1,12 +1,30 @@
 class_name CommandReceiver
 extends Node
 
+## Purpose: Inspector-exposed configuration `receiver_id`.
+## Example: `self.receiver_id = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var receiver_id: String = ""
+## Purpose: Inspector-exposed configuration `auto_register`.
+## Example: `self.auto_register = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var auto_register: bool = true
 
+## Purpose: Public runtime field `owner_entity`.
+## Example: `self.owner_entity = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var owner_entity: Node = null
+## Purpose: Public runtime field `state_machine`.
+## Example: `self.state_machine = null`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var state_machine: StateMachine = null
+## Purpose: Public runtime field `command_history`.
+## Example: `self.command_history = []`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var command_history: Array[GameCommand] = []
+## Purpose: Public runtime field `max_history`.
+## Example: `self.max_history = 1`
+## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var max_history: int = 20
 
 
@@ -31,6 +49,9 @@ func _ready() -> void:
 			router.register_receiver(receiver_id, self)
 
 
+## Purpose: Public method `receive_command` for external gameplay integration.
+## Example: `self.receive_command(<command>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func receive_command(command: GameCommand) -> bool:
 	_record_command(command)
 
@@ -43,6 +64,9 @@ func receive_command(command: GameCommand) -> bool:
 	return handle_unhandled_command(command)
 
 
+## Purpose: Public method `handle_unhandled_command` for external gameplay integration.
+## Example: `self.handle_unhandled_command(<command>)`
+## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func handle_unhandled_command(command: GameCommand) -> bool:
 	return false
 

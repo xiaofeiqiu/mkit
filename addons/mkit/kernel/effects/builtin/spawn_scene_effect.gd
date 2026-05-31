@@ -1,7 +1,13 @@
 class_name SpawnSceneEffect
 extends GameEffect
 
+## Purpose: Inspector-exposed configuration `scene_path`.
+## Example: `self.scene_path = "value"`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var scene_path: String = ""
+## Purpose: Inspector-exposed configuration `spawn_at_target`.
+## Example: `self.spawn_at_target = true`
+## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var spawn_at_target: bool = false
 
 

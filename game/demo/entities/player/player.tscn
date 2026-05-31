@@ -22,7 +22,7 @@
 [sub_resource type="RectangleShape2D" id="RectShape_hit"]
 size = Vector2(36, 36)
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_root")
 
 [node name="EntityIdentity" type="Node" parent="."]

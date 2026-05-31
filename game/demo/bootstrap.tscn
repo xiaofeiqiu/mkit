@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cyd166evfm55j"]
+
+[ext_resource type="Script" uid="uid://emtv51pykxsy" path="res://addons/mkit/kernel/bootstrap/game_bootstrap.gd" id="1_boot"]
+
+[node name="Bootstrap" type="Node" unique_id=735270380]
+script = ExtResource("1_boot")
+initial_scene_path = "res://game/demo/phase3_inventory_slice.tscn"

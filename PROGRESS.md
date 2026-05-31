@@ -293,14 +293,18 @@ Detect room clear. Choose reward. Advance to the next room.
 
 - [x] `game/demo/rooms/combat_room_01.tscn` — room scene (RoomController + EntitySpawner + Enemies container, 2 spawn positions)
 - [x] `game/demo/rooms/combat_room_02.tscn` — alternate room scene (3 spawn positions)
+- [x] `game/demo/rooms/combat_room_01.tscn` — room scene (RoomController + EntitySpawner + Enemies container, 2 spawn positions)
+- [x] `game/demo/rooms/combat_room_02.tscn` — alternate room scene (3 spawn positions)
 - [x] `game/demo/phase4_run_slice.tscn` + `phase4_run_slice.gd` — registers `enemy.goblin_basic` EntityDefinition + two RoomDefinitions + four RewardDefinitions; RunDirector with 3-room linear run (seed=12345, pool=[room.combat_01, room.combat_02])
-- [x] `game/demo/bootstrap.tscn` → `phase4_run_slice.tscn`
+- [x] `game/demo/bootstrap_phase4.tscn` — dedicated Phase 4 bootstrap → `phase4_run_slice.tscn`
+- [x] `game/demo/entities/player/player.tscn` — added `groups=["player"]` so `RunDirector.select_reward` can locate the player node via `get_first_node_in_group`
+- [x] Per-phase bootstraps: `bootstrap_phase1.tscn` / `_phase2` / `_phase3` / `_phase4` for isolated testing
 
-**How to run:** press Play. GameBootstrap boots services then enters `phase4_run_slice.tscn`.
-RunDirector generates a 3-room run, loads the first combat room, and spawns goblins via EntitySpawner.
-Move with WASD/Arrows, melee with Space/J. Kill all enemies → room cleared event fires, reward options
-printed to console. Press 1/2/3 to pick a reward → next room loads. After all 3 rooms: run completed.
-Player death triggers run failed. (Not yet run here — no Godot binary available in this environment.)
+**How to run:** open `bootstrap_phase4.tscn` as main scene and press Play. GameBootstrap boots services
+then enters `phase4_run_slice.tscn`. RunDirector generates a 3-room seeded run and loads the first combat
+room. Move with WASD/Arrows, melee with Space/J. Kill all enemies → room cleared → reward options printed.
+Press 1/2/3 to pick reward → next room loads. Repeat for all 3 rooms → run completed printed.
+**Validated:** full 3-room run completes; reward selection correctly advances room index each time.
 
 ## Phase 5 — Save & Meta Progression ⬜
 

@@ -347,6 +347,41 @@
       margin-bottom: 0;
     }
 
+    .pipeline-stage {
+      position: relative;
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 248, 229, 0.92);
+    }
+
+    .pipeline-stage h3 {
+      margin-top: 0;
+    }
+
+    .component-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: 0.7rem 0 0;
+    }
+
+    .component-cloud code {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.7rem;
+      border: 1px solid #cbb990;
+      background: #f6ebcf;
+      font-size: 0.78rem;
+    }
+
+    .pipeline-table td:first-child {
+      width: 11rem;
+      color: var(--accent-dark);
+      font-weight: 800;
+    }
+
     .tag {
       display: inline-block;
       margin: 0.12rem;
@@ -734,7 +769,9 @@
         <a href="#ai-ui-feedback">AI / UI / Feedback</a>
         <a href="#save-platform">Save / Platform</a>
         <a href="#component-examples">组件用例代码</a>
+        <a href="#full-pipeline-example">完整 Pipeline Example</a>
         <a href="#flows">常见流程</a>
+        <a href="#registration-flows">注册流程</a>
         <a href="#content-guides">内容制作指南</a>
         <a href="#debugging">调试和排错</a>
         <a href="#boundaries">边界和反模式</a>
@@ -2727,6 +2764,639 @@ iap.purchase("starter_pack")</code></pre>
         </div>
       </section>
 
+      <section id="full-pipeline-example">
+        <h2>完整 Pipeline Example：从启动到存档的一条可跑链路</h2>
+        <p class="lead">这个例子不是单个 component 的 isolated demo。它描述一个完整 vertical slice：玩家进入一局 run，房间生成 goblin，玩家释放火球消耗 mana，投射物命中造成伤害并施加 burn，敌人死亡后生成掉落和三选一奖励，玩家装备掉落武器，系统保存 profile，并把事件交给 mock 平台服务。这里的代码是设计级接入范式，路径和类名按项目实际实现调整。</p>
+
+        <div class="note ok">
+          <strong>Pipeline 目标：</strong>一次运行覆盖 runtime kernel、content、HFSM、action、condition、effect、entity、stats、resource pool、combat、ability、status、inventory、equipment、loot、reward、room、run、generation、AI、interaction、UI、feedback、save、platform service。
+        </div>
+
+        <h3>Godot 场景和 Project Settings</h3>
+        <p>Godot 侧先保证 Autoload、主场景、输入、碰撞层和节点组织正确。否则代码再完整也跑不通。</p>
+        <pre><code>Project Settings
+  Application / Run / Main Scene = res://game/demo/full_pipeline_demo.tscn
+  AutoLoad
+    ServiceRegistry = res://addons/mkit/kernel/services/service_registry.gd
+  Input Map
+    move_left / move_right / move_up / move_down
+    attack
+    cast_fireball
+    interact
+    inventory
+  Layer Names 2D Physics
+    1 world
+    2 player
+    3 enemy
+    4 player_hitbox
+    5 enemy_hurtbox
+    6 interactable
+
+FullPipelineDemo.tscn
+  FullPipelineDemo                  script: full_pipeline_demo.gd
+  Bootstrap                         script: GameBootstrap
+  Services
+    EventRouter
+    CommandRouter
+    ActionRunner
+    EffectExecutor
+    RandomService
+    TimeService
+    SceneRouter
+    ObjectPool
+    SaveManager
+    AnalyticsServiceMock
+    AdServiceMock
+    IAPServiceMock
+    CloudSaveService
+  Content
+    db_stats.tres
+    db_entities.tres
+    db_abilities.tres
+    db_status_effects.tres
+    db_items.tres
+    db_loot.tres
+    db_rewards.tres
+    db_rooms.tres
+    db_generation.tres
+  RunDirector
+    RunStateMachine                 Run HFSM
+  RoomRoot
+    RoomController
+    RoomStateMachine                Room HFSM
+    SpawnPoints
+    Interactables
+      Chest                         script: Interactable
+    RewardAnchor
+  Player                            script: EntityRoot
+    EntityIdentity
+    Components
+      StatsComponent
+      ResourcePoolComponent
+      HealthComponent
+      HitboxComponent
+      HurtboxComponent
+      InteractionComponent
+    Controllers
+      InventoryController
+      EquipmentController
+      AbilityController
+      StatusEffectController
+      CommandReceiver
+    Behavior
+      StateMachine
+      Blackboard
+      States
+        Idle                        script: State
+        Move                        script: State
+        CastFireball                script: State
+        Dead                        script: State
+  UI
+    UIManager
+    HUD
+    RewardSelectionUI
+    DebugOverlay
+  Feedback
+    FeedbackSystem
+    AudioManager
+    VFXSpawner
+    DamageNumberSystem</code></pre>
+
+        <h3>Content 配置：把所有 definition 放进 registry</h3>
+        <p>这里的核心原则是 Definition 只保存静态配置，运行时状态由 Instance、Controller、State 或 Saveable 保存。</p>
+        <pre><code># res://game/demo/full_pipeline_content.gd
+class_name FullPipelineContent
+extends Resource
+
+static func build_databases() -> Array[ResourceDatabase]:
+  var max_hp := StatDefinition.new()
+  max_hp.stat_id = "max_hp"
+  max_hp.default_value = 100.0
+
+  var max_mana := StatDefinition.new()
+  max_mana.stat_id = "max_mana"
+  max_mana.default_value = 50.0
+
+  var attack_power := StatDefinition.new()
+  attack_power.stat_id = "attack_power"
+  attack_power.default_value = 10.0
+
+  var sword_attack := StatModifierDefinition.new()
+  sword_attack.modifier_id = "mod.sword_iron_attack"
+  sword_attack.stat_id = "attack_power"
+  sword_attack.operation = StatModifierDefinition.Operation.FLAT_ADD
+  sword_attack.value = 5.0
+
+  var fireball := AbilityDefinition.new()
+  fireball.ability_id = "ability.fireball_basic"
+  fireball.cost_type = "mana"
+  fireball.cost_amount = 15.0
+  fireball.cooldown = 3.0
+  fireball.cast_time = 0.35
+  fireball.conditions = [
+    CooldownReadyCondition.new(),
+    TargetInRangeCondition.new()
+  ]
+  fireball.effects = [
+    SpawnProjectileEffect.new("projectile.fireball"),
+    ApplyStatusEffect.new("status.burn")
+  ]
+
+  var burn := StatusEffectDefinition.new()
+  burn.status_id = "status.burn"
+  burn.duration = 4.0
+  burn.tick_interval = 1.0
+  burn.max_stacks = 3
+  burn.effects_on_tick = [DealDamageEffect.new(6.0, "fire")]
+
+  var sword := ItemDefinition.new()
+  sword.item_id = "item.sword_iron"
+  sword.item_type = "equipment"
+  sword.equipment_slot = "weapon"
+  sword.stat_modifiers = [sword_attack]
+
+  var potion := ItemDefinition.new()
+  potion.item_id = "item.potion_mana_small"
+  potion.item_type = "consumable"
+  potion.use_effects = [RestoreResourceEffect.new("mana", 20.0)]
+
+  var goblin_loot_entry := LootEntry.new()
+  goblin_loot_entry.content_id = "item.sword_iron"
+  goblin_loot_entry.weight = 10.0
+  goblin_loot_entry.min_quantity = 1
+  goblin_loot_entry.max_quantity = 1
+
+  var goblin_loot := LootTableDefinition.new()
+  goblin_loot.loot_table_id = "loot.goblin_common"
+  goblin_loot.entries = [goblin_loot_entry]
+
+  var attack_upgrade := UpgradeDefinition.new()
+  attack_upgrade.upgrade_id = "upgrade.attack_plus_20"
+  attack_upgrade.effects = [ApplyStatModifierEffect.new("attack_power", 0.2)]
+
+  var reward_option := RewardOption.new()
+  reward_option.reward_id = "reward.option.attack_plus_20"
+  reward_option.display_name = "+20% Attack"
+  reward_option.effects = attack_upgrade.effects
+
+  var room_reward := RewardDefinition.new()
+  room_reward.reward_id = "reward.room_common"
+  room_reward.option_count = 3
+  room_reward.option_pool = [reward_option]
+
+  var player_def := EntityDefinition.new()
+  player_def.entity_definition_id = "entity.player"
+  player_def.scene_path = "res://game/demo/entities/player/player.tscn"
+  player_def.default_faction = "player"
+
+  var goblin_def := EntityDefinition.new()
+  goblin_def.entity_definition_id = "enemy.goblin_basic"
+  goblin_def.scene_path = "res://game/demo/entities/enemies/goblin.tscn"
+  goblin_def.default_faction = "enemy"
+  goblin_def.loot_table_id = "loot.goblin_common"
+
+  var room := RoomDefinition.new()
+  room.room_id = "room.pipeline_small_01"
+  room.scene_path = "res://game/demo/rooms/pipeline_small_01.tscn"
+  room.room_type = "combat"
+  room.spawn_rules = [{"entity_id": "enemy.goblin_basic", "count": 1}]
+  room.reward_id = "reward.room_common"
+
+  var rules := GenerationRules.new()
+  rules.rules_id = "generation.pipeline_demo"
+  rules.room_type_weights = {"combat": 100}
+
+  return [
+    ResourceDatabase.from_resources("db.stats", [max_hp, max_mana, attack_power]),
+    ResourceDatabase.from_resources("db.entities", [player_def, goblin_def]),
+    ResourceDatabase.from_resources("db.abilities", [fireball]),
+    ResourceDatabase.from_resources("db.status", [burn]),
+    ResourceDatabase.from_resources("db.items", [sword, potion]),
+    ResourceDatabase.from_resources("db.loot", [goblin_loot]),
+    ResourceDatabase.from_resources("db.rewards", [room_reward, reward_option, attack_upgrade]),
+    ResourceDatabase.from_resources("db.rooms", [room, rules])
+  ]</code></pre>
+
+        <h3>主驱动脚本：一条链路跑完整局部闭环</h3>
+        <p>这个脚本故意不把逻辑塞进 UI 或 Player。它只做 orchestration：注册服务、加载 content、启动 run、派发 command、监听事件，然后把结果交给对应系统。</p>
+        <pre><code># res://game/demo/full_pipeline_demo.gd
+extends Node
+
+@onready var bootstrap: GameBootstrap = $Bootstrap
+@onready var run_director: RunDirector = $RunDirector
+@onready var room_controller: RoomController = $RoomRoot/RoomController
+@onready var ui_manager: UIManager = $UI/UIManager
+@onready var hud: HUD = $UI/HUD
+@onready var reward_ui: RewardSelectionUI = $UI/RewardSelectionUI
+@onready var debug_overlay: DebugOverlay = $UI/DebugOverlay
+@onready var player: EntityRoot = $Player
+
+var event_router: EventRouter
+var command_router: CommandRouter
+var content: ContentRegistry
+var effects: EffectExecutor
+var random: RandomService
+var time: TimeService
+var save_manager: SaveManager
+var loot_system: LootSystem
+var reward_system: RewardSystem
+var progression_system: ProgressionSystem
+
+func _ready() -> void:
+  _register_services()
+  _load_content()
+  _wire_player_entity()
+  _wire_runtime_events()
+  _start_pipeline_run()
+
+func _register_services() -> void:
+  event_router = $Services/EventRouter
+  command_router = $Services/CommandRouter
+  effects = $Services/EffectExecutor
+  random = $Services/RandomService
+  time = $Services/TimeService
+  save_manager = $Services/SaveManager
+
+  ServiceRegistry.register_service("events", event_router)
+  ServiceRegistry.register_service("commands", command_router)
+  ServiceRegistry.register_service("actions", $Services/ActionRunner)
+  ServiceRegistry.register_service("effects", effects)
+  ServiceRegistry.register_service("random", random)
+  ServiceRegistry.register_service("time", time)
+  ServiceRegistry.register_service("scenes", $Services/SceneRouter)
+  ServiceRegistry.register_service("pool", $Services/ObjectPool)
+  ServiceRegistry.register_service("save", save_manager)
+  ServiceRegistry.register_service("analytics", $Services/AnalyticsServiceMock)
+  ServiceRegistry.register_service("ads", $Services/AdServiceMock)
+  ServiceRegistry.register_service("iap", $Services/IAPServiceMock)
+  ServiceRegistry.register_service("cloud_save", $Services/CloudSaveService)
+
+  loot_system = LootSystem.new()
+  reward_system = RewardSystem.new()
+  progression_system = ProgressionSystem.new()
+  ServiceRegistry.register_service("loot", loot_system)
+  ServiceRegistry.register_service("rewards", reward_system)
+  ServiceRegistry.register_service("progression", progression_system)
+
+func _load_content() -> void:
+  content = ContentRegistry.new()
+  ServiceRegistry.register_service("content", content)
+
+  for db in FullPipelineContent.build_databases():
+    content.load_database(db)
+
+  var validation: ContentValidationResult = content.validate_all()
+  if not validation.success:
+    push_error("Content validation failed: %s" % validation.errors)
+    return
+
+func _wire_player_entity() -> void:
+  var identity := player.get_node("EntityIdentity") as EntityIdentity
+  identity.entity_id = "player_001"
+  identity.definition_id = "entity.player"
+  identity.faction = "player"
+  identity.tags = ["player", "caster"]
+
+  var stats := player.get_component("StatsComponent") as StatsComponent
+  stats.set_base_value("max_hp", 100.0)
+  stats.set_base_value("max_mana", 50.0)
+  stats.set_base_value("attack_power", 10.0)
+  stats.set_base_value("cooldown_reduction", 0.0)
+
+  var pools := player.get_component("ResourcePoolComponent") as ResourcePoolComponent
+  pools.bind_max_stat("mana", "max_mana")
+  pools.restore("mana", 50.0)
+
+  var health := player.get_component("HealthComponent") as HealthComponent
+  health.bind_max_stat("max_hp")
+  health.restore_full()
+
+  var inventory := player.get_controller("InventoryController") as InventoryController
+  inventory.model = InventoryModel.with_slots(24)
+  inventory.changed.connect(hud.refresh_inventory)
+
+  var ability_controller := player.get_controller("AbilityController") as AbilityController
+  ability_controller.learn_ability("ability.fireball_basic")
+  ability_controller.cooldown_started.connect(hud.refresh_ability_cooldown)
+
+  var receiver := player.get_controller("CommandReceiver") as CommandReceiver
+  command_router.register_receiver("player_001", receiver)
+
+  var state_machine := player.get_node("Behavior/StateMachine") as StateMachine
+  state_machine.blackboard.set_value("facing", Vector2.RIGHT)
+  debug_overlay.watch_entity(player)
+
+func _wire_runtime_events() -> void:
+  event_router.domain_event_emitted.connect(_on_domain_event)
+  event_router.damage_applied.connect(_on_damage_applied)
+  event_router.entity_died.connect(_on_entity_died)
+  event_router.room_cleared.connect(_on_room_cleared)
+
+  reward_ui.selected.connect(_on_reward_selected)
+  save_manager.save_completed.connect(_on_save_completed)
+
+func _start_pipeline_run() -> void:
+  random.set_seed(20260531)
+  run_director.run_state = RunState.new()
+  run_director.run_state.run_id = "run_pipeline_example"
+  run_director.run_state.seed = 20260531
+  run_director.state_machine.transition_to("Run/Active/Exploring")
+
+  var graph: RoomGraph = DungeonGenerator.new().generate(
+    content.get_resource("generation.pipeline_demo"),
+    run_director.run_state.seed
+  )
+  run_director.set_room_graph(graph)
+  run_director.enter_room("room.pipeline_small_01")
+
+  room_controller.room_runtime = RoomRuntime.new()
+  room_controller.room_runtime.room_id = "room.pipeline_small_01"
+  room_controller.state_machine.transition_to("Room/Active/Spawning")
+  room_controller.spawn_enemies()
+  room_controller.state_machine.transition_to("Room/Active/Combat")
+  run_director.state_machine.transition_to("Run/Active/InCombat")
+
+  _simulate_player_cast_fireball()
+
+func _simulate_player_cast_fireball() -> void:
+  var command := GameCommand.create(BuiltinCommands.CAST_ABILITY, "player_001", "player_001", {
+    "ability_id": "ability.fireball_basic",
+    "target_id": "goblin_001",
+    "direction": Vector2.RIGHT
+  })
+  command_router.dispatch(command)
+
+func _on_damage_applied(result: DamageResult) -> void:
+  var feedback := $Feedback/FeedbackSystem as FeedbackSystem
+  feedback.play_hit(result)
+  $Feedback/AudioManager.play_sfx("hit_fire", "SFX")
+  $Feedback/VFXSpawner.spawn("res://game/vfx/fire_hit.tscn", result.hit_position)
+  $Feedback/DamageNumberSystem.show_damage(result.target, result.final_amount, result.was_critical)
+
+func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
+  var identity := entity_ref.get_node("EntityIdentity") as EntityIdentity
+  if identity.faction != "enemy":
+    return
+
+  var loot_result: LootRollResult = loot_system.roll(identity.loot_table_id, player)
+  for drop in loot_result.drops:
+    var inventory := player.get_controller("InventoryController") as InventoryController
+    inventory.add_item(drop.content_id, drop.quantity)
+
+  room_controller.mark_enemy_dead(entity_id)
+
+func _on_room_cleared(room_id: String) -> void:
+  room_controller.state_machine.transition_to("Room/Cleared/GeneratingReward")
+  run_director.state_machine.transition_to("Run/Active/ChoosingReward")
+
+  time.set_paused(true)
+  ui_manager.open_screen("reward_selection")
+
+  var options: Array[RewardOption] = reward_system.generate_options("reward.room_common", player)
+  reward_ui.show_options(options)
+
+func _on_reward_selected(option: RewardOption) -> void:
+  var context := GameplayContext.new()
+  context.source = player
+  context.tags = ["reward", "room_clear"]
+
+  var results: Array[EffectResult] = effects.execute_many(option.effects, context, true)
+  if EffectResult.all_success(results):
+    progression_system.state = ProgressionState.new()
+    progression_system.state.unlocked_abilities.append("ability.fireball_basic")
+    run_director.run_state.temporary_upgrades.append(option.reward_id)
+    ui_manager.close_screen("reward_selection")
+    time.set_paused(false)
+    _equip_first_weapon_if_available()
+    _save_and_report()
+
+func _equip_first_weapon_if_available() -> void:
+  var inventory := player.get_controller("InventoryController") as InventoryController
+  var equipment := player.get_controller("EquipmentController") as EquipmentController
+  var sword_instance: ItemInstance = inventory.find_first("item.sword_iron")
+  if sword_instance != null:
+    equipment.equip("weapon", sword_instance)
+
+func _save_and_report() -> void:
+  var analytics := ServiceRegistry.get_service("analytics") as AnalyticsService
+  analytics.track_event("pipeline_example_completed", {
+    "run_id": run_director.run_state.run_id,
+    "room_id": room_controller.room_runtime.room_id
+  })
+
+  save_manager.register_saveable(player.get_controller("InventoryController") as Saveable)
+  save_manager.register_saveable(progression_system as Saveable)
+  save_manager.add_migration(SaveMigration.new(1, 2))
+  save_manager.save_game(get_tree().root)
+
+func _on_save_completed(path: String) -> void:
+  var cloud := ServiceRegistry.get_service("cloud_save") as CloudSaveService
+  var data := FileAccess.get_file_as_string(path)
+  cloud.upload("profile_001", data)
+
+  var ads := ServiceRegistry.get_service("ads") as AdService
+  ads.preload_rewarded("revive")
+
+  var iap := ServiceRegistry.get_service("iap") as IAPService
+  iap.query_products(["starter_pack"])
+
+func _on_domain_event(event: DomainEvent) -> void:
+  debug_overlay.push_event(event)</code></pre>
+
+        <h3>AbilityController 内部应该这样串起来</h3>
+        <p>上面的主脚本只 dispatch command。真正的技能管线应该在实体内部完成，避免 UI、InputReader 或 demo script 直接改 HP、mana、cooldown。</p>
+        <pre><code># AbilityController.cast(command) 的设计级流程
+func cast_from_command(command: GameCommand) -> bool:
+  var ability_id: String = command.payload["ability_id"]
+  var instance: AbilityInstance = get_instance(ability_id)
+  var definition: AbilityDefinition = instance.definition
+
+  var context := ActionContext.from_command(command, owner_entity, _find_target(command))
+  context.ability_id = ability_id
+
+  var checks: Array[Condition] = definition.conditions
+  if not ConditionEvaluator.evaluate_all(checks, context):
+    ability_failed.emit(ability_id, "condition_failed")
+    return false
+
+  var pools := owner_entity.get_component("ResourcePoolComponent") as ResourcePoolComponent
+  if not pools.has_resource(definition.cost_type, definition.cost_amount):
+    ability_failed.emit(ability_id, "not_enough_%s" % definition.cost_type)
+    return false
+
+  pools.spend(definition.cost_type, definition.cost_amount)
+
+  var cast_action := CastAction.new()
+  cast_action.definition = definition
+  cast_action.completed.connect(func():
+    ServiceRegistry.get_service("effects").execute_many(definition.effects, context, true)
+    instance.start_cooldown()
+  )
+
+  ServiceRegistry.get_service("actions").start_action(cast_action, context)
+  return true</code></pre>
+
+        <h3>Projectile / Combat / Status 的命中段</h3>
+        <pre><code># Projectile 命中 Hurtbox 后
+func _on_hurtbox_hit(hurtbox: HurtboxComponent) -> void:
+  var target := hurtbox.owner_entity
+
+  var request := DamageRequest.new()
+  request.source = source_entity
+  request.target = target
+  request.base_amount = 20.0
+  request.damage_type = "ability"
+  request.element_type = "fire"
+  request.tags = ["projectile", "spell", "fireball"]
+
+  var result: DamageResult = CombatResolver.get_default().resolve(request)
+  target.get_component("HealthComponent").apply_damage(result)
+
+  var status := target.get_controller("StatusEffectController") as StatusEffectController
+  status.apply_status("status.burn", source_entity)
+
+  ServiceRegistry.get_service("events").emit_domain_event(
+    DomainEvent.create("projectile_hit", source_entity.name, target.name, result.to_debug_dict())
+  )
+  ServiceRegistry.get_service("pool").release("projectile.fireball", self)</code></pre>
+
+        <h3>端到端事件链</h3>
+        <pre><code>GameBootstrap
+  -&gt; ServiceRegistry registers services
+  -&gt; ContentRegistry loads ResourceDatabase
+  -&gt; ContentValidationResult passes
+  -&gt; RunDirector creates RunState
+  -&gt; DungeonGenerator reads GenerationRules
+  -&gt; RoomGraph selects room.pipeline_small_01
+  -&gt; RoomController enters Room HFSM Spawning
+  -&gt; EntitySpawner spawns enemy.goblin_basic
+  -&gt; Enemy EntityRoot wires EntityIdentity, Stats, Health, Hurtbox, AI
+  -&gt; PlayerInputReader creates GameCommand cast_ability
+  -&gt; CommandRouter dispatches to CommandReceiver
+  -&gt; StateMachine asks State if cast is allowed
+  -&gt; Blackboard provides facing and target
+  -&gt; AbilityController checks AbilityInstance, Condition, cooldown, range, ResourcePool
+  -&gt; CastAction runs through ActionRunner with TimeService delta
+  -&gt; EffectExecutor executes SpawnProjectileEffect and ApplyStatusEffect
+  -&gt; ObjectPool provides Projectile
+  -&gt; Projectile Hitbox overlaps Hurtbox
+  -&gt; DamageRequest goes into CombatResolver
+  -&gt; DamageResult goes into HealthComponent
+  -&gt; StatusEffectController creates StatusEffectInstance
+  -&gt; EventRouter emits DomainEvent damage_applied and entity_died
+  -&gt; FeedbackSystem calls AudioManager, VFXSpawner, DamageNumberSystem
+  -&gt; LootSystem rolls LootTableDefinition and LootEntry
+  -&gt; InventoryController creates ItemInstance in InventoryModel and InventorySlot
+  -&gt; EquipmentController equips sword and adds StatModifier to StatsComponent
+  -&gt; RoomController enters Room HFSM Cleared
+  -&gt; RunDirector enters Run HFSM ChoosingReward
+  -&gt; RewardSystem creates RewardOption from RewardDefinition
+  -&gt; UIManager opens RewardSelectionUI and HUD updates
+  -&gt; RewardSystem applies UpgradeDefinition effects
+  -&gt; ProgressionSystem updates ProgressionState
+  -&gt; SaveManager serializes Saveable objects
+  -&gt; SaveMigration upgrades old payload if needed
+  -&gt; AnalyticsServiceMock logs event
+  -&gt; AdServiceMock and IAPServiceMock stay swappable
+  -&gt; CloudSaveService uploads saved profile
+  -&gt; DebugOverlay shows state, command, event, damage trace, resource pools</code></pre>
+
+        <h3>全组件覆盖矩阵</h3>
+        <p>下面这张表是这个 example 的覆盖合同。如果新增 component，必须能放进这张表的某个阶段，否则它大概率没有被纳入主 gameplay pipeline。</p>
+        <table class="pipeline-table">
+          <thead>
+            <tr>
+              <th>阶段</th>
+              <th>参与 components</th>
+              <th>在 pipeline 中的职责</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>启动和服务</td>
+              <td>
+                <div class="component-cloud">
+                  <code>GameBootstrap</code><code>ServiceRegistry</code><code>EventRouter</code><code>CommandRouter</code><code>ActionRunner</code><code>EffectExecutor</code><code>RandomService</code><code>TimeService</code><code>SceneRouter</code><code>ObjectPool</code><code>DebugOverlay</code>
+                </div>
+              </td>
+              <td>建立 runtime kernel、注册服务、控制时间和场景、提供对象池、收集调试信息。</td>
+            </tr>
+            <tr>
+              <td>内容加载</td>
+              <td>
+                <div class="component-cloud">
+                  <code>ContentRegistry</code><code>ResourceDatabase</code><code>ContentValidationResult</code><code>StatDefinition</code><code>StatModifierDefinition</code><code>AbilityDefinition</code><code>StatusEffectDefinition</code><code>ItemDefinition</code><code>LootEntry</code><code>LootTableDefinition</code><code>RewardDefinition</code><code>RewardOption</code><code>UpgradeDefinition</code><code>RoomDefinition</code><code>GenerationRules</code><code>EntityDefinition</code>
+                </div>
+              </td>
+              <td>把所有可配置内容变成 stable ID，可校验、可查找、可保存。</td>
+            </tr>
+            <tr>
+              <td>Run 和房间</td>
+              <td>
+                <div class="component-cloud">
+                  <code>RunState</code><code>RunDirector</code><code>Run HFSM</code><code>DungeonGenerator</code><code>RoomGraph</code><code>RoomRuntime</code><code>RoomController</code><code>Room HFSM</code><code>EntitySpawner</code>
+                </div>
+              </td>
+              <td>生成房间图、进入房间、刷怪、切换 run state 和 room state。</td>
+            </tr>
+            <tr>
+              <td>实体和行为</td>
+              <td>
+                <div class="component-cloud">
+                  <code>EntityRoot</code><code>EntityIdentity</code><code>StatsComponent</code><code>ResourcePoolComponent</code><code>HealthComponent</code><code>HitboxComponent</code><code>HurtboxComponent</code><code>CommandReceiver</code><code>StateMachine</code><code>State</code><code>Blackboard</code><code>EnemyBrain</code><code>SimpleAI</code><code>BehaviorTreeAI</code><code>UtilityAI</code>
+                </div>
+              </td>
+              <td>让玩家和敌人有身份、属性、资源、HP、碰撞判定、状态机、AI 决策和 command 接收入口。</td>
+            </tr>
+            <tr>
+              <td>Command / Action / Effect</td>
+              <td>
+                <div class="component-cloud">
+                  <code>GameCommand</code><code>GameAction</code><code>ActionContext</code><code>GameplayContext</code><code>Condition</code><code>ConditionEvaluator</code><code>GameEffect</code><code>EffectResult</code><code>DomainEvent</code>
+                </div>
+              </td>
+              <td>把输入、AI 和脚本意图变成可检查、可执行、可追踪的 gameplay 行为。</td>
+            </tr>
+            <tr>
+              <td>Ability / Combat / Status</td>
+              <td>
+                <div class="component-cloud">
+                  <code>AbilityController</code><code>AbilityInstance</code><code>CastAction</code><code>Projectile</code><code>CooldownReadyCondition</code><code>TargetInRangeCondition</code><code>DamageRequest</code><code>CombatResolver</code><code>DamageResult</code><code>StatusEffectController</code><code>StatusEffectInstance</code><code>StatModifier</code>
+                </div>
+              </td>
+              <td>检查 cooldown、range、mana，执行施法，生成投射物，解析伤害，应用 burn 和临时属性变化。</td>
+            </tr>
+            <tr>
+              <td>Inventory / Loot / Reward</td>
+              <td>
+                <div class="component-cloud">
+                  <code>LootSystem</code><code>LootRollResult</code><code>InventoryModel</code><code>InventorySlot</code><code>InventoryController</code><code>ItemInstance</code><code>EquipmentController</code><code>RewardSystem</code><code>RewardSelectionUI</code><code>ProgressionSystem</code><code>ProgressionState</code>
+                </div>
+              </td>
+              <td>敌人死亡后生成掉落，进入背包，装备武器，清房间后给三选一奖励，并更新局内和局外成长。</td>
+            </tr>
+            <tr>
+              <td>Interaction / UI / Feedback</td>
+              <td>
+                <div class="component-cloud">
+                  <code>InteractionComponent</code><code>Interactable</code><code>UIManager</code><code>HUD</code><code>FeedbackSystem</code><code>AudioManager</code><code>VFXSpawner</code><code>DamageNumberSystem</code>
+                </div>
+              </td>
+              <td>处理宝箱、拾取、界面打开和输入阻挡，同时把命中、死亡、奖励表现交给反馈层。</td>
+            </tr>
+            <tr>
+              <td>Save / Platform</td>
+              <td>
+                <div class="component-cloud">
+                  <code>Saveable</code><code>SaveManager</code><code>SaveMigration</code><code>AnalyticsService</code><code>AnalyticsServiceMock</code><code>AdService</code><code>AdServiceMock</code><code>IAPService</code><code>IAPServiceMock</code><code>CloudSaveService</code>
+                </div>
+              </td>
+              <td>保存背包和进度，迁移旧存档，记录分析事件，保留广告、内购、云存档替换点。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
       <section id="flows">
         <h2>常见 Gameplay 流程</h2>
 
@@ -2794,6 +3464,263 @@ iap.purchase("starter_pack")</code></pre>
   -&gt; LootSystem 生成掉落
   -&gt; RoomController 更新清场条件
   -&gt; FeedbackSystem 播放死亡反馈</code></pre>
+      </section>
+
+      <section id="registration-flows">
+        <h2>注册流程：Content 注册和 Runtime 注册</h2>
+        <p class="lead">Mkit 里“注册”不是一个动作。必须区分两层：静态内容注册到 <code>ContentRegistry</code>，运行时拥有关系注册到对应 Controller。Ability 和 Item 都遵循这个规则。</p>
+
+        <h3>注册层级</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>层级</th>
+              <th>注册对象</th>
+              <th>注册位置</th>
+              <th>结果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Service registration</td><td><code>EventRouter</code>、<code>CommandRouter</code>、<code>ContentRegistry</code>、<code>SaveManager</code></td><td><code>GameBootstrap</code></td><td>系统可以通过 <code>ServiceRegistry.get_service()</code> 找到全局服务。</td></tr>
+            <tr><td>Content registration</td><td><code>AbilityDefinition</code>、<code>ItemDefinition</code>、<code>StatusEffectDefinition</code>、<code>RoomDefinition</code> 等</td><td><code>ResourceDatabase</code> 到 <code>ContentRegistry</code></td><td>静态内容可以通过 stable ID 查询，例如 <code>ability.fireball_basic</code>。</td></tr>
+            <tr><td>Runtime ownership registration</td><td><code>AbilityInstance</code>、<code>ItemInstance</code>、<code>StatModifier</code>、<code>StatusEffectInstance</code></td><td>实体上的 Controller</td><td>某个实体真正拥有技能、物品、装备或状态。</td></tr>
+            <tr><td>UI / Event registration</td><td>signal、event listener、HUD binding</td><td><code>HUD</code>、<code>FeedbackSystem</code>、<code>DebugOverlay</code></td><td>运行时变化能被显示、反馈、记录和调试。</td></tr>
+          </tbody>
+        </table>
+
+        <h3>启动时注册 ResourceDatabase</h3>
+        <p>所有 definition 都应该先进入 <code>ResourceDatabase</code>，再由启动流程统一加载到 <code>ContentRegistry</code>。不要在 AbilityController 或 InventoryController 里临时 preload 一堆 Resource。</p>
+        <pre><code># GameBootstrap.gd 设计级流程
+@export var resource_databases: Array[ResourceDatabase] = [
+  preload("res://game/content/db_stats.tres"),
+  preload("res://game/content/db_abilities.tres"),
+  preload("res://game/content/db_status_effects.tres"),
+  preload("res://game/content/db_items.tres"),
+  preload("res://game/content/db_loot.tres"),
+  preload("res://game/content/db_rewards.tres"),
+  preload("res://game/content/db_entities.tres"),
+  preload("res://game/content/db_rooms.tres")
+]
+
+func _ready() -> void:
+  var content := ContentRegistry.new()
+  ServiceRegistry.register_service("content", content)
+
+  for database in resource_databases:
+    content.load_database(database)
+
+  var result: ContentValidationResult = content.validate_all()
+  if not result.success:
+    push_error("Content registration failed: %s" % result.errors)
+    return
+
+  ServiceRegistry.register_service("events", $Services/EventRouter)
+  ServiceRegistry.register_service("commands", $Services/CommandRouter)
+  ServiceRegistry.register_service("effects", $Services/EffectExecutor)
+  ServiceRegistry.register_service("actions", $Services/ActionRunner)</code></pre>
+
+        <div class="note">
+          <strong>Godot Editor 配置点：</strong>把 <code>db_abilities.tres</code>、<code>db_items.tres</code> 等数据库资源拖到 <code>GameBootstrap.resource_databases</code>。这个配置是注册流程的一部分，不只是代码。
+        </div>
+
+        <h3>Ability 注册流程</h3>
+        <p>注册 ability 分两步：先注册 <code>AbilityDefinition</code> 到内容库，再把 ability ID 注册到某个实体的 <code>AbilityController</code>。前者表示游戏认识这个技能，后者表示某个玩家、敌人或 Boss 拥有这个技能。</p>
+        <pre><code>AbilityDefinition
+  -&gt; ResourceDatabase db_abilities.tres
+  -&gt; ContentRegistry.load_database()
+  -&gt; ContentRegistry.validate_all()
+  -&gt; Entity AbilityController.learn_ability("ability.fireball_basic")
+  -&gt; AbilityController creates AbilityInstance
+  -&gt; InputReader / EnemyBrain dispatches cast_ability command
+  -&gt; AbilityController checks cooldown, conditions, ResourcePoolComponent
+  -&gt; CastAction and effects run</code></pre>
+
+        <h4>1. 创建并注册 AbilityDefinition</h4>
+        <pre><code># res://game/content/abilities/fireball_basic.tres 的等价代码
+var fireball := AbilityDefinition.new()
+fireball.ability_id = "ability.fireball_basic"
+fireball.display_name = "Fireball"
+fireball.cost_type = "mana"
+fireball.cost_amount = 15.0
+fireball.cooldown = 3.0
+fireball.cast_time = 0.35
+fireball.range = 360.0
+fireball.conditions = [
+  CooldownReadyCondition.new(),
+  TargetInRangeCondition.new()
+]
+fireball.effects = [
+  SpawnProjectileEffect.new("projectile.fireball"),
+  ApplyStatusEffect.new("status.burn")
+]
+
+var db := ResourceDatabase.new()
+db.database_id = "db.abilities"
+db.resources = [fireball]
+# Editor 中等价操作：把 fireball_basic.tres 放入 db_abilities.tres 的 resources 数组。</code></pre>
+
+        <h4>2. 把 ability 给到玩家或敌人</h4>
+        <pre><code># PlayerAbilityLoadout.gd
+@export var starting_ability_ids: Array[String] = [
+  "ability.fireball_basic",
+  "ability.dash_shadow"
+]
+
+@onready var ability_controller := $"../Controllers/AbilityController" as AbilityController
+
+func _ready() -> void:
+  var content := ServiceRegistry.get_service("content") as ContentRegistry
+  for ability_id in starting_ability_ids:
+    if not content.has_resource(ability_id):
+      push_error("Ability is not registered in ContentRegistry: %s" % ability_id)
+      continue
+
+    ability_controller.learn_ability(ability_id)
+
+  ability_controller.ability_learned.connect(_on_ability_learned)
+  ability_controller.cooldown_started.connect(_on_cooldown_started)
+
+func _on_ability_learned(ability_id: String, instance: AbilityInstance) -> void:
+  $HUD.register_ability_slot(ability_id, instance)</code></pre>
+
+        <h4>3. 局内解锁 ability</h4>
+        <pre><code># RewardSystem 选中奖励后
+func apply_unlock_ability_reward(actor: EntityRoot, ability_id: String) -> EffectResult:
+  var content := ServiceRegistry.get_service("content") as ContentRegistry
+  if not content.has_resource(ability_id):
+    return EffectResult.fail("unlock_ability", "missing ability: %s" % ability_id)
+
+  var abilities := actor.get_controller("AbilityController") as AbilityController
+  if abilities.has_ability(ability_id):
+    return EffectResult.fail("unlock_ability", "already learned: %s" % ability_id)
+
+  abilities.learn_ability(ability_id)
+  return EffectResult.ok("unlock_ability", {"ability_id": ability_id})</code></pre>
+
+        <h3>Item 注册流程</h3>
+        <p>注册 item 也分两步：<code>ItemDefinition</code> 进入 <code>ContentRegistry</code>，运行时获得物品时才创建 <code>ItemInstance</code> 并放进 <code>InventoryModel</code>。装备物品时，<code>EquipmentController</code> 再把 modifier 注册到 <code>StatsComponent</code>。</p>
+        <pre><code>ItemDefinition
+  -&gt; ResourceDatabase db_items.tres
+  -&gt; ContentRegistry.load_database()
+  -&gt; LootTableDefinition / RewardDefinition references item_id
+  -&gt; LootSystem or RewardSystem returns item_id
+  -&gt; InventoryController.add_item("item.sword_iron")
+  -&gt; InventoryController creates ItemInstance
+  -&gt; InventoryModel stores ItemInstance in InventorySlot
+  -&gt; EquipmentController.equip()
+  -&gt; StatsComponent.add_modifier()
+  -&gt; SaveManager saves definition_id, instance_id, quantity, metadata</code></pre>
+
+        <h4>1. 创建并注册 ItemDefinition</h4>
+        <pre><code># res://game/content/items/sword_iron.tres 的等价代码
+var attack_mod := StatModifierDefinition.new()
+attack_mod.modifier_id = "mod.item.sword_iron.attack"
+attack_mod.stat_id = "attack_power"
+attack_mod.operation = StatModifierDefinition.Operation.FLAT_ADD
+attack_mod.value = 5.0
+
+var sword := ItemDefinition.new()
+sword.item_id = "item.sword_iron"
+sword.display_name = "Iron Sword"
+sword.item_type = "equipment"
+sword.rarity = "common"
+sword.stackable = false
+sword.equipment_slot = "weapon"
+sword.stat_modifiers = [attack_mod]
+
+var potion := ItemDefinition.new()
+potion.item_id = "item.potion_mana_small"
+potion.display_name = "Small Mana Potion"
+potion.item_type = "consumable"
+potion.stackable = true
+potion.max_stack = 10
+potion.use_effects = [RestoreResourceEffect.new("mana", 20.0)]
+
+var db := ResourceDatabase.new()
+db.database_id = "db.items"
+db.resources = [sword, potion]
+# Editor 中等价操作：把 sword_iron.tres 和 potion_mana_small.tres 放入 db_items.tres。</code></pre>
+
+        <h4>2. 把 item 接到 loot、reward 或 shop</h4>
+        <pre><code># Loot table 引用 item_id，不直接引用运行时 ItemInstance。
+var sword_entry := LootEntry.new()
+sword_entry.content_id = "item.sword_iron"
+sword_entry.weight = 10.0
+sword_entry.min_quantity = 1
+sword_entry.max_quantity = 1
+
+var goblin_loot := LootTableDefinition.new()
+goblin_loot.loot_table_id = "loot.goblin_common"
+goblin_loot.entries = [sword_entry]
+
+# RewardOption 通过 effect 发放 item。
+var grant_potion := GrantItemEffect.new()
+grant_potion.item_id = "item.potion_mana_small"
+grant_potion.quantity = 2
+
+var option := RewardOption.new()
+option.reward_id = "reward.option.two_mana_potions"
+option.display_name = "2 Mana Potions"
+option.effects = [grant_potion]</code></pre>
+
+        <h4>3. 运行时获得 item</h4>
+        <pre><code># 敌人死亡后
+func _on_enemy_died(enemy: EntityRoot) -> void:
+  var identity := enemy.get_node("EntityIdentity") as EntityIdentity
+  var loot := ServiceRegistry.get_service("loot") as LootSystem
+  var result: LootRollResult = loot.roll(identity.loot_table_id, player)
+
+  var inventory := player.get_controller("InventoryController") as InventoryController
+  for drop in result.drops:
+    inventory.add_item(drop.content_id, drop.quantity)
+
+# InventoryController 内部负责查 ItemDefinition，创建 ItemInstance，处理堆叠。
+func add_item(item_id: String, quantity: int = 1, metadata: Dictionary = {}) -> bool:
+  var content := ServiceRegistry.get_service("content") as ContentRegistry
+  var definition := content.get_resource(item_id) as ItemDefinition
+  if definition == null:
+    push_error("Item is not registered in ContentRegistry: %s" % item_id)
+    return false
+
+  var instance := ItemInstance.from_definition(definition)
+  instance.metadata = metadata
+  return model.add_instance(instance, quantity)</code></pre>
+
+        <h4>4. 装备 item 并注册 stat modifier</h4>
+        <pre><code>func equip_weapon_from_inventory(item_instance_id: String) -> bool:
+  var inventory := player.get_controller("InventoryController") as InventoryController
+  var equipment := player.get_controller("EquipmentController") as EquipmentController
+  var item: ItemInstance = inventory.get_item_instance(item_instance_id)
+  if item == null:
+    return false
+
+  if equipment.equip("weapon", item):
+    var stats := player.get_component("StatsComponent") as StatsComponent
+    print("Attack after equip: ", stats.get_stat_value("attack_power"))
+    return true
+
+  return false
+
+# EquipmentController 内部
+func _apply_equipment_modifiers(item: ItemInstance) -> void:
+  var definition := item.get_definition() as ItemDefinition
+  var stats := owner_entity.get_component("StatsComponent") as StatsComponent
+  for modifier_definition in definition.stat_modifiers:
+    var modifier := StatModifier.from_definition(modifier_definition, item.instance_id)
+    stats.add_modifier(modifier)</code></pre>
+
+        <h3>注册检查清单</h3>
+        <ul class="checklist">
+          <li>Definition ID 必须 stable，例如 <code>ability.fireball_basic</code>、<code>item.sword_iron</code>。</li>
+          <li>Definition 必须放进对应 <code>ResourceDatabase</code>。</li>
+          <li><code>ResourceDatabase</code> 必须配置到 <code>GameBootstrap.resource_databases</code>。</li>
+          <li>启动时必须跑 <code>ContentRegistry.validate_all()</code>。</li>
+          <li>玩家或敌人拥有 ability 时，必须调用 <code>AbilityController.learn_ability()</code> 创建 <code>AbilityInstance</code>。</li>
+          <li>玩家获得 item 时，必须通过 <code>InventoryController.add_item()</code> 创建 <code>ItemInstance</code>。</li>
+          <li>装备 item 时，必须通过 <code>EquipmentController.equip()</code> 注册和移除 stat modifiers。</li>
+          <li>UI 不直接注册内容，只监听 controller signal 或 EventRouter。</li>
+          <li>Save 不保存 Resource 对象，只保存 stable ID、instance ID、quantity 和 metadata。</li>
+        </ul>
       </section>
 
       <section id="content-guides">

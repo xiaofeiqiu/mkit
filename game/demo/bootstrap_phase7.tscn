@@ -4,4 +4,4 @@
 
 [node name="Bootstrap" type="Node"]
 script = ExtResource("1_boot")
-initial_scene_path = "res://game/demo/phase6_platform_slice.tscn"
+initial_scene_path = "res://game/demo/phase7_platform_slice.tscn"

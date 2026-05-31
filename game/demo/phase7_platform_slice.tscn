@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dnj81tnqw5d14"]
 
-[ext_resource type="Script" path="res://game/demo/phase6_platform_slice.gd" id="1_slice"]
+[ext_resource type="Script" path="res://game/demo/phase7_platform_slice.gd" id="1_slice"]
 
 [node name="PlatformSlice" type="Node2D"]
 script = ExtResource("1_slice")

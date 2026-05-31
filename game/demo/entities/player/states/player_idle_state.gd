@@ -18,4 +18,6 @@ func handle_command(command: GameCommand) -> bool:
 			return request_transition("Player/Move", {"reason": "move_command"})
 		BuiltinCommands.ATTACK:
 			return request_transition("Player/Attack", {"reason": "attack_command", "command": command})
+		BuiltinCommands.CAST_ABILITY:
+			return request_transition("Player/CastAbility", {"reason": "cast_command", "command": command})
 	return false

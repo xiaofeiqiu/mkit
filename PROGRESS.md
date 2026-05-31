@@ -154,12 +154,58 @@ The earlier kernel-only [phase0_demo.tscn](game/demo/phase0_demo.tscn) still
 exists as a standalone scene for inspecting the bare command→state→action→effect
 pipeline.
 
-## Phase 2 — Ability & Status Slice ⬜
+## Phase 2 — Ability & Status Slice ✅
 
-- [ ] AbilityDefinition / AbilityInstance / AbilityController
-- [ ] StatusEffectDefinition / StatusEffectInstance / StatusEffectController
-- [ ] CooldownReadyCondition
-- [ ] ApplyStatusEffect / SpawnSceneEffect
+Read: [06 Ability and Status Effects](spec/combined/06_ability_and_status_effects.md)
+
+Validation target:
+
+```text
+Player casts fireball. Fireball damages enemy. Burn ticks every second.
+Cooldown blocks repeated cast.
+```
+
+### Health module additions
+
+- [x] ResourcePoolComponent (`modules/health/resource_pool_component.gd`) — mana/stamina pool; max from StatsComponent
+
+### Ability module (doc 06 §12)
+
+- [x] AbilityDefinition (`modules/abilities/ability_definition.gd`)
+- [x] AbilityInstance (`modules/abilities/ability_instance.gd`)
+- [x] AbilityController (`modules/abilities/ability_controller.gd`)
+
+### Status Effect module (doc 06 §13)
+
+- [x] StatusEffectDefinition (`modules/status_effects/status_effect_definition.gd`)
+- [x] StatusEffectInstance (`modules/status_effects/status_effect_instance.gd`)
+- [x] StatusEffectController (`modules/status_effects/status_effect_controller.gd`)
+
+### Kernel additions
+
+- [x] CooldownReadyCondition (`kernel/conditions/builtin/cooldown_ready_condition.gd`)
+- [x] DealDamageEffect (`kernel/effects/builtin/deal_damage_effect.gd`)
+- [x] HealEffect (`kernel/effects/builtin/heal_effect.gd`)
+- [x] ApplyStatusEffect (`kernel/effects/builtin/apply_status_effect.gd`)
+- [x] SpawnSceneEffect (`kernel/effects/builtin/spawn_scene_effect.gd`)
+
+### Phase 2 validation demo
+
+- [x] `game/demo/entities/player/states/player_cast_ability_state.gd` — CastAbilityState (finds nearest enemy, calls AbilityController.cast)
+- [x] `game/demo/entities/player/player.tscn` — added CastAbility state, Controllers/AbilityController, Controllers/StatusEffectController, Components/ResourcePoolComponent (50 mana), max_mana in StatsComponent
+- [x] `game/demo/entities/enemy/enemy.tscn` — added Controllers/StatusEffectController, enemy group
+- [x] `game/demo/entities/player/player_input_reader.gd` — Q key → CAST_ABILITY fireball
+- [x] Player idle/move states — CAST_ABILITY → CastAbility transition
+- [x] `game/demo/phase2_ability_slice.tscn` + `phase2_ability_slice.gd` — registers ability.fireball_basic + status.burn at runtime, wires player AbilityController, logs all events
+- [x] `game/demo/bootstrap.tscn` → `phase2_ability_slice.tscn`
+
+**How to run:** press Play. GameBootstrap boots services then enters `phase2_ability_slice.tscn`.
+Move with WASD/Arrows, melee with Space/J, cast fireball with Q. Expected console output:
+`[ABILITY] cooldown started: ability.fireball_basic (3.0s)` after first cast,
+`[EVENT] damage_applied -> 30.x magic dmg to Enemy`,
+`[STATUS] applied: status.burn (stacks=1)`,
+`[STATUS] tick: status.burn` every second,
+`[ABILITY] cast failed: ability.fireball_basic — on_cooldown: ...` if cast during cooldown.
 
 ## Phase 3 — Inventory, Equipment, Loot, Reward ⬜
 

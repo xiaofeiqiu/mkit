@@ -49,3 +49,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			if _router == null:
 				return
 			_router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, target_id, target_id, {}))
+		elif event.keycode == KEY_Q:
+			if _router == null:
+				return
+			_router.dispatch(GameCommand.create(BuiltinCommands.CAST_ABILITY, target_id, target_id, {
+				"ability_id": "ability.fireball_basic"
+			}))

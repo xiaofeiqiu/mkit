@@ -1,14 +1,15 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="1_identity"]
 [ext_resource type="Script" path="res://addons/mkit/modules/stats/stats_component.gd" id="2_stats"]
 [ext_resource type="Script" path="res://addons/mkit/modules/health/health_component.gd" id="3_health"]
 [ext_resource type="Script" path="res://addons/mkit/modules/combat/hurtbox_component.gd" id="4_hurtbox"]
+[ext_resource type="Script" path="res://addons/mkit/modules/status_effects/status_effect_controller.gd" id="5_status"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_hurt"]
 size = Vector2(32, 32)
 
-[node name="Enemy" type="CharacterBody2D"]
+[node name="Enemy" type="CharacterBody2D" groups=["enemy"]]
 
 [node name="EntityIdentity" type="Node" parent="."]
 script = ExtResource("1_identity")
@@ -35,6 +36,11 @@ script = ExtResource("4_hurtbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Components/HurtboxComponent"]
 shape = SubResource("RectShape_hurt")
+
+[node name="Controllers" type="Node" parent="."]
+
+[node name="StatusEffectController" type="Node" parent="Controllers"]
+script = ExtResource("5_status")
 
 [node name="Visual" type="Polygon2D" parent="."]
 color = Color(0.85, 0.2, 0.2, 1)

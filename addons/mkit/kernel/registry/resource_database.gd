@@ -11,7 +11,7 @@ func get_all_resources() -> Array[Resource]:
 	result.append_array(resources)
 
 	for path in resource_paths:
-		var res := load(path)
+		var res: Resource = load(path)
 		if res != null:
 			result.append(res)
 		else:

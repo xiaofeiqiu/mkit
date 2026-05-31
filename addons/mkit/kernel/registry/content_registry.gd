@@ -64,7 +64,7 @@ func validate_all() -> ContentValidationResult:
 	result.success = true
 
 	for id in _by_id.keys():
-		var res := _by_id[id]
+		var res: Resource = _by_id[id]
 		if id == "":
 			result.add_error("Empty content id")
 		if res == null:
@@ -85,7 +85,7 @@ func _extract_content_id(res: Resource) -> String:
 func _get_resource_type_name(res: Resource) -> String:
 	if res == null:
 		return "Unknown"
-	var script := res.get_script()
+	var script := res.get_script() as Script
 	if script != null and script.resource_path != "":
 		return script.resource_path.get_file().get_basename()
 	return res.get_class()

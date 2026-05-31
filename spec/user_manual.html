@@ -321,6 +321,32 @@
       margin-top: 0;
     }
 
+    .example-list {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .example {
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 248, 229, 0.9);
+    }
+
+    .example h3,
+    .example h4 {
+      margin-top: 0;
+    }
+
+    .example p {
+      margin: 0.3rem 0 0.7rem;
+    }
+
+    .example pre {
+      margin-bottom: 0;
+    }
+
     .tag {
       display: inline-block;
       margin: 0.12rem;
@@ -482,7 +508,8 @@
 
       .principle,
       .grid,
-      .grid-3 {
+      .grid-3,
+      .example-list {
         grid-template-columns: 1fr;
       }
 
@@ -706,6 +733,7 @@
         <a href="#run-room">Run / Room / Generation</a>
         <a href="#ai-ui-feedback">AI / UI / Feedback</a>
         <a href="#save-platform">Save / Platform</a>
+        <a href="#component-examples">组件用例代码</a>
         <a href="#flows">常见流程</a>
         <a href="#content-guides">内容制作指南</a>
         <a href="#debugging">调试和排错</a>
@@ -1711,6 +1739,992 @@ AbilityController.cast()
     "settings": {}
   }
 }</code></pre>
+      </section>
+
+      <section id="component-examples">
+        <h2>Component Use Case Cookbook</h2>
+        <p class="lead">这一节按 component 给具体场景和代码。代码以 Godot / GDScript 使用方式为主，目标是让用户知道这个 component 在真实项目里怎么接到流程上。</p>
+
+        <h3>Runtime Kernel</h3>
+        <div class="example-list">
+          <article class="example">
+            <h4>GameBootstrap</h4>
+            <p><strong>场景：</strong>游戏启动时加载所有 content database，然后进入主菜单或第一张 run 场景。</p>
+            <pre><code># Bootstrap.tscn 上挂 GameBootstrap
+@export var resource_databases: Array[ResourceDatabase] = [
+  preload("res://game/content/db_abilities.tres"),
+  preload("res://game/content/db_items.tres")
+]
+@export var initial_scene_path := "res://game/scenes/main_menu.tscn"</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ServiceRegistry</h4>
+            <p><strong>场景：</strong>HUD、AI、RoomController 获取全局服务，不直接持有硬引用。</p>
+            <pre><code>var events := ServiceRegistry.get_service("events") as EventRouter
+var random := ServiceRegistry.get_service("random") as RandomService
+events.run_started.connect(_on_run_started)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ContentRegistry</h4>
+            <p><strong>场景：</strong>AbilityController 根据 stable ID 找到火球技能定义。</p>
+            <pre><code>var content := ServiceRegistry.get_service("content") as ContentRegistry
+var fireball := content.get_resource("ability.fireball_basic") as AbilityDefinition
+if fireball == null:
+  push_error("Missing ability.fireball_basic")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ResourceDatabase</h4>
+            <p><strong>场景：</strong>设计师把一组物品 Resource 放进数据库，启动时统一注册。</p>
+            <pre><code>var db := ResourceDatabase.new()
+db.database_id = "items.core"
+db.resources = [
+  preload("res://game/content/items/sword_iron.tres"),
+  preload("res://game/content/items/potion_small.tres")
+]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ContentValidationResult</h4>
+            <p><strong>场景：</strong>启动时检查内容 ID 是否重复或缺失，失败就阻止进入 gameplay。</p>
+            <pre><code>var registry := ServiceRegistry.get_service("content") as ContentRegistry
+var result := registry.validate_all()
+if not result.success:
+  push_error("Content validation failed: %s" % result.errors)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>EventRouter</h4>
+            <p><strong>场景：</strong>伤害发生后，DamageNumberSystem 和 AudioManager 同时响应。</p>
+            <pre><code>func _ready() -> void:
+  var events := ServiceRegistry.get_service("events") as EventRouter
+  events.damage_applied.connect(_on_damage_applied)
+
+func _on_damage_applied(result: DamageResult) -> void:
+  $DamageNumberSystem.show_damage(result.target, result.final_amount)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>DomainEvent</h4>
+            <p><strong>场景：</strong>宝箱打开后发一个通用事件，DebugOverlay 和 Analytics 都能记录。</p>
+            <pre><code>var event := DomainEvent.create("chest_opened", "player_001", "chest_003", {
+  "room_id": current_room_id
+})
+ServiceRegistry.get_service("events").emit_domain_event(event)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>GameCommand</h4>
+            <p><strong>场景：</strong>输入层把空格键转换成 attack command，而不是直接切状态。</p>
+            <pre><code>var cmd := GameCommand.create(BuiltinCommands.ATTACK, "player_001", "player_001", {
+  "direction": facing
+})
+ServiceRegistry.get_service("commands").dispatch(cmd)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>CommandRouter</h4>
+            <p><strong>场景：</strong>Boss AI 指挥召唤物攻击玩家。</p>
+            <pre><code>var router := ServiceRegistry.get_service("commands") as CommandRouter
+router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, "boss_001", "summon_004", {
+  "target_id": "player_001"
+}))</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>CommandReceiver</h4>
+            <p><strong>场景：</strong>玩家实体接收 move command，交给 StateMachine 判断当前状态能否移动。</p>
+            <pre><code>func receive_command(command: GameCommand) -> bool:
+  command_history.append(command)
+  if state_machine.handle_command(command):
+    command.mark_consumed()
+    return true
+  return false</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StateMachine</h4>
+            <p><strong>场景：</strong>玩家从移动状态切到攻击状态，LCA 负责退出和进入正确层级。</p>
+            <pre><code>var sm := player.get_node("Behavior/StateMachine") as StateMachine
+sm.transition_to("Player/Alive/Combat/BasicAttack", {
+  "reason": "attack_command",
+  "command": attack_command
+})</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>State</h4>
+            <p><strong>场景：</strong>IdleState 接收移动 command，把移动方向写入 blackboard 后切到 Move。</p>
+            <pre><code>func handle_command(command: GameCommand) -> bool:
+  if command.command_type == BuiltinCommands.MOVE:
+    blackboard.set_value("move_direction", command.get_vector2("direction"))
+    return request_transition("Player/Alive/Locomotion/Move", {"reason": "move"})
+  return false</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>Blackboard</h4>
+            <p><strong>场景：</strong>MoveState 保存 facing，AttackState 用它决定 hitbox 方向。</p>
+            <pre><code># MoveState
+blackboard.set_value("facing", input_direction.normalized())
+
+# AttackState
+var facing: Vector2 = blackboard.get_value("facing", Vector2.RIGHT)
+$Components/HitboxComponent.position = facing * 28.0</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>GameAction</h4>
+            <p><strong>场景：</strong>自定义蓄力动作，持续 1 秒后完成。</p>
+            <pre><code>class_name ChargeAction
+extends GameAction
+
+func _on_update(delta: float) -> void:
+  if elapsed &gt;= 1.0:
+    complete()</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ActionRunner</h4>
+            <p><strong>场景：</strong>AttackState 启动 TimedAttackAction，由全局 runner 负责更新和暂停缩放。</p>
+            <pre><code>var action := TimedAttackAction.new()
+var ctx := ActionContext.new()
+ctx.source = owner_entity
+ctx.direction = blackboard.get_value("facing", Vector2.RIGHT)
+ServiceRegistry.get_service("actions").start_action(action, ctx)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ActionContext</h4>
+            <p><strong>场景：</strong>从 command 创建 action context，保留方向、位置、ability_id。</p>
+            <pre><code>var ctx := ActionContext.from_command(command, player, target)
+ctx.action_id = "dash"
+ctx.duration = 0.18
+action_runner.start_action(DashAction.new(), ctx)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>Condition</h4>
+            <p><strong>场景：</strong>自定义一个“目标是 boss”条件，用于奖励或技能限制。</p>
+            <pre><code>class_name TargetHasTagCondition
+extends Condition
+
+@export var required_tag := "boss"
+
+func _evaluate_impl(context: GameplayContext) -> bool:
+  return context.target != null and context.target.get_node("EntityIdentity").has_tag(required_tag)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ConditionEvaluator</h4>
+            <p><strong>场景：</strong>释放技能前一次性检查 mana、range、cooldown 等条件。</p>
+            <pre><code>if not ConditionEvaluator.evaluate_all(definition.conditions, context):
+  var reasons := ConditionEvaluator.collect_failures(definition.conditions, context)
+  ability_failed.emit(definition.ability_id, ", ".join(reasons))
+  return false</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>GameEffect</h4>
+            <p><strong>场景：</strong>奖励卡执行一个给金币的 effect。</p>
+            <pre><code>class_name GrantGoldEffect
+extends GameEffect
+
+@export var amount := 25
+
+func _apply_impl(context: GameplayContext) -> EffectResult:
+  context.source.get_node("Controllers/InventoryController").add_currency("gold", amount)
+  return EffectResult.ok(effect_id, {"gold": amount})</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>EffectExecutor</h4>
+            <p><strong>场景：</strong>RewardSystem 应用玩家选中的三选一奖励。</p>
+            <pre><code>var executor := ServiceRegistry.get_service("effects") as EffectExecutor
+var context := GameplayContext.new().with_source(player)
+var results := executor.execute_many(selected_option.effects, context, true)
+print("reward results: ", results)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>EffectResult</h4>
+            <p><strong>场景：</strong>背包满时 GrantItemEffect 返回失败原因，UI 显示提示。</p>
+            <pre><code>if inventory.is_full():
+  return EffectResult.fail(effect_id, "inventory_full")
+return EffectResult.ok(effect_id, {"item_id": item_id, "quantity": quantity})</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>GameplayContext</h4>
+            <p><strong>场景：</strong>火球命中敌人时，把 source、target、position、ability_id 传给 effects。</p>
+            <pre><code>var ctx := GameplayContext.new()
+ctx.source = player
+ctx.target = enemy
+ctx.ability_id = "ability.fireball_basic"
+ctx.position = enemy.global_position
+ctx.tags = ["spell", "fire"]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RandomService</h4>
+            <p><strong>场景：</strong>LootSystem 用同一个 run seed 生成可复现掉落。</p>
+            <pre><code>var rng := ServiceRegistry.get_service("random") as RandomService
+rng.set_seed(run_state.seed)
+if rng.chance(0.25):
+  drops.append("item.potion_small")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>TimeService</h4>
+            <p><strong>场景：</strong>打开三选一奖励界面时暂停 gameplay action 和 status tick。</p>
+            <pre><code>var time := ServiceRegistry.get_service("time") as TimeService
+time.set_paused(true)
+ui_manager.open_screen("reward_selection")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>SceneRouter</h4>
+            <p><strong>场景：</strong>玩家死亡后从 run scene 切到 game over scene。</p>
+            <pre><code>var scenes := ServiceRegistry.get_service("scenes") as SceneRouter
+scenes.change_scene("res://game/scenes/game_over.tscn")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ObjectPool</h4>
+            <p><strong>场景：</strong>VFXSpawner 从对象池获取 hit spark，播放完再归还。</p>
+            <pre><code>var pool := ServiceRegistry.get_service("pool") as ObjectPool
+var vfx := pool.acquire("res://game/vfx/hit_spark.tscn", get_tree().current_scene)
+vfx.global_position = hit_position
+await vfx.finished
+pool.release("res://game/vfx/hit_spark.tscn", vfx)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>DebugOverlay</h4>
+            <p><strong>场景：</strong>CombatArena 盯住 Player，显示 state、last command、HP、recent events。</p>
+            <pre><code>@onready var overlay := $DebugOverlay as DebugOverlay
+
+func _ready() -> void:
+  overlay.watch_entity_path = NodePath("../Player")
+  overlay.visible_on_start = true</code></pre>
+          </article>
+        </div>
+
+        <h3>Entity / Stats / Health / Combat</h3>
+        <div class="example-list">
+          <article class="example">
+            <h4>EntityIdentity</h4>
+            <p><strong>场景：</strong>Hitbox 判断目标是不是 enemy，不误伤 player 或 neutral NPC。</p>
+            <pre><code>var identity := target.get_node("EntityIdentity") as EntityIdentity
+if identity.is_faction("enemy") and identity.has_tag("elite"):
+  request.base_amount *= 1.25</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>EntityRoot</h4>
+            <p><strong>场景：</strong>外部系统不写深路径，统一通过 root 查组件。</p>
+            <pre><code>var root := enemy as EntityRoot
+var health := root.get_component("HealthComponent") as HealthComponent
+var abilities := root.get_controller("AbilityController") as AbilityController</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>EntityDefinition</h4>
+            <p><strong>场景：</strong>RoomDefinition 的 spawn rule 引用 goblin definition，而不是直接写场景路径。</p>
+            <pre><code>var def := EntityDefinition.new()
+def.entity_definition_id = "enemy.goblin_basic"
+def.scene_path = "res://game/enemies/goblin.tscn"
+def.default_faction = "enemy"</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>EntitySpawner</h4>
+            <p><strong>场景：</strong>RoomController 在 spawn point 生成敌人并分配 runtime entity_id。</p>
+            <pre><code>var spawner := ServiceRegistry.get_service("entity_spawner") as EntitySpawner
+var enemy := spawner.spawn("enemy.goblin_basic", $SpawnPoints/P1.global_position)
+enemy.get_node("EntityIdentity").entity_id = "goblin_%03d" % active_enemy_count</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StatsComponent</h4>
+            <p><strong>场景：</strong>移动状态读取最终 move_speed，包括装备和 buff。</p>
+            <pre><code>var stats := owner_entity.get_node("Components/StatsComponent") as StatsComponent
+var speed := stats.get_stat_value("move_speed", 160.0)
+body.velocity = direction.normalized() * speed</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StatDefinition</h4>
+            <p><strong>场景：</strong>属性面板根据定义显示百分比或普通数值。</p>
+            <pre><code>var crit := StatDefinition.new()
+crit.stat_id = "crit_chance"
+crit.display_name = "Critical Chance"
+crit.default_value = 0.05
+crit.is_percent = true</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StatModifierDefinition</h4>
+            <p><strong>场景：</strong>铁剑 Resource 定义 attack_power +5。</p>
+            <pre><code>var mod_def := StatModifierDefinition.new()
+mod_def.modifier_id = "sword_iron_attack"
+mod_def.stat_id = "attack_power"
+mod_def.operation = StatModifierDefinition.Operation.FLAT_ADD
+mod_def.value = 5.0</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StatModifier</h4>
+            <p><strong>场景：</strong>装备铁剑时把定义转换成运行时 modifier，source 是装备实例 ID。</p>
+            <pre><code>var modifier := StatModifier.from_definition(mod_def, item_instance.instance_id)
+stats.add_modifier(modifier)
+print(stats.get_stat_value("attack_power"))</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>HealthComponent</h4>
+            <p><strong>场景：</strong>敌人受到 CombatResolver 产出的伤害结果，HP 到 0 后触发死亡。</p>
+            <pre><code>var health := enemy.get_node("Components/HealthComponent") as HealthComponent
+health.died.connect(_on_enemy_died)
+health.apply_damage(damage_result)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ResourcePoolComponent</h4>
+            <p><strong>场景：</strong>火球释放前消耗 15 mana，不足时不进入冷却。</p>
+            <pre><code>var resources := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
+if not resources.spend("mana", 15.0):
+  ability_failed.emit("ability.fireball_basic", "not_enough_mana")
+  return</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>DamageRequest</h4>
+            <p><strong>场景：</strong>火焰陷阱触发一次不可暴击的 fire damage。</p>
+            <pre><code>var req := DamageRequest.new()
+req.source = trap
+req.target = player
+req.base_amount = 18.0
+req.damage_type = "trap"
+req.element_type = "fire"
+req.can_crit = false</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>DamageResult</h4>
+            <p><strong>场景：</strong>DebugOverlay 显示本次伤害公式 trace。</p>
+            <pre><code>var result := CombatResolver.get_default().resolve(req)
+print("Final damage: ", result.final_amount)
+print("Trace: ", result.to_debug_dict().trace)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>CombatResolver</h4>
+            <p><strong>场景：</strong>命中后由 resolver 统一读取攻击、防御、暴击并产出结果。</p>
+            <pre><code>var result := CombatResolver.get_default().resolve(req)
+var health := req.target.get_node("Components/HealthComponent") as HealthComponent
+health.apply_damage(result)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>HitboxComponent</h4>
+            <p><strong>场景：</strong>攻击 action 的 active frame 打开 hitbox，结束马上关闭。</p>
+            <pre><code>func _on_active_frame_started() -> void:
+  $Components/HitboxComponent.set_active(true)
+
+func _on_active_frame_finished() -> void:
+  $Components/HitboxComponent.set_active(false)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>HurtboxComponent</h4>
+            <p><strong>场景：</strong>Boss 头部 hurtbox 承受 150% 伤害，身体正常伤害。</p>
+            <pre><code># HeadHurtbox inspector
+owner_path = NodePath("../..")
+can_receive_damage = true
+damage_multiplier = 1.5
+damage_tags = ["weak_point"]</code></pre>
+          </article>
+        </div>
+
+        <h3>Ability / Status</h3>
+        <div class="example-list">
+          <article class="example">
+            <h4>AbilityDefinition</h4>
+            <p><strong>场景：</strong>设计火球技能：消耗 mana、读条、命中后造成火焰伤害并施加 burn。</p>
+            <pre><code>var fireball := AbilityDefinition.new()
+fireball.ability_id = "ability.fireball_basic"
+fireball.cost_type = "mana"
+fireball.cost_amount = 15
+fireball.cast_time = 0.35
+fireball.effects = [spawn_projectile_effect, apply_burn_effect]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>AbilityInstance</h4>
+            <p><strong>场景：</strong>玩家和法师敌人都有火球，但各自冷却独立。</p>
+            <pre><code>var instance := AbilityInstance.new()
+instance.setup(fireball_definition, player)
+instance.start_cooldown(fireball_definition, stats.get_stat_value("cooldown_reduction"))
+print(instance.cooldown_remaining)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>AbilityController</h4>
+            <p><strong>场景：</strong>玩家按 Q 释放火球，controller 负责条件、资源、施法和效果。</p>
+            <pre><code>var ctx := GameplayContext.new()
+ctx.source = player
+ctx.target = locked_enemy
+ctx.direction = (locked_enemy.global_position - player.global_position).normalized()
+$Controllers/AbilityController.cast("ability.fireball_basic", ctx)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>CastAction</h4>
+            <p><strong>场景：</strong>大招读条 1.2 秒，期间被 stun 取消。</p>
+            <pre><code>var action := CastAction.new()
+action.duration = 1.2
+action.animation_name = "cast_ultimate"
+action.cancel_tags = ["stun", "death", "silence"]
+ActionRunner.start_action(action, action_context)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>Projectile</h4>
+            <p><strong>场景：</strong>SpawnSceneEffect 生成火球投射物，投射物命中后执行 effects。</p>
+            <pre><code>func on_projectile_hit(target: Node) -> void:
+  var ctx := GameplayContext.new()
+  ctx.source = caster
+  ctx.target = target
+  ServiceRegistry.get_service("effects").execute_many(on_hit_effects, ctx)
+  queue_free()</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StatusEffectDefinition</h4>
+            <p><strong>场景：</strong>Burn 每秒 tick 一次，最多 3 层。</p>
+            <pre><code>var burn := StatusEffectDefinition.new()
+burn.status_id = "status.burn"
+burn.duration = 4.0
+burn.tick_interval = 1.0
+burn.max_stacks = 3
+burn.stack_rule = StatusEffectDefinition.StackRule.ADD_STACK
+burn.effects_on_tick = [burn_tick_damage]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StatusEffectInstance</h4>
+            <p><strong>场景：</strong>同一个 burn 定义挂到两个敌人身上，各自保存剩余时间和层数。</p>
+            <pre><code>var status := StatusEffectInstance.new()
+status.setup(burn_definition, player, goblin, 2)
+print(status.definition_id, status.remaining_duration, status.stacks)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>StatusEffectController</h4>
+            <p><strong>场景：</strong>火球命中后给敌人上 burn，由 controller 负责 tick 和过期。</p>
+            <pre><code>var controller := enemy.get_node("Controllers/StatusEffectController") as StatusEffectController
+controller.apply_status("status.burn", player, 1)
+controller.status_ticked.connect(func(id): print("ticked ", id))</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>CooldownReadyCondition</h4>
+            <p><strong>场景：</strong>AI 只有在火球冷却完成时才选择 cast_ability。</p>
+            <pre><code>var ctx := GameplayContext.new()
+ctx.source = enemy
+ctx.ability_id = "ability.fireball_basic"
+if cooldown_condition.evaluate(ctx):
+  issue_cast_command()</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>TargetInRangeCondition</h4>
+            <p><strong>场景：</strong>近战攻击必须在 48 像素内，否则 AI 继续 chase。</p>
+            <pre><code>var condition := TargetInRangeCondition.new()
+condition.range = 48.0
+var ctx := GameplayContext.new().with_source(enemy).with_target(player)
+if condition.evaluate(ctx):
+  issue_attack_command()
+else:
+  issue_chase_command()</code></pre>
+          </article>
+        </div>
+
+        <h3>Inventory / Equipment / Loot / Reward</h3>
+        <div class="example-list">
+          <article class="example">
+            <h4>ItemDefinition</h4>
+            <p><strong>场景：</strong>小血瓶配置成可堆叠消耗品，使用后治疗。</p>
+            <pre><code>var potion := ItemDefinition.new()
+potion.item_id = "item.potion_small"
+potion.item_type = "consumable"
+potion.stackable = true
+potion.max_stack = 10
+potion.use_effects = [heal_25_effect]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ItemInstance</h4>
+            <p><strong>场景：</strong>同一把铁剑定义生成带随机词缀的实例。</p>
+            <pre><code>var item := ItemInstance.new()
+item.instance_id = "item_instance_%d" % Time.get_ticks_usec()
+item.definition_id = "item.sword_iron"
+item.rolled_affixes = ["affix.crit_plus_12"]
+item.durability = 82</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>InventorySlot</h4>
+            <p><strong>场景：</strong>把 5 个小血瓶放到第 3 个背包格。</p>
+            <pre><code>var slot := InventorySlot.new()
+slot.index = 3
+slot.item = potion_instance
+slot.quantity = 5</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>InventoryModel</h4>
+            <p><strong>场景：</strong>UI 只读取 model 渲染格子，不直接改背包规则。</p>
+            <pre><code>for slot in inventory_model.slots:
+  var cell := slot_scene.instantiate()
+  cell.set_item(slot.item, slot.quantity)
+  grid.add_child(cell)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>InventoryController</h4>
+            <p><strong>场景：</strong>玩家拾取地上的 potion，controller 处理堆叠和事件。</p>
+            <pre><code>var inv := player.get_node("Controllers/InventoryController") as InventoryController
+if inv.add_item("item.potion_small", 1):
+  pickup.queue_free()
+else:
+  show_message("Inventory full")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>EquipmentController</h4>
+            <p><strong>场景：</strong>装备铁剑，把 sword 的 modifiers 添加到 StatsComponent。</p>
+            <pre><code>var equipment := player.get_node("Controllers/EquipmentController") as EquipmentController
+if equipment.equip("weapon", sword_instance):
+  print("Attack: ", stats.get_stat_value("attack_power"))</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>LootEntry</h4>
+            <p><strong>场景：</strong>Goblin 有权重掉落金币和小血瓶。</p>
+            <pre><code>var entry := LootEntry.new()
+entry.content_id = "item.potion_small"
+entry.weight = 20.0
+entry.min_quantity = 1
+entry.max_quantity = 2</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>LootTableDefinition</h4>
+            <p><strong>场景：</strong>普通 goblin 使用 common loot table。</p>
+            <pre><code>var table := LootTableDefinition.new()
+table.loot_table_id = "loot.goblin_common"
+table.entries = [gold_entry, potion_entry, sword_entry]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>LootRollResult</h4>
+            <p><strong>场景：</strong>开宝箱先生成结果，再由 PickupSpawner 在地上生成可拾取物。</p>
+            <pre><code>var result := loot_system.roll("loot.chest_common", player)
+for drop in result.drops:
+  pickup_spawner.spawn_pickup(drop.content_id, drop.quantity, chest.global_position)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>LootSystem</h4>
+            <p><strong>场景：</strong>敌人死亡后，按 loot table 和玩家 luck 生成掉落。</p>
+            <pre><code>func _on_enemy_died(enemy: Node) -> void:
+  var identity := enemy.get_node("EntityIdentity") as EntityIdentity
+  var result := loot_system.roll(identity.loot_table_id, player)
+  spawn_drops(result, enemy.global_position)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RewardDefinition</h4>
+            <p><strong>场景：</strong>房间清理后使用 common reward pool 生成三选一。</p>
+            <pre><code>var reward_def := RewardDefinition.new()
+reward_def.reward_id = "reward.room_common"
+reward_def.option_count = 3
+reward_def.option_pool = ["upgrade.attack_plus_20", "item.potion_small"]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RewardOption</h4>
+            <p><strong>场景：</strong>一张奖励卡显示 +20% attack，点击后执行 ApplyStatModifierEffect。</p>
+            <pre><code>var option := RewardOption.new()
+option.reward_id = "reward.attack_plus_20"
+option.display_name = "+20% Attack"
+option.effects = [attack_plus_20_effect]
+option.weight = 1.0</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RewardSystem</h4>
+            <p><strong>场景：</strong>Room cleared 后生成三张卡，玩家点击后应用并推进 run。</p>
+            <pre><code>var options := reward_system.generate_options("reward.room_common", player)
+reward_ui.show_options(options)
+reward_ui.selected.connect(func(option):
+  reward_system.apply_option(option, player)
+  run_director.advance_to_next_room()
+)</code></pre>
+          </article>
+        </div>
+
+        <h3>Run / Room / Generation / Progression</h3>
+        <div class="example-list">
+          <article class="example">
+            <h4>RoomDefinition</h4>
+            <p><strong>场景：</strong>森林小房间配置场景、难度、房型和刷怪规则。</p>
+            <pre><code>var room := RoomDefinition.new()
+room.room_id = "room.forest_small_01"
+room.scene_path = "res://game/rooms/forest_small_01.tscn"
+room.room_type = "combat"
+room.difficulty_rating = 2</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RoomRuntime</h4>
+            <p><strong>场景：</strong>进入房间后记录当前敌人、是否清理、奖励是否发放。</p>
+            <pre><code>room_runtime.room_id = "room.forest_small_01"
+room_runtime.active_enemy_ids = ["goblin_001", "goblin_002"]
+room_runtime.cleared = false
+room_runtime.reward_claimed = false</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RoomController</h4>
+            <p><strong>场景：</strong>监听敌人死亡，最后一个敌人死后发 room_cleared。</p>
+            <pre><code>func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
+  active_enemies.erase(entity_id)
+  if active_enemies.is_empty():
+    events.emit_room_cleared(room_id)
+    state_machine.transition_to("Room/Cleared/GeneratingReward")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>Room HFSM</h4>
+            <p><strong>场景：</strong>房间从 Spawning 切到 Combat，再切到 RewardAvailable。</p>
+            <pre><code>room_state_machine.transition_to("Room/Active/Spawning")
+spawn_enemies()
+room_state_machine.transition_to("Room/Active/Combat")
+# clear detected
+room_state_machine.transition_to("Room/Cleared/RewardAvailable")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RunState</h4>
+            <p><strong>场景：</strong>一局 run 保存 seed、当前层数、房间历史和局内升级。</p>
+            <pre><code>run_state.run_id = "run_%d" % Time.get_ticks_usec()
+run_state.seed = ServiceRegistry.get_service("random").randomize_seed()
+run_state.current_floor = 1
+run_state.temporary_upgrades = ["upgrade.attack_plus_20"]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RunDirector</h4>
+            <p><strong>场景：</strong>开始 run，生成 dungeon，进入第一个房间。</p>
+            <pre><code>func start_run(seed: int) -> void:
+  run_state = RunState.new(seed)
+  room_graph = dungeon_generator.generate(seed)
+  enter_room(room_graph.start_room_id)
+  events.emit_run_started(run_state.run_id, seed)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>Run HFSM</h4>
+            <p><strong>场景：</strong>房间清理后 run 从 InCombat 进入 ChoosingReward。</p>
+            <pre><code>func _on_room_cleared(room_id: String) -> void:
+  run_state_machine.transition_to("Run/Active/ChoosingReward", {
+    "room_id": room_id
+  })</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>DungeonGenerator</h4>
+            <p><strong>场景：</strong>同一个 seed 生成同样的房间路径。</p>
+            <pre><code>var rng := ServiceRegistry.get_service("random") as RandomService
+rng.set_seed(seed)
+var room_id := rng.weighted_pick(candidate_rooms, "weight").room_id
+graph.add_room(room_id)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RoomGraph</h4>
+            <p><strong>场景：</strong>地图 UI 显示当前房间后面有两个分支。</p>
+            <pre><code>var next_rooms := room_graph.get_next_rooms(run_state.current_room_id)
+for room_id in next_rooms:
+  map_ui.add_room_button(room_id, func(): run_director.enter_room(room_id))</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>GenerationRules</h4>
+            <p><strong>场景：</strong>第 3 层提高 elite room 权重。</p>
+            <pre><code>var rules := GenerationRules.new()
+rules.floor = 3
+rules.room_type_weights = {
+  "combat": 70,
+  "elite": 20,
+  "shop": 10
+}</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>UpgradeDefinition</h4>
+            <p><strong>场景：</strong>局内升级给玩家 +1 projectile。</p>
+            <pre><code>var upgrade := UpgradeDefinition.new()
+upgrade.upgrade_id = "upgrade.projectile_plus_1"
+upgrade.display_name = "+1 Projectile"
+upgrade.effects = [projectile_count_modifier_effect]</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ProgressionState</h4>
+            <p><strong>场景：</strong>局外保存永久货币和已解锁技能。</p>
+            <pre><code>progression.currency["meta_gold"] = 120
+progression.unlocked_abilities.append("ability.fireball_basic")
+progression.purchased_upgrades.append("upgrade.starting_hp_5")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>ProgressionSystem</h4>
+            <p><strong>场景：</strong>玩家花费 meta currency 购买永久 max_hp 升级。</p>
+            <pre><code>if progression_system.can_purchase("upgrade.meta_hp_5"):
+  progression_system.purchase("upgrade.meta_hp_5")
+  save_manager.save_game(get_tree().root)</code></pre>
+          </article>
+        </div>
+
+        <h3>AI / Interaction / UI / Feedback</h3>
+        <div class="example-list">
+          <article class="example">
+            <h4>EnemyBrain</h4>
+            <p><strong>场景：</strong>敌人每帧评估距离，决定 chase 或 attack。</p>
+            <pre><code>func _physics_process(_delta: float) -> void:
+  if global_position.distance_to(player.global_position) &lt; attack_range:
+    issue_command(BuiltinCommands.ATTACK)
+  else:
+    issue_command(BuiltinCommands.MOVE, {"target_position": player.global_position})</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>SimpleAI</h4>
+            <p><strong>场景：</strong>早期 goblin 只需要追玩家和近身攻击。</p>
+            <pre><code>if can_see_player and distance_to_player &gt; attack_range:
+  router.dispatch(GameCommand.create(BuiltinCommands.MOVE, entity_id, entity_id, {"direction": chase_dir}))
+elif distance_to_player &lt;= attack_range:
+  router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, entity_id, entity_id))</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>BehaviorTreeAI</h4>
+            <p><strong>场景：</strong>Boss 行为树优先释放可用技能，否则追击。</p>
+            <pre><code>Selector
+  Sequence(CooldownReady("ability.fire_breath"), TargetInRange(220), IssueCastCommand)
+  Sequence(TargetInRange(48), IssueAttackCommand)
+  IssueChaseCommand</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>UtilityAI</h4>
+            <p><strong>场景：</strong>高级 Boss 在逃跑、召唤、攻击中选择分数最高的行为。</p>
+            <pre><code>var scores := {
+  "retreat": low_hp_score(),
+  "summon": add_count_score(),
+  "attack": damage_opportunity_score()
+}
+var action := scores.keys().max_custom(func(a, b): return scores[a] &lt; scores[b])
+issue_ai_action(action)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>InteractionComponent</h4>
+            <p><strong>场景：</strong>玩家按 E 时和最近的宝箱交互。</p>
+            <pre><code>func interact() -> void:
+  var target := find_nearest_interactable()
+  if target != null and target.can_interact(owner):
+    target.interact(owner)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>Interactable</h4>
+            <p><strong>场景：</strong>宝箱打开后调用 LootSystem 生成掉落，只能打开一次。</p>
+            <pre><code>func interact(actor: Node) -> void:
+  if opened:
+    return
+  opened = true
+  var result := loot_system.roll("loot.chest_common", actor)
+  pickup_spawner.spawn_many(result, global_position)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>UIManager</h4>
+            <p><strong>场景：</strong>打开背包时暂停 gameplay input，但不销毁 run state。</p>
+            <pre><code>ui_manager.open_screen("inventory")
+input_router.set_gameplay_input_enabled(false)
+ServiceRegistry.get_service("time").set_paused(true)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>RewardSelectionUI</h4>
+            <p><strong>场景：</strong>展示三张 RewardOption 卡，点击后发 selected。</p>
+            <pre><code>func show_options(options: Array[RewardOption]) -> void:
+  for option in options:
+    var card := reward_card_scene.instantiate()
+    card.setup(option)
+    card.pressed.connect(func(): selected.emit(option))
+    grid.add_child(card)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>HUD</h4>
+            <p><strong>场景：</strong>监听 HP、mana 和技能冷却，刷新局内 UI。</p>
+            <pre><code>health.health_changed.connect(func(current, max_hp): hp_bar.set_value(current, max_hp))
+resources.resource_changed.connect(func(id, current, max_value):
+  resource_bars[id].set_value(current, max_value)
+)
+abilities.cooldown_started.connect(_on_cooldown_started)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>FeedbackSystem</h4>
+            <p><strong>场景：</strong>收到 damage_applied 后统一播放命中音效、VFX 和伤害数字。</p>
+            <pre><code>func _on_damage_applied(result: DamageResult) -> void:
+  vfx.spawn("hit_spark", result.target.global_position)
+  audio.play_sfx("hit_physical")
+  damage_numbers.show(result.target, result.final_amount, result.was_critical)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>AudioManager</h4>
+            <p><strong>场景：</strong>UI 按钮、武器命中、死亡分别走不同 bus。</p>
+            <pre><code>audio.play_sfx("ui_click", "UI")
+audio.play_sfx("sword_hit_01", "SFX")
+audio.play_sfx("enemy_death", "SFX")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>VFXSpawner</h4>
+            <p><strong>场景：</strong>在敌人受击点生成 hit spark，优先走 ObjectPool。</p>
+            <pre><code>func spawn_hit(result: DamageResult) -> void:
+  var pos := (result.target as Node2D).global_position
+  spawn("res://game/vfx/hit_spark.tscn", pos)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>DamageNumberSystem</h4>
+            <p><strong>场景：</strong>暴击伤害显示更大更亮，治疗数字显示绿色。</p>
+            <pre><code>func show_damage(target: Node, amount: float, crit: bool) -> void:
+  var number := pool.acquire(number_scene_path, self)
+  number.setup(amount, "crit" if crit else "damage")
+  number.global_position = target.global_position + Vector2.UP * 24</code></pre>
+          </article>
+        </div>
+
+        <h3>Save / Platform</h3>
+        <div class="example-list">
+          <article class="example">
+            <h4>Saveable</h4>
+            <p><strong>场景：</strong>InventoryController 实现保存接口，SaveManager 不需要知道内部 slot 结构。</p>
+            <pre><code>func get_save_id() -> String:
+  return "player_inventory"
+
+func to_save_data() -> Dictionary:
+  return inventory_model.to_dict()
+
+func from_save_data(data: Dictionary) -> void:
+  inventory_model.from_dict(data)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>SaveManager</h4>
+            <p><strong>场景：</strong>玩家回到营地时保存 profile、背包、装备、meta progression。</p>
+            <pre><code>var save := ServiceRegistry.get_service("save") as SaveManager
+save.save_completed.connect(func(path): print("Saved ", path))
+save.save_failed.connect(func(path, reason): push_error(reason))
+save.save_game(get_tree().root)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>SaveMigration</h4>
+            <p><strong>场景：</strong>版本 1 存档没有 resource_pools 字段，升级到版本 2 时补默认值。</p>
+            <pre><code>func migrate(data: Dictionary) -> Dictionary:
+  if data.save_version == 1:
+    data.payload["resource_pools"] = {"mana": 50, "stamina": 100}
+    data.save_version = 2
+  return data</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>AnalyticsService</h4>
+            <p><strong>场景：</strong>run 结束时记录结果、时长、房间数和死亡原因。</p>
+            <pre><code>analytics.track_event("run_finished", {
+  "run_id": run_state.run_id,
+  "result": "failed",
+  "floor": run_state.current_floor,
+  "death_reason": "enemy.goblin_elite"
+})</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>AnalyticsServiceMock</h4>
+            <p><strong>场景：</strong>Editor 中不接真实 SDK，只把事件打印出来。</p>
+            <pre><code>func track_event(name: String, payload: Dictionary = {}) -> void:
+  print("[AnalyticsMock] %s %s" % [name, payload])</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>AdService</h4>
+            <p><strong>场景：</strong>玩家死亡后看 rewarded ad 复活。</p>
+            <pre><code>ad_service.rewarded_completed.connect(func(placement):
+  if placement == "revive":
+    player.get_node("Components/HealthComponent").revive(0.5)
+)
+ad_service.show_rewarded("revive")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>AdServiceMock</h4>
+            <p><strong>场景：</strong>本地测试广告复活流程，不等待真实广告 SDK。</p>
+            <pre><code>func show_rewarded(placement: String) -> void:
+  print("[AdMock] rewarded: ", placement)
+  rewarded_completed.emit(placement)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>IAPService</h4>
+            <p><strong>场景：</strong>玩家购买 starter pack，成功后发放货币和物品。</p>
+            <pre><code>iap.purchase_completed.connect(func(product_id):
+  if product_id == "starter_pack":
+    reward_system.apply_definition("reward.starter_pack", player)
+)
+iap.purchase("starter_pack")</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>IAPServiceMock</h4>
+            <p><strong>场景：</strong>Editor 中点购买按钮立即模拟成功。</p>
+            <pre><code>func purchase(product_id: String) -> void:
+  print("[IAPMock] purchase: ", product_id)
+  purchase_completed.emit(product_id)</code></pre>
+          </article>
+
+          <article class="example">
+            <h4>CloudSaveService</h4>
+            <p><strong>场景：</strong>本地保存成功后把 profile 上传到云端。</p>
+            <pre><code>save_manager.save_completed.connect(func(path):
+  var data := FileAccess.get_file_as_string(path)
+  cloud_save.upload("profile_001", data)
+)</code></pre>
+          </article>
+        </div>
       </section>
 
       <section id="flows">

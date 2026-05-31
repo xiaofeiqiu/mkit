@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="2_identity"]
@@ -16,6 +16,8 @@
 [ext_resource type="Script" path="res://addons/mkit/modules/abilities/ability_controller.gd" id="14_ability"]
 [ext_resource type="Script" path="res://addons/mkit/modules/status_effects/status_effect_controller.gd" id="15_status"]
 [ext_resource type="Script" path="res://game/demo/entities/player/player_input_reader.gd" id="16_input"]
+[ext_resource type="Script" path="res://addons/mkit/modules/inventory/inventory_controller.gd" id="17_inv"]
+[ext_resource type="Script" path="res://addons/mkit/modules/inventory/equipment_controller.gd" id="18_equip"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_hit"]
 size = Vector2(36, 36)
@@ -95,6 +97,13 @@ script = ExtResource("14_ability")
 
 [node name="StatusEffectController" type="Node" parent="Controllers"]
 script = ExtResource("15_status")
+
+[node name="InventoryController" type="Node" parent="Controllers"]
+script = ExtResource("17_inv")
+capacity = 20
+
+[node name="EquipmentController" type="Node" parent="Controllers"]
+script = ExtResource("18_equip")
 
 [node name="InputReader" type="Node" parent="."]
 script = ExtResource("16_input")

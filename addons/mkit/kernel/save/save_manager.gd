@@ -75,6 +75,9 @@ func load_game(root: Node) -> bool:
 		return false
 
 	var file := FileAccess.open(save_path, FileAccess.READ)
+	if file == null:
+		load_failed.emit(save_path, "Cannot open file for read")
+		return false
 	var text := file.get_as_text()
 	file.close()
 

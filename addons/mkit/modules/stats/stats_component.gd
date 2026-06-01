@@ -81,6 +81,7 @@ func add_modifier(modifier: StatModifier) -> void:
 	if modifier == null or modifier.stat_id == "":
 		return
 
+	var old_value := get_stat_value(modifier.stat_id)
 	if not modifiers_by_stat.has(modifier.stat_id):
 		modifiers_by_stat[modifier.stat_id] = []
 
@@ -88,7 +89,7 @@ func add_modifier(modifier: StatModifier) -> void:
 	_apply_stacking_rule(list, modifier)
 	list.append(modifier)
 	mark_dirty(modifier.stat_id)
-	_emit_stat_changed(modifier.stat_id)
+	_emit_stat_changed(modifier.stat_id, old_value)
 
 
 ## Purpose: Public method `remove_modifier` for external gameplay integration.
@@ -97,6 +98,7 @@ func add_modifier(modifier: StatModifier) -> void:
 func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array = modifiers_by_stat[stat_id]
+		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
 			if modifier.modifier_id == modifier_id and (source_id == "" or modifier.source_id == source_id):
@@ -104,7 +106,7 @@ func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 				removed = true
 		if removed:
 			mark_dirty(stat_id)
-			_emit_stat_changed(stat_id)
+			_emit_stat_changed(stat_id, old_value)
 
 
 ## Purpose: Public method `remove_modifiers_from_source` for external gameplay integration.
@@ -113,6 +115,7 @@ func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 func remove_modifiers_from_source(source_id: String) -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array = modifiers_by_stat[stat_id]
+		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
 			if modifier.source_id == source_id:
@@ -120,7 +123,7 @@ func remove_modifiers_from_source(source_id: String) -> void:
 				removed = true
 		if removed:
 			mark_dirty(stat_id)
-			_emit_stat_changed(stat_id)
+			_emit_stat_changed(stat_id, old_value)
 
 
 ## Purpose: Public method `tick_modifiers` for external gameplay integration.
@@ -129,6 +132,7 @@ func remove_modifiers_from_source(source_id: String) -> void:
 func tick_modifiers(delta: float) -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array = modifiers_by_stat[stat_id]
+		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
 			if modifier.remaining_duration > 0:
@@ -138,7 +142,7 @@ func tick_modifiers(delta: float) -> void:
 					removed = true
 		if removed:
 			mark_dirty(stat_id)
-			_emit_stat_changed(stat_id)
+			_emit_stat_changed(stat_id, old_value)
 
 
 ## Purpose: Public method `mark_dirty` for external gameplay integration.
@@ -212,6 +216,6 @@ func _apply_stacking_rule(list: Array, modifier: StatModifier) -> void:
 			pass
 
 
-func _emit_stat_changed(stat_id: String) -> void:
+func _emit_stat_changed(stat_id: String, old_value: float) -> void:
 	var new_value := get_stat_value(stat_id)
-	stat_changed.emit(stat_id, cached_values.get(stat_id, new_value), new_value)
+	stat_changed.emit(stat_id, old_value, new_value)

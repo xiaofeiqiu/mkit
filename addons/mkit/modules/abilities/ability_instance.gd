@@ -37,6 +37,7 @@ var enabled: bool = true
 var temporary_modifiers: Dictionary = {}
 
 var _definition: AbilityDefinition = null
+var _recharge_duration: float = 0.0
 
 
 ## Purpose: Public method `setup` for external gameplay integration.
@@ -45,7 +46,9 @@ var _definition: AbilityDefinition = null
 func setup(definition: AbilityDefinition, owner_entity: Node) -> void:
 	definition_id = definition.ability_id
 	owner = owner_entity
-	current_charges = definition.charges
+	current_charges = _max_charges(definition)
+	cooldown_remaining = 0.0
+	_recharge_duration = 0.0
 	_definition = definition
 
 
@@ -57,27 +60,44 @@ func tick(delta: float) -> void:
 		cooldown_remaining = max(0.0, cooldown_remaining - delta)
 		if cooldown_remaining <= 0.0 and _definition != null:
 			restore_charge(_definition)
+			if current_charges < _max_charges(_definition) and _recharge_duration > 0.0:
+				cooldown_remaining = _recharge_duration
 
 
 ## Purpose: Public method `is_cooldown_ready` for external gameplay integration.
 ## Example: `self.is_cooldown_ready()`
 ## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func is_cooldown_ready() -> bool:
-	return cooldown_remaining <= 0.0 and current_charges > 0
+	return current_charges > 0
 
 
 ## Purpose: Public method `start_cooldown` for external gameplay integration.
 ## Example: `self.start_cooldown(<definition>, <cooldown_reduction>)`
 ## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func start_cooldown(definition: AbilityDefinition, cooldown_reduction: float = 0.0) -> void:
+	var max_charges := _max_charges(definition)
 	var final_cd := max(0.0, definition.cooldown * (1.0 - cooldown_reduction))
-	cooldown_remaining = final_cd
-	if definition.charges > 0:
-		current_charges = max(0, current_charges - 1)
+	_recharge_duration = final_cd
+	current_charges = max(0, current_charges - 1)
+	if final_cd <= 0.0:
+		current_charges = max_charges
+		cooldown_remaining = 0.0
+		return
+	if current_charges < max_charges:
+		cooldown_remaining = final_cd
+	else:
+		cooldown_remaining = 0.0
 
 
 ## Purpose: Public method `restore_charge` for external gameplay integration.
 ## Example: `self.restore_charge(<definition>)`
 ## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func restore_charge(definition: AbilityDefinition) -> void:
-	current_charges = min(definition.charges, current_charges + 1)
+	var max_charges := _max_charges(definition)
+	current_charges = min(max_charges, current_charges + 1)
+	if current_charges >= max_charges:
+		cooldown_remaining = 0.0
+
+
+func _max_charges(definition: AbilityDefinition) -> int:
+	return max(1, definition.charges)

@@ -113,8 +113,18 @@ func enter_next_room() -> void:
 ## Example: `self.on_room_cleared(<room_controller>)`
 ## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func on_room_cleared(room_controller: RoomController) -> void:
+	if run_state == null:
+		return
+	var options: Array[RewardOption] = []
+	if room_controller != null and room_controller.runtime != null:
+		options = room_controller.runtime.reward_options
+	if options.is_empty():
+		run_state.current_room_index += 1
+		run_state.status = "active"
+		enter_next_room()
+		return
 	run_state.status = "choosing_reward"
-	choosing_reward.emit(room_controller.runtime.reward_options)
+	choosing_reward.emit(options)
 
 ## Purpose: Public method `select_reward` for external gameplay integration.
 ## Example: `self.select_reward(<option>)`

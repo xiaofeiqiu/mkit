@@ -51,10 +51,10 @@ func _connect_signals() -> void:
 		_iap.restore_completed.connect(func(ids): _log("[IAP] restore: %s" % str(ids)))
 
 	if _cloud_save != null:
-		_cloud_save.cloud_save_completed.connect(func(slot): _log("[CloudSave] saved: '%s'" % slot))
-		_cloud_save.cloud_save_failed.connect(func(slot, r): _log("[CloudSave] save failed: %s" % r))
+		_cloud_save.cloud_save_completed.connect(_on_cloud_save_completed)
+		_cloud_save.cloud_save_failed.connect(_on_cloud_save_failed)
 		_cloud_save.cloud_load_completed.connect(_on_cloud_loaded)
-		_cloud_save.cloud_load_failed.connect(func(slot, r): _log("[CloudSave] load failed: %s" % r))
+		_cloud_save.cloud_load_failed.connect(_on_cloud_load_failed)
 
 
 func _input(event: InputEvent) -> void:
@@ -163,9 +163,6 @@ func _do_cloud_save() -> void:
 	_log("[CloudSave] saving slot 'profile_01' …")
 	_update_status()
 	_cloud_save.save_to_cloud("profile_01", data)
-	await _cloud_save.cloud_save_completed
-	_cloud_busy = false
-	_update_status()
 
 
 func _do_cloud_load() -> void:
@@ -182,7 +179,16 @@ func _do_cloud_load() -> void:
 	_log("[CloudSave] loading slot 'profile_01' …")
 	_update_status()
 	_cloud_save.load_from_cloud("profile_01")
-	var result = await _cloud_save.cloud_load_completed
+
+
+func _on_cloud_save_completed(slot: String) -> void:
+	_log("[CloudSave] saved: '%s'" % slot)
+	_cloud_busy = false
+	_update_status()
+
+
+func _on_cloud_save_failed(_slot: String, reason: String) -> void:
+	_log("[CloudSave] save failed: %s" % reason)
 	_cloud_busy = false
 	_update_status()
 
@@ -193,6 +199,14 @@ func _on_cloud_loaded(slot: String, data: Dictionary) -> void:
 		str(data.get("run_count", "?")),
 		str(data.get("timestamp", "?"))
 	])
+	_cloud_busy = false
+	_update_status()
+
+
+func _on_cloud_load_failed(_slot: String, reason: String) -> void:
+	_log("[CloudSave] load failed: %s" % reason)
+	_cloud_busy = false
+	_update_status()
 
 
 # --- HUD ---

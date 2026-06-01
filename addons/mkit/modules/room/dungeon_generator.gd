@@ -12,6 +12,12 @@ extends RefCounted
 ## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func generate_linear(room_pool_ids: Array[String], seed: int, length: int) -> RoomGraph:
 	var graph := RoomGraph.new()
+	if length <= 0:
+		return graph
+	if room_pool_ids.is_empty():
+		push_warning("DungeonGenerator: room_pool_ids is empty, cannot generate run graph.")
+		return graph
+
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
 

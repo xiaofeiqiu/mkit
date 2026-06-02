@@ -1,0 +1,22 @@
+[
+  {"query": "i want to add a knockback effect that shoves the target backwards when they get hit. where does that go under addons/mkit and what do i need to wire up so it runs through the effect executor?", "should_trigger": true},
+  {"query": "add a unit test for the loot system that checks weighted rolls come out deterministic when you inject a seeded random. follow how the other module tests do it", "should_trigger": true},
+  {"query": "crits in combat_resolver.gd are being applied before attack_power gets added, so the numbers are off. fix the ordering and make sure make ut still passes", "should_trigger": true},
+  {"query": "can you review my dev branch? i'm paranoid i accidentally added an import from the kernel up into one of the modules, which would break the layering", "should_trigger": true},
+  {"query": "scaffold a new dash action with startup / active / recovery phases, basically modeled on the existing timed attack action", "should_trigger": true},
+  {"query": "how do I register a new service in game_bootstrap so other systems can pull it off the ServiceRegistry by id?", "should_trigger": true},
+  {"query": "I changed AbilityController.cast() to take a GameplayContext arg now, can you update its reference doc page to match", "should_trigger": true},
+  {"query": "i'm building a roguelite and want a poison status that ticks damage every second. how should I split the static definition from the per-entity runtime instance here?", "should_trigger": true},
+  {"query": "add a command for the player to interact with objects in the world, and wire it so the idle state handles it and transitions properly", "should_trigger": true},
+  {"query": "i've got a new boss with 500 hp and a fireball attack. where do I put this so I don't end up hardcoding game content into the reusable framework?", "should_trigger": true},
+  {"query": "i'm starting a brand new Godot 4 platformer from scratch, can you set up a basic CharacterBody2D player movement script with jump and gravity?", "should_trigger": false},
+  {"query": "how do I write unit tests in Unity with NUnit for my inventory system? i've got an InventoryManager MonoBehaviour i want to cover", "should_trigger": false},
+  {"query": "explain how Godot's autoload singletons work in general and when you'd use one vs a static class", "should_trigger": false},
+  {"query": "i have a python script that calls the anthropic API in a loop, help me add prompt caching so it stops re-sending the same system prompt every time", "should_trigger": false},
+  {"query": "write me a python script that walks a directory and strips all the // comments out of my javascript and typescript files", "should_trigger": false},
+  {"query": "my Unreal Engine RPG needs a damage formula with crit chance, crit multiplier and defense subtraction. can you write the C++ for a combat resolver class?", "should_trigger": false},
+  {"query": "i want to create a new skill that helps me organize and search my markdown notes, walk me through it", "should_trigger": false},
+  {"query": "what's a good loot table drop-rate design for a mobile gacha game so it's profitable but not too predatory?", "should_trigger": false},
+  {"query": "help me set up a github actions CI workflow that runs the test suite for my generic node.js project on every push", "should_trigger": false},
+  {"query": "i'm reading some GDScript someone wrote and i don't get what the := operator does, can you explain typed gdscript inference?", "should_trigger": false}
+]

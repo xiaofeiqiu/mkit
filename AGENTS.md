@@ -8,7 +8,16 @@ Mkit is a reusable Godot 4.7 (GDScript 2.0) runtime kernel plus gameplay modules
 
 Never hardcode a specific boss, item, room, economy, shop price, or other concrete game content into `addons/mkit/`. The addon should expose generic, data-driven mechanisms only.
 
-For deeper task-specific guidance, use the local Codex skill at `.codex/skills/mkit-dev/SKILL.md`.
+For deeper task-specific guidance, read the existing Claude skill at `.claude/skills/mkit-dev/SKILL.md`. That file and its references are the single source of truth for the mkit development playbook.
+
+Use these references directly instead of maintaining a Codex copy:
+
+| Task | Read |
+|------|------|
+| Understand layers, pipeline, data model, folder map, entity layout | `.claude/skills/mkit-dev/references/architecture.md` |
+| Add or extend a gameplay system the mkit way | `.claude/skills/mkit-dev/references/adding-a-system.md` |
+| Write or run tests, debug a failing GUT test | `.claude/skills/mkit-dev/references/testing.md` |
+| Match code style, handle `.uid` files, update docs | `.claude/skills/mkit-dev/references/conventions.md` |
 
 ## Commands
 

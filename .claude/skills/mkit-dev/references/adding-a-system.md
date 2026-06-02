@@ -38,7 +38,8 @@ correct change:
 
 Before writing anything, grep `addons/mkit/` and read the closest existing
 sibling — the fastest way to stay consistent is to copy the shape of the nearest
-neighbor. Then read the matching `spec/combined/NN_*.md` section.
+neighbor. Then read the relevant `docs/` page: `docs/pipeline.md`, the affected
+layer doc, and any nearby `docs/ref/<ClassName>.md` entries.
 
 ## Add a new effect
 
@@ -135,7 +136,8 @@ Model it on an existing module (e.g. `modules/abilities/` or `modules/inventory/
    from unrelated systems. Emit domain events through `EventRouter` so UI/audio/
    analytics can react without coupling.
 5. Place files under a new `addons/mkit/modules/<feature>/` folder, keep the
-   layer's dependency direction, add tests + a `spec/test-spec/` doc + docs/ref.
+   layer's dependency direction, add tests, and update the affected `docs/ref`
+   and layer/pipeline docs.
 
 ## Add a new kernel service
 

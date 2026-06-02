@@ -6,7 +6,7 @@ description: >-
   2D RPG / roguelike games). Use this whenever working inside the mkit repo:
   adding or changing a gameplay system, module, action, effect, command,
   condition, entity, or service; writing or running GUT unit tests; updating
-  docs/ref or specs; or reviewing a change for architecture / layering
+  docs/ref or layer/pipeline docs; or reviewing a change for architecture / layering
   violations. Trigger even when the request never says "mkit" but it touches
   addons/mkit/, game/, GDScript (.gd / .tscn) files, the
   command -> action -> effect pipeline, ServiceRegistry, the
@@ -35,8 +35,9 @@ that matches your task instead of loading everything:
 | Match code style, handle `.uid` files, update docs | `references/conventions.md` |
 
 You usually don't need all four. But before you write code, skim the relevant
-`spec/combined/NN_*.md` design doc — the spec is the source of truth the
-implementation follows, and it explains intent the code alone won't.
+`docs/` page: `docs/readme.md` for the overview, `docs/pipeline.md` for runtime
+flow, `docs/*_layer.md` for layer boundaries, and `docs/ref/<ClassName>.md` for
+public interfaces. The docs explain intent the code alone won't.
 
 ## Orient yourself before editing
 
@@ -51,9 +52,10 @@ duplicated mechanism, broken convention):
    pooling. New behavior is usually a *new data definition or a new
    action/effect/condition*, not a new bespoke system. Grep `addons/mkit/`
    before inventing anything.
-3. **Read the matching spec.** `spec/implementation_spec.md` maps phases to
-   slices; `spec/combined/00..12_*.md` carry the design (bilingual — Chinese
-   concept prose, English identifiers). `spec/test-spec/` documents each test.
+3. **Read the matching docs.** `docs/readme.md` is the top-level index,
+   `docs/pipeline.md` maps wired flows, the layer docs define dependency
+   boundaries, and `docs/ref/<ClassName>.md` records public interfaces. Treat
+   `docs/` as the source of truth.
 
 ## The invariants that matter most
 
@@ -117,8 +119,9 @@ report success on unverified work.
   make ut-modules    # modules only
   ```
   New or changed behavior in the addon should ship with a GUT test under
-  `test/unit/` and, ideally, a matching `spec/test-spec/` doc. The engine binary
-  is set via the `GODOT` env var (this is a Godot **4.7-dev** project — point
+  `test/unit/`. When behavior changes a public interface, layer contract, or
+  documented pipeline, update the affected `docs/` pages. The engine binary is
+  set via the `GODOT` env var (this is a Godot **4.7-dev** project — point
   `GODOT` at a matching build). See `references/testing.md` for single-test
   commands and the `test_tc_<area>_<nn>_<desc>` naming convention.
 

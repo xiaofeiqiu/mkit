@@ -8,7 +8,7 @@ Mkit is a reusable Godot 4.7 (GDScript 2.0) runtime kernel plus gameplay modules
 
 Never hardcode a specific boss, item, room, economy, shop price, or other concrete game content into `addons/mkit/`. The addon should expose generic, data-driven mechanisms only.
 
-For deeper task-specific guidance, read the existing Claude skill at `.claude/skills/mkit-dev/SKILL.md`. That file and its references are the single source of truth for the mkit development playbook.
+For deeper task-specific guidance, read the existing Claude skill at `.claude/skills/mkit-dev/SKILL.md`. That file and its references are the mkit development playbook, and `docs/` is the source of truth for architecture, public interfaces, layers, and pipelines.
 
 Use these references directly instead of maintaining a Codex copy:
 
@@ -37,7 +37,7 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/unit/modules/test
 $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/unit/modules/test_combat_resolver.gd -gunit_test_name=test_tc_combat_05 -gexit
 ```
 
-There is no separate build step. Godot compiles GDScript at load. Tests use GUT; test files `extends GutTest`, are named `test_*.gd`, and methods are named `test_tc_<area>_<nn>_<description>`. Each test spec has a matching design doc in `spec/test-spec/`.
+There is no separate build step. Godot compiles GDScript at load. Tests use GUT; test files `extends GutTest`, are named `test_*.gd`, and methods are named `test_tc_<area>_<nn>_<description>`. Project design, public interfaces, layers, and pipelines are documented under `docs/`.
 
 ## Architecture
 
@@ -93,7 +93,7 @@ Modules locate siblings through hardcoded relative paths from `owner`, so preser
 - Keep the addon reusable. Concrete game content belongs in `game/`.
 - When adding a new `.gd`, let Godot generate the sibling `.gd.uid` by importing the project or running tests; never hand-author UIDs.
 - When public interfaces change, update the matching `docs/ref/<ClassName>.md` and affected layer or pipeline docs.
-- Docs and specs are bilingual: keep Chinese conceptual prose Chinese, and keep code, identifiers, and file paths English.
+- Docs are bilingual: keep Chinese conceptual prose Chinese, and keep code, identifiers, and file paths English.
 
 ## Definition Of Done
 
@@ -101,6 +101,6 @@ Before reporting a code change as complete:
 
 1. Run the relevant GUT suite, or explain exactly why it could not be run.
 2. Add or update focused tests for changed addon behavior.
-3. Keep `spec/test-spec/` in sync with new or changed test files.
+3. Keep affected `docs/` pages in sync with public behavior, interface, layer, or pipeline changes.
 4. Confirm no upward dependency was introduced.
 5. Confirm no concrete game content was added inside `addons/mkit/`.

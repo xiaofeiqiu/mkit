@@ -21,7 +21,7 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/unit/modules/test
 $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/unit/modules/test_combat_resolver.gd -gunit_test_name=test_tc_combat_05 -gexit
 ```
 
-There is no separate build step (Godot compiles GDScript at load). Tests use the GUT addon; test files `extends GutTest`, are named `test_*.gd`, and methods are named `test_tc_<area>_<nn>_<description>`. Each test spec has a matching design doc in `spec/test-spec/`.
+There is no separate build step (Godot compiles GDScript at load). Tests use the GUT addon; test files `extends GutTest`, are named `test_*.gd`, and methods are named `test_tc_<area>_<nn>_<description>`. Project design, public interfaces, layers, and pipelines are documented under `docs/`.
 
 ## Architecture
 
@@ -93,4 +93,4 @@ EntityRoot
 
 ## Reference
 
-- `docs/` — generated class reference (`docs/ref/<ClassName>.md`) plus layer overviews (`kernel_layer.md`, `module_layer.md`, `platform_adapter_layer.md`, `pipeline.md`). Note: several docs are written in Chinese.
+- `docs/` — source of truth for project guidance: generated class reference (`docs/ref/<ClassName>.md`), layer overviews (`kernel_layer.md`, `module_layer.md`, `platform_adapter_layer.md`), and runtime pipeline docs (`pipeline.md`). Note: several docs are written in Chinese.

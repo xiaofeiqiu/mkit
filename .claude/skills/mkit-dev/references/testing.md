@@ -9,7 +9,7 @@ the real result before claiming success.
 - [Where tests live and how they're named](#where-tests-live-and-how-theyre-named)
 - [The standard test shape](#the-standard-test-shape)
 - [Determinism: stub the random service](#determinism-stub-the-random-service)
-- [Test-spec docs](#test-spec-docs)
+- [Docs sync](#docs-sync)
 - [Debugging a failing test](#debugging-a-failing-test)
 
 ## Running tests
@@ -120,13 +120,12 @@ RandomService` inner class (see above and `test_loot_system.gd` /
 `test_combat_resolver.gd`). Where the system reads random via the registry,
 register the stub under `"random"` in `before_each`.
 
-## Test-spec docs
+## Docs sync
 
-Each test file has a companion design doc in `spec/test-spec/test_<class>.md`
-describing source, helpers, and the cases. When you add a new test file, add the
-matching spec doc; when you add cases to an existing file, keep its spec doc in
-step. The doc is where the *intent* of each case is recorded — the code says what
-is checked, the spec says why.
+When a test reflects a new or changed public interface, layer contract, or
+documented pipeline, update the affected `docs/` pages in the same change. The
+code says what is checked; the docs explain the behavior and intent users should
+rely on.
 
 ## Debugging a failing test
 

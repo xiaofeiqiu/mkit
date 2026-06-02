@@ -10,7 +10,7 @@ feature, not a preference.
 - [.uid files](#uid-files)
 - [Scenes (.tscn) and resources](#scenes-tscn-and-resources)
 - [Keeping docs in sync](#keeping-docs-in-sync)
-- [Language policy for docs and specs](#language-policy-for-docs-and-specs)
+- [Language policy for docs](#language-policy-for-docs)
 
 ## GDScript style
 
@@ -48,12 +48,12 @@ path arg):
 
 ```bash
 python3 tools/strip_comments.py [path]   # strip all # and ## comments (string-literal aware)
-python3 tools/clean_comments.py [path]   # remove auto-generated ## SPEC FIELD/FUNC/SIGNAL blocks + headers
+python3 tools/clean_comments.py [path]   # remove auto-generated doc comment blocks + headers
 ```
 
-`clean_comments.py` exists because the spec-driven generation step emits doc
-comment blocks; it removes them so the committed source stays clean. If you ever
-generate code from the spec, run the cleaner before committing.
+`clean_comments.py` exists because generated code may include doc comment blocks;
+it removes them so the committed source stays clean. If you ever generate code,
+run the cleaner before committing.
 
 Note this rule is scoped to the **addon**. Test helpers and `game/` may carry the
 occasional comment, but the prevailing style is still terse and self-describing —
@@ -111,12 +111,12 @@ stays truthful:
 Scope the update to what actually changed — a renamed method means fixing the
 `## 接口` and `## 函数使用场景` entries, not rewriting the file.
 
-## Language policy for docs and specs
+## Language policy for docs
 
-The docs and specs are **bilingual**: Chinese for conceptual prose
-(概念说明 / 设计目的 / function-purpose notes), English for code, identifiers, and
-file paths. The rule is **match the file/section you're editing** — keep Chinese
-where it already is, keep code and identifiers English, and don't translate an
-existing Chinese section into English (or vice versa) as a side effect of a code
-change. New files mirror the structure and language mix of their nearest sibling.
-This keeps the corpus consistent for the people who maintain it.
+The docs are **bilingual**: Chinese for conceptual prose (概念说明 / 设计目的 /
+function-purpose notes), English for code, identifiers, and file paths. The rule
+is **match the file/section you're editing** — keep Chinese where it already is,
+keep code and identifiers English, and don't translate an existing Chinese
+section into English (or vice versa) as a side effect of a code change. New files
+mirror the structure and language mix of their nearest sibling. This keeps the
+corpus consistent for the people who maintain it.

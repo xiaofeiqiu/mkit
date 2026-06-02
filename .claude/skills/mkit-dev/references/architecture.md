@@ -1,8 +1,8 @@
 # mkit architecture reference
 
 How the framework is shaped, so a change lands in the right place and follows the
-grain of the codebase. Source of truth is `spec/combined/` and
-`spec/architecture/high_level_design.md`; this is the working summary.
+grain of the codebase. The canonical project docs live in `docs/readme.md`,
+`docs/pipeline.md`, the layer docs, and `docs/ref/`; this is the working summary.
 
 ## Contents
 - [Layers and dependency direction](#layers-and-dependency-direction)
@@ -112,8 +112,7 @@ addons/mkit/
     inventory/ loot/ room/ progression/ ai/ interaction/ ui/
 game/demo/                     # demo content + phaseN slices (concrete content lives here)
 test/unit/{kernel,modules}/    # GUT tests
-spec/                          # design: combined/ (working set), architecture/, test-spec/
-docs/                          # generated class ref + layer/pipeline overviews
+docs/                          # source of truth: class ref + layer/pipeline overviews
 tools/                         # strip_comments.py / clean_comments.py
 ```
 

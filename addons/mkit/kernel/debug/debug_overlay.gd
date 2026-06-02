@@ -1,21 +1,7 @@
-## What: DebugOverlay is a lightweight CanvasLayer for showing live runtime state during local development.
-## Responsibilities: read selected entity data, format debug text, and toggle visibility without changing gameplay logic.
-## Upstream: GameBootstrap or a debug scene adds this overlay and sets watch_entity_path to the player or test entity.
-## Downstream: designers, QA, and demo scenes consume the rendered text while gameplay systems stay decoupled.
-## When to use: Use it in prototype slices or internal builds when you need quick inspection of HP, state, stats, or services.
-## Example: `$DebugOverlay.watch_entity_path = NodePath("../Player")` then call `$DebugOverlay.toggle()` from a debug key.
 class_name DebugOverlay
 extends CanvasLayer
-
-## Purpose: Inspector-exposed configuration `watch_entity_path`.
-## Example: `self.watch_entity_path = NodePath(".")`
-## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var watch_entity_path: NodePath
-## Purpose: Inspector-exposed configuration `visible_on_start`.
-## Example: `self.visible_on_start = true`
-## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var visible_on_start: bool = true
-
 var _label: Label = null
 var _events: EventRouter = null
 
@@ -35,9 +21,6 @@ func _process(_delta: float) -> void:
 		_label.text = _build_text()
 
 
-## Purpose: Public method `toggle` for external gameplay integration.
-## Example: `self.toggle()`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func toggle() -> void:
 	visible = not visible
 
@@ -54,13 +37,13 @@ func _build_text() -> String:
 		var receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
 		if receiver != null and not receiver.command_history.is_empty():
 			lines.append("Last command: %s" % receiver.command_history[-1].command_type)
-		# HealthComponent is a gameplay-module type added in a later phase. Read it
-		# by duck typing so the kernel-level overlay compiles before combat exists.
 		var health = entity.get_node_or_null("Components/HealthComponent")
 		if health != null and "current_hp" in health and health.has_method("get_max_hp"):
 			lines.append("HP: %.0f / %.0f" % [health.current_hp, health.get_max_hp()])
 	if _events != null and not _events.recent_events.is_empty():
-		var recent := _events.recent_events.slice(max(0, _events.recent_events.size() - 5), _events.recent_events.size())
+		var recent := _events.recent_events.slice(
+			max(0, _events.recent_events.size() - 5), _events.recent_events.size()
+		)
 		var names: Array[String] = []
 		for e in recent:
 			names.append(e.event_type)

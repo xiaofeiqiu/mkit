@@ -1,23 +1,7 @@
-## What: DashAction is a GameAction that moves a CharacterBody2D quickly for a fixed duration.
-## Responsibilities: read dash direction/speed, move the source body each update, and complete when time expires.
-## Upstream: State, AbilityController, or CommandReceiver can start it through ActionRunner.
-## Downstream: the source CharacterBody2D receives velocity/move behavior during the dash window.
-## When to use: Use it for player or enemy dash abilities that need cancellable action timing.
-## Example: `var dash := DashAction.new(); dash.direction = Vector2.RIGHT; actions.start_action(dash, ActionContext.from_command(cmd, player))`.
 class_name DashAction
 extends GameAction
-
-## Purpose: Public runtime field `duration`.
-## Example: `self.duration = 1.0`
-## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var duration: float = 0.18
-## Purpose: Public runtime field `speed`.
-## Example: `self.speed = 1.0`
-## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var speed: float = 480.0
-## Purpose: Public runtime field `direction`.
-## Example: `self.direction = Vector2.ZERO`
-## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var direction: Vector2 = Vector2.ZERO
 
 
@@ -33,12 +17,10 @@ func _on_update(delta: float) -> void:
 	if context.source == null:
 		complete()
 		return
-
 	var body := context.source as CharacterBody2D
 	if body != null:
 		body.velocity = direction * speed
 		body.move_and_slide()
-
 	if elapsed >= duration:
 		complete()
 

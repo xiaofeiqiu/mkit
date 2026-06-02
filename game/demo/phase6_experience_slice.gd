@@ -26,9 +26,7 @@ func _ready() -> void:
 
 	_setup_experience()
 
-	_instructions_label.text = (
-		"E = +30 XP (enemy kill)     B = +150 XP (boss kill)     F = save     L = load"
-	)
+	_instructions_label.text = ("E = +30 XP (enemy kill)     B = +150 XP (boss kill)     F = save     L = load")
 
 
 func _setup_experience() -> void:
@@ -43,17 +41,25 @@ func _setup_experience() -> void:
 	add_child(_experience)
 
 	_experience.level_up.connect(_on_level_up)
-	_log("[EXP] ready — lv%d  (max %d, base_xp %d, growth x%.1f)" % [
-		_experience.current_level, curve.max_level, curve.base_xp, curve.growth_factor])
+	_log(
+		(
+			"[EXP] ready — lv%d  (max %d, base_xp %d, growth x%.1f)"
+			% [_experience.current_level, curve.max_level, curve.base_xp, curve.growth_factor]
+		)
+	)
 
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
-			KEY_E: _add_xp(30)
-			KEY_B: _add_xp(150)
-			KEY_F: _do_save()
-			KEY_L: _do_load()
+			KEY_E:
+				_add_xp(30)
+			KEY_B:
+				_add_xp(150)
+			KEY_F:
+				_do_save()
+			KEY_L:
+				_do_load()
 
 
 func _process(_delta: float) -> void:
@@ -70,16 +76,27 @@ func _process(_delta: float) -> void:
 		_xp_label.text = "XP: MAX"
 		_progress_label.text = "Progress: [██████████] 100%"
 	else:
-		_xp_label.text = "XP: %d / %d  (to next: %d)" % [xp, required, _experience.get_xp_to_next_level()]
+		_xp_label.text = (
+			"XP: %d / %d  (to next: %d)" % [xp, required, _experience.get_xp_to_next_level()]
+		)
 		var filled: int = int(_experience.get_level_progress() * 10)
-		_progress_label.text = "Progress: [%s%s] %d%%" % [
-			"█".repeat(filled), "░".repeat(10 - filled),
-			int(_experience.get_level_progress() * 100)]
+		_progress_label.text = (
+			"Progress: [%s%s] %d%%"
+			% [
+				"█".repeat(filled),
+				"░".repeat(10 - filled),
+				int(_experience.get_level_progress() * 100)
+			]
+		)
 
 
 func _on_level_up(old_level: int, new_level: int) -> void:
-	_log("[LEVEL UP] %d → %d  (next needs %d XP)" % [
-		old_level, new_level, _experience.curve.get_xp_required(new_level)])
+	_log(
+		(
+			"[LEVEL UP] %d → %d  (next needs %d XP)"
+			% [old_level, new_level, _experience.curve.get_xp_required(new_level)]
+		)
+	)
 
 
 func _add_xp(amount: int) -> void:
@@ -89,9 +106,16 @@ func _add_xp(amount: int) -> void:
 		_log("[XP] already max level")
 		return
 	_experience.add_xp(amount)
-	_log("[XP] +%d  →  %d / %d" % [
-		amount, _experience.current_xp,
-		_experience.curve.get_xp_required(_experience.current_level)])
+	_log(
+		(
+			"[XP] +%d  →  %d / %d"
+			% [
+				amount,
+				_experience.current_xp,
+				_experience.curve.get_xp_required(_experience.current_level)
+			]
+		)
+	)
 
 
 func _do_save() -> void:

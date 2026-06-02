@@ -34,12 +34,16 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
-			KEY_1: _pick_reward(0)
-			KEY_2: _pick_reward(1)
-			KEY_3: _pick_reward(2)
+			KEY_1:
+				_pick_reward(0)
+			KEY_2:
+				_pick_reward(1)
+			KEY_3:
+				_pick_reward(2)
 
 
 # ── content registration ───────────────────────────────────────────────────────
+
 
 func _register_content() -> void:
 	var registry := ServiceRegistry.get_service("content") as ContentRegistry
@@ -54,12 +58,7 @@ func _register_content() -> void:
 	goblin.scene_path = "res://game/demo/entities/enemy/enemy.tscn"
 	goblin.default_faction = "enemy"
 	goblin.tags = ["enemy", "living", "melee"]
-	goblin.base_stats = {
-		"max_hp": 60.0,
-		"attack_power": 8.0,
-		"move_speed": 0.0,
-		"defense": 0.0
-	}
+	goblin.base_stats = {"max_hp": 60.0, "attack_power": 8.0, "move_speed": 0.0, "defense": 0.0}
 	registry.register_resource(goblin)
 
 	# Room definitions
@@ -69,7 +68,12 @@ func _register_content() -> void:
 	room01.room_type = "combat"
 	room01.difficulty_rating = 1
 	room01.enemy_spawn_ids = ["enemy.goblin_basic", "enemy.goblin_basic"]
-	room01.reward_pool_ids = ["reward.attack_plus_20", "reward.max_hp_plus_20", "reward.move_speed_plus_15pct", "reward.defense_plus_5"]
+	room01.reward_pool_ids = [
+		"reward.attack_plus_20",
+		"reward.max_hp_plus_20",
+		"reward.move_speed_plus_15pct",
+		"reward.defense_plus_5"
+	]
 	registry.register_resource(room01)
 
 	var room02 := RoomDefinition.new()
@@ -78,23 +82,72 @@ func _register_content() -> void:
 	room02.room_type = "combat"
 	room02.difficulty_rating = 1
 	room02.enemy_spawn_ids = ["enemy.goblin_basic", "enemy.goblin_basic", "enemy.goblin_basic"]
-	room02.reward_pool_ids = ["reward.attack_plus_20", "reward.max_hp_plus_20", "reward.move_speed_plus_15pct", "reward.defense_plus_5"]
+	room02.reward_pool_ids = [
+		"reward.attack_plus_20",
+		"reward.max_hp_plus_20",
+		"reward.move_speed_plus_15pct",
+		"reward.defense_plus_5"
+	]
 	registry.register_resource(room02)
 
 	# Reward definitions
-	_register_reward(registry, "reward.attack_plus_20", "Power Up", "+20% attack power",
-		"attack_power", StatModifierDefinition.Operation.PERCENT_ADD, 0.20, "common", 10.0)
-	_register_reward(registry, "reward.max_hp_plus_20", "Vitality", "+20 max HP",
-		"max_hp", StatModifierDefinition.Operation.FLAT_ADD, 20.0, "common", 10.0)
-	_register_reward(registry, "reward.move_speed_plus_15pct", "Swift Feet", "+15% move speed",
-		"move_speed", StatModifierDefinition.Operation.PERCENT_ADD, 0.15, "rare", 6.0)
-	_register_reward(registry, "reward.defense_plus_5", "Iron Skin", "+5 defense",
-		"defense", StatModifierDefinition.Operation.FLAT_ADD, 5.0, "common", 8.0)
+	_register_reward(
+		registry,
+		"reward.attack_plus_20",
+		"Power Up",
+		"+20% attack power",
+		"attack_power",
+		StatModifierDefinition.Operation.PERCENT_ADD,
+		0.20,
+		"common",
+		10.0
+	)
+	_register_reward(
+		registry,
+		"reward.max_hp_plus_20",
+		"Vitality",
+		"+20 max HP",
+		"max_hp",
+		StatModifierDefinition.Operation.FLAT_ADD,
+		20.0,
+		"common",
+		10.0
+	)
+	_register_reward(
+		registry,
+		"reward.move_speed_plus_15pct",
+		"Swift Feet",
+		"+15% move speed",
+		"move_speed",
+		StatModifierDefinition.Operation.PERCENT_ADD,
+		0.15,
+		"rare",
+		6.0
+	)
+	_register_reward(
+		registry,
+		"reward.defense_plus_5",
+		"Iron Skin",
+		"+5 defense",
+		"defense",
+		StatModifierDefinition.Operation.FLAT_ADD,
+		5.0,
+		"common",
+		8.0
+	)
 
 
-func _register_reward(registry: ContentRegistry, reward_id: String, display_name: String,
-		description: String, stat_id: String, op: StatModifierDefinition.Operation,
-		value: float, rarity: String, weight: float) -> void:
+func _register_reward(
+	registry: ContentRegistry,
+	reward_id: String,
+	display_name: String,
+	description: String,
+	stat_id: String,
+	op: StatModifierDefinition.Operation,
+	value: float,
+	rarity: String,
+	weight: float
+) -> void:
 	var stat_effect := ApplyStatModifierEffect.new()
 	stat_effect.effect_id = reward_id
 	stat_effect.stat_id = stat_id
@@ -113,6 +166,7 @@ func _register_reward(registry: ContentRegistry, reward_id: String, display_name
 
 
 # ── signals ────────────────────────────────────────────────────────────────────
+
 
 func _connect_signals() -> void:
 	_run_director.run_started.connect(_on_run_started)
@@ -140,7 +194,12 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 	_pending_rewards = options
 	_log("[REWARD] room cleared! Pick reward:")
 	for i in range(options.size()):
-		_log("  %d) [%s] %s — %s" % [i + 1, options[i].rarity, options[i].display_name, options[i].description])
+		_log(
+			(
+				"  %d) [%s] %s — %s"
+				% [i + 1, options[i].rarity, options[i].display_name, options[i].description]
+			)
+		)
 	_reward_label.text = "Room cleared! Press 1 / 2 / 3 to pick reward"
 
 
@@ -172,15 +231,19 @@ func _pick_reward(index: int) -> void:
 
 # ── HUD ────────────────────────────────────────────────────────────────────────
 
+
 func _update_hud() -> void:
 	var state := _run_director.run_state
 	if state != null:
-		_room_label.text = "Run floor %d  room %d/%d  [%s]" % [
-			state.current_floor,
-			state.current_room_index + 1,
-			_run_director.run_length,
-			state.status
-		]
+		_room_label.text = (
+			"Run floor %d  room %d/%d  [%s]"
+			% [
+				state.current_floor,
+				state.current_room_index + 1,
+				_run_director.run_length,
+				state.status
+			]
+		)
 		_status_label.text = "Seed: %d  Rooms visited: %d" % [state.seed, state.room_history.size()]
 
 	var health := player.get_node_or_null("Components/HealthComponent") as HealthComponent

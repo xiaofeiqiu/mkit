@@ -1,61 +1,76 @@
-## What: RewardSystem generates reward choices and applies the selected reward effects.
-## Responsibilities: filter RewardDefinition resources by pool/conditions, weighted-pick options, build RewardOption objects, and execute selection effects.
-## Upstream: RoomController or RunDirector request reward options after clearing rooms.
-## Downstream: reward UI displays RewardOption values and EffectExecutor applies selected reward effects.
-## When to use: Use it for choose-one-of-N reward screens after combat, events, bosses, or milestones.
-## Example: `var options := reward_system.generate_options(["starter_rewards"], 3, ctx)`.
 class_name RewardSystem
 extends RefCounted
 
 
-## Purpose: Public method `generate_options` for external gameplay integration.
-## Example: `self.generate_options(<pool_ids>, <count>, <context>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
-func generate_options(pool_ids: Array[String], count: int, context: GameplayContext) -> Array[RewardOption]:
+func generate_options(
+	pool_ids: Array[String], count: int, context: GameplayContext
+) -> Array[RewardOption]:
+	if count <= 0 or pool_ids.is_empty():
+		return []
+	if not ServiceRegistry.has_service("content"):
+		push_error("RewardSystem.generate_options: missing ContentRegistry service")
+		return []
 	var content := ServiceRegistry.get_service("content") as ContentRegistry
+	if content == null:
+		push_error("RewardSystem.generate_options: ContentRegistry service is invalid")
+		return []
+	var ctx := context if context != null else GameplayContext.new()
 	var candidates: Array[RewardDefinition] = []
-
 	for id in pool_ids:
+		if id.strip_edges() == "":
+			continue
 		var def := content.get_resource(id) as RewardDefinition
-		if def != null and ConditionEvaluator.evaluate_all(def.conditions, context):
+		if def != null and ConditionEvaluator.evaluate_all(def.conditions, ctx):
 			candidates.append(def)
-
 	var result: Array[RewardOption] = []
 	while result.size() < count and candidates.size() > 0:
 		var selected := _weighted_pick(candidates)
+		if selected == null:
+			break
 		candidates.erase(selected)
 		result.append(_build_option(selected))
-
 	return result
 
 
-## Purpose: Public method `apply_selected` for external gameplay integration.
-## Example: `self.apply_selected(<option>, <context>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	if option == null:
 		return false
-	var executor := ServiceRegistry.get_service("effects") as EffectExecutor
-	var results := executor.execute_many(option.effects, context, true)
+	var ctx := context if context != null else GameplayContext.new()
+	var executor: EffectExecutor = null
+	if ServiceRegistry.has_service("effects"):
+		executor = ServiceRegistry.get_service("effects") as EffectExecutor
+	if executor == null:
+		executor = EffectExecutor.new()
+	var results := executor.execute_many(option.effects, ctx, true)
 	for r in results:
 		if not r.success:
 			return false
-
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events: EventRouter = null
+	if ServiceRegistry.has_service("events"):
+		events = ServiceRegistry.get_service("events") as EventRouter
 	if events != null:
-		events.emit_reward_selected(option.reward_id, context.source.name if context.source != null else "")
+		events.emit_reward_selected(option.reward_id, ctx.source.name if ctx.source != null else "")
 	return true
 
 
 func _weighted_pick(candidates: Array[RewardDefinition]) -> RewardDefinition:
+	if candidates.is_empty():
+		return null
 	var total := 0.0
 	for c in candidates:
-		total += c.weight
-	var random := ServiceRegistry.get_service("random") as RandomService
+		if c != null:
+			total += max(0.0, c.weight)
+	if total <= 0.0:
+		return candidates[0]
+	var random: RandomService = null
+	if ServiceRegistry.has_service("random"):
+		random = ServiceRegistry.get_service("random") as RandomService
 	var r := random.randf_range(0.0, total) if random != null else randf_range(0.0, total)
 	var cursor := 0.0
 	for c in candidates:
-		cursor += c.weight
+		if c == null:
+			continue
+		cursor += max(0.0, c.weight)
 		if r <= cursor:
 			return c
 	return candidates[0]
@@ -63,6 +78,8 @@ func _weighted_pick(candidates: Array[RewardDefinition]) -> RewardDefinition:
 
 func _build_option(def: RewardDefinition) -> RewardOption:
 	var option := RewardOption.new()
+	if def == null:
+		return option
 	option.reward_id = def.reward_id
 	option.display_name = def.display_name
 	option.description = def.description

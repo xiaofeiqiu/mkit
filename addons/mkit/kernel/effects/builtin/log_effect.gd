@@ -1,40 +1,31 @@
-## What: LogEffect emits a structured DomainEvent and print-style trace for debugging content execution.
-## Responsibilities: format context-aware messages, emit through EventRouter when available, and return success.
-## Upstream: test abilities, scripted rewards, and demo content use it to verify effect chains.
-## Downstream: EventRouter, debug overlays, logs, or tests observe the emitted event type and payload.
-## When to use: Use it to prove content wiring before replacing placeholder behavior with real effects.
-## Example: set `event_type = "reward_preview"` and `message = "selected starter reward"` in a RewardDefinition.
 class_name LogEffect
 extends GameEffect
-
-# A game-agnostic kernel effect that records that something happened. It emits a
-# DomainEvent through the EventRouter (so it shows up in DebugOverlay's recent
-# events) and returns a structured EffectResult. It is the minimal effect needed
-# to validate the Phase 0 pipeline (command -> state -> action -> effect ->
-# event) before combat/inventory effects exist. Concrete games keep using the
-# real domain effects (DealDamageEffect, HealEffect, ...) added in later phases.
-
-## Purpose: Inspector-exposed configuration `message`.
-## Example: `self.message = "value"`
-## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var message: String = "log"
-## Purpose: Inspector-exposed configuration `event_type`.
-## Example: `self.event_type = "value"`
-## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var event_type: String = "log"
 
 
 func _apply_impl(context: GameplayContext) -> EffectResult:
 	var source_id := _node_name(context.source)
 	var target_id := _node_name(context.target)
-
 	if ServiceRegistry.has_service("events"):
 		var events := ServiceRegistry.get_service("events") as EventRouter
 		if events != null:
-			events.emit_domain_event(DomainEvent.create(event_type, source_id, target_id, {
-				"message": message,
-			}))
-
+			(
+				events
+				. emit_domain_event(
+					(
+						DomainEvent
+						. create(
+							event_type,
+							source_id,
+							target_id,
+							{
+								"message": message,
+							}
+						)
+					)
+				)
+			)
 	print("[LogEffect] %s (source=%s target=%s)" % [message, source_id, target_id])
 	return EffectResult.ok(effect_id, {"message": message, "event_type": event_type})
 

@@ -31,9 +31,22 @@ func _run_demo() -> void:
 
 	# 1. Send a MOVE command: Idle -> Move
 	print("-> dispatch MOVE")
-	router.dispatch(GameCommand.create(BuiltinCommands.MOVE, TARGET_ID, TARGET_ID, {
-		"direction": Vector2.RIGHT,
-	}))
+	(
+		router
+		. dispatch(
+			(
+				GameCommand
+				. create(
+					BuiltinCommands.MOVE,
+					TARGET_ID,
+					TARGET_ID,
+					{
+						"direction": Vector2.RIGHT,
+					}
+				)
+			)
+		)
+	)
 	await get_tree().create_timer(0.4).timeout
 
 	# 2. Send an ATTACK command: Move -> Attack (runs a DemoWaitAction)
@@ -44,7 +57,9 @@ func _run_demo() -> void:
 
 	# 3. Send a command the current state rejects, to show graceful failure.
 	print("-> dispatch STOP_MOVE (expected: unhandled in Idle)")
-	var handled := router.dispatch(GameCommand.create(BuiltinCommands.STOP_MOVE, TARGET_ID, TARGET_ID, {}))
+	var handled := router.dispatch(
+		GameCommand.create(BuiltinCommands.STOP_MOVE, TARGET_ID, TARGET_ID, {})
+	)
 	print("   handled = %s" % handled)
 
 	print("=== Phase 0 Demo complete (see DebugOverlay for state path + recent events) ===")

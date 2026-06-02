@@ -3,13 +3,20 @@ extends State
 
 
 func enter(context: Dictionary = {}) -> void:
-	print("[Dummy] Enter Move (direction=%s)" % str(blackboard.get_value("move_direction", Vector2.ZERO)))
+	print(
+		(
+			"[Dummy] Enter Move (direction=%s)"
+			% str(blackboard.get_value("move_direction", Vector2.ZERO))
+		)
+	)
 
 
 func handle_command(command: GameCommand) -> bool:
 	match command.command_type:
 		BuiltinCommands.ATTACK:
-			return request_transition("Dummy/Attack", {"reason": "attack_command", "command": command})
+			return request_transition(
+				"Dummy/Attack", {"reason": "attack_command", "command": command}
+			)
 		BuiltinCommands.STOP_MOVE:
 			return request_transition("Dummy/Idle", {"reason": "stop_command"})
 		BuiltinCommands.MOVE:

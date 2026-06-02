@@ -33,9 +33,7 @@ func _ready() -> void:
 	_connect_signals()
 	_update_status()
 
-	_instructions_label.text = (
-		"A = analytics event     D = rewarded ad     P = IAP purchase     C = cloud save     L = cloud load"
-	)
+	_instructions_label.text = ("A = analytics event     D = rewarded ad     P = IAP purchase     C = cloud save     L = cloud load")
 	_log("Platform services ready — all using mock implementations")
 
 
@@ -60,31 +58,37 @@ func _connect_signals() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
-			KEY_A: _do_analytics()
-			KEY_D: _do_rewarded_ad()
-			KEY_P: _do_iap_purchase()
-			KEY_C: _do_cloud_save()
-			KEY_L: _do_cloud_load()
+			KEY_A:
+				_do_analytics()
+			KEY_D:
+				_do_rewarded_ad()
+			KEY_P:
+				_do_iap_purchase()
+			KEY_C:
+				_do_cloud_save()
+			KEY_L:
+				_do_cloud_load()
 
 
 # --- Analytics ---
+
 
 func _do_analytics() -> void:
 	if _analytics == null:
 		_log("[Analytics] service not available")
 		return
 	_run_counter += 1
-	_analytics.track_event("run_started", {
-		"run_id": "run_%03d" % _run_counter,
-		"seed": randi(),
-		"character": "warrior"
-	})
+	_analytics.track_event(
+		"run_started",
+		{"run_id": "run_%03d" % _run_counter, "seed": randi(), "character": "warrior"}
+	)
 	_analytics.set_user_property("total_runs", _run_counter)
 	_log("[Analytics] tracked run_started  (run #%d)" % _run_counter)
 	_update_status()
 
 
 # --- Rewarded Ad ---
+
 
 func _do_rewarded_ad() -> void:
 	if _ads == null:
@@ -116,6 +120,7 @@ func _on_ad_failed(placement_id: String, reason: String) -> void:
 
 # --- IAP ---
 
+
 func _do_iap_purchase() -> void:
 	if _iap == null:
 		_log("[IAP] service not available")
@@ -132,8 +137,12 @@ func _do_iap_purchase() -> void:
 
 func _on_purchase_completed(product_id: String) -> void:
 	_iap_busy = false
-	_log("[IAP] purchase_completed: %s  (owned: %s)" % [
-		product_id, str(_iap.is_purchased(product_id))])
+	_log(
+		(
+			"[IAP] purchase_completed: %s  (owned: %s)"
+			% [product_id, str(_iap.is_purchased(product_id))]
+		)
+	)
 	_update_status()
 
 
@@ -144,6 +153,7 @@ func _on_purchase_failed(product_id: String, reason: String) -> void:
 
 
 # --- CloudSave ---
+
 
 func _do_cloud_save() -> void:
 	if _cloud_save == null:
@@ -156,10 +166,7 @@ func _do_cloud_save() -> void:
 		_log("[CloudSave] busy")
 		return
 	_cloud_busy = true
-	var data := {
-		"run_count": _run_counter,
-		"timestamp": Time.get_datetime_string_from_system(true)
-	}
+	var data := {"run_count": _run_counter, "timestamp": Time.get_datetime_string_from_system(true)}
 	_log("[CloudSave] saving slot 'profile_01' …")
 	_update_status()
 	_cloud_save.save_to_cloud("profile_01", data)
@@ -194,11 +201,12 @@ func _on_cloud_save_failed(_slot: String, reason: String) -> void:
 
 
 func _on_cloud_loaded(slot: String, data: Dictionary) -> void:
-	_log("[CloudSave] loaded '%s': run_count=%s  ts=%s" % [
-		slot,
-		str(data.get("run_count", "?")),
-		str(data.get("timestamp", "?"))
-	])
+	_log(
+		(
+			"[CloudSave] loaded '%s': run_count=%s  ts=%s"
+			% [slot, str(data.get("run_count", "?")), str(data.get("timestamp", "?"))]
+		)
+	)
 	_cloud_busy = false
 	_update_status()
 
@@ -211,21 +219,34 @@ func _on_cloud_load_failed(_slot: String, reason: String) -> void:
 
 # --- HUD ---
 
+
 func _update_status() -> void:
 	if _status_label == null:
 		return
 	var lines: Array[String] = []
 	lines.append("Analytics: %s" % ("OK" if _analytics != null else "missing"))
-	lines.append("Ads:       %s%s" % [
-		("OK" if _ads != null else "missing"),
-		"  [waiting…]" if _ad_busy else ""])
-	lines.append("IAP:       %s%s" % [
-		("OK" if _iap != null else "missing"),
-		"  [waiting…]" if _iap_busy else ""])
-	lines.append("CloudSave: %s%s  (available=%s)" % [
-		("OK" if _cloud_save != null else "missing"),
-		"  [busy…]" if _cloud_busy else "",
-		str(_cloud_save.is_available()) if _cloud_save != null else "false"])
+	lines.append(
+		(
+			"Ads:       %s%s"
+			% ["OK" if _ads != null else "missing", "  [waiting…]" if _ad_busy else ""]
+		)
+	)
+	lines.append(
+		(
+			"IAP:       %s%s"
+			% ["OK" if _iap != null else "missing", "  [waiting…]" if _iap_busy else ""]
+		)
+	)
+	lines.append(
+		(
+			"CloudSave: %s%s  (available=%s)"
+			% [
+				"OK" if _cloud_save != null else "missing",
+				"  [busy…]" if _cloud_busy else "",
+				str(_cloud_save.is_available()) if _cloud_save != null else "false"
+			]
+		)
+	)
 	lines.append("Runs tracked: %d" % _run_counter)
 	_status_label.text = "\n".join(lines)
 

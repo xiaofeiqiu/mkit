@@ -1,18 +1,8 @@
-## What: ObjectPool reuses scene instances keyed by scene path to reduce runtime allocation spikes.
-## Responsibilities: warm scenes, acquire active nodes, release inactive nodes, and clear cached instances by path.
-## Upstream: projectile spawners, VFX systems, or room controllers request pooled instances.
-## Downstream: instantiated scenes receive activate/deactivate lifecycle calls when those methods exist.
-## When to use: Use it for frequently spawned short-lived objects such as hit sparks, arrows, pickups, or damage popups.
-## Example: `var orb := pool.acquire("res://game/fx/orb.tscn", fx_root)` and later `pool.release("res://game/fx/orb.tscn", orb)`.
 class_name ObjectPool
 extends Node
+var _pools: Dictionary = {}
 
-var _pools: Dictionary = {} # scene_path -> Array[Node]
 
-
-## Purpose: Public method `warmup` for external gameplay integration.
-## Example: `self.warmup(<scene_path>, <count>, <parent>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 	for i in range(count):
 		var node := _instantiate(scene_path)
@@ -24,9 +14,6 @@ func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 		release(scene_path, node)
 
 
-## Purpose: Public method `acquire` for external gameplay integration.
-## Example: `self.acquire(<scene_path>, <parent>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func acquire(scene_path: String, parent: Node = null) -> Node:
 	var pool: Array = _pools.get(scene_path, [])
 	var node: Node = null
@@ -35,7 +22,6 @@ func acquire(scene_path: String, parent: Node = null) -> Node:
 	else:
 		node = _instantiate(scene_path)
 	_pools[scene_path] = pool
-
 	if node != null:
 		if parent != null and node.get_parent() != parent:
 			if node.get_parent() != null:
@@ -45,9 +31,6 @@ func acquire(scene_path: String, parent: Node = null) -> Node:
 	return node
 
 
-## Purpose: Public method `release` for external gameplay integration.
-## Example: `self.release(<scene_path>, <node>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func release(scene_path: String, node: Node) -> void:
 	if node == null:
 		return
@@ -59,9 +42,6 @@ func release(scene_path: String, node: Node) -> void:
 	_pools[scene_path] = pool
 
 
-## Purpose: Public method `clear_pool` for external gameplay integration.
-## Example: `self.clear_pool(<scene_path>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func clear_pool(scene_path: String) -> void:
 	if not _pools.has(scene_path):
 		return

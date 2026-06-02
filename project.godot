@@ -20,7 +20,7 @@ ServiceRegistry="*res://addons/mkit/kernel/services/service_registry.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/mkit/plugin.cfg")
+enabled=PackedStringArray("res://addons/mkit/plugin.cfg", "res://addons/gut/plugin.cfg")
 
 [physics]
 

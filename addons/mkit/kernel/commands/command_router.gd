@@ -1,68 +1,58 @@
-## What: CommandRouter maps target ids to CommandReceiver nodes and dispatches GameCommand objects.
-## Responsibilities: register/unregister receivers, deliver targeted commands, broadcast commands, and emit success/failure signals.
-## Upstream: input readers, AI controllers, UI, cutscenes, or tests submit commands.
-## Downstream: CommandReceiver nodes and their StateMachine/State handlers process the command.
-## When to use: Use it when one system needs to send intent to another system without holding a node reference.
-## Example: `commands.dispatch(GameCommand.create(BuiltinCommands.ATTACK, "player_input", "player_001"))`.
 class_name CommandRouter
 extends Node
-
-## Purpose: Emits the `command_dispatched` signal to notify external listeners of a state change.
-## Example: `self.command_dispatched.connect(_on_command_dispatched)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal command_dispatched(command: GameCommand)
-## Purpose: Emits the `command_failed` signal to notify external listeners of a state change.
-## Example: `self.command_failed.connect(_on_command_failed)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal command_failed(command: GameCommand, reason: String)
-
 var _receivers: Dictionary = {}
 
 
-## Purpose: Public method `register_receiver` for external gameplay integration.
-## Example: `self.register_receiver(<receiver_id>, <receiver>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func register_receiver(receiver_id: String, receiver: CommandReceiver) -> void:
-	assert(receiver_id != "")
-	assert(receiver != null)
+	if receiver_id.strip_edges() == "":
+		push_error("CommandRouter.register_receiver: receiver_id is empty")
+		return
+	if receiver == null:
+		push_error("CommandRouter.register_receiver: receiver is null for id %s" % receiver_id)
+		return
 	_receivers[receiver_id] = receiver
 
 
-## Purpose: Public method `unregister_receiver` for external gameplay integration.
-## Example: `self.unregister_receiver(<receiver_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func unregister_receiver(receiver_id: String) -> void:
 	_receivers.erase(receiver_id)
 
 
-## Purpose: Public method `dispatch` for external gameplay integration.
-## Example: `self.dispatch(<command>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func dispatch(command: GameCommand) -> bool:
+	if command == null:
+		push_error("CommandRouter.dispatch: command is null")
+		return false
 	command_dispatched.emit(command)
-
-	if command.target_id == "":
+	if command.target_id.strip_edges() == "":
 		command_failed.emit(command, "Missing target_id")
 		return false
-
 	if not _receivers.has(command.target_id):
 		command_failed.emit(command, "No receiver for target_id: %s" % command.target_id)
 		return false
-
 	var receiver := _receivers[command.target_id] as CommandReceiver
+	if receiver == null or not is_instance_valid(receiver):
+		command_failed.emit(command, "Receiver is invalid for target_id: %s" % command.target_id)
+		return false
 	var handled := receiver.receive_command(command)
 	if not handled:
 		command_failed.emit(command, "Receiver did not handle command: %s" % command.command_type)
 	return handled
 
 
-## Purpose: Public method `broadcast` for external gameplay integration.
-## Example: `self.broadcast(<command>, <receiver_ids>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func broadcast(command: GameCommand, receiver_ids: Array[String]) -> int:
+	if command == null:
+		push_error("CommandRouter.broadcast: command is null")
+		return 0
+	if receiver_ids.is_empty():
+		return 0
 	var handled_count := 0
 	for id in receiver_ids:
-		var cloned := GameCommand.create(command.command_type, command.source_id, id, command.payload)
+		if id.strip_edges() == "":
+			continue
+		var cloned := GameCommand.create(
+			command.command_type, command.source_id, id, command.payload.duplicate(true)
+		)
 		if dispatch(cloned):
 			handled_count += 1
 	return handled_count

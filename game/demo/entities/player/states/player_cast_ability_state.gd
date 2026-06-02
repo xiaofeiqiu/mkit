@@ -9,7 +9,9 @@ func enter(context: Dictionary = {}) -> void:
 		return
 
 	var ability_id := command.get_string("ability_id")
-	var controller := owner_entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+	var controller := (
+		owner_entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+	)
 	if controller == null:
 		request_transition.call_deferred("Player/Idle", {"reason": "no_ability_controller"})
 		return
@@ -39,7 +41,9 @@ func _find_nearest_enemy() -> Node:
 	var best_dist := INF
 	for enemy in enemies:
 		if enemy is Node2D:
-			var d := (owner_entity as Node2D).global_position.distance_to((enemy as Node2D).global_position)
+			var d := (owner_entity as Node2D).global_position.distance_to(
+				(enemy as Node2D).global_position
+			)
 			if d < best_dist:
 				best = enemy
 				best_dist = d

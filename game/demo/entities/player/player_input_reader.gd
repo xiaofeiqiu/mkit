@@ -36,7 +36,9 @@ func _physics_process(_delta: float) -> void:
 		dir.y += 1.0
 
 	if dir != Vector2.ZERO:
-		_router.dispatch(GameCommand.create(BuiltinCommands.MOVE, target_id, target_id, {"direction": dir}))
+		_router.dispatch(
+			GameCommand.create(BuiltinCommands.MOVE, target_id, target_id, {"direction": dir})
+		)
 		_was_moving = true
 	elif _was_moving:
 		_router.dispatch(GameCommand.create(BuiltinCommands.STOP_MOVE, target_id, target_id, {}))
@@ -52,6 +54,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_Q:
 			if _router == null:
 				return
-			_router.dispatch(GameCommand.create(BuiltinCommands.CAST_ABILITY, target_id, target_id, {
-				"ability_id": "ability.fireball_basic"
-			}))
+			_router.dispatch(
+				GameCommand.create(
+					BuiltinCommands.CAST_ABILITY,
+					target_id,
+					target_id,
+					{"ability_id": "ability.fireball_basic"}
+				)
+			)

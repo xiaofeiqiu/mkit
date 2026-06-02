@@ -26,9 +26,13 @@ func handle_command(command: GameCommand) -> bool:
 			blackboard.set_value("move_direction", Vector2.ZERO)
 			return request_transition("Player/Idle", {"reason": "stop_command"})
 		BuiltinCommands.ATTACK:
-			return request_transition("Player/Attack", {"reason": "attack_command", "command": command})
+			return request_transition(
+				"Player/Attack", {"reason": "attack_command", "command": command}
+			)
 		BuiltinCommands.CAST_ABILITY:
-			return request_transition("Player/CastAbility", {"reason": "cast_command", "command": command})
+			return request_transition(
+				"Player/CastAbility", {"reason": "cast_command", "command": command}
+			)
 	return false
 
 

@@ -22,7 +22,9 @@ func _ready() -> void:
 	_register_player_abilities()
 	_connect_events()
 
-	_enemy_sec = enemy.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+	_enemy_sec = (
+		enemy.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+	)
 
 	print("=== Ability Slice ===")
 	print("Move: WASD / Arrows    Melee: Space / J    Fireball: Q")
@@ -34,6 +36,7 @@ func _process(_delta: float) -> void:
 
 
 # ── content setup ──────────────────────────────────────────────────────────────
+
 
 func _register_content() -> void:
 	var registry := ServiceRegistry.get_service("content") as ContentRegistry
@@ -105,7 +108,9 @@ func _connect_events() -> void:
 	events.entity_died.connect(_on_entity_died)
 
 	if enemy != null:
-		var sec := enemy.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+		var sec := (
+			enemy.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+		)
 		if sec != null:
 			sec.status_applied.connect(_on_status_applied)
 			sec.status_ticked.connect(_on_status_ticked)
@@ -113,6 +118,7 @@ func _connect_events() -> void:
 
 
 # ── HUD ────────────────────────────────────────────────────────────────────────
+
 
 func _update_hud() -> void:
 	# Enemy HP
@@ -125,16 +131,26 @@ func _update_hud() -> void:
 
 	# Player Mana
 	if player != null:
-		var pool := player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+		var pool := (
+			player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+		)
 		if pool != null:
-			_mana_label.text = "Mana: %.0f / %.0f" % [pool.get_current("mana"), pool.get_max_resource("mana")]
+			_mana_label.text = (
+				"Mana: %.0f / %.0f" % [pool.get_current("mana"), pool.get_max_resource("mana")]
+			)
 
 	# Burn status with remaining time
-	if _enemy_sec != null and is_instance_valid(_enemy_sec) and _enemy_sec.has_status("status.burn"):
+	if (
+		_enemy_sec != null
+		and is_instance_valid(_enemy_sec)
+		and _enemy_sec.has_status("status.burn")
+	):
 		var inst: StatusEffectInstance = _enemy_sec.active_statuses.get("status.burn")
 		if inst != null:
 			_burn_label.add_theme_color_override("font_color", Color.ORANGE)
-			_burn_label.text = "Burn: %d stack(s)  %.1fs left" % [inst.stacks, inst.remaining_duration]
+			_burn_label.text = (
+				"Burn: %d stack(s)  %.1fs left" % [inst.stacks, inst.remaining_duration]
+			)
 	else:
 		_burn_label.remove_theme_color_override("font_color")
 		_burn_label.text = "Burn: inactive"
@@ -162,12 +178,14 @@ func _spawn_damage_number(world_pos: Vector2, text: String, color: Color) -> voi
 
 # ── event handlers ─────────────────────────────────────────────────────────────
 
+
 func _on_damage_applied(result) -> void:
 	if result == null:
 		return
 
-	var is_burn_tick: bool = result.damage_type == "magic" and result.element_type == "fire" \
-		and result.source != player
+	var is_burn_tick: bool = (
+		result.damage_type == "magic" and result.element_type == "fire" and result.source != player
+	)
 
 	var color := Color.WHITE
 	if result.was_critical:
@@ -188,12 +206,17 @@ func _on_damage_applied(result) -> void:
 
 	_last_damage_label.text = "Last hit: %s  (%s)" % [label_text, result.damage_type]
 
-	print("[DMG] %s  final=%.1f  crit=%s  lethal=%s" % [
-		label_text,
-		result.final_amount,
-		str(result.was_critical),
-		str(result.was_lethal),
-	])
+	print(
+		(
+			"[DMG] %s  final=%.1f  crit=%s  lethal=%s"
+			% [
+				label_text,
+				result.final_amount,
+				str(result.was_critical),
+				str(result.was_lethal),
+			]
+		)
+	)
 
 
 func _on_entity_died(entity_id: String, _ref: Node) -> void:

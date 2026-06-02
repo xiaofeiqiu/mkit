@@ -1,27 +1,6 @@
-## What: GameBootstrap wires the kernel services and optional initial scene for a playable MKit runtime.
-## Responsibilities: register services, load content databases, validate content, initialize runtime systems, and enter the first scene.
-## Upstream: boot scenes place this node and configure resource_databases/initial_scene_path in the Inspector.
-## Downstream: ServiceRegistry exposes content, events, commands, effects, actions, scene routing, RNG, time, and pooling.
-## When to use: Put one GameBootstrap in a boot scene to initialize a demo slice or full game session.
-## Example: set `resource_databases = [combat_db, item_db]` and `initial_scene_path = "res://game/demo/phase4_run_slice.tscn"`.
 class_name GameBootstrap
 extends Node
-
-# Startup orchestrator. Creates kernel services, registers them into the global
-# ServiceRegistry, loads + validates content, then enters the initial scene.
-#
-# Phase 0 scope: only the kernel services implemented so far are constructed
-# here. SaveManager and ProgressionSystem are registered in their own phases
-# (Save / Meta progression); this file is extended at that point rather than
-# rewritten.
-
-## Purpose: Inspector-exposed configuration `resource_databases`.
-## Example: `self.resource_databases = []`
-## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var resource_databases: Array[ResourceDatabase] = []
-## Purpose: Inspector-exposed configuration `initial_scene_path`.
-## Example: `self.initial_scene_path = "value"`
-## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var initial_scene_path: String = ""
 
 
@@ -29,28 +8,21 @@ func _ready() -> void:
 	boot()
 
 
-## Purpose: Public method `boot` for external gameplay integration.
-## Example: `self.boot()`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func boot() -> void:
 	_register_kernel_services()
 	_load_content()
 	_validate_content()
 	_initialize_runtime_systems()
 	_load_profile()
-	# Defer the scene change: boot() typically runs from _ready(), during which
-	# the SceneTree is still busy adding this node, and change_scene_to_file()
-	# (which frees the current scene) is not allowed mid-mutation. Deferring runs
-	# it once the tree settles.
 	_enter_initial_scene.call_deferred()
 
 
 func _register_kernel_services() -> void:
-	# Idempotent: a GameBootstrap may run again (e.g. a second bootstrap scene).
-	# Services live as long as the app, so don't rebuild them.
+	if ServiceRegistry == null:
+		push_error("GameBootstrap: ServiceRegistry autoload is missing")
+		return
 	if ServiceRegistry.has_service("events"):
 		return
-
 	var events := EventRouter.new()
 	var content := ContentRegistry.new()
 	var random := RandomService.new()
@@ -66,7 +38,6 @@ func _register_kernel_services() -> void:
 	var ads := AdServiceMock.new()
 	var iap := IAPServiceMock.new()
 	var cloud_save := CloudSaveServiceMock.new()
-
 	events.name = "EventRouter"
 	content.name = "ContentRegistry"
 	action_runner.name = "ActionRunner"
@@ -79,11 +50,6 @@ func _register_kernel_services() -> void:
 	ads.name = "AdService"
 	iap.name = "IAPService"
 	cloud_save.name = "CloudSaveService"
-
-	# Parent the Node-based services under the persistent ServiceRegistry autoload,
-	# NOT under this bootstrap node. The bootstrap node is freed when it changes to
-	# the initial scene; parenting here would free the services with it and leave
-	# the registry holding freed references.
 	ServiceRegistry.add_child(events)
 	ServiceRegistry.add_child(content)
 	ServiceRegistry.add_child(action_runner)
@@ -96,7 +62,6 @@ func _register_kernel_services() -> void:
 	ServiceRegistry.add_child(ads)
 	ServiceRegistry.add_child(iap)
 	ServiceRegistry.add_child(cloud_save)
-
 	ServiceRegistry.register_service("events", events)
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("random", random)
@@ -116,6 +81,9 @@ func _register_kernel_services() -> void:
 
 func _load_content() -> void:
 	var registry := ServiceRegistry.get_service("content") as ContentRegistry
+	if registry == null:
+		push_error("GameBootstrap._load_content: missing ContentRegistry service")
+		return
 	for db in resource_databases:
 		if db != null:
 			registry.load_database(db)
@@ -123,6 +91,9 @@ func _load_content() -> void:
 
 func _validate_content() -> void:
 	var registry := ServiceRegistry.get_service("content") as ContentRegistry
+	if registry == null:
+		push_error("GameBootstrap._validate_content: missing ContentRegistry service")
+		return
 	var result := registry.validate_all()
 	if not result.success:
 		push_error("Content validation failed: %s" % result.errors)
@@ -133,29 +104,38 @@ func _initialize_runtime_systems() -> void:
 
 
 func _load_profile() -> void:
-	var save_manager := ServiceRegistry.get_service("save") as SaveManager
+	var save_manager: SaveManager = null
+	if ServiceRegistry.has_service("save"):
+		save_manager = ServiceRegistry.get_service("save") as SaveManager
 	if save_manager == null:
 		return
-	if FileAccess.file_exists(save_manager.save_path):
-		save_manager.load_game(get_tree().root)
+	var tree := get_tree()
+	if tree != null and FileAccess.file_exists(save_manager.save_path):
+		save_manager.load_game(tree.root)
 
 
 func _enter_initial_scene() -> void:
 	if initial_scene_path == "":
 		return
 	if not ResourceLoader.exists(initial_scene_path, "PackedScene"):
-		push_error("GameBootstrap.initial_scene_path must point to an existing PackedScene resource, but got: %s" % initial_scene_path)
+		push_error(
+			(
+				"GameBootstrap.initial_scene_path must point to an existing PackedScene resource, but got: %s"
+				% initial_scene_path
+			)
+		)
 		return
-
-	# Guard against the bootstrap loop: if initial_scene_path resolves to the same
-	# scene that already contains this GameBootstrap, changing to it re-runs boot()
-	# in the freshly loaded copy, which changes scene again, forever. A bootstrap
-	# scene must point at a DIFFERENT gameplay/menu scene.
 	if _is_same_scene_as_self(initial_scene_path):
-		push_error("GameBootstrap.initial_scene_path (%s) points to the scene that already contains this GameBootstrap. Refusing to reload it (that would be an infinite bootstrap loop). Put GameBootstrap in a minimal scene and point initial_scene_path at a different scene." % initial_scene_path)
+		push_error(
+			(
+				"GameBootstrap.initial_scene_path (%s) points to the scene that already contains this GameBootstrap. Refusing to reload it (that would be an infinite bootstrap loop). Put GameBootstrap in a minimal scene and point initial_scene_path at a different scene."
+				% initial_scene_path
+			)
+		)
 		return
-
-	var scene_router := ServiceRegistry.get_service("scenes") as SceneRouter
+	var scene_router: SceneRouter = null
+	if ServiceRegistry.has_service("scenes"):
+		scene_router = ServiceRegistry.get_service("scenes") as SceneRouter
 	if scene_router != null:
 		scene_router.change_scene(initial_scene_path)
 	else:

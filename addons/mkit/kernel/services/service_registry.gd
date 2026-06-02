@@ -1,25 +1,17 @@
-# Registered by plugin.gd as the autoload singleton "ServiceRegistry".
-# IMPORTANT: do NOT declare `class_name ServiceRegistry` here — in Godot 4 an
-# autoload name cannot collide with a class_name. Access it everywhere through
-# the autoload global (e.g. ServiceRegistry.get_service("events")).
-## What: ServiceRegistry is the single MKit autoload that stores runtime services by id.
-## Responsibilities: register, fetch, type-check, unregister, and clear shared services without per-system autoloads.
-## Upstream: plugin.gd installs this autoload and GameBootstrap registers services into it during boot.
-## Downstream: gameplay systems resolve services such as `content`, `events`, `commands`, `effects`, `actions`, and `scene_router`.
-## When to use: Use it when systems need shared service access without direct node references.
-## Example: `var events := ServiceRegistry.get_service("events") as EventRouter; events.emit_room_cleared("room_01")`.
 extends Node
-
 var _services: Dictionary = {}
 var _service_types: Dictionary = {}
 
 
-## Purpose: Public method `register_service` for external gameplay integration.
-## Example: `self.register_service(<service_id>, <service>, <expected_class_name>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
-func register_service(service_id: String, service: Object, expected_class_name: String = "") -> void:
-	assert(service_id != "")
-	assert(service != null)
+func register_service(
+	service_id: String, service: Object, expected_class_name: String = ""
+) -> void:
+	if service_id.strip_edges() == "":
+		push_error("ServiceRegistry.register_service: service_id is empty")
+		return
+	if service == null:
+		push_error("ServiceRegistry.register_service: service is null for id %s" % service_id)
+		return
 	if _services.has(service_id):
 		push_warning("Service already registered: %s. It will be replaced." % service_id)
 	_services[service_id] = service
@@ -27,46 +19,45 @@ func register_service(service_id: String, service: Object, expected_class_name: 
 		_service_types[service_id] = expected_class_name
 
 
-## Purpose: Public method `has_service` for external gameplay integration.
-## Example: `self.has_service(<service_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func has_service(service_id: String) -> bool:
+	if service_id.strip_edges() == "":
+		return false
 	return _services.has(service_id)
 
 
-## Purpose: Public method `get_service` for external gameplay integration.
-## Example: `self.get_service(<service_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_service(service_id: String) -> Object:
+	if service_id.strip_edges() == "":
+		push_error("ServiceRegistry.get_service: service_id is empty")
+		return null
 	if not _services.has(service_id):
 		push_error("Missing service: %s" % service_id)
 		return null
 	return _services[service_id]
 
 
-## Purpose: Public method `get_typed` for external gameplay integration.
-## Example: `self.get_typed(<service_id>, <expected_class_name>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_typed(service_id: String, expected_class_name: String) -> Object:
 	var service := get_service(service_id)
 	if service == null:
 		return null
-	if expected_class_name != "" and service.get_class() != expected_class_name and not service.is_class(expected_class_name):
-		push_warning("Service %s may not match expected type %s" % [service_id, expected_class_name])
+	if (
+		expected_class_name != ""
+		and service.get_class() != expected_class_name
+		and not service.is_class(expected_class_name)
+	):
+		push_warning(
+			"Service %s may not match expected type %s" % [service_id, expected_class_name]
+		)
 	return service
 
 
-## Purpose: Public method `unregister_service` for external gameplay integration.
-## Example: `self.unregister_service(<service_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func unregister_service(service_id: String) -> void:
+	if service_id.strip_edges() == "":
+		push_warning("ServiceRegistry.unregister_service: service_id is empty")
+		return
 	_services.erase(service_id)
 	_service_types.erase(service_id)
 
 
-## Purpose: Public method `clear` for external gameplay integration.
-## Example: `self.clear()`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func clear() -> void:
 	_services.clear()
 	_service_types.clear()

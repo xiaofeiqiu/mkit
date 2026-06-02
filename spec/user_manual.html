@@ -244,7 +244,6 @@
       </div>
       <nav class="toc" aria-label="目录">
         <a href="#overview">1. 文档范围</a>
-        <a href="#status">2. 实现状态</a>
         <a href="#quick-start">3. 快速接入</a>
         <a href="#architecture">4. High Level Architecture</a>
         <a href="#pipeline">5. Gameplay Pipeline</a>
@@ -270,57 +269,6 @@
         <h2>Mkit 用户手册（按现有实现）</h2>
         <p>本文直接对应仓库中 <code>addons/mkit/</code> 与 <code>game/demo/</code> 的现有代码。重点是“现在怎么接入、怎么跑通、哪里有硬约束”，不是概念性设计草案。</p>
       </header>
-
-      <section id="status">
-        <h2>2. 实现状态（截至 2026-05-31）</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Phase</th>
-              <th>状态</th>
-              <th>说明</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Phase 0 Kernel</td>
-              <td><span class="badge ok">已完成</span></td>
-              <td>Command → HFSM → Action → Effect → Event 基础链路可跑。</td>
-            </tr>
-            <tr>
-              <td>Phase 1 Combat</td>
-              <td><span class="badge ok">已完成</span></td>
-              <td>Hitbox/Hurtbox、DamageRequest/Result、CombatResolver、HealthComponent。</td>
-            </tr>
-            <tr>
-              <td>Phase 2 Ability/Status</td>
-              <td><span class="badge ok">已完成</span></td>
-              <td>AbilityController、Cooldown、CastAction、StatusEffect tick。</td>
-            </tr>
-            <tr>
-              <td>Phase 3 Inventory/Loot/Reward</td>
-              <td><span class="badge ok">已完成</span></td>
-              <td>背包、装备、掉落、奖励生成与应用。</td>
-            </tr>
-            <tr>
-              <td>Phase 4 Room/Run/Generation</td>
-              <td><span class="badge ok">已完成</span></td>
-              <td>RunDirector + RoomController + DungeonGenerator 线性房间流。</td>
-            </tr>
-            <tr>
-              <td>Phase 5 Save/Meta</td>
-              <td><span class="badge ok">已完成</span></td>
-              <td>SaveManager、SaveMigration、ProgressionSystem。</td>
-            </tr>
-            <tr>
-              <td>Phase 6 Platform</td>
-              <td><span class="badge ok">已完成</span></td>
-              <td>平台服务抽象 + mock 实现 + 平台联调 demo 已完成（符合当前 phase 验收目标）。</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="note">当前 Phase 6 分为两条可运行切片：<code>phase6_experience_slice</code>（经验/存档）和 <code>phase6_platform_slice</code>（平台服务 mock 联调）。</div>
-      </section>
 
       <section id="quick-start">
         <h2>3. 快速接入（按当前工程）</h2>

@@ -26,12 +26,17 @@ func _ready() -> void:
 func _on_damage_applied(result) -> void:
 	if result == null:
 		return
-	print("[EVENT] damage_applied -> %.1f damage to %s (crit=%s, lethal=%s)" % [
-		result.final_amount,
-		_node_name(result.target),
-		str(result.was_critical),
-		str(result.was_lethal),
-	])
+	print(
+		(
+			"[EVENT] damage_applied -> %.1f damage to %s (crit=%s, lethal=%s)"
+			% [
+				result.final_amount,
+				_node_name(result.target),
+				str(result.was_critical),
+				str(result.was_lethal),
+			]
+		)
+	)
 
 
 func _on_entity_died(entity_id: String, _entity_ref: Node) -> void:

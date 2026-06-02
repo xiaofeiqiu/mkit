@@ -55,6 +55,7 @@ func _input(event: InputEvent) -> void:
 
 # ── content registration ───────────────────────────────────────────────────────
 
+
 func _register_content() -> void:
 	var registry := ServiceRegistry.get_service("content") as ContentRegistry
 	if registry == null:
@@ -239,6 +240,7 @@ func _register_player_abilities() -> void:
 
 # ── events ─────────────────────────────────────────────────────────────────────
 
+
 func _connect_events() -> void:
 	var events := ServiceRegistry.get_service("events") as EventRouter
 	if events == null:
@@ -299,6 +301,7 @@ func _on_equipment_changed(slot_id: String, item: ItemInstance) -> void:
 
 # ── actions ────────────────────────────────────────────────────────────────────
 
+
 func _try_equip_sword() -> void:
 	var inv := player.get_node_or_null("Controllers/InventoryController") as InventoryController
 	var eq := player.get_node_or_null("Controllers/EquipmentController") as EquipmentController
@@ -354,12 +357,16 @@ func _generate_rewards() -> void:
 	var ctx := GameplayContext.new()
 	ctx.source = player
 
-	_pending_rewards = _reward_system.generate_options([
-		"reward.attack_plus_20",
-		"reward.max_hp_plus_20",
-		"reward.move_speed_plus_15pct",
-		"reward.defense_plus_5"
-	], 3, ctx)
+	_pending_rewards = _reward_system.generate_options(
+		[
+			"reward.attack_plus_20",
+			"reward.max_hp_plus_20",
+			"reward.move_speed_plus_15pct",
+			"reward.defense_plus_5"
+		],
+		3,
+		ctx
+	)
 
 	_log("[REWARD] options:")
 	for i in range(_pending_rewards.size()):
@@ -379,12 +386,17 @@ func _pick_reward(index: int) -> void:
 	ctx.source = player
 
 	if _reward_system.apply_selected(option, ctx):
-		_log("[REWARD] applied: %s  atk=%.1f  hp=%.1f  spd=%.1f" % [
-			option.display_name,
-			_get_player_stat("attack_power"),
-			_get_player_stat("max_hp"),
-			_get_player_stat("move_speed")
-		])
+		_log(
+			(
+				"[REWARD] applied: %s  atk=%.1f  hp=%.1f  spd=%.1f"
+				% [
+					option.display_name,
+					_get_player_stat("attack_power"),
+					_get_player_stat("max_hp"),
+					_get_player_stat("move_speed")
+				]
+			)
+		)
 		_pending_rewards.clear()
 		_reward_label.text = "Reward applied: %s" % option.display_name
 	else:
@@ -392,6 +404,7 @@ func _pick_reward(index: int) -> void:
 
 
 # ── HUD ────────────────────────────────────────────────────────────────────────
+
 
 func _update_hud() -> void:
 	if enemy != null and is_instance_valid(enemy) and _enemy_alive:
@@ -401,12 +414,15 @@ func _update_hud() -> void:
 	else:
 		_hp_label.text = "Enemy: dead"
 
-	_atk_label.text = "Attack: %.1f  MaxHP: %.1f  Speed: %.1f  Def: %.1f" % [
-		_get_player_stat("attack_power"),
-		_get_player_stat("max_hp"),
-		_get_player_stat("move_speed"),
-		_get_player_stat("defense")
-	]
+	_atk_label.text = (
+		"Attack: %.1f  MaxHP: %.1f  Speed: %.1f  Def: %.1f"
+		% [
+			_get_player_stat("attack_power"),
+			_get_player_stat("max_hp"),
+			_get_player_stat("move_speed"),
+			_get_player_stat("defense")
+		]
+	)
 
 	var inv := player.get_node_or_null("Controllers/InventoryController") as InventoryController
 	if inv != null:
@@ -419,10 +435,13 @@ func _update_hud() -> void:
 	var eq := player.get_node_or_null("Controllers/EquipmentController") as EquipmentController
 	if eq != null:
 		var weapon := eq.get_equipped("weapon")
-		_equip_label.text = "Weapon: %s" % (weapon.definition_id.replace("item.", "") if weapon != null else "none")
+		_equip_label.text = (
+			"Weapon: %s" % (weapon.definition_id.replace("item.", "") if weapon != null else "none")
+		)
 
 
 # ── helpers ────────────────────────────────────────────────────────────────────
+
 
 func _get_player_stat(stat_id: String) -> float:
 	if player == null:

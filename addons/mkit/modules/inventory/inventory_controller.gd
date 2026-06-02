@@ -1,50 +1,26 @@
-## What: InventoryController is the node-facing API for an entity or profile inventory.
-## Responsibilities: initialize capacity, add/stack/remove/find items, fetch definitions, emit item/inventory signals, and save/load inventory data.
-## Upstream: loot, rewards, item pickups, UI, commands, shops, and SaveManager call inventory operations.
-## Downstream: InventoryModel stores slots, ContentRegistry provides item definitions, and UI listens to change signals.
-## When to use: Attach it to any owner that can carry items.
-## Example: `$InventoryController.add_item(ItemInstance.create("iron_sword", 1)); var potion = $InventoryController.find_item_by_definition("health_potion")`.
 class_name InventoryController
 extends Node
-
-## Purpose: Emits the `inventory_changed` signal to notify external listeners of a state change.
-## Example: `self.inventory_changed.connect(_on_inventory_changed)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal inventory_changed
-## Purpose: Emits the `item_added` signal to notify external listeners of a state change.
-## Example: `self.item_added.connect(_on_item_added)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal item_added(item: ItemInstance)
-## Purpose: Emits the `item_removed` signal to notify external listeners of a state change.
-## Example: `self.item_removed.connect(_on_item_removed)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal item_removed(item: ItemInstance)
-
-## Purpose: Inspector-exposed configuration `capacity`.
-## Example: `self.capacity = 1`
-## Scenario: Tune this in the Inspector or resource setup to adjust behavior without code changes.
 @export var capacity: int = 30
-
-## Purpose: Public runtime field `model`.
-## Example: `self.model = null`
-## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var model := InventoryModel.new()
-## Purpose: Public runtime field `content`.
-## Example: `self.content = null`
-## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var content: ContentRegistry = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service("content") as ContentRegistry
+	if ServiceRegistry.has_service("content"):
+		content = ServiceRegistry.get_service("content") as ContentRegistry
+	capacity = max(1, capacity)
 	model.setup(capacity)
 	model.owner_id = _get_owner_id()
 
 
-## Purpose: Public method `can_add_item` for external gameplay integration.
-## Example: `self.can_add_item(<item>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func can_add_item(item: ItemInstance) -> bool:
+	if item == null:
+		return false
+	if item.quantity <= 0:
+		return false
 	var definition := get_item_definition(item.definition_id)
 	if definition == null:
 		return false
@@ -53,21 +29,38 @@ func can_add_item(item: ItemInstance) -> bool:
 	return model.find_first_empty_slot() != null
 
 
-## Purpose: Public method `add_item` for external gameplay integration.
-## Example: `self.add_item(<item>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func add_item(item: ItemInstance) -> bool:
+	if item == null:
+		push_error("InventoryController.add_item: item is null")
+		return false
+	if item.quantity <= 0:
+		push_warning("InventoryController.add_item: item quantity must be > 0")
+		return false
 	var definition := get_item_definition(item.definition_id)
 	if definition == null:
 		return false
-
+	if definition.stackable and definition.max_stack <= 0:
+		push_error(
+			(
+				"InventoryController.add_item: stackable item has invalid max_stack <= 0: %s"
+				% item.definition_id
+			)
+		)
+		return false
+	var stack_size := definition.max_stack if definition.stackable else 1
+	if stack_size <= 0:
+		push_error(
+			"InventoryController.add_item: invalid stack size for item %s" % item.definition_id
+		)
+		return false
 	var remaining := item.quantity
 	var original_quantity := item.quantity
-
 	if definition.stackable:
 		for slot in model.slots:
 			if slot.item != null and slot.item.definition_id == item.definition_id:
 				var space := definition.max_stack - slot.item.quantity
+				if space <= 0:
+					continue
 				var moved := min(space, remaining)
 				slot.item.quantity += moved
 				remaining -= moved
@@ -75,7 +68,6 @@ func add_item(item: ItemInstance) -> bool:
 					item_added.emit(item)
 					_emit_inventory_changed()
 					return true
-
 	while remaining > 0:
 		var empty := model.find_first_empty_slot()
 		if empty == null:
@@ -84,19 +76,20 @@ func add_item(item: ItemInstance) -> bool:
 				item_added.emit(item)
 			_emit_inventory_changed()
 			return false
-		var new_stack := ItemInstance.create(item.definition_id, min(remaining, definition.max_stack))
+		var new_stack := ItemInstance.create(item.definition_id, min(remaining, stack_size))
 		empty.item = new_stack
 		remaining -= new_stack.quantity
-
 	item_added.emit(item)
 	_emit_inventory_changed()
 	return true
 
 
-## Purpose: Public method `remove_item_by_instance_id` for external gameplay integration.
-## Example: `self.remove_item_by_instance_id(<instance_id>, <quantity>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
+	if instance_id.strip_edges() == "":
+		return false
+	if quantity <= 0:
+		push_warning("InventoryController.remove_item_by_instance_id: quantity must be > 0")
+		return false
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
 			slot.item.quantity -= quantity
@@ -109,9 +102,6 @@ func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	return false
 
 
-## Purpose: Public method `find_item` for external gameplay integration.
-## Example: `self.find_item(<instance_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func find_item(instance_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
@@ -119,9 +109,6 @@ func find_item(instance_id: String) -> ItemInstance:
 	return null
 
 
-## Purpose: Public method `find_item_by_definition` for external gameplay integration.
-## Example: `self.find_item_by_definition(<definition_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func find_item_by_definition(definition_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.definition_id == definition_id:
@@ -129,18 +116,17 @@ func find_item_by_definition(definition_id: String) -> ItemInstance:
 	return null
 
 
-## Purpose: Public method `get_item_definition` for external gameplay integration.
-## Example: `self.get_item_definition(<item_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_item_definition(item_id: String) -> ItemDefinition:
+	if item_id.strip_edges() == "":
+		return null
 	if content == null:
-		content = ServiceRegistry.get_service("content") as ContentRegistry
+		if ServiceRegistry.has_service("content"):
+			content = ServiceRegistry.get_service("content") as ContentRegistry
+	if content == null:
+		return null
 	return content.get_resource(item_id) as ItemDefinition
 
 
-## Purpose: Public method `to_save_data` for external gameplay integration.
-## Example: `self.to_save_data()`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func to_save_data() -> Dictionary:
 	var items: Array = []
 	for slot in model.slots:
@@ -148,11 +134,9 @@ func to_save_data() -> Dictionary:
 	return {"capacity": capacity, "items": items}
 
 
-## Purpose: Public method `from_save_data` for external gameplay integration.
-## Example: `self.from_save_data(<data>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func from_save_data(data: Dictionary) -> void:
 	capacity = int(data.get("capacity", capacity))
+	capacity = max(1, capacity)
 	model.setup(capacity)
 	var items: Array = data.get("items", [])
 	for i in range(min(items.size(), model.slots.size())):
@@ -163,11 +147,16 @@ func from_save_data(data: Dictionary) -> void:
 
 func _emit_inventory_changed() -> void:
 	inventory_changed.emit()
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events: EventRouter = null
+	if ServiceRegistry.has_service("events"):
+		events = ServiceRegistry.get_service("events") as EventRouter
 	if events != null:
 		events.emit_inventory_changed(_get_owner_id())
 
 
 func _get_owner_id() -> String:
-	var identity := owner.get_node_or_null("EntityIdentity") as EntityIdentity
-	return identity.entity_id if identity != null else str(owner.name)
+	var owner_node := owner if owner != null else get_parent()
+	if owner_node == null:
+		return name
+	var identity := owner_node.get_node_or_null("EntityIdentity") as EntityIdentity
+	return identity.entity_id if identity != null else str(owner_node.name)

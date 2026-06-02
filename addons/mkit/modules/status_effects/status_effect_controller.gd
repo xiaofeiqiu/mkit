@@ -1,32 +1,9 @@
-## What: StatusEffectController owns timed status effects active on one entity.
-## Responsibilities: apply/refresh/remove statuses, tick durations, run apply/tick/remove effects, and manage stat modifiers.
-## Upstream: ApplyStatusEffect, HealthComponent on-hit logic, abilities, traps, or scripted events request statuses.
-## Downstream: StatusEffectInstance, StatusEffectDefinition, StatsComponent, and EffectExecutor handle runtime behavior.
-## When to use: Attach it to entities that can receive buffs, debuffs, dots, stuns, or stacking status effects.
-## Example: `$StatusEffectController.apply_status("burning", caster, 2, 4.0)` applies two stacks for four seconds.
 class_name StatusEffectController
 extends Node
-
-## Purpose: Emits the `status_applied` signal to notify external listeners of a state change.
-## Example: `self.status_applied.connect(_on_status_applied)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal status_applied(status_id: String, stacks: int)
-## Purpose: Emits the `status_removed` signal to notify external listeners of a state change.
-## Example: `self.status_removed.connect(_on_status_removed)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal status_removed(status_id: String)
-## Purpose: Emits the `status_ticked` signal to notify external listeners of a state change.
-## Example: `self.status_ticked.connect(_on_status_ticked)`
-## Scenario: Use this in event-driven flows where UI, audio, or systems react without direct coupling.
 signal status_ticked(status_id: String)
-
-## Purpose: Public runtime field `active_statuses`.
-## Example: `self.active_statuses = {}`
-## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var active_statuses: Dictionary = {}
-## Purpose: Public runtime field `content`.
-## Example: `self.content = null`
-## Scenario: Read or update this when coordinating shared runtime state between systems or tests.
 var content: ContentRegistry = null
 
 
@@ -40,45 +17,35 @@ func _process(delta: float) -> void:
 		var definition := get_definition(status_id)
 		if definition == null:
 			continue
-
 		instance.remaining_duration -= delta
 		instance.tick_timer -= delta
-
 		if definition.tick_interval > 0 and instance.tick_timer <= 0:
 			_tick_status(instance, definition)
 			instance.tick_timer = definition.tick_interval
-
 		if instance.remaining_duration <= 0:
 			remove_status(status_id)
 
 
-## Purpose: Public method `apply_status` for external gameplay integration.
-## Example: `self.apply_status(<status_id>, <source>, <stacks>, <duration_override>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
-func apply_status(status_id: String, source: Node, stacks: int = 1, duration_override: float = -1.0) -> bool:
+func apply_status(
+	status_id: String, source: Node, stacks: int = 1, duration_override: float = -1.0
+) -> bool:
 	var definition := get_definition(status_id)
 	if definition == null:
 		return false
-
 	if active_statuses.has(status_id):
 		var existing := active_statuses[status_id] as StatusEffectInstance
 		_apply_stack_rule(existing, definition, stacks, duration_override)
 		status_applied.emit(status_id, existing.stacks)
 		return true
-
 	var instance := StatusEffectInstance.new()
 	instance.setup(definition, source, owner, stacks, duration_override)
 	active_statuses[status_id] = instance
-
 	_apply_stat_modifiers(instance, definition)
 	_execute_effects(definition.effects_on_apply, instance)
 	status_applied.emit(status_id, instance.stacks)
 	return true
 
 
-## Purpose: Public method `remove_status` for external gameplay integration.
-## Example: `self.remove_status(<status_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func remove_status(status_id: String) -> void:
 	if not active_statuses.has(status_id):
 		return
@@ -91,16 +58,10 @@ func remove_status(status_id: String) -> void:
 	status_removed.emit(status_id)
 
 
-## Purpose: Public method `has_status` for external gameplay integration.
-## Example: `self.has_status(<status_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func has_status(status_id: String) -> bool:
 	return active_statuses.has(status_id)
 
 
-## Purpose: Public method `get_definition` for external gameplay integration.
-## Example: `self.get_definition(<status_id>)`
-## Scenario: Call this from other systems when this component needs to perform its main behavior.
 func get_definition(status_id: String) -> StatusEffectDefinition:
 	if content == null:
 		content = ServiceRegistry.get_service("content") as ContentRegistry
@@ -120,13 +81,17 @@ func _execute_effects(effects: Array[GameEffect], instance: StatusEffectInstance
 	context.target = instance.target
 	context.status_id = instance.definition_id
 	context.payload["stacks"] = instance.stacks
-
 	var executor := ServiceRegistry.get_service("effects") as EffectExecutor
 	if executor != null:
 		executor.execute_many(effects, context)
 
 
-func _apply_stack_rule(instance: StatusEffectInstance, definition: StatusEffectDefinition, stacks: int, duration_override: float) -> void:
+func _apply_stack_rule(
+	instance: StatusEffectInstance,
+	definition: StatusEffectDefinition,
+	stacks: int,
+	duration_override: float
+) -> void:
 	var duration := duration_override if duration_override > 0 else definition.duration
 	match definition.stack_rule:
 		StatusEffectDefinition.StackRule.REFRESH_DURATION:
@@ -145,12 +110,16 @@ func _apply_stack_rule(instance: StatusEffectInstance, definition: StatusEffectD
 			pass
 
 
-func _apply_stat_modifiers(instance: StatusEffectInstance, definition: StatusEffectDefinition) -> void:
+func _apply_stat_modifiers(
+	instance: StatusEffectInstance, definition: StatusEffectDefinition
+) -> void:
 	var stats := owner.get_node_or_null("Components/StatsComponent") as StatsComponent
 	if stats == null:
 		return
 	for mod_def in definition.stat_modifiers:
-		var modifier := StatModifier.from_definition(mod_def, instance.instance_id, instance.remaining_duration)
+		var modifier := StatModifier.from_definition(
+			mod_def, instance.instance_id, instance.remaining_duration
+		)
 		stats.add_modifier(modifier)
 		instance.applied_modifier_ids.append(modifier.modifier_id)
 

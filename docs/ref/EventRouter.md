@@ -12,41 +12,33 @@ EventRouter 是玩法事件发布和订阅的路由层。负责发布 damage_app
 
 `res://addons/mkit/kernel/events/event_router.gd`
 
+## 字段说明
+
+- **recent_events**：最近事件列表。例：DebugOverlay 显示最近 damage_applied、entity_died、room_cleared，方便排查流程。
+- **max_recent_events**：最近事件保留上限。例：只保留 100 条，避免长期运行后 Debug 数据无限增长。
+
 ## 接口
 
 ```gdscript
 class_name EventRouter
 extends Node
-
 signal domain_event_emitted(event: DomainEvent)
-signal damage_applied(result: DamageResult)
+signal damage_applied(result)
 signal entity_died(entity_id: String, entity_ref: Node)
-signal item_collected(item_instance: ItemInstance)
 signal inventory_changed(owner_id: String)
 signal room_cleared(room_id: String)
 signal reward_selected(reward_id: String)
 signal run_started(run_id: String, seed: int)
 signal run_finished(run_id: String, result: String)
-
 var recent_events: Array[DomainEvent] = []
 var max_recent_events: int = 100
-
 func emit_domain_event(event: DomainEvent) -> void
-
-func emit_damage_applied(result: DamageResult) -> void
-
+func emit_damage_applied(result) -> void
 func emit_entity_died(entity_id: String, entity_ref: Node) -> void
-
 func emit_inventory_changed(owner_id: String) -> void
-
-func emit_item_collected(item_instance: ItemInstance, collector_id: String = "") -> void
-
 func emit_room_cleared(room_id: String) -> void
-
 func emit_reward_selected(reward_id: String, source_id: String = "") -> void
-
 func emit_run_started(run_id: String, seed: int) -> void
-
 func emit_run_finished(run_id: String, result: String) -> void
 ```
 

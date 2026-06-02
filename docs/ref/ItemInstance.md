@@ -12,12 +12,21 @@ ItemInstance 是背包里一件具体物品或一组堆叠物品。它记录 ins
 
 `res://addons/mkit/modules/inventory/item_instance.gd`
 
+## 字段说明
+
+- **instance_id**：运行时物品/对象实例 ID。例：两把 Iron Sword 都来自 item.sword_iron，但一把有暴击词缀、一把有耐久损耗，所以必须有不同 instance_id。
+- **definition_id**：静态定义 ID。例：goblin_001 的 definition_id 是 enemy.goblin_basic；存档或刷怪系统可以通过这个 ID 重新找到敌人定义，而不是保存具体节点。
+- **quantity**：数量。例：药水 stack 数量是 3，金币掉落数量是 20。
+- **rolled_affixes**：随机词缀。例：同一把 item.sword_iron 可以随机出 +12% crit chance。
+- **durability**：耐久。例：武器每次攻击降低耐久，归零后需要修理或失效。
+- **upgrade_level**：强化等级。例：+3 铁剑比普通铁剑有更高攻击 modifier。
+- **metadata**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name ItemInstance
 extends RefCounted
-
 var instance_id: String = ""
 var definition_id: String = ""
 var quantity: int = 1
@@ -25,10 +34,9 @@ var rolled_affixes: Array[StatModifier] = []
 var durability: float = 1.0
 var upgrade_level: int = 0
 var metadata: Dictionary = {}
-
-static func create(definition_id: String, quantity: int = 1) -> ItemInstance: ...
-func to_save_data() -> Dictionary: ...
-static func from_save_data(data: Dictionary) -> ItemInstance: ...
+static func create(def_id: String, qty: int = 1) -> ItemInstance
+func to_save_data() -> Dictionary
+static func from_save_data(data: Dictionary) -> ItemInstance
 ```
 
 ## 函数使用场景

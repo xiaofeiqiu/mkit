@@ -12,34 +12,19 @@ EntitySpawner 是通过 EntityDefinition 创建实体节点的统一入口。它
 
 `res://addons/mkit/modules/entity/entity_spawner.gd`
 
+## 字段说明
+
+- **content**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name EntitySpawner
 extends Node
-
 signal entity_spawned(entity: Node, definition_id: String)
 signal entity_spawn_failed(definition_id: String, reason: String)
-
 var content: ContentRegistry = null
-
-func _ready() -> void:
-    content = ServiceRegistry.get_service("content") as ContentRegistry
-
-func spawn_entity(definition_id: String, parent: Node, position: Vector2 = Vector2.ZERO, runtime_id: String = "") -> Node:
-    ...
-
-func _get_definition(definition_id: String) -> EntityDefinition:
-    ...
-
-func _initialize_identity(entity: Node, definition: EntityDefinition, runtime_id: String) -> void:
-    ...
-
-func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:
-    ...
-
-func _initialize_abilities(entity: Node, definition: EntityDefinition) -> void:
-    ...
+func spawn_entity( definition_id: String, parent: Node, position: Vector2 = Vector2.ZERO, runtime_id: String = "" ) -> Node
 ```
 
 ## 函数使用场景

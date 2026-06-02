@@ -10,14 +10,29 @@ RunState 是一局 roguelike run 的运行时存档对象。它保存 run_id、s
 
 ## 文件
 
-`res://addons/mkit/modules/run/run_state.gd`
+`res://addons/mkit/modules/room/run_state.gd`
+
+## 字段说明
+
+- **run_id**：一局 run 的 ID。例：Analytics 可以把所有 room_cleared 和 reward_selected 归到同一局。
+- **seed**：随机种子。例：同一个 seed 生成同样房间顺序，方便复现 bug。
+- **current_floor**：当前层数。例：第 3 层开始刷 elite 敌人。
+- **current_room_index**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **current_room_id**：当前房间 ID。例：存档恢复时知道玩家正在哪个房间。
+- **elapsed_time**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **temporary_upgrade_ids**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **run_currency**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **enemy_scaling_level**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **room_history**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **reward_history**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **rng_state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **status**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 
 ## 接口
 
 ```gdscript
 class_name RunState
 extends RefCounted
-
 var run_id: String = ""
 var seed: int = 0
 var current_floor: int = 1
@@ -31,9 +46,8 @@ var room_history: Array[String] = []
 var reward_history: Array[String] = []
 var rng_state: Dictionary = {}
 var status: String = "not_started"
-
-static func create(seed_value: int) -> RunState: ...
-func to_save_data() -> Dictionary: ...
+static func create(seed_value: int) -> RunState
+func to_save_data() -> Dictionary
 ```
 
 ## 函数使用场景

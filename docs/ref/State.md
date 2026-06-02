@@ -12,41 +12,38 @@ State 是 HFSM（层级有限状态机）中的一个行为模式节点。负责
 
 `res://addons/mkit/kernel/state_machine/state.gd`
 
+## 字段说明
+
+- **state_id**：稳定 ID 字段。例：State 通过 state_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **initial_child_state_id**：稳定 ID 字段。例：State 通过 initial_child_state_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **parent_state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **state_machine**：所属状态机引用。例：AttackState 完成后通过 state_machine 请求回到 Idle。
+- **owner_entity**：拥有该组件或状态机的实体。例：PlayerMoveState 需要通过 owner_entity 读取 StatsComponent 并推动 CharacterBody2D。
+- **active_child**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **blackboard**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name State
 extends Node
-
 @export var state_id: String = ""
 @export var initial_child_state_id: String = ""
-
 var parent_state: State = null
 var state_machine: StateMachine = null
 var owner_entity: Node = null
 var active_child: State = null
 var blackboard: Blackboard = null
-
 func setup(machine: StateMachine, entity: Node, parent: State = null) -> void
-
 func enter(context: Dictionary = {}) -> void
-
 func exit(context: Dictionary = {}) -> void
-
 func update(delta: float) -> void
-
 func physics_update(delta: float) -> void
-
 func handle_command(command: GameCommand) -> bool
-
 func can_enter(context: Dictionary = {}) -> bool
-
 func can_exit(context: Dictionary = {}) -> bool
-
 func request_transition(target_path: String, context: Dictionary = {}) -> bool
-
 func get_path_ids() -> Array[String]
-
 func get_full_path() -> String
 ```
 

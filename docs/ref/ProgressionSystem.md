@@ -12,25 +12,28 @@ ProgressionSystem 是长期进度和升级购买的控制器。它管理 Progres
 
 `res://addons/mkit/modules/progression/progression_system.gd`
 
+## 字段说明
+
+- **state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **content**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name ProgressionSystem
 extends Saveable
-
 signal currency_changed(currency_id: String, amount: int)
 signal upgrade_level_changed(upgrade_id: String, level: int)
 signal content_unlocked(content_id: String)
-
 var state := ProgressionState.new()
 var content: ContentRegistry = null
-
-func add_currency(currency_id: String, amount: int) -> void: ...
-func can_unlock(upgrade_id: String) -> bool: ...
-func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> bool: ...
-func get_definition(upgrade_id: String) -> UpgradeDefinition: ...
-func to_save_data() -> Dictionary: ...
-func from_save_data(data: Dictionary) -> void: ...
+func add_currency(currency_id: String, amount: int) -> void
+func get_currency(currency_id: String) -> int
+func can_unlock(upgrade_id: String) -> bool
+func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> bool
+func get_definition(upgrade_id: String) -> UpgradeDefinition
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景

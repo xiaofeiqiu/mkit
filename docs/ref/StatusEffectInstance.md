@@ -12,12 +12,22 @@ StatusEffectInstance 是已经挂在某个实体身上的状态运行时实例�
 
 `res://addons/mkit/modules/status_effects/status_effect_instance.gd`
 
+## 字段说明
+
+- **instance_id**：运行时物品/对象实例 ID。例：两把 Iron Sword 都来自 item.sword_iron，但一把有暴击词缀、一把有耐久损耗，所以必须有不同 instance_id。
+- **definition_id**：静态定义 ID。例：goblin_001 的 definition_id 是 enemy.goblin_basic；存档或刷怪系统可以通过这个 ID 重新找到敌人定义，而不是保存具体节点。
+- **source**：玩法来源节点。例：火球的 source 是玩家，后续伤害、仇恨、经验归属都可以追踪到玩家。
+- **target**：玩法目标节点。例：HealEffect 的 target 是玩家，DealDamageEffect 的 target 是被命中的敌人。
+- **remaining_duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **tick_timer**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **stacks**：代码字段。层数。
+- **applied_modifier_ids**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name StatusEffectInstance
 extends RefCounted
-
 var instance_id: String = ""
 var definition_id: String = ""
 var source: Node = null
@@ -26,8 +36,7 @@ var remaining_duration: float = 0.0
 var tick_timer: float = 0.0
 var stacks: int = 1
 var applied_modifier_ids: Array[String] = []
-
-func setup(definition: StatusEffectDefinition, source_entity: Node, target_entity: Node, initial_stacks: int, duration_override: float = -1.0) -> void: ...
+func setup( definition: StatusEffectDefinition, source_entity: Node, target_entity: Node, initial_stacks: int, duration_override: float = -1.0 ) -> void
 ```
 
 ## 函数使用场景

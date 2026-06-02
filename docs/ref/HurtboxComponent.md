@@ -12,19 +12,23 @@ HurtboxComponent 是实体"可以被打中"的受击区域（Area2D）。它表�
 
 `res://addons/mkit/modules/combat/hurtbox_component.gd`
 
+## 字段说明
+
+- **owner_path**：资源或节点路径。例：用 owner_path 指向场景或节点，方便在 Inspector 中配置。
+- **can_receive_damage**：是否接收命中。例：Dash 无敌帧期间设为 false。
+- **damage_multiplier**：受击倍率。例：Boss 头部弱点设为 1.5，护盾区域设为 0.5。
+- **damage_tags**：受击区域标签。例：weak_point、shield、armor，可进入 DamageRequest.tags。
+
 ## 接口
 
 ```gdscript
 class_name HurtboxComponent
 extends Area2D
-
 @export var owner_path: NodePath = NodePath("../..")
 @export var can_receive_damage: bool = true
 @export var damage_multiplier: float = 1.0
 @export var damage_tags: Array[String] = []
-
-func get_owner_entity() -> Node:
-    return get_node_or_null(owner_path)
+func get_owner_entity() -> Node
 ```
 
 ## 函数使用场景

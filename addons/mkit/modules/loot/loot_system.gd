@@ -7,11 +7,11 @@ func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 		push_warning("LootSystem.roll_table: table_id is empty")
 		return LootRollResult.new()
 	if not ServiceRegistry.has_service("content"):
-		push_error("LootSystem.roll_table: missing ContentRegistry service")
+		push_warning("LootSystem.roll_table: missing ContentRegistry service")
 		return LootRollResult.new()
 	var content := ServiceRegistry.get_service("content") as ContentRegistry
 	if content == null:
-		push_error("LootSystem.roll_table: ContentRegistry service is invalid")
+		push_warning("LootSystem.roll_table: ContentRegistry service is invalid")
 		return LootRollResult.new()
 	var table := content.get_resource(table_id) as LootTableDefinition
 	if table == null:
@@ -23,7 +23,7 @@ func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 func roll(table: LootTableDefinition, context: GameplayContext) -> LootRollResult:
 	var result := LootRollResult.new()
 	if table == null:
-		push_error("LootSystem.roll: table is null")
+		push_warning("LootSystem.roll: table is null")
 		return result
 	if table.rolls <= 0:
 		return result

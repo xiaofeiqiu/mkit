@@ -12,17 +12,20 @@ GrantItemEffect 是把物品实例加入目标背包的内置 Effect。它创建
 
 `res://addons/mkit/kernel/effects/builtin/grant_item_effect.gd`
 
+## 字段说明
+
+- **item_id**：物品定义 ID。例：item.potion_small。
+- **quantity**：给予数量。例：奖励给 3 瓶小药水。
+- **give_to_source**：接收者选择。例：奖励通常给 source，偷取类效果可以给 target。
+
 ## 接口
 
 ```gdscript
 class_name GrantItemEffect
 extends GameEffect
-
 @export var item_id: String = ""
 @export var quantity: int = 1
 @export var give_to_source: bool = true
-
-func _apply_impl(context: GameplayContext) -> EffectResult: ...
 ```
 
 ## 函数使用场景

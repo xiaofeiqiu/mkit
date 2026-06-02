@@ -17,12 +17,8 @@ AnalyticsService 是玩法数据埋点接口。它记录 run_started、reward_se
 ```gdscript
 class_name AnalyticsService
 extends Node
-
-func track_event(event_name: String, properties: Dictionary = {}) -> void:
-    pass
-
-func set_user_property(key: String, value) -> void:
-    pass
+func track_event(event_name: String, properties: Dictionary = {}) -> void
+func set_user_property(key: String, value: Variant) -> void
 ```
 
 ## 函数使用场景

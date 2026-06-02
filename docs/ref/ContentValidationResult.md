@@ -12,18 +12,21 @@ ContentValidationResult 是内容校验的结构化结果。负责收集错误�
 
 `res://addons/mkit/kernel/registry/content_validation_result.gd`
 
+## 字段说明
+
+- **success**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+- **errors**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **warnings**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name ContentValidationResult
 extends RefCounted
-
 var success: bool = true
 var errors: Array[String] = []
 var warnings: Array[String] = []
-
 func add_error(message: String) -> void
-
 func add_warning(message: String) -> void
 ```
 

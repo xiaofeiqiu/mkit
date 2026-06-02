@@ -31,7 +31,7 @@ func can_add_item(item: ItemInstance) -> bool:
 
 func add_item(item: ItemInstance) -> bool:
 	if item == null:
-		push_error("InventoryController.add_item: item is null")
+		push_warning("InventoryController.add_item: item is null")
 		return false
 	if item.quantity <= 0:
 		push_warning("InventoryController.add_item: item quantity must be > 0")
@@ -68,6 +68,7 @@ func add_item(item: ItemInstance) -> bool:
 					item_added.emit(item)
 					_emit_inventory_changed()
 					return true
+	var placed_original := false
 	while remaining > 0:
 		var empty := model.find_first_empty_slot()
 		if empty == null:
@@ -76,9 +77,16 @@ func add_item(item: ItemInstance) -> bool:
 				item_added.emit(item)
 			_emit_inventory_changed()
 			return false
-		var new_stack := ItemInstance.create(item.definition_id, min(remaining, stack_size))
-		empty.item = new_stack
-		remaining -= new_stack.quantity
+		var amount := min(remaining, stack_size)
+		var stack: ItemInstance
+		if not placed_original:
+			item.quantity = amount
+			stack = item
+			placed_original = true
+		else:
+			stack = ItemInstance.create(item.definition_id, amount)
+		empty.item = stack
+		remaining -= amount
 	item_added.emit(item)
 	_emit_inventory_changed()
 	return true

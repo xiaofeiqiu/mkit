@@ -7,10 +7,10 @@ func register_service(
 	service_id: String, service: Object, expected_class_name: String = ""
 ) -> void:
 	if service_id.strip_edges() == "":
-		push_error("ServiceRegistry.register_service: service_id is empty")
+		push_warning("ServiceRegistry.register_service: service_id is empty")
 		return
 	if service == null:
-		push_error("ServiceRegistry.register_service: service is null for id %s" % service_id)
+		push_warning("ServiceRegistry.register_service: service is null for id %s" % service_id)
 		return
 	if _services.has(service_id):
 		push_warning("Service already registered: %s. It will be replaced." % service_id)
@@ -27,10 +27,10 @@ func has_service(service_id: String) -> bool:
 
 func get_service(service_id: String) -> Object:
 	if service_id.strip_edges() == "":
-		push_error("ServiceRegistry.get_service: service_id is empty")
+		push_warning("ServiceRegistry.get_service: service_id is empty")
 		return null
 	if not _services.has(service_id):
-		push_error("Missing service: %s" % service_id)
+		push_warning("Missing service: %s" % service_id)
 		return null
 	return _services[service_id]
 

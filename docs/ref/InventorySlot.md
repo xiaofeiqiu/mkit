@@ -12,20 +12,20 @@ InventorySlot 是背包中的一个格子或存储位置。它保存该格子里
 
 `res://addons/mkit/modules/inventory/inventory_slot.gd`
 
+## 字段说明
+
+- **index**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **item**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name InventorySlot
 extends RefCounted
-
 var index: int = -1
 var item: ItemInstance = null
-
-func is_empty() -> bool:
-    return item == null
-
-func clear() -> void:
-    item = null
+func is_empty() -> bool
+func clear() -> void
 ```
 
 ## 函数使用场景

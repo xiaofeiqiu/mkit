@@ -27,7 +27,7 @@ func _ready() -> void:
 
 func setup(definition_id: String) -> void:
 	if definition_id.strip_edges() == "":
-		push_error("RoomController.setup: definition_id is empty")
+		push_warning("RoomController.setup: definition_id is empty")
 		return
 	room_definition_id = definition_id
 	runtime = RoomRuntime.create(definition_id)
@@ -36,7 +36,7 @@ func setup(definition_id: String) -> void:
 func enter_room() -> void:
 	if runtime == null:
 		if room_definition_id.strip_edges() == "":
-			push_error("RoomController.enter_room: missing runtime and room_definition_id")
+			push_warning("RoomController.enter_room: missing runtime and room_definition_id")
 			return
 		runtime = RoomRuntime.create(room_definition_id)
 	runtime.entered = true

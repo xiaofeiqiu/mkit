@@ -12,12 +12,22 @@ GameCommand 是表示"意图"的数据对象。负责承载 move、attack、cast
 
 `res://addons/mkit/kernel/commands/game_command.gd`
 
+## 字段说明
+
+- **command_id**：单次命令 ID。例：玩家连续点两次攻击时，两个 attack 命令需要能在 debug history 里分开追踪。
+- **command_type**：命令类型。例：move、attack、cast_ability，StateMachine 根据它决定当前状态能不能处理。
+- **source_id**：行为来源 ID。例：伤害事件里 source_id=player_001，Analytics 和仇恨系统就知道是谁造成了伤害。
+- **target_id**：行为目标 ID。例：CastAbilityCommand 的 target_id=player_001 表示命令发给玩家实体处理，不是直接发给技能资源。
+- **timestamp**：发生时间。例：DebugOverlay 可以按时间排序最近事件，回放系统也能按时间重放命令。
+- **priority**：代码字段。计算优先级。
+- **payload**：扩展数据包。例：attack 命令可以放 direction，cast_ability 可以放 ability_id；MVP 阶段允许用它承载少量灵活数据。
+- **consumed**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+
 ## 接口
 
 ```gdscript
 class_name GameCommand
 extends RefCounted
-
 var command_id: String = ""
 var command_type: String = ""
 var source_id: String = ""
@@ -26,15 +36,10 @@ var timestamp: float = 0.0
 var priority: int = 0
 var payload: Dictionary = {}
 var consumed: bool = false
-
-static func create(type: String, source: String = "", target: String = "", data: Dictionary = {}) -> GameCommand
-
+static func create( type: String, source: String = "", target: String = "", data: Dictionary = {} ) -> GameCommand
 func mark_consumed() -> void
-
 func get_vector2(key: String, default_value: Vector2 = Vector2.ZERO) -> Vector2
-
 func get_string(key: String, default_value: String = "") -> String
-
 func get_float(key: String, default_value: float = 0.0) -> float
 ```
 

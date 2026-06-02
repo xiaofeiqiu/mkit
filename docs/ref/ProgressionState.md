@@ -12,24 +12,28 @@ ProgressionState 是玩家长期进度的纯数据状态。它保存货币、升
 
 `res://addons/mkit/modules/progression/progression_state.gd`
 
+## 字段说明
+
+- **currencies**：长期货币表。例：meta_currency=320。
+- **upgrade_levels**：升级等级表。例：upgrade.attack_plus_20=2。
+- **unlocked_content_ids**：已解锁内容。例：ability.fireball_basic 已进入奖励池。
+
 ## 接口
 
 ```gdscript
 class_name ProgressionState
 extends RefCounted
-
 var currencies: Dictionary = {}
 var upgrade_levels: Dictionary = {}
 var unlocked_content_ids: Array[String] = []
-
-func get_currency(currency_id: String) -> int: ...
-func add_currency(currency_id: String, amount: int) -> void: ...
-func spend_currency(currency_id: String, amount: int) -> bool: ...
-func get_upgrade_level(upgrade_id: String) -> int: ...
-func set_upgrade_level(upgrade_id: String, level: int) -> void: ...
-func unlock_content(content_id: String) -> void: ...
-func to_save_data() -> Dictionary: ...
-func from_save_data(data: Dictionary) -> void: ...
+func get_currency(currency_id: String) -> int
+func add_currency(currency_id: String, amount: int) -> void
+func spend_currency(currency_id: String, amount: int) -> bool
+func get_upgrade_level(upgrade_id: String) -> int
+func set_upgrade_level(upgrade_id: String, level: int) -> void
+func unlock_content(content_id: String) -> void
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景

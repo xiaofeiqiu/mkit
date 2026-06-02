@@ -12,6 +12,11 @@ ServiceRegistry 是运行时全局服务的轻量目录。负责注册和解析 
 
 `res://addons/mkit/kernel/services/service_registry.gd`
 
+## 字段说明
+
+- **_services**：内部服务表，按 service_id 保存已注册的 Object。
+- **_service_types**：内部期望类型表，记录注册时传入的 expected_class_name。
+
 ## 接口
 
 ```gdscript

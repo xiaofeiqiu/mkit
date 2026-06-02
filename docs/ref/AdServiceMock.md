@@ -17,13 +17,8 @@ AdServiceMock 是 AdService 的开发期假实现。它模拟广告已准备好�
 ```gdscript
 class_name AdServiceMock
 extends AdService
-
-func is_rewarded_ad_ready(placement_id: String) -> bool:
-    return true
-
-func show_rewarded_ad(placement_id: String) -> void:
-    await get_tree().create_timer(0.5).timeout
-    rewarded_ad_completed.emit(placement_id)
+func is_rewarded_ad_ready(_placement_id: String) -> bool
+func show_rewarded_ad(placement_id: String) -> void
 ```
 
 ## 函数使用场景

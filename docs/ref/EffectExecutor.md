@@ -12,19 +12,22 @@ EffectExecutor 是 Effect 的统一执行器。负责按顺序执行效果，记
 
 `res://addons/mkit/kernel/effects/effect_executor.gd`
 
+## 字段说明
+
+- **trace_enabled**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+- **recent_results**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **max_recent_results**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name EffectExecutor
 extends RefCounted
-
 var trace_enabled: bool = true
 var recent_results: Array[EffectResult] = []
 var max_recent_results: int = 100
-
 func execute(effect: GameEffect, context: GameplayContext) -> EffectResult
-
-func execute_many(effects: Array[GameEffect], context: GameplayContext, stop_on_failure: bool = false) -> Array[EffectResult]
+func execute_many( effects: Array[GameEffect], context: GameplayContext, stop_on_failure: bool = false ) -> Array[EffectResult]
 ```
 
 ## 函数使用场景

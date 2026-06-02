@@ -61,7 +61,7 @@ func test_tc_rd_01_empty_room_pool_calls_fail_run() -> void:
 	watch_signals(director)
 	director.start_run(1)
 	assert_signal_emitted(director, "run_finished")
-	var params := get_signal_parameters(director, "run_finished", 0)
+	var params: Array = get_signal_parameters(director, "run_finished", 0)
 	assert_true(str(params[0]).begins_with("failed"))
 
 
@@ -136,7 +136,7 @@ func test_tc_rd_09_fail_run_sets_failed_and_emits() -> void:
 	watch_signals(director)
 	director.fail_run("timeout")
 	assert_eq(director.run_state.status, "failed")
-	var params := get_signal_parameters(director, "run_finished", 0)
+	var params: Array = get_signal_parameters(director, "run_finished", 0)
 	assert_true(str(params[0]).contains("timeout"))
 
 
@@ -144,7 +144,7 @@ func test_tc_rd_10_fail_run_empty_reason_substitutes_unknown() -> void:
 	director.run_state = RunState.create(1)
 	watch_signals(director)
 	director.fail_run("")
-	var params := get_signal_parameters(director, "run_finished", 0)
+	var params: Array = get_signal_parameters(director, "run_finished", 0)
 	assert_true(str(params[0]).contains("unknown"))
 
 
@@ -165,7 +165,7 @@ func test_tc_rd_12_player_death_triggers_fail_run() -> void:
 	add_child_autofree(dummy)
 	events.emit_entity_died("player_001", dummy)
 	assert_signal_emitted(director, "run_finished")
-	var params := get_signal_parameters(director, "run_finished", 0)
+	var params: Array = get_signal_parameters(director, "run_finished", 0)
 	assert_true(str(params[0]).contains("player_died"))
 
 

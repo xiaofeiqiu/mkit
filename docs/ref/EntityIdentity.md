@@ -12,33 +12,27 @@ EntityIdentity 是玩法实体的身份证节点。它负责保存 `entity_id`�
 
 `res://addons/mkit/modules/entity/entity_identity.gd`
 
+## 字段说明
+
+- **entity_id**：运行时实体 ID。例：场景里有三个 goblin，它们都来自 enemy.goblin_basic，但运行时应分别是 goblin_001、goblin_002、goblin_003，这样伤害、死亡、AI 目标和 Debug 才能指向具体个体。
+- **definition_id**：静态定义 ID。例：goblin_001 的 definition_id 是 enemy.goblin_basic；存档或刷怪系统可以通过这个 ID 重新找到敌人定义，而不是保存具体节点。
+- **display_name**：代码字段。显示名称。
+- **faction**：阵营。例：player 的攻击只伤害 enemy faction，敌人之间不会互相误伤。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+
 ## 接口
 
 ```gdscript
 class_name EntityIdentity
 extends Node
-
 @export var entity_id: String = ""
 @export var definition_id: String = ""
 @export var display_name: String = ""
 @export var faction: String = "neutral"
 @export var tags: Array[String] = []
-
-func _ready() -> void:
-    if entity_id == "":
-        entity_id = "%s_%d" % [name.to_snake_case(), Time.get_ticks_usec()]
-
-func has_tag(tag: String) -> bool:
-    return tags.has(tag)
-
-func has_any_tag(input_tags: Array[String]) -> bool:
-    for tag in input_tags:
-        if tags.has(tag):
-            return true
-    return false
-
-func is_faction(value: String) -> bool:
-    return faction == value
+func has_tag(tag: String) -> bool
+func has_any_tag(input_tags: Array[String]) -> bool
+func is_faction(value: String) -> bool
 ```
 
 ## 函数使用场景

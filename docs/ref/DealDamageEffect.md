@@ -12,21 +12,26 @@ DealDamageEffect 是把效果转换成伤害请求的内置 Effect。它用配�
 
 `res://addons/mkit/kernel/effects/builtin/deal_damage_effect.gd`
 
+## 字段说明
+
+- **base_amount**：基础伤害/治疗数值。例：火球基础伤害 20，最终伤害还要经过攻击力、暴击和防御计算。
+- **damage_type**：伤害类型。例：physical、magic、true，用于不同防御规则。
+- **element_type**：元素类型。例：fire、ice、poison，用于抗性、弱点或状态联动。
+- **can_crit**：是否允许暴击。例：普通攻击可以暴击，持续毒伤通常不暴击。
+- **hit_tags**：代码字段。写入 DamageRequest.tags 的命中标签列表。
+- **on_hit_statuses**：命中时尝试附加的状态（含概率/层数/时长），交给 CombatResolver 掷定、HealthComponent 施加。例：燃烧火球可不再单独配 ApplyStatusEffect，直接写 `[{"status_id":"status.burn","chance":0.3}]`，让伤害和上状态共享同一次命中判定。
+
 ## 接口
 
 ```gdscript
 class_name DealDamageEffect
 extends GameEffect
-
-@export var base_amount: float = 1.0
+@export var base_amount: float = 10.0
 @export var damage_type: String = "physical"
 @export var element_type: String = "none"
 @export var can_crit: bool = true
-@export var damage_tags: Array[String] = []
+@export var hit_tags: Array[String] = []
 @export var on_hit_statuses: Array[Dictionary] = []
-# 每项格式: {status_id: String, chance: float, stacks: int, duration: float}
-
-func _apply_impl(context: GameplayContext) -> EffectResult: ...
 ```
 
 ## 函数使用场景

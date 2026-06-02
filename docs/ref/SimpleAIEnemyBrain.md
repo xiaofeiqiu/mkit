@@ -12,18 +12,21 @@ SimpleAIEnemyBrain 是早期可用的简单敌人 AI。它发现目标、追击�
 
 `res://addons/mkit/modules/ai/simple_ai_enemy_brain.gd`
 
+## 字段说明
+
+- **detection_range**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **attack_range**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **target_group**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name SimpleAIEnemyBrain
 extends Brain
-
 @export var detection_range: float = 240.0
 @export var attack_range: float = 48.0
 @export var target_group: String = "player"
-
-func _ready() -> void: ...
-func think() -> void: ...
+func think() -> void
 ```
 
 ## 函数使用场景

@@ -12,17 +12,19 @@ SaveMigration 是一个存档版本到下一个版本的数据转换规则。它
 
 `res://addons/mkit/kernel/save/save_migration.gd`
 
+## 字段说明
+
+- **from_version**：源版本。例：旧存档 save_version=1。
+- **to_version**：目标版本。例：迁移完成后写成 save_version=2。
+
 ## 接口
 
 ```gdscript
 class_name SaveMigration
 extends Resource
-
 @export var from_version: int = 1
 @export var to_version: int = 2
-
-func migrate(data: Dictionary) -> Dictionary: ...
-func _migrate_impl(data: Dictionary) -> Dictionary: ...
+func migrate(data: Dictionary) -> Dictionary
 ```
 
 ## 函数使用场景

@@ -17,23 +17,12 @@ ContentRegistry 是稳定内容 ID 到 Resource 定义的查找表。负责加�
 ```gdscript
 class_name ContentRegistry
 extends Node
-
-var _by_id: Dictionary = {}
-var _by_type: Dictionary = {}
-var _resource_path_by_id: Dictionary = {}
-
 func load_database(database: ResourceDatabase) -> void
-
 func register_resource(res: Resource) -> void
-
 func get_resource(content_id: String) -> Resource
-
 func get_typed_resource(content_id: String, expected_script: Script) -> Resource
-
 func get_all_by_type(type_name: String) -> Array
-
 func has(content_id: String) -> bool
-
 func validate_all() -> ContentValidationResult
 ```
 

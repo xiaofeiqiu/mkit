@@ -12,20 +12,27 @@ RoomRuntime 是一间房在本局 Run 中的运行时状态。它记录是否进
 
 `res://addons/mkit/modules/room/room_runtime.gd`
 
+## 字段说明
+
+- **room_runtime_id**：稳定 ID 字段。例：RoomRuntime 通过 room_runtime_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **definition_id**：静态定义 ID。例：goblin_001 的 definition_id 是 enemy.goblin_basic；存档或刷怪系统可以通过这个 ID 重新找到敌人定义，而不是保存具体节点。
+- **cleared**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+- **entered**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+- **active_enemy_ids**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **reward_options**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+
 ## 接口
 
 ```gdscript
 class_name RoomRuntime
 extends RefCounted
-
 var room_runtime_id: String = ""
 var definition_id: String = ""
 var cleared: bool = false
 var entered: bool = false
 var active_enemy_ids: Array[String] = []
 var reward_options: Array[RewardOption] = []
-
-static func create(definition_id: String) -> RoomRuntime: ...
+static func create(definition_id: String) -> RoomRuntime
 ```
 
 ## 函数使用场景

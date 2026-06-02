@@ -12,15 +12,17 @@ TargetInRangeCondition 是检查目标距离的条件。比较 context.source �
 
 `res://addons/mkit/kernel/conditions/builtin/target_in_range_condition.gd`
 
+## 字段说明
+
+- **range**：作用范围。例：近战技能 range=48，火球 range=600。
+
 ## 接口
 
 ```gdscript
 class_name TargetInRangeCondition
 extends Condition
-
 @export var range: float = 64.0
-
-func _evaluate_impl(context: GameplayContext) -> bool
+func get_failure_reason(context: GameplayContext) -> String
 ```
 
 ## 函数使用场景

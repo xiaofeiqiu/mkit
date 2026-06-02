@@ -12,20 +12,26 @@ ApplyStatModifierEffect 是把一个 StatModifier 应用到目标 StatsComponent
 
 `res://addons/mkit/kernel/effects/builtin/apply_stat_modifier_effect.gd`
 
+## 字段说明
+
+- **stat_id**：要修改的属性。例：attack_power、max_hp、move_speed。
+- **operation**：修改方式，复用 StatModifierDefinition.Operation。
+- **value**：修改值。例：PERCENT_ADD + 0.20 表示 +20%。
+- **duration**：持续时间，-1 表示本局永久（直到来源被移除）。
+- **stacking_rule**：代码字段。叠加规则。
+- **apply_to_source**：奖励通常作用于 source（玩家）；诅咒类可作用于 target。
+
 ## 接口
 
 ```gdscript
 class_name ApplyStatModifierEffect
 extends GameEffect
-
 @export var stat_id: String = ""
 @export var operation: StatModifierDefinition.Operation = StatModifierDefinition.Operation.FLAT_ADD
 @export var value: float = 0.0
-@export var duration: float = -1.0 # -1 = 本局/永久
+@export var duration: float = -1.0
 @export var stacking_rule: StatModifierDefinition.StackingRule = StatModifierDefinition.StackingRule.STACK
 @export var apply_to_source: bool = true
-
-func _apply_impl(context: GameplayContext) -> EffectResult: ...
 ```
 
 ## 函数使用场景

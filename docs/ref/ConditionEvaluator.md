@@ -10,17 +10,15 @@ ConditionEvaluator 是条件列表的统一评估器。负责执行 all/any 规�
 
 ## 文件
 
-由使用者自行实现（通常紧邻 condition.gd 放置）
+`res://addons/mkit/kernel/conditions/condition_evaluator.gd`
 
 ## 接口
 
 ```gdscript
 class_name ConditionEvaluator
 extends RefCounted
-
 static func evaluate_all(conditions: Array[Condition], context: GameplayContext) -> bool
-
-static func collect_failures(conditions: Array[Condition], context: GameplayContext) -> Array[String]
+static func collect_failures( conditions: Array[Condition], context: GameplayContext ) -> Array[String]
 ```
 
 ## 函数使用场景

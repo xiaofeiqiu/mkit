@@ -12,29 +12,31 @@ HealthComponent 是实体生命值状态的拥有者。它追踪 current/max HP�
 
 `res://addons/mkit/modules/health/health_component.gd`
 
+## 字段说明
+
+- **current_hp**：当前生命值。例：敌人从 30 HP 被打到 0 HP 后触发 died。
+- **destroy_on_death**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **dead**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **stats**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name HealthComponent
 extends Node
-
 signal health_changed(current: float, max_value: float)
 signal damaged(result: DamageResult)
 signal healed(amount: float, source: Node)
 signal died(owner_entity: Node)
-
 @export var current_hp: float = 100.0
 @export var destroy_on_death: bool = false
-
 var dead: bool = false
 var stats: StatsComponent = null
-
-func _ready() -> void: ...
-func get_max_hp() -> float: ...
-func apply_damage(result: DamageResult) -> void: ...
-func heal(amount: float, source: Node = null) -> void: ...
-func die(killer: Node = null) -> void: ...
-func revive(percent: float = 1.0) -> void: ...
+func get_max_hp() -> float
+func apply_damage(result: DamageResult) -> void
+func heal(amount: float, source: Node = null) -> void
+func die(killer: Node = null) -> void
+func revive(percent: float = 1.0) -> void
 ```
 
 ## 函数使用场景

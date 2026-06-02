@@ -12,28 +12,28 @@ SaveManager 是存档读写协调器。它收集 Saveable 数据、写文件、�
 
 `res://addons/mkit/kernel/save/save_manager.gd`
 
+## 字段说明
+
+- **save_path**：资源或节点路径。例：用 save_path 指向场景或节点，方便在 Inspector 中配置。
+- **save_version**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **game_version**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **migrations**：存档迁移规则。例：从 save_version 1 读到 3 时依次执行 1->2、2->3。
+
 ## 接口
 
 ```gdscript
 class_name SaveManager
 extends Node
-
 signal save_completed(path: String)
 signal load_completed(path: String)
 signal save_failed(path: String, reason: String)
 signal load_failed(path: String, reason: String)
-
 @export var save_path: String = "user://save.json"
 @export var save_version: int = 1
 @export var game_version: String = "0.1.0"
 @export var migrations: Array[SaveMigration] = []
-
-func save_game(root: Node) -> bool: ...
-func load_game(root: Node) -> bool: ...
-func _collect_saveables(root: Node) -> Dictionary: ...
-func _restore_saveables(root: Node, payload: Dictionary) -> void: ...
-func _migrate_data(data: Dictionary) -> Dictionary: ...
-func _find_migration(from_version: int, to_version: int) -> SaveMigration: ...
+func save_game(root: Node) -> bool
+func load_game(root: Node) -> bool
 ```
 
 ## 函数使用场景

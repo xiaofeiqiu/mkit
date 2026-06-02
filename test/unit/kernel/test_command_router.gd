@@ -6,7 +6,7 @@ class StubReceiver:
 	var last_command: GameCommand = null
 	var handle_return: bool = true
 
-	func receive_command(command: GameCommand) -> bool:
+	func handle_unhandled_command(command: GameCommand) -> bool:
 		last_command = command
 		return handle_return
 

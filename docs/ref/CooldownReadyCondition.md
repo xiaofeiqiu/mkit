@@ -12,17 +12,17 @@ CooldownReadyCondition 是检查技能冷却是否就绪的条件。读取目标
 
 `res://addons/mkit/kernel/conditions/builtin/cooldown_ready_condition.gd`
 
+## 字段说明
+
+- **ability_id**：技能定义 ID。例：ability.fireball_basic 让 AbilityController 找到火球定义并读取冷却、消耗和效果。
+
 ## 接口
 
 ```gdscript
 class_name CooldownReadyCondition
 extends Condition
-
 @export var ability_id: String = ""
-
-func _evaluate_impl(context: GameplayContext) -> bool
-
-func get_failure_reason(context: GameplayContext) -> String
+func get_failure_reason(_context: GameplayContext) -> String
 ```
 
 ## 函数使用场景

@@ -12,12 +12,27 @@ DamageResult 是一次伤害结算的结果单。它记录最终伤害、是否�
 
 `res://addons/mkit/modules/combat/damage_result.gd`
 
+## 字段说明
+
+- **source**：玩法来源节点。例：火球的 source 是玩家，后续伤害、仇恨、经验归属都可以追踪到玩家。
+- **target**：玩法目标节点。例：HealEffect 的 target 是玩家，DealDamageEffect 的 target 是被命中的敌人。
+- **base_amount**：基础伤害/治疗数值。例：火球基础伤害 20，最终伤害还要经过攻击力、暴击和防御计算。
+- **final_amount**：结算后的最终数值。例：base 20 加攻击加成后被防御抵消，最终造成 27 点伤害。
+- **damage_type**：伤害类型。例：physical、magic、true，用于不同防御规则。
+- **element_type**：元素类型。例：fire、ice、poison，用于抗性、弱点或状态联动。
+- **was_critical**：本次是否暴击。例：UI 根据它显示更大的黄色伤害数字。
+- **was_evaded**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **was_blocked**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **was_lethal**：本次是否致命。例：HealthComponent 根据它触发死亡流程和掉落。
+- **applied_status_effects**：本次命中实际附加的 status_id 列表。例：火球命中且燃烧判定通过时为 `["status.burn"]`；UI、Analytics 和 DebugOverlay 据此显示"造成燃烧"。
+- **status_applications**：与上一字段配套的完整施加条目（含 stacks/duration），供 HealthComponent 真正调用 StatusEffectController.apply_status。
+- **trace**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name DamageResult
 extends RefCounted
-
 var source: Node = null
 var target: Node = null
 var base_amount: float = 0.0
@@ -29,10 +44,9 @@ var was_evaded: bool = false
 var was_blocked: bool = false
 var was_lethal: bool = false
 var applied_status_effects: Array[String] = []
-var status_applications: Array[Dictionary] = [] # {status_id, stacks, duration}
+var status_applications: Array[Dictionary] = []
 var trace: Dictionary = {}
-
-func to_debug_dict() -> Dictionary: ...
+func to_debug_dict() -> Dictionary
 ```
 
 ## 函数使用场景

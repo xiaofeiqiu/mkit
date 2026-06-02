@@ -10,18 +10,15 @@ RewardSystem 是玩家可选择奖励的生成和应用系统。它负责生成�
 
 ## 文件
 
-`res://addons/mkit/modules/rewards/reward_system.gd`
+`res://addons/mkit/modules/loot/reward_system.gd`
 
 ## 接口
 
 ```gdscript
 class_name RewardSystem
 extends RefCounted
-
-func generate_options(pool_ids: Array[String], count: int, context: GameplayContext) -> Array[RewardOption]: ...
-func apply_selected(option: RewardOption, context: GameplayContext) -> bool: ...
-func _weighted_pick(candidates: Array[RewardDefinition]) -> RewardDefinition: ...
-func _build_option(def: RewardDefinition) -> RewardOption: ...
+func generate_options( pool_ids: Array[String], count: int, context: GameplayContext ) -> Array[RewardOption]
+func apply_selected(option: RewardOption, context: GameplayContext) -> bool
 ```
 
 ## 函数使用场景

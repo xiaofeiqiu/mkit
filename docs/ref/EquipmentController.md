@@ -12,24 +12,26 @@ EquipmentController 是装备槽和装备属性的控制器。它负责校验槽
 
 `res://addons/mkit/modules/inventory/equipment_controller.gd`
 
+## 字段说明
+
+- **allowed_slots**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **equipped**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **content**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name EquipmentController
 extends Node
-
 signal equipment_changed(slot_id: String, item: ItemInstance)
-
 @export var allowed_slots: Array[String] = ["weapon", "helmet", "armor", "ring", "amulet"]
-
-var equipped: Dictionary = {} # slot_id -> ItemInstance
+var equipped: Dictionary = {}
 var content: ContentRegistry = null
-
-func can_equip(item: ItemInstance, slot_id: String) -> bool: ...
-func equip(item: ItemInstance, slot_id: String) -> bool: ...
-func unequip(slot_id: String) -> ItemInstance: ...
-func get_equipped(slot_id: String) -> ItemInstance: ...
-func get_item_definition(item_id: String) -> ItemDefinition: ...
+func can_equip(item: ItemInstance, slot_id: String) -> bool
+func equip(item: ItemInstance, slot_id: String) -> bool
+func unequip(slot_id: String) -> ItemInstance
+func get_equipped(slot_id: String) -> ItemInstance
+func get_item_definition(item_id: String) -> ItemDefinition
 ```
 
 ## 函数使用场景

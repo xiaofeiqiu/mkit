@@ -12,19 +12,21 @@ GameEffect 是声明式玩法结果的基类 Resource。负责表达伤害、治
 
 `res://addons/mkit/kernel/effects/game_effect.gd`
 
+## 字段说明
+
+- **effect_id**：稳定 ID 字段。例：GameEffect 通过 effect_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **conditions**：释放或生效条件。例：HasEnoughMana、CooldownReady、TargetInRange。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+
 ## 接口
 
 ```gdscript
 class_name GameEffect
 extends Resource
-
 @export var effect_id: String = ""
 @export var conditions: Array[Condition] = []
 @export var tags: Array[String] = []
-
 func apply(context: GameplayContext) -> EffectResult
-
-func _apply_impl(context: GameplayContext) -> EffectResult
 ```
 
 ## 函数使用场景

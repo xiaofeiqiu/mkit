@@ -17,15 +17,9 @@ ObjectPool 是可复用场景实例池。负责预热、取出、归还投射物
 ```gdscript
 class_name ObjectPool
 extends Node
-
-var _pools: Dictionary = {} # scene_path -> Array[Node]
-
 func warmup(scene_path: String, count: int, parent: Node = null) -> void
-
 func acquire(scene_path: String, parent: Node = null) -> Node
-
 func release(scene_path: String, node: Node) -> void
-
 func clear_pool(scene_path: String) -> void
 ```
 

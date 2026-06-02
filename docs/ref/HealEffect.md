@@ -12,16 +12,16 @@ HealEffect 是恢复生命值的内置 Effect。它通过 HealthComponent 应用
 
 `res://addons/mkit/kernel/effects/builtin/heal_effect.gd`
 
+## 字段说明
+
+- **base_amount**：代码字段。基础数值。
+
 ## 接口
 
 ```gdscript
 class_name HealEffect
 extends GameEffect
-
-@export var amount: float = 1.0
-@export var use_source_healing_multiplier: bool = true
-
-func _apply_impl(context: GameplayContext) -> EffectResult: ...
+@export var base_amount: float = 20.0
 ```
 
 ## 函数使用场景

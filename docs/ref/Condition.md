@@ -12,19 +12,19 @@ Condition 是可复用的真假规则。负责判断技能能不能放、状态�
 
 `res://addons/mkit/kernel/conditions/condition.gd`
 
+## 字段说明
+
+- **condition_id**：稳定 ID 字段。例：Condition 通过 condition_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **invert**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name Condition
 extends Resource
-
 @export var condition_id: String = ""
 @export var invert: bool = false
-
 func evaluate(context: GameplayContext) -> bool
-
-func _evaluate_impl(context: GameplayContext) -> bool
-
 func get_failure_reason(context: GameplayContext) -> String
 ```
 

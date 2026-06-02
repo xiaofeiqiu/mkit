@@ -12,24 +12,27 @@ CommandReceiver 是挂在实体上的命令接收端组件。负责将来自 Com
 
 `res://addons/mkit/kernel/commands/command_receiver.gd`
 
+## 字段说明
+
+- **receiver_id**：命令接收者 ID。例：player_001 的 CommandReceiver 注册后，CommandRouter 才能把攻击命令投递给玩家。
+- **auto_register**：是否自动注册到路由器。例：敌人生成后自动注册 receiver，就能立刻接收 AI 命令。
+- **owner_entity**：拥有该组件或状态机的实体。例：PlayerMoveState 需要通过 owner_entity 读取 StatsComponent 并推动 CharacterBody2D。
+- **state_machine**：所属状态机引用。例：AttackState 完成后通过 state_machine 请求回到 Idle。
+- **command_history**：最近命令历史。例：玩家卡住时可以看到最后收到的是 dash 还是 attack。
+- **max_history**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+
 ## 接口
 
 ```gdscript
 class_name CommandReceiver
 extends Node
-
 @export var receiver_id: String = ""
 @export var auto_register: bool = true
-
 var owner_entity: Node = null
 var state_machine: StateMachine = null
 var command_history: Array[GameCommand] = []
 var max_history: int = 20
-
-func _ready() -> void
-
 func receive_command(command: GameCommand) -> bool
-
 func handle_unhandled_command(command: GameCommand) -> bool
 ```
 

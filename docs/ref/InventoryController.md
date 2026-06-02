@@ -12,28 +12,31 @@ InventoryController 是实体背包操作的场景控制器。它连接拾取、
 
 `res://addons/mkit/modules/inventory/inventory_controller.gd`
 
+## 字段说明
+
+- **capacity**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **model**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **content**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name InventoryController
 extends Node
-
 signal inventory_changed
 signal item_added(item: ItemInstance)
 signal item_removed(item: ItemInstance)
-
 @export var capacity: int = 30
-
 var model := InventoryModel.new()
 var content: ContentRegistry = null
-
-func can_add_item(item: ItemInstance) -> bool: ...
-func add_item(item: ItemInstance) -> bool: ...
-func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool: ...
-func find_item(instance_id: String) -> ItemInstance: ...
-func get_item_definition(item_id: String) -> ItemDefinition: ...
-func to_save_data() -> Dictionary: ...
-func from_save_data(data: Dictionary) -> void: ...
+func can_add_item(item: ItemInstance) -> bool
+func add_item(item: ItemInstance) -> bool
+func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool
+func find_item(instance_id: String) -> ItemInstance
+func find_item_by_definition(definition_id: String) -> ItemInstance
+func get_item_definition(item_id: String) -> ItemDefinition
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景

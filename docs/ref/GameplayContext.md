@@ -12,12 +12,27 @@ GameplayContext 是一次玩法解析所需信息的上下文对象。负责携�
 
 `res://addons/mkit/kernel/context/gameplay_context.gd`
 
+## 字段说明
+
+- **source**：玩法来源节点。例：火球的 source 是玩家，后续伤害、仇恨、经验归属都可以追踪到玩家。
+- **target**：玩法目标节点。例：HealEffect 的 target 是玩家，DealDamageEffect 的 target 是被命中的敌人。
+- **instigator**：真正发起者。例：召唤物造成伤害时 source 可以是召唤物，instigator 是玩家，用来归属击杀奖励。
+- **ability_id**：技能定义 ID。例：ability.fireball_basic 让 AbilityController 找到火球定义并读取冷却、消耗和效果。
+- **item_id**：物品定义 ID。例：item.potion_small 用于从 ContentRegistry 找到药水定义。
+- **status_id**：状态定义 ID。例：status.burn 用于创建燃烧状态实例。
+- **room_id**：房间定义或运行时房间 ID。例：room.dungeon_small_01 用于清房间、奖励和存档恢复。
+- **run_id**：一局 run 的 ID。例：Analytics 可以把所有 room_cleared 和 reward_selected 归到同一局。
+- **position**：世界位置。例：SpawnSceneEffect 用 position 决定投射物或掉落物生成在哪里。
+- **direction**：方向。例：玩家按右方向释放火球，direction=Vector2.RIGHT。
+- **amount**：通用数值。例：HealEffect 可以把 amount 当治疗量，RewardEffect 可以把 amount 当金币数量。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+- **payload**：扩展数据包。例：attack 命令可以放 direction，cast_ability 可以放 ability_id；MVP 阶段允许用它承载少量灵活数据。
+
 ## 接口
 
 ```gdscript
 class_name GameplayContext
 extends RefCounted
-
 var source: Node = null
 var target: Node = null
 var instigator: Node = null
@@ -31,17 +46,11 @@ var direction: Vector2 = Vector2.ZERO
 var amount: float = 0.0
 var tags: Array[String] = []
 var payload: Dictionary = {}
-
-static func from_command(command: GameCommand, source_node: Node = null, target_node: Node = null) -> GameplayContext
-
+static func from_command( command: GameCommand, source_node: Node = null, target_node: Node = null ) -> GameplayContext
 func with_source(node: Node) -> GameplayContext
-
 func with_target(node: Node) -> GameplayContext
-
 func with_payload_value(key: String, value) -> GameplayContext
-
 func get_payload_value(key: String, default_value = null)
-
 func has_tag(tag: String) -> bool
 ```
 

@@ -12,12 +12,20 @@ StatDefinition 是一个属性类型的静态定义，例如 `max_hp`、`attack_
 
 `res://addons/mkit/modules/stats/stat_definition.gd`
 
+## 字段说明
+
+- **stat_id**：稳定 ID 字段。例：StatDefinition 通过 stat_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **display_name**：代码字段。显示名称。
+- **default_value**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **min_value**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **max_value**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **is_percent**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name StatDefinition
 extends Resource
-
 @export var stat_id: String = ""
 @export var display_name: String = ""
 @export var default_value: float = 0.0

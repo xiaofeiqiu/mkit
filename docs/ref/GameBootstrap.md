@@ -12,30 +12,19 @@ GameBootstrap 是 Mkit 的启动编排器。负责创建服务、注册服务、
 
 `res://addons/mkit/kernel/bootstrap/game_bootstrap.gd`
 
+## 字段说明
+
+- **resource_databases**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **initial_scene_path**：资源或节点路径。例：用 initial_scene_path 指向场景或节点，方便在 Inspector 中配置。
+
 ## 接口
 
 ```gdscript
 class_name GameBootstrap
 extends Node
-
 @export var resource_databases: Array[ResourceDatabase] = []
-@export var initial_scene_path: String = "res://game/scenes/main_menu.tscn"
-
-func _ready() -> void
-
+@export var initial_scene_path: String = ""
 func boot() -> void
-
-func _register_kernel_services() -> void
-
-func _load_content() -> void
-
-func _validate_content() -> void
-
-func _initialize_runtime_systems() -> void
-
-func _load_profile() -> void
-
-func _enter_initial_scene() -> void
 ```
 
 ## 函数使用场景

@@ -10,14 +10,24 @@ RewardDefinition 是一个可能出现的奖励的静态定义。它定义奖励
 
 ## 文件
 
-`res://addons/mkit/modules/rewards/reward_definition.gd`
+`res://addons/mkit/modules/loot/reward_definition.gd`
+
+## 字段说明
+
+- **reward_id**：稳定 ID 字段。例：RewardDefinition 通过 reward_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **display_name**：代码字段。显示名称。
+- **description**：代码字段。描述文本。
+- **icon**：代码字段。图标资源。
+- **rarity**：稀有度。例：common、rare、legendary，用于掉落权重和 UI 颜色。
+- **weight**：权重。例：普通药水 weight=10，稀有武器 weight=1。
+- **conditions**：释放或生效条件。例：HasEnoughMana、CooldownReady、TargetInRange。
+- **effects**：玩法结果列表。例：DealDamageEffect 后接 ApplyStatusEffect(status.burn)。
 
 ## 接口
 
 ```gdscript
 class_name RewardDefinition
 extends Resource
-
 @export var reward_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
@@ -26,6 +36,7 @@ extends Resource
 @export var weight: float = 1.0
 @export var conditions: Array[Condition] = []
 @export var effects: Array[GameEffect] = []
+func get_resource_id() -> String
 ```
 
 ## 函数使用场景

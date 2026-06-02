@@ -90,7 +90,7 @@ func test_tc_sm_07_state_changed_emits_previous_and_current() -> void:
 	watch_signals(sm)
 	sm.transition_to("root/combat")
 	assert_signal_emitted(sm, "state_changed")
-	var params := get_signal_parameters(sm, "state_changed", 0)
+	var params: Array = get_signal_parameters(sm, "state_changed", 0)
 	assert_eq(params[0], "root/idle")
 	assert_eq(params[1], "root/combat/attack")
 
@@ -224,14 +224,14 @@ func test_tc_sm_18_on_exit_called_before_on_enter() -> void:
 class _LockedState:
 	extends State
 
-	func can_exit(_ctx: Dictionary) -> bool:
+	func can_exit(_ctx: Dictionary = {}) -> bool:
 		return false
 
 
 class _GuardedState:
 	extends State
 
-	func can_enter(_ctx: Dictionary) -> bool:
+	func can_enter(_ctx: Dictionary = {}) -> bool:
 		return false
 
 

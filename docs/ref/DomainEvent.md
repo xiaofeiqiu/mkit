@@ -12,20 +12,27 @@ Event 表示已经发生的事实，用过去式命名。DomainEvent 只用于�
 
 `res://addons/mkit/kernel/events/domain_event.gd`
 
+## 字段说明
+
+- **event_type**：事件类型。例：damage_applied、entity_died、room_cleared，用来让监听者决定是否响应。
+- **event_id**：单次事件 ID。例：同一秒内可能有多次 damage_applied，event_id 让日志和回放能区分每一次。
+- **timestamp**：发生时间。例：DebugOverlay 可以按时间排序最近事件，回放系统也能按时间重放命令。
+- **source_id**：行为来源 ID。例：伤害事件里 source_id=player_001，Analytics 和仇恨系统就知道是谁造成了伤害。
+- **target_id**：行为目标 ID。例：CastAbilityCommand 的 target_id=player_001 表示命令发给玩家实体处理，不是直接发给技能资源。
+- **payload**：扩展数据包。例：attack 命令可以放 direction，cast_ability 可以放 ability_id；MVP 阶段允许用它承载少量灵活数据。
+
 ## 接口
 
 ```gdscript
 class_name DomainEvent
 extends RefCounted
-
 var event_type: String = ""
 var event_id: String = ""
 var timestamp: float = 0.0
 var source_id: String = ""
 var target_id: String = ""
 var payload: Dictionary = {}
-
-static func create(type: String, source: String = "", target: String = "", data: Dictionary = {}) -> DomainEvent
+static func create( type: String, source: String = "", target: String = "", data: Dictionary = {} ) -> DomainEvent
 ```
 
 ## 函数使用场景

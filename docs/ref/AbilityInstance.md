@@ -12,12 +12,21 @@ AbilityInstance 是某个实体身上正在使用的技能运行时实例。它�
 
 `res://addons/mkit/modules/abilities/ability_instance.gd`
 
+## 字段说明
+
+- **definition_id**：静态定义 ID。例：goblin_001 的 definition_id 是 enemy.goblin_basic；存档或刷怪系统可以通过这个 ID 重新找到敌人定义，而不是保存具体节点。
+- **owner**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **cooldown_remaining**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **current_charges**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **runtime_level**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **enabled**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+- **temporary_modifiers**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+
 ## 接口
 
 ```gdscript
 class_name AbilityInstance
 extends RefCounted
-
 var definition_id: String = ""
 var owner: Node = null
 var cooldown_remaining: float = 0.0
@@ -25,12 +34,11 @@ var current_charges: int = 1
 var runtime_level: int = 1
 var enabled: bool = true
 var temporary_modifiers: Dictionary = {}
-
-func setup(definition: AbilityDefinition, owner_entity: Node) -> void: ...
-func tick(delta: float) -> void: ...
-func is_cooldown_ready() -> bool: ...
-func start_cooldown(definition: AbilityDefinition, cooldown_reduction: float = 0.0) -> void: ...
-func restore_charge(definition: AbilityDefinition) -> void: ...
+func setup(definition: AbilityDefinition, owner_entity: Node) -> void
+func tick(delta: float) -> void
+func is_cooldown_ready() -> bool
+func start_cooldown(definition: AbilityDefinition, cooldown_reduction: float = 0.0) -> void
+func restore_charge(definition: AbilityDefinition) -> void
 ```
 
 ## 函数使用场景

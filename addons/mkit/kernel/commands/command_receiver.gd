@@ -30,7 +30,7 @@ func _ready() -> void:
 
 func receive_command(command: GameCommand) -> bool:
 	if command == null:
-		push_error("CommandReceiver.receive_command: command is null")
+		push_warning("CommandReceiver.receive_command: command is null")
 		return false
 	_record_command(command)
 	if state_machine != null:

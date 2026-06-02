@@ -88,7 +88,7 @@ func test_tc_rc_06_enter_room_emits_room_entered_with_runtime_id() -> void:
 	watch_signals(ctrl)
 	ctrl.enter_room()
 	assert_signal_emitted(ctrl, "room_entered")
-	var params := get_signal_parameters(ctrl, "room_entered", 0)
+	var params: Array = get_signal_parameters(ctrl, "room_entered", 0)
 	assert_eq(params[0], ctrl.runtime.room_runtime_id)
 
 
@@ -171,7 +171,7 @@ func test_tc_rc_14_generate_reward_zero_count_emits_empty_options() -> void:
 	watch_signals(ctrl)
 	ctrl.generate_reward()
 	assert_signal_emitted(ctrl, "reward_ready")
-	var params := get_signal_parameters(ctrl, "reward_ready", 0)
+	var params: Array = get_signal_parameters(ctrl, "reward_ready", 0)
 	assert_eq(params[0].size(), 0)
 
 
@@ -179,7 +179,7 @@ func test_tc_rc_15_generate_reward_null_runtime_emits_empty() -> void:
 	watch_signals(ctrl)
 	ctrl.generate_reward()
 	assert_signal_emitted(ctrl, "reward_ready")
-	var params := get_signal_parameters(ctrl, "reward_ready", 0)
+	var params: Array = get_signal_parameters(ctrl, "reward_ready", 0)
 	assert_eq(params[0].size(), 0)
 
 
@@ -188,7 +188,7 @@ func test_tc_rc_16_generate_reward_no_pool_ids_emits_empty() -> void:
 	ctrl.setup("empty_room")
 	watch_signals(ctrl)
 	ctrl.generate_reward()
-	var params := get_signal_parameters(ctrl, "reward_ready", 0)
+	var params: Array = get_signal_parameters(ctrl, "reward_ready", 0)
 	assert_eq(params[0].size(), 0)
 
 

@@ -11,9 +11,10 @@ var stats: StatsComponent = null
 
 
 func _ready() -> void:
-	stats = owner.get_node_or_null("Components/StatsComponent") as StatsComponent
-	if stats != null:
-		stats.stat_changed.connect(_on_stat_changed)
+	if owner != null:
+		stats = owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+		if stats != null:
+			stats.stat_changed.connect(_on_stat_changed)
 	current_hp = min(current_hp, get_max_hp())
 
 
@@ -33,9 +34,10 @@ func apply_damage(result: DamageResult) -> void:
 	_apply_on_hit_statuses(result)
 	damaged.emit(result)
 	health_changed.emit(current_hp, get_max_hp())
-	var events := ServiceRegistry.get_service("events") as EventRouter
-	if events != null:
-		events.emit_damage_applied(result)
+	if ServiceRegistry.has_service("events"):
+		var events := ServiceRegistry.get_service("events") as EventRouter
+		if events != null:
+			events.emit_damage_applied(result)
 	if current_hp <= 0.0:
 		die(result.source)
 
@@ -73,9 +75,10 @@ func die(killer: Node = null) -> void:
 	died.emit(owner)
 	var identity := owner.get_node_or_null("EntityIdentity") as EntityIdentity
 	var entity_id: String = identity.entity_id if identity != null else str(owner.name)
-	var events := ServiceRegistry.get_service("events") as EventRouter
-	if events != null:
-		events.emit_entity_died(entity_id, owner)
+	if ServiceRegistry.has_service("events"):
+		var events := ServiceRegistry.get_service("events") as EventRouter
+		if events != null:
+			events.emit_entity_died(entity_id, owner)
 	if destroy_on_death:
 		owner.queue_free()
 

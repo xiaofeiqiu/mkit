@@ -12,24 +12,24 @@ TimeService 是玩法时间的统一包装。负责提供 scaled/unscaled delta�
 
 `res://addons/mkit/kernel/services/time_service.gd`
 
+## 字段说明
+
+- **paused**：玩法暂停标记。例：奖励选择 UI 打开时暂停 gameplay Action，但 UI 仍可响应输入。
+- **gameplay_time_scale**：玩法时间倍率。例：子弹时间可以把 gameplay_time_scale 设为 0.25。
+- **elapsed_gameplay_time**：已推进的玩法时间。例：DebugOverlay 显示从 run 开始到当前房间清理用了多久。
+
 ## 接口
 
 ```gdscript
 class_name TimeService
 extends RefCounted
-
 var paused: bool = false
 var gameplay_time_scale: float = 1.0
 var elapsed_gameplay_time: float = 0.0
-
 func set_paused(value: bool) -> void
-
 func set_gameplay_time_scale(value: float) -> void
-
 func get_scaled_delta(delta: float) -> float
-
 func advance(delta: float) -> float
-
 func get_unix_time() -> int
 ```
 

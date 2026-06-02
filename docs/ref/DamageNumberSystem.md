@@ -10,18 +10,21 @@ DamageNumberSystem 是伤害数字显示系统。它生成伤害数字 UI/Node2D
 
 ## 文件
 
-`res://addons/mkit/modules/feedback/damage_number_system.gd`
+`res://addons/mkit/modules/ui/damage_number_system.gd`
+
+## 字段说明
+
+- **damage_number_scene_path**：伤害数字场景路径。例：指向 FloatingDamageNumber.tscn。
+- **default_offset**：显示偏移。例：数字从敌人头顶上方弹出。
 
 ## 接口
 
 ```gdscript
 class_name DamageNumberSystem
 extends Node
-
 @export var damage_number_scene_path: String = ""
 @export var default_offset: Vector2 = Vector2(0, -24)
-
-func show_number(position: Vector2, amount: float, critical: bool = false) -> Node: ...
+func show_number(position: Vector2, amount: float, critical: bool = false) -> Node
 ```
 
 ## 函数使用场景

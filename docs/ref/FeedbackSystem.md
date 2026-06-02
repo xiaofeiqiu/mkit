@@ -10,25 +10,28 @@ FeedbackSystem 是玩法事件到表现反馈的桥。它监听伤害、死亡�
 
 ## 文件
 
-`res://addons/mkit/modules/feedback/feedback_system.gd`
+`res://addons/mkit/modules/ui/feedback_system.gd`
+
+## 字段说明
+
+- **damage_number_system_path**：资源或节点路径。例：用 damage_number_system_path 指向场景或节点，方便在 Inspector 中配置。
+- **vfx_spawner_path**：资源或节点路径。例：用 vfx_spawner_path 指向场景或节点，方便在 Inspector 中配置。
+- **audio_manager_path**：资源或节点路径。例：用 audio_manager_path 指向场景或节点，方便在 Inspector 中配置。
+- **damage_numbers**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **vfx**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **audio**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 
 ## 接口
 
 ```gdscript
 class_name FeedbackSystem
 extends Node
-
 @export var damage_number_system_path: NodePath
 @export var vfx_spawner_path: NodePath
 @export var audio_manager_path: NodePath
-
 var damage_numbers: DamageNumberSystem
 var vfx: VFXSpawner
 var audio: AudioManager
-
-func _ready() -> void: ...
-func _on_damage_applied(result: DamageResult) -> void: ...
-func _on_entity_died(entity_id: String, entity_ref: Node) -> void: ...
 ```
 
 ## 函数使用场景

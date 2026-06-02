@@ -12,26 +12,30 @@ UIManager 是 UI 屏幕和弹窗的管理器。它负责打开/关闭界面、�
 
 `res://addons/mkit/modules/ui/ui_manager.gd`
 
+## 字段说明
+
+- **screen_root_path**：资源或节点路径。例：用 screen_root_path 指向场景或节点，方便在 Inspector 中配置。
+- **screen_scene_map**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **screen_stack**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **active_screens**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **modal_screens**：当前阻塞玩法输入的界面栈。例：奖励选择和暂停菜单都打开时，只有两个 modal 都关闭才恢复 gameplay 时间。
+
 ## 接口
 
 ```gdscript
 class_name UIManager
 extends Node
-
 signal screen_opened(screen_id: String)
 signal screen_closed(screen_id: String)
-
 @export var screen_root_path: NodePath = NodePath("ScreenRoot")
 @export var screen_scene_map: Dictionary = {}
-
 var screen_stack: Array[String] = []
 var active_screens: Dictionary = {}
 var modal_screens: Array[String] = []
-
-func open_screen(screen_id: String, data: Dictionary = {}, modal: bool = false) -> Node: ...
-func close_screen(screen_id: String) -> void: ...
-func close_top_screen() -> void: ...
-func is_screen_open(screen_id: String) -> bool: ...
+func open_screen(screen_id: String, data: Dictionary = {}, modal: bool = false) -> Node
+func close_screen(screen_id: String) -> void
+func close_top_screen() -> void
+func is_screen_open(screen_id: String) -> bool
 ```
 
 ## 函数使用场景

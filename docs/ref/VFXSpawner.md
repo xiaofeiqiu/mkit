@@ -10,18 +10,21 @@ VFXSpawner 是视觉特效生成器。它按 vfx_id 生成 PackedScene，设置�
 
 ## 文件
 
-`res://addons/mkit/modules/feedback/vfx_spawner.gd`
+`res://addons/mkit/modules/ui/vfx_spawner.gd`
+
+## 字段说明
+
+- **vfx_scene_map**：特效场景表。例：hit、death、pickup 分别映射到不同 PackedScene。
+- **auto_free_seconds**：自动清理时间。例：普通 hit VFX 2 秒后释放。
 
 ## 接口
 
 ```gdscript
 class_name VFXSpawner
 extends Node
-
-@export var vfx_scene_map: Dictionary = {} # vfx_id -> scene_path
+@export var vfx_scene_map: Dictionary = {}
 @export var auto_free_seconds: float = 2.0
-
-func spawn(vfx_id: String, position: Vector2, direction: Vector2 = Vector2.ZERO) -> Node: ...
+func spawn(vfx_id: String, position: Vector2, direction: Vector2 = Vector2.ZERO) -> Node
 ```
 
 ## 函数使用场景

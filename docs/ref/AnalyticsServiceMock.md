@@ -17,9 +17,8 @@ AnalyticsServiceMock 是 AnalyticsService 的开发期假实现。它把埋点�
 ```gdscript
 class_name AnalyticsServiceMock
 extends AnalyticsService
-
-func track_event(event_name: String, properties: Dictionary = {}) -> void:
-    print("[Analytics] %s %s" % [event_name, properties])
+func track_event(event_name: String, properties: Dictionary = {}) -> void
+func set_user_property(key: String, value: Variant) -> void
 ```
 
 ## 函数使用场景

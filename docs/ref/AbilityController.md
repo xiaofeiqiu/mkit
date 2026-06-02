@@ -12,31 +12,33 @@ AbilityController 是实体释放技能的控制器。它管理技能实例、�
 
 `res://addons/mkit/modules/abilities/ability_controller.gd`
 
+## 字段说明
+
+- **starting_ability_ids**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **abilities**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **content**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name AbilityController
 extends Node
-
 signal ability_registered(ability_id: String)
 signal ability_cast_started(ability_id: String)
 signal ability_cast_finished(ability_id: String)
 signal ability_failed(ability_id: String, reason: String)
 signal cooldown_started(ability_id: String, duration: float)
-
 @export var starting_ability_ids: Array[String] = []
-
-var abilities: Dictionary = {} # ability_id -> AbilityInstance
+var abilities: Dictionary = {}
 var content: ContentRegistry = null
-
-func register_ability(ability_id: String) -> bool: ...
-func has_ability(ability_id: String) -> bool: ...
-func can_cast(ability_id: String, context: GameplayContext) -> bool: ...
-func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> String: ...
-func cast(ability_id: String, context: GameplayContext) -> bool: ...
-func is_cooldown_ready(ability_id: String) -> bool: ...
-func get_cooldown_remaining(ability_id: String) -> float: ...
-func get_definition(ability_id: String) -> AbilityDefinition: ...
+func register_ability(ability_id: String) -> bool
+func has_ability(ability_id: String) -> bool
+func can_cast(ability_id: String, context: GameplayContext) -> bool
+func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> String
+func cast(ability_id: String, context: GameplayContext) -> bool
+func is_cooldown_ready(ability_id: String) -> bool
+func get_cooldown_remaining(ability_id: String) -> float
+func get_definition(ability_id: String) -> AbilityDefinition
 ```
 
 ## 函数使用场景

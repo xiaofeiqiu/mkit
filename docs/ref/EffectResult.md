@@ -12,20 +12,25 @@ EffectResult 是效果执行后的结构化结果。负责记录成功与否、�
 
 `res://addons/mkit/kernel/effects/effect_result.gd`
 
+## 字段说明
+
+- **success**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+- **effect_id**：稳定 ID 字段。例：EffectResult 通过 effect_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **failure_reason**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **payload**：扩展数据包。例：attack 命令可以放 direction，cast_ability 可以放 ability_id；MVP 阶段允许用它承载少量灵活数据。
+- **child_results**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name EffectResult
 extends RefCounted
-
 var success: bool = true
 var effect_id: String = ""
 var failure_reason: String = ""
 var payload: Dictionary = {}
 var child_results: Array[EffectResult] = []
-
 static func ok(id: String = "", data: Dictionary = {}) -> EffectResult
-
 static func fail(id: String, reason: String) -> EffectResult
 ```
 

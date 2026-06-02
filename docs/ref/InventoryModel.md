@@ -12,20 +12,24 @@ InventoryModel 是背包的纯数据模型，不负责 UI。它添加、移除�
 
 `res://addons/mkit/modules/inventory/inventory_model.gd`
 
+## 字段说明
+
+- **owner_id**：稳定 ID 字段。例：InventoryModel 通过 owner_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **capacity**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **slots**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name InventoryModel
 extends RefCounted
-
 var owner_id: String = ""
 var capacity: int = 30
 var slots: Array[InventorySlot] = []
-
-func setup(slot_count: int) -> void: ...
-func find_first_empty_slot() -> InventorySlot: ...
-func find_stackable_slot(definition: ItemDefinition, item: ItemInstance) -> InventorySlot: ...
-func get_items() -> Array[ItemInstance]: ...
+func setup(slot_count: int) -> void
+func find_first_empty_slot() -> InventorySlot
+func find_stackable_slot(definition: ItemDefinition, item: ItemInstance) -> InventorySlot
+func get_items() -> Array[ItemInstance]
 ```
 
 ## 函数使用场景

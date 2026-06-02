@@ -12,12 +12,23 @@ StatModifier 是正在生效的运行时属性修改实例。它记录 modifier 
 
 `res://addons/mkit/modules/stats/stat_modifier.gd`
 
+## 字段说明
+
+- **modifier_id**：稳定 ID 字段。例：StatModifier 通过 modifier_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **stat_id**：稳定 ID 字段。例：StatModifier 通过 stat_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **source_id**：行为来源 ID。例：伤害事件里 source_id=player_001，Analytics 和仇恨系统就知道是谁造成了伤害。
+- **operation**：代码字段。运算类型。
+- **value**：代码字段。数值。
+- **priority**：代码字段。计算优先级。
+- **stacking_rule**：代码字段。叠加规则。
+- **remaining_duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+
 ## 接口
 
 ```gdscript
 class_name StatModifier
 extends RefCounted
-
 var modifier_id: String = ""
 var stat_id: String = ""
 var source_id: String = ""
@@ -27,19 +38,7 @@ var priority: int = 0
 var stacking_rule: StatModifierDefinition.StackingRule
 var remaining_duration: float = -1.0
 var tags: Array[String] = []
-
-static func from_definition(definition: StatModifierDefinition, source: String, duration: float = -1.0) -> StatModifier:
-    var m := StatModifier.new()
-    m.modifier_id = definition.modifier_id
-    m.stat_id = definition.stat_id
-    m.source_id = source
-    m.operation = definition.operation
-    m.value = definition.value
-    m.priority = definition.priority
-    m.stacking_rule = definition.stacking_rule
-    m.remaining_duration = duration
-    m.tags = definition.tags.duplicate()
-    return m
+static func from_definition( definition: StatModifierDefinition, source: String, duration: float = -1.0 ) -> StatModifier
 ```
 
 ## 函数使用场景

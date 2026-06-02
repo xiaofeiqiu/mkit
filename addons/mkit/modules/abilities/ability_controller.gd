@@ -7,6 +7,7 @@ signal ability_failed(ability_id: String, reason: String)
 signal cooldown_started(ability_id: String, duration: float)
 @export var starting_ability_ids: Array[String] = []
 var abilities: Dictionary = {}
+var active_cast_actions: Array[GameAction] = []
 var content: ContentRegistry = null
 
 
@@ -24,23 +25,34 @@ func _process(delta: float) -> void:
 	for instance: AbilityInstance in abilities.values():
 		if instance != null:
 			instance.tick(delta)
+	for action in active_cast_actions.duplicate():
+		if action == null:
+			active_cast_actions.erase(action)
+			continue
+		action.update(delta)
+		if action.is_finished():
+			active_cast_actions.erase(action)
 
 
 func register_ability(ability_id: String) -> bool:
 	if ability_id.strip_edges() == "":
-		push_error("AbilityController.register_ability: ability_id is empty")
+		push_warning("AbilityController.register_ability: ability_id is empty")
 		return false
 	if abilities.has(ability_id):
 		return true
 	var definition := get_definition(ability_id)
 	if definition == null:
-		push_error("AbilityController: definition not found: %s" % ability_id)
+		push_warning("AbilityController: definition not found: %s" % ability_id)
 		return false
 	var instance := AbilityInstance.new()
 	instance.setup(definition, owner)
 	abilities[ability_id] = instance
 	ability_registered.emit(ability_id)
 	return true
+
+
+func unregister_ability(ability_id: String) -> void:
+	abilities.erase(ability_id)
 
 
 func has_ability(ability_id: String) -> bool:
@@ -171,21 +183,8 @@ func _start_cast_action(definition: AbilityDefinition, context: GameplayContext)
 	action_context.target = context.target
 	action_context.ability_id = definition.ability_id
 	action_context.payload = context.payload.duplicate(true) if context.payload != null else {}
-	var runner: ActionRunner = null
-	if ServiceRegistry.has_service("actions"):
-		runner = ServiceRegistry.get_service("actions") as ActionRunner
-	if runner == null:
-		push_warning(
-			(
-				"AbilityController: missing ActionRunner; casting immediately for %s"
-				% definition.ability_id
-			)
-		)
-		_execute_ability_effects(definition, context)
-		_start_cooldown(abilities[definition.ability_id] as AbilityInstance, definition)
-		ability_cast_finished.emit(definition.ability_id)
-		return
-	runner.start_action(action, action_context)
+	action.start(action_context)
+	active_cast_actions.append(action)
 
 
 func _has_enough_cost(definition: AbilityDefinition) -> bool:

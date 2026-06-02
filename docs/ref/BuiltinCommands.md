@@ -17,7 +17,6 @@ BuiltinCommands 是内置命令类型名称的常量表。负责集中定义 mov
 ```gdscript
 class_name BuiltinCommands
 extends Object
-
 const MOVE := "move"
 const STOP_MOVE := "stop_move"
 const ATTACK := "attack"

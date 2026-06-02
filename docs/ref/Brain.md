@@ -12,24 +12,24 @@ Brain 是 AI 决策组件的基类。它观察局势并发出命令，而不是�
 
 `res://addons/mkit/modules/ai/brain.gd`
 
+## 字段说明
+
+- **enabled**：状态标记。例：用它判断当前对象是否已经处理过，避免重复触发。
+- **think_interval**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **command_router**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **target**：玩法目标节点。例：HealEffect 的 target 是玩家，DealDamageEffect 的 target 是被命中的敌人。
+
 ## 接口
 
 ```gdscript
 class_name Brain
 extends Node
-
 @export var enabled: bool = true
 @export var think_interval: float = 0.2
-
-var _timer: float = 0.0
 var command_router: CommandRouter = null
 var target: Node = null
-
-func _ready() -> void: ...
-func _process(delta: float) -> void: ...
-func think() -> void: ...
-func issue_command(command_type: String, payload: Dictionary = {}) -> bool: ...
-func _get_owner_id() -> String: ...
+func think() -> void
+func issue_command(command_type: String, payload: Dictionary = {}) -> bool
 ```
 
 ## 函数使用场景

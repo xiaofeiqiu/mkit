@@ -12,21 +12,22 @@ SceneRouter 是场景切换服务。负责统一执行 change_scene、reload 等
 
 `res://addons/mkit/kernel/services/scene_router.gd`
 
+## 字段说明
+
+- **current_scene_path**：当前场景路径。例：死亡后 reload_current_scene 可以重进当前 run 测试场景。
+- **transition_locked**：切换锁。例：避免奖励选择和死亡流程同一帧重复切场景。
+
 ## 接口
 
 ```gdscript
 class_name SceneRouter
 extends Node
-
 signal scene_change_requested(scene_path: String)
 signal scene_changed(scene_path: String)
 signal scene_change_failed(scene_path: String, reason: String)
-
 var current_scene_path: String = ""
 var transition_locked: bool = false
-
 func change_scene(scene_path: String) -> bool
-
 func reload_current_scene() -> bool
 ```
 

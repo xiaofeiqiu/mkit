@@ -12,17 +12,20 @@ ApplyStatusEffect 是给目标附加状态的内置 Effect。它通过 StatusEff
 
 `res://addons/mkit/kernel/effects/builtin/apply_status_effect.gd`
 
+## 字段说明
+
+- **status_id**：状态定义 ID。例：status.burn 用于创建燃烧状态实例。
+- **stacks**：代码字段。层数。
+- **duration_override**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+
 ## 接口
 
 ```gdscript
 class_name ApplyStatusEffect
 extends GameEffect
-
 @export var status_id: String = ""
-@export var duration_override: float = -1.0
 @export var stacks: int = 1
-
-func _apply_impl(context: GameplayContext) -> EffectResult: ...
+@export var duration_override: float = -1.0
 ```
 
 ## 函数使用场景

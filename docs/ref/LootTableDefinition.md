@@ -12,17 +12,25 @@ LootTableDefinition 是一张完整掉落表的静态定义。它组合多个 Lo
 
 `res://addons/mkit/modules/loot/loot_table_definition.gd`
 
+## 字段说明
+
+- **loot_table_id**：稳定 ID 字段。例：LootTableDefinition 通过 loot_table_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **rolls**：掉落表掷骰次数。例：Boss 宝箱 rolls=3，普通敌人 rolls=1。
+- **entries**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **allow_empty**：是否允许空掉落。例：普通小怪可以空掉落，Boss 宝箱不应该空。
+- **empty_weight**：空掉落权重。例：empty_weight 越高，普通怪越可能不掉东西。
+
 ## 接口
 
 ```gdscript
 class_name LootTableDefinition
 extends Resource
-
 @export var loot_table_id: String = ""
 @export var rolls: int = 1
 @export var entries: Array[LootEntry] = []
 @export var allow_empty: bool = true
 @export var empty_weight: float = 0.0
+func get_resource_id() -> String
 ```
 
 ## 函数使用场景

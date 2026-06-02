@@ -12,16 +12,20 @@ ResourceDatabase 是一组内容资源的数据库 Resource。负责把物品、
 
 `res://addons/mkit/kernel/registry/resource_database.gd`
 
+## 字段说明
+
+- **database_id**：稳定 ID 字段。例：ResourceDatabase 通过 database_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **resources**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **resource_paths**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name ResourceDatabase
 extends Resource
-
 @export var database_id: String = ""
 @export var resources: Array[Resource] = []
 @export var resource_paths: Array[String] = []
-
 func get_all_resources() -> Array[Resource]
 ```
 

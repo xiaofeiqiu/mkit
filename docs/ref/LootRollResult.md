@@ -12,12 +12,17 @@ LootRollResult 是一次掉落表掷骰后的生成结果。它保存生成出�
 
 `res://addons/mkit/modules/loot/loot_roll_result.gd`
 
+## 字段说明
+
+- **item_instances**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **currency**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **debug_rolls**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name LootRollResult
 extends RefCounted
-
 var item_instances: Array[ItemInstance] = []
 var currency: Dictionary = {}
 var debug_rolls: Array[Dictionary] = []

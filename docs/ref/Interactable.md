@@ -12,19 +12,22 @@ Interactable 是世界中可被互动的对象基类。它提供显示文本、�
 
 `res://addons/mkit/modules/interaction/interactable.gd`
 
+## 字段说明
+
+- **interaction_id**：稳定 ID 字段。例：Interactable 通过 interaction_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **display_text**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **conditions**：释放或生效条件。例：HasEnoughMana、CooldownReady、TargetInRange。
+
 ## 接口
 
 ```gdscript
 class_name Interactable
 extends Node
-
 @export var interaction_id: String = ""
 @export var display_text: String = "Interact"
 @export var conditions: Array[Condition] = []
-
-func can_interact(context: GameplayContext) -> bool: ...
-func interact(context: GameplayContext) -> bool: ...
-func _interact_impl(context: GameplayContext) -> bool: ...
+func can_interact(context: GameplayContext) -> bool
+func interact(context: GameplayContext) -> bool
 ```
 
 ## 函数使用场景

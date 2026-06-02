@@ -12,12 +12,19 @@ LootEntry 是掉落表中的一个候选掉落项。它定义可能掉落什么�
 
 `res://addons/mkit/modules/loot/loot_entry.gd`
 
+## 字段说明
+
+- **content_id**：稳定 ID 字段。例：LootEntry 通过 content_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **weight**：权重。例：普通药水 weight=10，稀有武器 weight=1。
+- **min_quantity**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **max_quantity**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **conditions**：释放或生效条件。例：HasEnoughMana、CooldownReady、TargetInRange。
+
 ## 接口
 
 ```gdscript
 class_name LootEntry
 extends Resource
-
 @export var content_id: String = ""
 @export var weight: float = 1.0
 @export var min_quantity: int = 1

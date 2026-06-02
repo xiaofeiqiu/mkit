@@ -17,19 +17,11 @@ Blackboard 是行为系统的短期共享记忆。负责保存移动方向、当
 ```gdscript
 class_name Blackboard
 extends RefCounted
-
-var _data: Dictionary = {}
-
 func set_value(key: String, value) -> void
-
 func get_value(key: String, default_value = null)
-
 func has_value(key: String) -> bool
-
 func erase_value(key: String) -> void
-
 func clear() -> void
-
 func to_debug_dict() -> Dictionary
 ```
 

@@ -10,15 +10,14 @@ DungeonGenerator 是确定性地牢图生成器。它根据 seed 和房间池生
 
 ## 文件
 
-`res://addons/mkit/modules/run/dungeon_generator.gd`
+`res://addons/mkit/modules/room/dungeon_generator.gd`
 
 ## 接口
 
 ```gdscript
 class_name DungeonGenerator
 extends RefCounted
-
-func generate_linear(room_pool_ids: Array[String], seed: int, length: int) -> RoomGraph: ...
+func generate_linear(room_pool_ids: Array[String], seed: int, length: int) -> RoomGraph
 ```
 
 ## 函数使用场景

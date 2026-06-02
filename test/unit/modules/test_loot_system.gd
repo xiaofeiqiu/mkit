@@ -44,7 +44,7 @@ func _make_table(
 	entries: Array, rolls: int = 1, allow_empty: bool = false, empty_weight: float = 0.0
 ) -> LootTableDefinition:
 	var t := LootTableDefinition.new()
-	t.entries = entries
+	t.entries.assign(entries)
 	t.rolls = rolls
 	t.allow_empty = allow_empty
 	t.empty_weight = empty_weight

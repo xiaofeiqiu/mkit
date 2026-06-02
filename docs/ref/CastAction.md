@@ -12,12 +12,16 @@ CastAction 是带施法时间、可取消和完成回调的 Action。负责推�
 
 `res://addons/mkit/kernel/actions/builtin/cast_action.gd`
 
+## 字段说明
+
+- **duration**：施法时间。例：火球 cast_time=0.35，期间被眩晕会取消。
+- **animation_name**：施法动画名。例：法师播放 cast 动画直到 Action 完成或取消。
+
 ## 接口
 
 ```gdscript
 class_name CastAction
 extends GameAction
-
 var duration: float = 0.0
 var animation_name: String = "cast"
 ```

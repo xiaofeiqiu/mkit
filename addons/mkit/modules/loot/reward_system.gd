@@ -8,11 +8,11 @@ func generate_options(
 	if count <= 0 or pool_ids.is_empty():
 		return []
 	if not ServiceRegistry.has_service("content"):
-		push_error("RewardSystem.generate_options: missing ContentRegistry service")
+		push_warning("RewardSystem.generate_options: missing ContentRegistry service")
 		return []
 	var content := ServiceRegistry.get_service("content") as ContentRegistry
 	if content == null:
-		push_error("RewardSystem.generate_options: ContentRegistry service is invalid")
+		push_warning("RewardSystem.generate_options: ContentRegistry service is invalid")
 		return []
 	var ctx := context if context != null else GameplayContext.new()
 	var candidates: Array[RewardDefinition] = []

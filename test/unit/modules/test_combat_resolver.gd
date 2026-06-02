@@ -159,6 +159,7 @@ func test_tc_cmbt_08_crit_multiplies_damage_when_roll_passes() -> void:
 	var tgt := Node.new()
 	add_child_autofree(tgt)
 	var src_stats := src.get_node("Components/StatsComponent") as StatsComponent
+	src_stats.set_base_stat("attack_power", 0.0)
 	src_stats.set_base_stat("crit_chance", 0.5)
 	src_stats.set_base_stat("crit_damage", 2.0)
 	var req := DamageRequest.new()
@@ -178,6 +179,7 @@ func test_tc_cmbt_09_crit_does_not_trigger_when_can_crit_false() -> void:
 	var tgt := Node.new()
 	add_child_autofree(tgt)
 	var src_stats := src.get_node("Components/StatsComponent") as StatsComponent
+	src_stats.set_base_stat("attack_power", 0.0)
 	src_stats.set_base_stat("crit_chance", 1.0)
 	src_stats.set_base_stat("crit_damage", 3.0)
 	var req := DamageRequest.new()

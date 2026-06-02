@@ -12,44 +12,31 @@ StatsComponent 是实体属性的计算组件。它保存基础属性、运行�
 
 `res://addons/mkit/modules/stats/stats_component.gd`
 
+## 字段说明
+
+- **base_stats**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **modifiers_by_stat**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **cached_values**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **dirty_stats**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name StatsComponent
 extends Node
-
 signal stat_changed(stat_id: String, old_value: float, new_value: float)
-
 @export var base_stats: Dictionary = {
-    "max_hp": 100.0,
-    "attack_power": 10.0,
-    "defense": 0.0,
-    "move_speed": 160.0,
-    "max_mana": 0.0,
-    "max_stamina": 100.0,
-    "attack_speed": 1.0,
-    "crit_chance": 0.05,
-    "crit_damage": 1.5,
-    "cooldown_reduction": 0.0,
-    "luck": 0.0,
-    "damage_multiplier": 1.0,
-    "healing_multiplier": 1.0
-}
-
 var modifiers_by_stat: Dictionary = {}
 var cached_values: Dictionary = {}
 var dirty_stats: Dictionary = {}
-
-func _ready() -> void: ...
-
-func get_stat_value(stat_id: String, default_value: float = 0.0) -> float: ...
-func set_base_stat(stat_id: String, value: float) -> void: ...
-func add_modifier(modifier: StatModifier) -> void: ...
-func remove_modifier(modifier_id: String, source_id: String = "") -> void: ...
-func remove_modifiers_from_source(source_id: String) -> void: ...
-func tick_modifiers(delta: float) -> void: ...
-func mark_dirty(stat_id: String) -> void: ...
-func mark_all_dirty() -> void: ...
+func get_stat_value(stat_id: String, default_value: float = 0.0) -> float
+func set_base_stat(stat_id: String, value: float) -> void
+func add_modifier(modifier: StatModifier) -> void
+func remove_modifier(modifier_id: String, source_id: String = "") -> void
+func remove_modifiers_from_source(source_id: String) -> void
+func tick_modifiers(delta: float) -> void
+func mark_dirty(stat_id: String) -> void
+func mark_all_dirty() -> void
 ```
 
 ## 函数使用场景

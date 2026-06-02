@@ -12,16 +12,22 @@ TimedAttackAction 是带前摇、生效和后摇窗口的攻击 Action。只在 
 
 `res://addons/mkit/kernel/actions/builtin/timed_attack_action.gd`
 
+## 字段说明
+
+- **startup_duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **active_duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **recovery_duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **hitbox_path**：资源或节点路径。例：用 hitbox_path 指向场景或节点，方便在 Inspector 中配置。
+
 ## 接口
 
 ```gdscript
 class_name TimedAttackAction
 extends GameAction
-
 var startup_duration: float = 0.12
 var active_duration: float = 0.10
 var recovery_duration: float = 0.25
-var hitbox_path: NodePath = NodePath("Components/HitboxEmitter")
+var hitbox_path: NodePath = NodePath("Components/HitboxComponent")
 ```
 
 ## 函数使用场景

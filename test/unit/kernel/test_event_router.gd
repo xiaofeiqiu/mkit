@@ -78,7 +78,7 @@ func test_tc_er_09_emit_run_started_fires_and_records() -> void:
 	watch_signals(events)
 	events.emit_run_started("run_001", 42)
 	assert_signal_emitted_with_parameters(events, "run_started", ["run_001", 42])
-	var de := events.recent_events.back()
+	var de: DomainEvent = events.recent_events.back()
 	assert_eq(de.event_type, "run_started")
 	assert_eq(de.payload.get("seed"), 42)
 

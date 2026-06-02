@@ -12,18 +12,23 @@ ActionContext 扩展 GameplayContext，让 Action 的执行过程有专属的时
 
 `res://addons/mkit/kernel/context/action_context.gd`
 
+## 字段说明
+
+- **action_id**：稳定 ID 字段。例：ActionContext 通过 action_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **elapsed**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **phase**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name ActionContext
 extends GameplayContext
-
 var action_id: String = ""
 var duration: float = 0.0
 var elapsed: float = 0.0
 var phase: String = ""
-
-static func from_command(command: GameCommand, source_node: Node = null, target_node: Node = null) -> ActionContext
+static func from_command( command: GameCommand, source_node: Node = null, target_node: Node = null ) -> ActionContext
 ```
 
 ## 函数使用场景

@@ -17,15 +17,10 @@ AdService 是广告平台接口。它检查广告是否就绪、展示广告并�
 ```gdscript
 class_name AdService
 extends Node
-
 signal rewarded_ad_completed(placement_id: String)
 signal rewarded_ad_failed(placement_id: String, reason: String)
-
-func is_rewarded_ad_ready(placement_id: String) -> bool:
-    return false
-
-func show_rewarded_ad(placement_id: String) -> void:
-    rewarded_ad_failed.emit(placement_id, "not_implemented")
+func is_rewarded_ad_ready(placement_id: String) -> bool
+func show_rewarded_ad(placement_id: String) -> void
 ```
 
 ## 函数使用场景

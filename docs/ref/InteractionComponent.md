@@ -12,21 +12,19 @@ InteractionComponent 是实体寻找并触发互动对象的 Area2D 组件。它
 
 `res://addons/mkit/modules/interaction/interaction_component.gd`
 
+## 字段说明
+
+- **current_interactable**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name InteractionComponent
 extends Area2D
-
 signal interactable_focused(interactable: Interactable)
 signal interactable_unfocused(interactable: Interactable)
-
 var current_interactable: Interactable = null
-
-func _ready() -> void: ...
-func try_interact() -> bool: ...
-func _on_area_entered(area: Area2D) -> void: ...
-func _on_area_exited(area: Area2D) -> void: ...
+func try_interact() -> bool
 ```
 
 ## 函数使用场景

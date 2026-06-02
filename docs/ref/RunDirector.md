@@ -10,34 +10,42 @@ RunDirector 是一局 Roguelike Run 的导演。它负责开始 Run、进入房�
 
 ## 文件
 
-`res://addons/mkit/modules/run/run_director.gd`
+`res://addons/mkit/modules/room/run_director.gd`
+
+## 字段说明
+
+- **first_floor_room_pool**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **room_scene_container_path**：资源或节点路径。例：用 room_scene_container_path 指向场景或节点，方便在 Inspector 中配置。
+- **player_group**：玩家节点 group。例：选择奖励时用它找到奖励效果的 source/target。
+- **player_entity_id**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **run_length**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **run_state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **room_graph**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **current_room_controller**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 
 ## 接口
 
 ```gdscript
 class_name RunDirector
 extends Node
-
 signal run_started(run_state: RunState)
 signal room_enter_requested(room_id: String)
 signal choosing_reward(options: Array[RewardOption])
 signal run_finished(result: String)
-
 @export var first_floor_room_pool: Array[String] = []
-@export var room_scene_container_path: NodePath = NodePath("RoomRoot")
+@export var room_scene_container_path: NodePath = NodePath("../RoomRoot")
 @export var player_group: String = "player"
 @export var player_entity_id: String = "player_001"
-
+@export var run_length: int = 3
 var run_state: RunState = null
 var room_graph: RoomGraph = null
 var current_room_controller: RoomController = null
-
-func start_run(seed: int = 0) -> void: ...
-func enter_next_room() -> void: ...
-func on_room_cleared(room_controller: RoomController) -> void: ...
-func select_reward(option: RewardOption) -> void: ...
-func complete_run() -> void: ...
-func fail_run(reason: String) -> void: ...
+func start_run(seed: int = 0) -> void
+func enter_next_room() -> void
+func on_room_cleared(room_controller: RoomController) -> void
+func select_reward(option: RewardOption) -> void
+func complete_run() -> void
+func fail_run(reason: String) -> void
 ```
 
 ## 函数使用场景

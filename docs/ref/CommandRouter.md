@@ -17,18 +17,11 @@ CommandRouter 是命令生产者和消费者之间的路由层。负责根据 ta
 ```gdscript
 class_name CommandRouter
 extends Node
-
 signal command_dispatched(command: GameCommand)
 signal command_failed(command: GameCommand, reason: String)
-
-var _receivers: Dictionary = {}
-
 func register_receiver(receiver_id: String, receiver: CommandReceiver) -> void
-
 func unregister_receiver(receiver_id: String) -> void
-
 func dispatch(command: GameCommand) -> bool
-
 func broadcast(command: GameCommand, receiver_ids: Array[String]) -> int
 ```
 

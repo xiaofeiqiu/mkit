@@ -7,7 +7,7 @@ var _receivers: Dictionary = {}
 
 func register_receiver(receiver_id: String, receiver: CommandReceiver) -> void:
 	if receiver_id.strip_edges() == "":
-		push_error("CommandRouter.register_receiver: receiver_id is empty")
+		push_warning("CommandRouter.register_receiver: receiver_id is empty")
 		return
 	if receiver == null:
 		push_error("CommandRouter.register_receiver: receiver is null for id %s" % receiver_id)
@@ -21,7 +21,7 @@ func unregister_receiver(receiver_id: String) -> void:
 
 func dispatch(command: GameCommand) -> bool:
 	if command == null:
-		push_error("CommandRouter.dispatch: command is null")
+		push_warning("CommandRouter.dispatch: command is null")
 		return false
 	command_dispatched.emit(command)
 	if command.target_id.strip_edges() == "":

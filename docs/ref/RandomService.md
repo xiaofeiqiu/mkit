@@ -12,27 +12,24 @@ RandomService 是统一随机数服务。负责保存 run seed，提供 randf、
 
 `res://addons/mkit/kernel/services/random_service.gd`
 
+## 字段说明
+
+- **seed_value**：当前随机种子。例：RunState 保存 seed_value 后，重新进入同一局可以复现房间图和掉落。
+- **rng**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name RandomService
 extends RefCounted
-
 var seed_value: int = 0
 var rng := RandomNumberGenerator.new()
-
 func set_seed(value: int) -> void
-
 func randomize_seed() -> int
-
 func randf() -> float
-
 func randi_range(from: int, to: int) -> int
-
 func randf_range(from: float, to: float) -> float
-
 func chance(probability: float) -> bool
-
 func weighted_pick(entries: Array, weight_property: String = "weight")
 ```
 

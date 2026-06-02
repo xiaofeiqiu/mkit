@@ -8,10 +8,10 @@ var active_actions: Array[GameAction] = []
 
 func start_action(action: GameAction, context: ActionContext) -> GameAction:
 	if action == null:
-		push_error("ActionRunner.start_action: action is null")
+		push_warning("ActionRunner.start_action: action is null")
 		return null
 	if context == null:
-		push_error("ActionRunner.start_action: context is null")
+		push_warning("ActionRunner.start_action: context is null")
 		return null
 	active_actions.append(action)
 	if not action.completed.is_connected(_on_action_completed):
@@ -35,6 +35,8 @@ func _process(delta: float) -> void:
 		action.update(scaled_delta)
 		if action.is_finished():
 			active_actions.erase(action)
+			if not action.cancelled_flag:
+				action_completed.emit(action)
 
 
 func cancel_actions_for_source(source: Node, reason: String = "") -> void:
@@ -46,8 +48,8 @@ func cancel_actions_for_source(source: Node, reason: String = "") -> void:
 			action.cancel(reason)
 
 
-func _on_action_completed(action: GameAction) -> void:
-	action_completed.emit(action)
+func _on_action_completed(_action: GameAction) -> void:
+	pass
 
 
 func _on_action_cancelled(action: GameAction, reason: String) -> void:

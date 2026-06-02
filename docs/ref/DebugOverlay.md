@@ -12,22 +12,18 @@ DebugOverlay 是运行时调试叠层（CanvasLayer）。负责显示当前被�
 
 `res://addons/mkit/kernel/debug/debug_overlay.gd`
 
+## 字段说明
+
+- **watch_entity_path**：要观察的实体（通常是玩家）。
+- **visible_on_start**：是否启动即显示，可用快捷键 toggle。
+
 ## 接口
 
 ```gdscript
 class_name DebugOverlay
 extends CanvasLayer
-
 @export var watch_entity_path: NodePath
 @export var visible_on_start: bool = true
-
-var _label: Label = null
-var _events: EventRouter = null
-
-func _ready() -> void
-
-func _process(_delta: float) -> void
-
 func toggle() -> void
 ```
 

@@ -1,5 +1,6 @@
 GODOT ?= /Applications/Godot.app/Contents/MacOS/Godot
 GUT  := addons/gut/gut_cmdln.gd
+DOCS_PORT ?= 8060
 
 ut: ut-kernel ut-modules
 
@@ -9,4 +10,7 @@ ut-kernel:
 ut-modules:
 	$(GODOT) --headless -s $(GUT) -gdir=res://test/unit/modules -gexit
 
-.PHONY: ut ut-kernel ut-modules
+docs-server:
+	python3 -m http.server $(DOCS_PORT) --directory docs
+
+.PHONY: ut ut-kernel ut-modules docs-server

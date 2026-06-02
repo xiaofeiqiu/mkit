@@ -15,6 +15,21 @@ var current_room_controller: RoomController = null
 var _events_connected: bool = false
 
 
+func _ready() -> void:
+	_connect_events()
+
+
+func _connect_events() -> void:
+	if _events_connected:
+		return
+	var events: EventRouter = null
+	if ServiceRegistry.has_service("events"):
+		events = ServiceRegistry.get_service("events") as EventRouter
+	if events != null:
+		events.entity_died.connect(_on_entity_died)
+		_events_connected = true
+
+
 func start_run(seed: int = 0) -> void:
 	if first_floor_room_pool.is_empty():
 		fail_run("empty_room_pool")
@@ -39,9 +54,7 @@ func start_run(seed: int = 0) -> void:
 		events = ServiceRegistry.get_service("events") as EventRouter
 	if events != null:
 		events.emit_run_started(run_state.run_id, seed)
-		if not _events_connected:
-			events.entity_died.connect(_on_entity_died)
-			_events_connected = true
+	_connect_events()
 	enter_next_room()
 
 

@@ -17,11 +17,8 @@ LootSystem 是掉落表生成服务。它按权重、条件、数量范围和随
 ```gdscript
 class_name LootSystem
 extends RefCounted
-
-func roll_table(table_id: String, context: GameplayContext) -> LootRollResult: ...
-func roll(table: LootTableDefinition, context: GameplayContext) -> LootRollResult: ...
-func _get_valid_entries(table: LootTableDefinition, context: GameplayContext) -> Array[LootEntry]: ...
-func _roll_quantity(entry: LootEntry) -> int: ...
+func roll_table(table_id: String, context: GameplayContext) -> LootRollResult
+func roll(table: LootTableDefinition, context: GameplayContext) -> LootRollResult
 ```
 
 ## 函数使用场景

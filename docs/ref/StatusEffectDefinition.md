@@ -12,21 +12,26 @@ StatusEffectDefinition 是状态效果的静态配置，例如燃烧、中毒、
 
 `res://addons/mkit/modules/status_effects/status_effect_definition.gd`
 
+## 字段说明
+
+- **status_id**：状态定义 ID。例：status.burn 用于创建燃烧状态实例。
+- **display_name**：代码字段。显示名称。
+- **duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **tick_interval**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **max_stacks**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **stack_rule**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+- **effects_on_apply**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **effects_on_tick**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **effects_on_remove**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **stat_modifiers**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+
 ## 接口
 
 ```gdscript
 class_name StatusEffectDefinition
 extends Resource
-
-enum StackRule {
-    REFRESH_DURATION,
-    ADD_STACK,
-    REPLACE,
-    IGNORE,
-    EXTEND_DURATION,
-    INDEPENDENT_STACKS
-}
-
+enum StackRule { REFRESH_DURATION, ADD_STACK, REPLACE, IGNORE, EXTEND_DURATION, INDEPENDENT_STACKS }
 @export var status_id: String = ""
 @export var display_name: String = ""
 @export var duration: float = 5.0

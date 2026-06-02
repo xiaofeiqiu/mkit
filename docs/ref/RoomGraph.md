@@ -10,22 +10,23 @@ RoomGraph 是程序生成地牢后的完整房间连接图。它包含所有 Roo
 
 ## 文件
 
-`res://addons/mkit/modules/run/room_graph.gd`
+`res://addons/mkit/modules/room/room_graph.gd`
+
+## 字段说明
+
+- **nodes**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **start_node**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **boss_node**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 
 ## 接口
 
 ```gdscript
 class_name RoomGraph
 extends RefCounted
-
 var nodes: Array[RoomNode] = []
 var start_node: RoomNode = null
 var boss_node: RoomNode = null
-
-func get_room_at(index: int) -> RoomNode:
-    if index < 0 or index >= nodes.size():
-        return null
-    return nodes[index]
+func get_room_at(index: int) -> RoomNode
 ```
 
 ## 函数使用场景

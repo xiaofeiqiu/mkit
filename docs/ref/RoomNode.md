@@ -10,14 +10,21 @@ RoomNode 是程序生成地牢后地图结构中的单个房间节点。它保�
 
 ## 文件
 
-`res://addons/mkit/modules/run/room_node.gd`
+`res://addons/mkit/modules/room/room_node.gd`
+
+## 字段说明
+
+- **node_id**：稳定 ID 字段。例：RoomNode 通过 node_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **room_definition_id**：稳定 ID 字段。例：RoomNode 通过 room_definition_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **room_type**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **next_nodes**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **previous_nodes**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
 
 ## 接口
 
 ```gdscript
 class_name RoomNode
 extends RefCounted
-
 var node_id: String = ""
 var room_definition_id: String = ""
 var room_type: String = "combat"

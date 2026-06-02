@@ -12,18 +12,27 @@ StateMachine 是当前行为状态和状态转换的拥有者。负责注册状�
 
 `res://addons/mkit/kernel/state_machine/state_machine.gd`
 
+## 字段说明
+
+- **initial_state_path**：资源或节点路径。例：用 initial_state_path 指向场景或节点，方便在 Inspector 中配置。
+- **auto_start**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **owner_entity**：拥有该组件或状态机的实体。例：PlayerMoveState 需要通过 owner_entity 读取 StatsComponent 并推动 CharacterBody2D。
+- **root_state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **current_leaf_state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **blackboard**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **previous_path**：资源或节点路径。例：用 previous_path 指向场景或节点，方便在 Inspector 中配置。
+- **last_transition_reason**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **last_failed_transition_reason**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name StateMachine
 extends Node
-
 signal state_changed(previous_path: String, current_path: String)
 signal transition_failed(from_path: String, to_path: String, reason: String)
-
 @export var initial_state_path: String = ""
 @export var auto_start: bool = true
-
 var owner_entity: Node = null
 var root_state: State = null
 var current_leaf_state: State = null
@@ -31,13 +40,9 @@ var blackboard: Blackboard = Blackboard.new()
 var previous_path: String = ""
 var last_transition_reason: String = ""
 var last_failed_transition_reason: String = ""
-
 func handle_command(command: GameCommand) -> bool
-
 func transition_to(target_path: String, context: Dictionary = {}) -> bool
-
 func get_current_path() -> String
-
 func find_state_by_path(path: String) -> State
 ```
 

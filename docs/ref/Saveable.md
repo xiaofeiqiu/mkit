@@ -10,26 +10,21 @@ Saveable 是节点可存档的契约基类。它提供 save_id、to_save_data �
 
 ## 文件
 
-`res://addons/mkit/modules/save/saveable.gd`
+`res://addons/mkit/kernel/save/saveable.gd`
+
+## 字段说明
+
+- **save_id**：稳定 ID 字段。例：Saveable 通过 save_id 引用某个定义或运行时对象，避免直接保存节点路径。
 
 ## 接口
 
 ```gdscript
 class_name Saveable
 extends Node
-
 @export var save_id: String = ""
-
-func get_save_id() -> String:
-    if save_id == "":
-        return owner.name
-    return save_id
-
-func to_save_data() -> Dictionary:
-    return {}
-
-func from_save_data(data: Dictionary) -> void:
-    pass
+func get_save_id() -> String
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景

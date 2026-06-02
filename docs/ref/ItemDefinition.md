@@ -12,16 +12,31 @@ ItemDefinition 是一个物品类型的静态定义，例如小药水、铁剑�
 
 `res://addons/mkit/modules/inventory/item_definition.gd`
 
+## 字段说明
+
+- **item_id**：物品定义 ID。例：item.potion_small 用于从 ContentRegistry 找到药水定义。
+- **display_name**：代码字段。显示名称。
+- **description**：代码字段。描述文本。
+- **item_type**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **rarity**：稀有度。例：common、rare、legendary，用于掉落权重和 UI 颜色。
+- **icon**：代码字段。图标资源。
+- **stackable**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **max_stack**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **equipment_slot**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+- **use_conditions**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **use_effects**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **stat_modifiers**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+
 ## 接口
 
 ```gdscript
 class_name ItemDefinition
 extends Resource
-
 @export var item_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
-@export var item_type: String = "material" # weapon, armor, consumable, material, quest
+@export var item_type: String = "material"
 @export var rarity: String = "common"
 @export var icon: Texture2D
 @export var stackable: bool = true
@@ -31,6 +46,7 @@ extends Resource
 @export var use_conditions: Array[Condition] = []
 @export var use_effects: Array[GameEffect] = []
 @export var stat_modifiers: Array[StatModifierDefinition] = []
+func get_resource_id() -> String
 ```
 
 ## 函数使用场景

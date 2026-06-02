@@ -12,19 +12,34 @@ AbilityDefinition 是一个技能的静态配置，例如基础火球、翻滚�
 
 `res://addons/mkit/modules/abilities/ability_definition.gd`
 
+## 字段说明
+
+- **ability_id**：技能定义 ID。例：ability.fireball_basic 让 AbilityController 找到火球定义并读取冷却、消耗和效果。
+- **display_name**：代码字段。显示名称。
+- **description**：代码字段。描述文本。
+- **icon**：代码字段。图标资源。
+- **cooldown**：基础冷却时间。例：火球 cooldown=3.0，释放后 3 秒不能再次释放。
+- **charges**：可储存次数。例：翻滚技能有 2 层 charges，可以连续使用两次。
+- **cost_type**：消耗类型。例：mana、stamina、rage，不同角色可以用不同资源。
+- **cost_amount**：消耗数量。例：火球消耗 15 mana。
+- **cast_time**：施法时间。例：大招 cast_time=1.2 秒，期间可以播放蓄力动画或被打断。
+- **range**：作用范围。例：近战技能 range=48，火球 range=600。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+- **conditions**：释放或生效条件。例：HasEnoughMana、CooldownReady、TargetInRange。
+- **effects**：玩法结果列表。例：DealDamageEffect 后接 ApplyStatusEffect(status.burn)。
+
 ## 接口
 
 ```gdscript
 class_name AbilityDefinition
 extends Resource
-
 @export var ability_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
 @export var icon: Texture2D
 @export var cooldown: float = 1.0
 @export var charges: int = 1
-@export var cost_type: String = "none" # mana, stamina, hp, currency, none
+@export var cost_type: String = "none"
 @export var cost_amount: float = 0.0
 @export var cast_time: float = 0.0
 @export var range: float = 0.0

@@ -12,12 +12,25 @@ DamageRequest 是一次伤害结算的输入单。它携带攻击者、目标、
 
 `res://addons/mkit/modules/combat/damage_request.gd`
 
+## 字段说明
+
+- **source**：玩法来源节点。例：火球的 source 是玩家，后续伤害、仇恨、经验归属都可以追踪到玩家。
+- **target**：玩法目标节点。例：HealEffect 的 target 是玩家，DealDamageEffect 的 target 是被命中的敌人。
+- **base_amount**：基础伤害/治疗数值。例：火球基础伤害 20，最终伤害还要经过攻击力、暴击和防御计算。
+- **damage_type**：伤害类型。例：physical、magic、true，用于不同防御规则。
+- **element_type**：元素类型。例：fire、ice、poison，用于抗性、弱点或状态联动。
+- **can_crit**：是否允许暴击。例：普通攻击可以暴击，持续毒伤通常不暴击。
+- **can_evade**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **can_block**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+- **on_hit_statuses**：命中时尝试附加的状态列表。例：火球命中有 30% 概率挂 burn，可写 `[{"status_id":"status.burn","chance":0.3,"stacks":1,"duration":4.0}]`。CombatResolver 会用 RandomService 掷概率，命中的状态记录到 DamageResult.applied_status_effects，由 HealthComponent 统一施加。
+- **payload**：扩展数据包。例：attack 命令可以放 direction，cast_ability 可以放 ability_id；MVP 阶段允许用它承载少量灵活数据。
+
 ## 接口
 
 ```gdscript
 class_name DamageRequest
 extends RefCounted
-
 var source: Node = null
 var target: Node = null
 var base_amount: float = 0.0
@@ -27,7 +40,7 @@ var can_crit: bool = true
 var can_evade: bool = true
 var can_block: bool = true
 var tags: Array[String] = []
-var on_hit_statuses: Array[Dictionary] = [] # 每项: {status_id, chance, stacks, duration}
+var on_hit_statuses: Array[Dictionary] = []
 var payload: Dictionary = {}
 ```
 

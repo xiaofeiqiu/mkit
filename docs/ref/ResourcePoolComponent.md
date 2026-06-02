@@ -12,30 +12,31 @@ ResourcePoolComponent 是实体的可消耗资源池，例如 mana、stamina、e
 
 `res://addons/mkit/modules/health/resource_pool_component.gd`
 
+## 字段说明
+
+- **starting_values**：初始资源值。例：玩家开局 mana=50、stamina=100。
+- **current_values**：当前资源表。例：释放火球后 mana 从 50 变成 35。
+- **stats**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name ResourcePoolComponent
 extends Node
-
 signal resource_changed(resource_id: String, current: float, max_value: float)
 signal resource_spent(resource_id: String, amount: float)
 signal resource_restored(resource_id: String, amount: float)
-
-@export var starting_values: Dictionary = {} # resource_id -> current value
-
+@export var starting_values: Dictionary = {}
 var current_values: Dictionary = {}
 var stats: StatsComponent = null
-
-func _ready() -> void: ...
-func get_current(resource_id: String) -> float: ...
-func get_max_resource(resource_id: String) -> float: ...
-func has_resource(resource_id: String, amount: float) -> bool: ...
-func spend(resource_id: String, amount: float) -> bool: ...
-func restore(resource_id: String, amount: float) -> void: ...
-func set_current(resource_id: String, value: float) -> void: ...
-func to_save_data() -> Dictionary: ...
-func from_save_data(data: Dictionary) -> void: ...
+func get_current(resource_id: String) -> float
+func get_max_resource(resource_id: String) -> float
+func has_resource(resource_id: String, amount: float) -> bool
+func spend(resource_id: String, amount: float) -> bool
+func restore(resource_id: String, amount: float) -> void
+func set_current(resource_id: String, value: float) -> void
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景

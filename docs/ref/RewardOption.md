@@ -10,14 +10,24 @@ RewardOption 是一次奖励选择界面里的一个可选项。它保存展示�
 
 ## 文件
 
-`res://addons/mkit/modules/rewards/reward_option.gd`
+`res://addons/mkit/modules/loot/reward_option.gd`
+
+## 字段说明
+
+- **reward_id**：稳定 ID 字段。例：RewardOption 通过 reward_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **display_name**：代码字段。显示名称。
+- **description**：代码字段。描述文本。
+- **icon**：代码字段。图标资源。
+- **rarity**：稀有度。例：common、rare、legendary，用于掉落权重和 UI 颜色。
+- **source**：玩法来源节点。例：火球的 source 是玩家，后续伤害、仇恨、经验归属都可以追踪到玩家。
+- **effects**：玩法结果列表。例：DealDamageEffect 后接 ApplyStatusEffect(status.burn)。
+- **payload**：扩展数据包。例：attack 命令可以放 direction，cast_ability 可以放 ability_id；MVP 阶段允许用它承载少量灵活数据。
 
 ## 接口
 
 ```gdscript
 class_name RewardOption
 extends RefCounted
-
 var reward_id: String = ""
 var display_name: String = ""
 var description: String = ""

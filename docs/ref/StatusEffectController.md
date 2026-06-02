@@ -12,23 +12,25 @@ StatusEffectController 是实体身上状态效果的管理器。它负责应用
 
 `res://addons/mkit/modules/status_effects/status_effect_controller.gd`
 
+## 字段说明
+
+- **active_statuses**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **content**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name StatusEffectController
 extends Node
-
 signal status_applied(status_id: String, stacks: int)
 signal status_removed(status_id: String)
 signal status_ticked(status_id: String)
-
-var active_statuses: Dictionary = {} # status_id -> StatusEffectInstance
+var active_statuses: Dictionary = {}
 var content: ContentRegistry = null
-
-func apply_status(status_id: String, source: Node, stacks: int = 1, duration_override: float = -1.0) -> bool: ...
-func remove_status(status_id: String) -> void: ...
-func has_status(status_id: String) -> bool: ...
-func get_definition(status_id: String) -> StatusEffectDefinition: ...
+func apply_status( status_id: String, source: Node, stacks: int = 1, duration_override: float = -1.0 ) -> bool
+func remove_status(status_id: String) -> void
+func has_status(status_id: String) -> bool
+func get_definition(status_id: String) -> StatusEffectDefinition
 ```
 
 ## 函数使用场景

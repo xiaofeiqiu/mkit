@@ -22,6 +22,11 @@ func resolve(request: DamageRequest) -> DamageResult:
 		return result
 	var source_stats := _get_stats(request.source)
 	var target_stats := _get_stats(request.target)
+	if request.can_evade and _roll_chance(_stat(target_stats, "evade_chance", 0.0)):
+		result.was_evaded = true
+		result.final_amount = 0.0
+		result.trace["evaded"] = true
+		return result
 	var attack_power := _stat(source_stats, "attack_power", 0.0)
 	var damage_multiplier := _stat(source_stats, "damage_multiplier", 1.0)
 	var defense := _stat(target_stats, "defense", 0.0)

@@ -17,17 +17,8 @@ CombatResolver 是伤害结算规则引擎。它读取攻击者的攻击力、�
 ```gdscript
 class_name CombatResolver
 extends RefCounted
-
-static var _default: CombatResolver = null
-
-static func get_default() -> CombatResolver: ...
-
-func resolve(request: DamageRequest) -> DamageResult: ...
-
-func _roll_on_hit_statuses(request: DamageRequest, result: DamageResult) -> void: ...
-func _get_stats(entity: Node) -> StatsComponent: ...
-func _stat(stats: StatsComponent, stat_id: String, default_value: float) -> float: ...
-func _roll_chance(chance: float) -> bool: ...
+static func get_default() -> CombatResolver
+func resolve(request: DamageRequest) -> DamageResult
 ```
 
 ## 函数使用场景

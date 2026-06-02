@@ -12,12 +12,24 @@ HitboxComponent 是实体或投射物"能打到别人"的攻击判定区域（Ar
 
 `res://addons/mkit/modules/combat/hitbox_component.gd`
 
+## 字段说明
+
+- **active**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **base_damage**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **damage_type**：伤害类型。例：physical、magic、true，用于不同防御规则。
+- **element_type**：元素类型。例：fire、ice、poison，用于抗性、弱点或状态联动。
+- **hit_once_per_activation**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **target_factions**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **hit_tags**：命中标签。例：melee、projectile、heavy_attack，可传给 CombatResolver 或状态触发逻辑。
+- **on_hit_statuses**：代码字段。命中后尝试附加的状态配置列表。
+- **source_entity**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **already_hit**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name HitboxComponent
 extends Area2D
-
 @export var active: bool = false
 @export var base_damage: float = 1.0
 @export var damage_type: String = "physical"
@@ -26,12 +38,9 @@ extends Area2D
 @export var target_factions: Array[String] = ["enemy"]
 @export var hit_tags: Array[String] = []
 @export var on_hit_statuses: Array[Dictionary] = []
-
 var source_entity: Node = null
 var already_hit: Dictionary = {}
-
-func _ready() -> void: ...
-func set_active(value: bool) -> void: ...
+func set_active(value: bool) -> void
 ```
 
 ## 函数使用场景

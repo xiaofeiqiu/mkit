@@ -12,41 +12,34 @@ GameAction 是一个随时间推进的玩法过程。负责表达攻击前摇/�
 
 `res://addons/mkit/kernel/actions/game_action.gd`
 
+## 字段说明
+
+- **action_id**：稳定 ID 字段。例：GameAction 通过 action_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **context**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **elapsed**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **finished**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **cancelled_flag**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **cancel_tags**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name GameAction
 extends RefCounted
-
 signal completed(action: GameAction)
 signal cancelled(action: GameAction, reason: String)
-
 var action_id: String = ""
 var context: ActionContext = null
 var elapsed: float = 0.0
 var finished: bool = false
 var cancelled_flag: bool = false
 var cancel_tags: Array[String] = []
-
 func start(ctx: ActionContext) -> void
-
 func update(delta: float) -> void
-
 func cancel(reason: String = "") -> void
-
 func complete() -> void
-
 func is_finished() -> bool
-
 func can_cancel_with(tag: String) -> bool
-
-func _on_start() -> void
-
-func _on_update(delta: float) -> void
-
-func _on_cancel(reason: String) -> void
-
-func _on_complete() -> void
 ```
 
 ## 函数使用场景

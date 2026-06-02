@@ -12,20 +12,20 @@ ActionRunner 是所有活动 Action 的更新器。负责启动、更新、取�
 
 `res://addons/mkit/kernel/actions/action_runner.gd`
 
+## 字段说明
+
+- **active_actions**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name ActionRunner
 extends Node
-
 signal action_started(action: GameAction)
 signal action_completed(action: GameAction)
 signal action_cancelled(action: GameAction, reason: String)
-
 var active_actions: Array[GameAction] = []
-
 func start_action(action: GameAction, context: ActionContext) -> GameAction
-
 func cancel_actions_for_source(source: Node, reason: String = "") -> void
 ```
 

@@ -12,12 +12,25 @@ UpgradeDefinition 是永久或局内升级的静态定义。它定义升级 ID�
 
 `res://addons/mkit/modules/progression/upgrade_definition.gd`
 
+## 字段说明
+
+- **upgrade_id**：升级定义 ID。例：upgrade.attack_plus_20。
+- **display_name**：代码字段。显示名称。
+- **description**：代码字段。描述文本。
+- **max_level**：最大等级。例：永久生命升级最多 5 级。
+- **currency_id**：消耗货币 ID。例：meta_currency、gold、shard。
+- **cost_by_level**：每级消耗。例：[100, 150, 250]。
+- **prerequisite_upgrade_ids**：前置升级。例：unlock.fire_magic 需要先解锁 upgrade.mage_path。
+- **unlock_content_ids**：解锁内容 ID。例：解锁 ability.fireball_basic 进入可选池。
+- **effects**：升级生效效果。例：增加 max_hp 或 attack_power 的 GameEffect。
+- **tags**：代码字段。标签列表。
+- **is_meta_upgrade**：是否跨 run 持久。例：meta upgrade 存档，run upgrade 只写入 RunState。
+
 ## 接口
 
 ```gdscript
 class_name UpgradeDefinition
 extends Resource
-
 @export var upgrade_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
@@ -29,8 +42,7 @@ extends Resource
 @export var effects: Array[GameEffect] = []
 @export var tags: Array[String] = []
 @export var is_meta_upgrade: bool = true
-
-func get_cost_for_level(next_level: int) -> int: ...
+func get_cost_for_level(next_level: int) -> int
 ```
 
 ## 函数使用场景

@@ -10,20 +10,21 @@ RewardSelectionUI 是奖励选择界面。它展示奖励选项并把玩家选�
 
 ## 文件
 
-由使用者自行实现（框架提供伪代码参考）
+`res://addons/mkit/modules/ui/reward_selection_ui.gd`
+
+## 字段说明
+
+- **options**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **run_director**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 
 ## 接口
 
 ```gdscript
 class_name RewardSelectionUI
 extends Control
-
 var options: Array[RewardOption] = []
 var run_director: RunDirector = null
-
-func setup(data: Dictionary) -> void: ...
-func _render_options() -> void: ...
-func _on_option_selected(option: RewardOption) -> void: ...
+func setup(data: Dictionary) -> void
 ```
 
 ## 函数使用场景

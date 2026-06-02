@@ -10,25 +10,29 @@ AudioManager 是音效和音乐播放的轻量管理器。它按 audio_id 查找
 
 ## 文件
 
-`res://addons/mkit/modules/feedback/audio_manager.gd`
+`res://addons/mkit/modules/ui/audio_manager.gd`
+
+## 字段说明
+
+- **sfx_map**：音效资源表。例：hit、death、pickup 映射到对应 AudioStream。
+- **music_map**：音乐资源表。例：main_menu、combat_room 映射到背景音乐。
+- **sfx_bus**：音效 bus。例：设置为 SFX 后由音量选项统一控制。
+- **music_bus**：音乐 bus。例：设置为 Music 后由设置界面控制。
+- **music_player**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 
 ## 接口
 
 ```gdscript
 class_name AudioManager
 extends Node
-
-@export var sfx_map: Dictionary = {} # audio_id -> AudioStream
-@export var music_map: Dictionary = {} # music_id -> AudioStream
+@export var sfx_map: Dictionary = {}
+@export var music_map: Dictionary = {}
 @export var sfx_bus: String = "SFX"
 @export var music_bus: String = "Music"
-
 var music_player: AudioStreamPlayer = null
-
-func _ready() -> void: ...
-func play_sfx(audio_id: String, volume_db: float = 0.0) -> void: ...
-func play_music(music_id: String, fade_seconds: float = 0.0) -> void: ...
-func stop_music() -> void: ...
+func play_sfx(audio_id: String, volume_db: float = 0.0) -> void
+func play_music(music_id: String, fade_seconds: float = 0.0) -> void
+func stop_music() -> void
 ```
 
 ## 函数使用场景

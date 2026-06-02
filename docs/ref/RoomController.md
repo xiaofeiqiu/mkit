@@ -12,32 +12,41 @@ RoomController 是房间生命周期控制器。它负责生成敌人、追踪�
 
 `res://addons/mkit/modules/room/room_controller.gd`
 
+## 字段说明
+
+- **room_definition_id**：稳定 ID 字段。例：RoomController 通过 room_definition_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **enemy_container_path**：资源或节点路径。例：用 enemy_container_path 指向场景或节点，方便在 Inspector 中配置。
+- **entity_spawner_path**：资源或节点路径。例：RoomController 通过它找到房间里的 EntitySpawner。
+- **reward_count**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **spawn_positions**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **runtime**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **active_enemies**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **content**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **entity_spawner**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name RoomController
 extends Node
-
 signal room_entered(room_id: String)
 signal room_cleared(room_id: String)
 signal reward_ready(options: Array[RewardOption])
-
 @export var room_definition_id: String = ""
-@export var enemy_container_path: NodePath = NodePath("Enemies")
-@export var entity_spawner_path: NodePath = NodePath("EntitySpawner")
+@export var enemy_container_path: NodePath = NodePath("../Enemies")
+@export var entity_spawner_path: NodePath = NodePath("../EntitySpawner")
 @export var reward_count: int = 3
-
+@export var spawn_positions: Array[Vector2] = []
 var runtime: RoomRuntime = null
 var active_enemies: Dictionary = {}
 var content: ContentRegistry = null
 var entity_spawner: EntitySpawner = null
-
-func setup(definition_id: String) -> void: ...
-func enter_room() -> void: ...
-func spawn_enemies() -> void: ...
-func check_clear_condition() -> void: ...
-func generate_reward() -> void: ...
-func get_definition() -> RoomDefinition: ...
+func setup(definition_id: String) -> void
+func enter_room() -> void
+func spawn_enemies() -> void
+func check_clear_condition() -> void
+func generate_reward() -> void
+func get_definition() -> RoomDefinition
 ```
 
 ## 函数使用场景

@@ -12,29 +12,23 @@ StatModifierDefinition 是描述"如何改变属性"的静态规则，例如 `at
 
 `res://addons/mkit/modules/stats/stat_modifier_definition.gd`
 
+## 字段说明
+
+- **modifier_id**：稳定 ID 字段。例：StatModifierDefinition 通过 modifier_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **stat_id**：稳定 ID 字段。例：StatModifierDefinition 通过 stat_id 引用某个定义或运行时对象，避免直接保存节点路径。
+- **operation**：代码字段。运算类型。
+- **value**：代码字段。数值。
+- **priority**：代码字段。计算优先级。
+- **stacking_rule**：代码字段。叠加规则。
+- **tags**：标签集合。例：enemy、boss、projectile、fire，条件和效果可以通过标签判断适用性。
+
 ## 接口
 
 ```gdscript
 class_name StatModifierDefinition
 extends Resource
-
-enum Operation {
-    FLAT_ADD,
-    PERCENT_ADD,
-    PERCENT_MULTIPLY,
-    OVERRIDE,
-    CLAMP_MIN,
-    CLAMP_MAX
-}
-
-enum StackingRule {
-    STACK,
-    REPLACE_SAME_SOURCE,
-    HIGHEST_ONLY,
-    LOWEST_ONLY,
-    UNIQUE
-}
-
+enum Operation { FLAT_ADD, PERCENT_ADD, PERCENT_MULTIPLY, OVERRIDE, CLAMP_MIN, CLAMP_MAX }
+enum StackingRule { STACK, REPLACE_SAME_SOURCE, HIGHEST_ONLY, LOWEST_ONLY, UNIQUE }
 @export var modifier_id: String = ""
 @export var stat_id: String = ""
 @export var operation: Operation = Operation.FLAT_ADD

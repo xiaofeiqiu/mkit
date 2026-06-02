@@ -12,26 +12,23 @@ EntityRoot 是玩法实体场景的组合根节点。它把 `EntityIdentity`、`
 
 `res://addons/mkit/modules/entity/entity_root.gd`
 
+## 字段说明
+
+- **identity**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **state_machine**：所属状态机引用。例：AttackState 完成后通过 state_machine 请求回到 Idle。
+- **command_receiver**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+
 ## 接口
 
 ```gdscript
 class_name EntityRoot
 extends CharacterBody2D
-
 @onready var identity: EntityIdentity = $EntityIdentity
 @onready var state_machine: StateMachine = $StateMachine
 @onready var command_receiver: CommandReceiver = $CommandReceiver
-
-func get_entity_id() -> String:
-    if identity == null:
-        return name
-    return identity.entity_id
-
-func get_component(component_name: String) -> Node:
-    return get_node_or_null("Components/%s" % component_name)
-
-func get_controller(controller_name: String) -> Node:
-    return get_node_or_null("Controllers/%s" % controller_name)
+func get_entity_id() -> String
+func get_component(component_name: String) -> Node
+func get_controller(controller_name: String) -> Node
 ```
 
 ## 函数使用场景

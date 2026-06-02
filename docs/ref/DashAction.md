@@ -12,12 +12,17 @@ DashAction 是短时间位移爆发 Action。按方向和速度推动实体一�
 
 `res://addons/mkit/kernel/actions/builtin/dash_action.gd`
 
+## 字段说明
+
+- **duration**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
+- **speed**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
+- **direction**：方向。例：玩家按右方向释放火球，direction=Vector2.RIGHT。
+
 ## 接口
 
 ```gdscript
 class_name DashAction
 extends GameAction
-
 var duration: float = 0.18
 var speed: float = 480.0
 var direction: Vector2 = Vector2.ZERO

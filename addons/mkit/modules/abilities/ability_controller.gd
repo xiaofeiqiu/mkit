@@ -25,13 +25,6 @@ func _process(delta: float) -> void:
 	for instance: AbilityInstance in abilities.values():
 		if instance != null:
 			instance.tick(delta)
-	for action in active_cast_actions.duplicate():
-		if action == null:
-			active_cast_actions.erase(action)
-			continue
-		action.update(delta)
-		if action.is_finished():
-			active_cast_actions.erase(action)
 
 
 func register_ability(ability_id: String) -> bool:
@@ -99,10 +92,16 @@ func cast(ability_id: String, context: GameplayContext) -> bool:
 	if definition == null or instance == null:
 		ability_failed.emit(ability_id, "invalid_ability_data")
 		return false
+	var action_runner: ActionRunner = null
+	if definition.cast_time > 0.0:
+		action_runner = _get_action_runner()
+		if action_runner == null:
+			ability_failed.emit(ability_id, "missing_action_runner")
+			return false
 	_pay_cost(definition)
 	ability_cast_started.emit(ability_id)
 	if definition.cast_time > 0.0:
-		_start_cast_action(definition, context)
+		_start_cast_action(definition, context, action_runner)
 	else:
 		_execute_ability_effects(definition, context)
 		_start_cooldown(instance, definition)
@@ -161,21 +160,30 @@ func _start_cooldown(instance: AbilityInstance, definition: AbilityDefinition) -
 	cooldown_started.emit(definition.ability_id, instance.cooldown_remaining)
 
 
-func _start_cast_action(definition: AbilityDefinition, context: GameplayContext) -> void:
+func _start_cast_action(
+	definition: AbilityDefinition, context: GameplayContext, action_runner: ActionRunner
+) -> void:
 	if definition == null or context == null:
 		var failed_id := definition.ability_id if definition != null else ""
 		ability_failed.emit(failed_id, "invalid_cast_context")
+		return
+	if action_runner == null:
+		ability_failed.emit(definition.ability_id, "missing_action_runner")
 		return
 	var action := CastAction.new()
 	action.duration = definition.cast_time
 	action.completed.connect(
 		func(_a: GameAction) -> void:
+			active_cast_actions.erase(_a)
 			_execute_ability_effects(definition, context)
-			_start_cooldown(abilities[definition.ability_id] as AbilityInstance, definition)
+			var ability_instance := abilities.get(definition.ability_id, null) as AbilityInstance
+			if ability_instance != null:
+				_start_cooldown(ability_instance, definition)
 			ability_cast_finished.emit(definition.ability_id)
 	)
 	action.cancelled.connect(
 		func(_a: GameAction, reason: String) -> void:
+			active_cast_actions.erase(_a)
 			ability_failed.emit(definition.ability_id, "cast_cancelled:%s" % reason)
 	)
 	var action_context := ActionContext.new()
@@ -183,8 +191,14 @@ func _start_cast_action(definition: AbilityDefinition, context: GameplayContext)
 	action_context.target = context.target
 	action_context.ability_id = definition.ability_id
 	action_context.payload = context.payload.duplicate(true) if context.payload != null else {}
-	action.start(action_context)
 	active_cast_actions.append(action)
+	action_runner.start_action(action, action_context)
+
+
+func _get_action_runner() -> ActionRunner:
+	if not ServiceRegistry.has_service("actions"):
+		return null
+	return ServiceRegistry.get_service("actions") as ActionRunner
 
 
 func _has_enough_cost(definition: AbilityDefinition) -> bool:

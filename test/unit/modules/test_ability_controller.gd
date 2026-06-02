@@ -37,6 +37,8 @@ func _make_ability(id: String, cooldown: float = 0.0) -> AbilityDefinition:
 
 var ctrl: AbilityController
 var content: StubContent
+var actions: ActionRunner
+var time: TimeService
 var entity: Node
 var ctx: GameplayContext
 
@@ -45,7 +47,13 @@ func before_each() -> void:
 	entity = Node.new()
 	add_child_autofree(entity)
 	content = StubContent.new()
+	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
+	actions = ActionRunner.new()
+	add_child_autofree(actions)
+	ServiceRegistry.register_service("actions", actions)
+	time = TimeService.new()
+	ServiceRegistry.register_service("time", time)
 	ctrl = AbilityController.new()
 	entity.add_child(ctrl)
 	ctx = GameplayContext.new()
@@ -242,6 +250,8 @@ func test_tc_ab_19_cast_with_cast_time_emits_started_not_finished() -> void:
 	ctrl.cast("charge", ctx)
 	assert_signal_emitted(ctrl, "ability_cast_started")
 	assert_signal_not_emitted(ctrl, "ability_cast_finished")
+	assert_eq(actions.active_actions.size(), 1)
+	assert_eq(ctrl.active_cast_actions.size(), 1)
 
 
 func test_tc_ab_20_cast_finished_fires_after_cast_time_elapses() -> void:
@@ -251,20 +261,51 @@ func test_tc_ab_20_cast_finished_fires_after_cast_time_elapses() -> void:
 	ctrl.register_ability("charge")
 	ctrl.cast("charge", ctx)
 	watch_signals(ctrl)
-	ctrl._process(0.6)
+	actions._process(0.6)
 	assert_signal_emitted(ctrl, "ability_cast_finished")
+
+
+func test_tc_ab_21_cast_with_cast_time_respects_pause() -> void:
+	var def := _make_ability("charge")
+	def.cast_time = 0.5
+	content._defs["charge"] = def
+	ctrl.register_ability("charge")
+	ctrl.cast("charge", ctx)
+	watch_signals(ctrl)
+	time.set_paused(true)
+	actions._process(0.6)
+	assert_signal_not_emitted(ctrl, "ability_cast_finished")
+	time.set_paused(false)
+	actions._process(0.6)
+	assert_signal_emitted(ctrl, "ability_cast_finished")
+
+
+func test_tc_ab_22_cast_with_cast_time_fails_without_action_runner() -> void:
+	var def := _make_ability("charge")
+	def.cast_time = 0.5
+	content._defs["charge"] = def
+	ctrl.register_ability("charge")
+	ServiceRegistry.unregister_service("actions")
+	watch_signals(ctrl)
+	var result := ctrl.cast("charge", ctx)
+	assert_false(result)
+	assert_signal_emitted_with_parameters(
+		ctrl, "ability_failed", ["charge", "missing_action_runner"]
+	)
+	assert_eq(actions.active_actions.size(), 0)
+	assert_eq(ctrl.active_cast_actions.size(), 0)
 
 
 # --- unregister_ability ---
 
 
-func test_tc_ab_22_unregister_removes_ability() -> void:
+func test_tc_ab_23_unregister_removes_ability() -> void:
 	content._defs["slash"] = _make_ability("slash")
 	ctrl.register_ability("slash")
 	ctrl.unregister_ability("slash")
 	assert_false(ctrl.has_ability("slash"))
 
 
-func test_tc_ab_23_unregister_nonexistent_is_safe() -> void:
+func test_tc_ab_24_unregister_nonexistent_is_safe() -> void:
 	ctrl.unregister_ability("ghost_ability")
 	assert_true(true)

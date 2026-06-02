@@ -52,6 +52,14 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gdir=res://test/integration -gexit
 - `UpgradeDefinition`
 - `StatusEffectDefinition`
 - `StatDefinition`
+- `StatModifierDefinition`
+- `ExperienceCurve`
+
+同时提供 test-only resource helpers：
+
+- `PassingCondition` / `FailingCondition`，用于 ability、loot、reward 的 condition filtering。
+- `ProbeEffect` / `FailingEffect`，用于验证 `EffectExecutor` 顺序、stop-on-failure、context payload 和 result trace。
+- 常用 builtin effect factory，例如 `GrantItemEffect`、`HealEffect`、`ApplyStatusEffect`、`ApplyStatModifierEffect`。
 
 同时提供一个专门 helper 保存临时 `.tres`：
 
@@ -78,15 +86,29 @@ TestRoot
         StatsComponent
         HealthComponent
         ResourcePoolComponent
+        HitboxComponent
+        HurtboxComponent
       Controllers/
         AbilityController
         StatusEffectController
         InventoryController
         EquipmentController
+      Presentation/
+        AnimationPlayer
     Enemies/
+      Enemy
+        EntityIdentity
+        Components/
+          StatsComponent
+          HealthComponent
+          HurtboxComponent
+        Controllers/
+          StatusEffectController
     EntitySpawner
     RoomRoot/
 ```
+
+`Presentation/AnimationPlayer` 用于覆盖 `CastAction` / `TimedAttackAction` 的可选动画 lookup；`HitboxComponent` 和 `HurtboxComponent` 分别用于攻击源和受击目标，避免 combat integration 绕过真实节点路径。
 
 ### DeterministicRandom
 
@@ -148,13 +170,13 @@ TestRoot
 | Save Pipeline | `SaveManager.save_game(root)` 收集多个 `Saveable`，写出 versioned payload。 |
 | Load & Migration Pipeline | legacy save data 经过 `SaveMigration` 后恢复到 saveables。 |
 | Scene Routing Pipeline | `SceneRouter.change_scene()` success/fail signal 和 transition lock。 |
-| UI Screen Pipeline | `UIManager.open_screen/close_screen()` 实例化 screen，modal pause/resume gameplay。 |
+| UI Screen Pipeline | `UIManager.open_screen/close_screen()` 实例化 screen，modal pause/resume gameplay，并验证 `UIManager._ready()` 注册 `"ui"` service。 |
 | Feedback Pipeline | `FeedbackSystem` 监听 damage/death event，调用 damage number/VFX/audio collaborators。 |
 | Analytics Pipeline | gameplay event 调用 injected `AnalyticsService` mock/probe。 |
 | Rewarded Ad Pipeline | `AdServiceMock.show_rewarded_ad()` async complete 后 grant reward/revive。 |
 | IAP Pipeline | `IAPServiceMock.load_products/purchase/restore` signals 和 purchased state。 |
 | Cloud Save Pipeline | `CloudSaveServiceMock.save_to_cloud/load_from_cloud` round-trip dictionary。 |
-| Debug Overlay Pipeline | `DebugOverlay` 绑定 target entity，读取 state/health/recent events。 |
+| Debug Overlay Pipeline | `DebugOverlay` 绑定 target entity，读取 state/health/recent events，并验证 `DebugOverlay._ready()` 注册 `"debug"` service。 |
 
 ## 建议 Test Files
 
@@ -200,6 +222,7 @@ TestRoot
 5. `InventoryController` 发 `inventory_changed`，`EventRouter` 记录 domain event。
 6. Cooldown 开始，resource 被扣除。
 7. pause/scale 后 action progress 符合 `TimeService`。
+8. `GameCommand.payload` 通过 `GameplayContext.from_command()` / `ActionContext.from_command()` 进入 state/action/effect，并可写入 `StateMachine.blackboard`。
 
 核心 cases：
 
@@ -207,6 +230,7 @@ TestRoot
 - `test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure`
 - `test_tc_int_game_03_time_pause_blocks_action_progress`
 - `test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results`
+- `test_tc_int_game_05_command_payload_context_blackboard_effect_event_trace`
 
 ### `test_combat_status_feedback_integration.gd`
 
@@ -238,6 +262,7 @@ TestRoot
 - `test_tc_int_cmb_02_heal_clamps_to_max_hp_and_emits`
 - `test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_debug_overlay`
 - `test_tc_int_cmb_04_status_duration_expiry_removes_stat_modifier`
+- `test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target`
 
 ### `test_content_spawn_room_run_integration.gd`
 
@@ -316,6 +341,7 @@ TestRoot
 2. `InteractionComponent` 选择 interactable 并执行 effects。
 3. `SceneRouter` 切换临时 scene，验证 success/fail signal。
 4. `UIManager` 打开 modal screen，`TimeService` pause，关闭后恢复。
+5. `UIManager._ready()` 注册 `"ui"` service，后续系统可通过 `ServiceRegistry.get_service("ui")` 获取。
 
 核心 cases：
 
@@ -323,6 +349,7 @@ TestRoot
 - `test_tc_int_ui_02_interaction_executes_interactable_effects`
 - `test_tc_int_ui_03_scene_router_emits_success_and_failure_paths`
 - `test_tc_int_ui_04_modal_ui_pauses_and_closes_to_resume_time`
+- `test_tc_int_ui_05_ui_manager_registers_ui_service`
 
 ## 执行顺序计划
 
@@ -334,7 +361,8 @@ TestRoot
 6. 实现 progression/save/platform async integration，注意所有 save path 使用测试临时路径。
 7. 实现 UI/interaction/AI/scene integration，必要时使用 minimal scenes/screens。
 8. 为每个新增 `.gd` 运行 Godot/GUT 生成 `.gd.uid`。
-9. 运行 `res://test/integration`，再运行相关 unit suite，确保 integration 没有污染 `ServiceRegistry` 或 runtime globals。
+9. 为每个新增 integration test file 增加 `spec/test-spec/test_<file>.md`，记录 helper、覆盖 pipeline 和核心 cases。
+10. 运行 `res://test/integration`，再运行相关 unit suite，确保 integration 没有污染 `ServiceRegistry` 或 runtime globals。
 
 ## 风险与约束
 
@@ -353,4 +381,5 @@ TestRoot
 - 所有临时 save/scene/resource 文件可清理或位于测试临时路径。
 - 测试不依赖 `game/demo/` 具体内容。
 - 测试不修改 `addons/mkit/` runtime 行为。
+- 每个新增 integration test file 都有对应的 `spec/test-spec/test_<file>.md`。
 - 新增 test code 时同步生成 `.gd.uid`。

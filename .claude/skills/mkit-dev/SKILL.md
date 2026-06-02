@@ -1,18 +1,21 @@
 ---
 name: mkit-dev
 description: >-
-  Engineering playbook for developing and maintaining the mkit Godot 4.7 /
-  GDScript 2.0 game framework (a layered kernel + reusable gameplay modules for
-  2D RPG / roguelike games). Use this whenever working inside the mkit repo:
-  adding or changing a gameplay system, module, action, effect, command,
-  condition, entity, or service; writing or running GUT unit tests; updating
-  docs/ref or layer/pipeline docs; or reviewing a change for architecture / layering
-  violations. Trigger even when the request never says "mkit" but it touches
-  addons/mkit/, game/, GDScript (.gd / .tscn) files, the
-  command -> action -> effect pipeline, ServiceRegistry, the
-  Definition -> Instance -> Controller data model, or the "no hardcoded game
-  content in the addon" rule. When in doubt while editing this repo, consult
-  this skill rather than guessing the conventions.
+  Engineering playbook for the mkit codebase — a reusable Godot 4.7 / GDScript
+  2.0 framework (layered kernel + gameplay modules under addons/mkit/, concrete
+  games under game/) for 2D RPG / roguelike games. Consult it BEFORE writing or
+  changing GDScript in this repo so the work follows the project's conventions:
+  adding or editing an action, effect, condition, command, entity, component, or
+  system; registering a service via ServiceRegistry or game_bootstrap.gd;
+  placing a boss / item / loot table as data without hardcoding content into the
+  addon; working through the command -> action -> effect pipeline or the
+  Definition -> Instance -> Controller model; writing or running GUT unit tests
+  (make ut); or updating docs/ref and layer/pipeline docs. Trigger even when the
+  request never says "mkit" but it references this repo's files (e.g.
+  combat_resolver.gd, game_bootstrap.gd, .tscn scenes), classes (CombatResolver,
+  AbilityController, EventRouter, EntityRoot), or conventions. Do NOT use for
+  generic Godot / GDScript syntax questions, other engines (Unity, Unreal), or
+  game-design / economy questions not tied to editing this codebase.
 ---
 
 # Developing and maintaining mkit

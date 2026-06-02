@@ -34,7 +34,7 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gdir=res://test/integration -gexit
 - 使用临时 `ResourceDatabase` 和内存构造的 definitions，避免依赖 `game/demo/` 的具体内容。
 - 需要 scene path 的管线使用测试期间临时保存的 `PackedScene`，路径放在可控测试目录或临时目录。
 - 所有随机行为注入 deterministic `RandomService` subclass。
-- 每个 test `after_each()` 清理 `ServiceRegistry`，释放临时 scene/resource，避免跨测试污染。
+- 每个 test `after_each()` 必须先释放 `GameBootstrap` 加进 `ServiceRegistry` autoload 的 node service（`for c in ServiceRegistry.get_children(): c.queue_free()`），再调用 `ServiceRegistry.clear()`，最后释放临时 scene/resource。注意 `ServiceRegistry.clear()` 只清空 `_services`/`_service_types` 字典，不会 free 这些 child node；若残留，下一次 `boot()` 因 `has_service("events")` 为 false 会重新 `add_child` 第二套服务（出现两个 `ActionRunner` 同时 `_process`，action 进度翻倍），导致 timing 测试错误或 flaky。
 - Integration case 按 pipeline 粒度设计，多个 pipeline 可以合并在同一个端到端场景中验证，但 `spec` 必须明确它覆盖了哪些 pipeline。
 
 ## Fixture 设计
@@ -110,15 +110,25 @@ TestRoot
 
 `Presentation/AnimationPlayer` 用于覆盖 `CastAction` / `TimedAttackAction` 的可选动画 lookup；`HitboxComponent` 和 `HurtboxComponent` 分别用于攻击源和受击目标，避免 combat integration 绕过真实节点路径。
 
+`HitboxComponent`、`HurtboxComponent`、`InteractionComponent` 都是 `Area2D`，靠 `area_entered` / `get_overlapping_areas()` 检测。TestSceneBuilder 必须给每个 Area2D 加 `CollisionShape2D` 子节点、设置匹配的 `collision_layer` / `collision_mask`，并在 `set_active(true)` 后 `await get_tree().physics_frame`（通常两帧）让 overlap 进入 physics server。physics frame 走真实时间、不受 `TimeService` 缩放，因此 pause/scale 测试不能依赖它。Interaction case 需要额外的 interactor（带 `InteractionComponent` 的 Area2D）和实现 `_interact_impl` 的 test-only `Interactable`，上面的基础布局未包含。
+
+### TestStates 与 receiver 接线
+
+HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon 内没有可用的 gameplay state。Main Gameplay、HFSM Transition、Action Lifecycle 三条管线必须自带 test-only `State` 子类（例如 `IdleState` / `CastState` / `AttackState`），把 `CAST_ABILITY` / `ATTACK` 翻译成 ability/action 调用，并暴露可断言的 enter/exit 顺序。同时接线：
+
+- `CommandReceiver.state_machine` 指向场景里的 `StateMachine`。
+- `CommandRouter.register_receiver(target_id, receiver)` 注册 receiver，使 `dispatch()` 能按 `target_id` 找到它。
+
 ### DeterministicRandom
 
-固定返回：
+`extends RandomService` 的 test-only subclass，固定或脚本化返回：
 
 - `randf()`
 - `randf_range()`
 - `randi_range()`
+- `randi()` 和 `seed()`（`RunDirector.start_run` 会 seed random，`DungeonGenerator.generate_linear` 依赖它）
 
-用于 loot、reward、crit、evade、dungeon generation。
+在 `before_each` 注册到 `ServiceRegistry` 的 `"random"` id 下，让所有通过 registry 读取 random 的系统都拿到该 stub。用于 loot、reward、crit、evade、dungeon generation。
 
 ### Probe Services
 
@@ -127,6 +137,7 @@ TestRoot
 - `ProbeAnalyticsService extends AnalyticsService`
 - `ProbeSaveable extends Saveable`
 - `ProbeScreen extends Control`
+- feedback collaborator probes（damage number / VFX / audio），供 `FeedbackSystem` 注入；先确认 `FeedbackSystem` 在 collaborator 为 null 时是否安全，否则 `cmb_01` 断言 feedback 时必须注入这些 probe。
 
 这些只存在于 `test/integration/`，不进入 addon。
 
@@ -157,16 +168,16 @@ TestRoot
 | Death Pipeline | lethal damage 触发 `HealthComponent.die()`、`EventRouter.entity_died`、room/run 响应。 |
 | Enemy AI Pipeline | `SimpleAIEnemyBrain` think tick dispatch command 到 router。 |
 | Interaction Pipeline | `InteractionComponent` 选择 nearby `Interactable`，执行 interact effects。 |
-| Inventory Add & Remove Pipeline | `InventoryController.add_item/remove_item` stack、capacity、events。 |
+| Inventory Add & Remove Pipeline | `InventoryController.add_item(ItemInstance)` / `remove_item_by_instance_id(instance_id, quantity)` stack、capacity、events（没有 `remove_item`）。 |
 | Item Pickup Pipeline | `GrantItemEffect` 创建 `ItemInstance` 并进入 inventory。 |
 | Equipment Pipeline | equip/unequip item modifier，验证 stats 回滚。 |
 | Loot Roll Pipeline | `LootSystem.roll_table()` deterministic weighted roll，conditions filter，生成 item instances。 |
 | Reward Selection Pipeline | `RewardSystem.generate_options/apply_selected()`，执行 effects，发 reward event。 |
-| Room Lifecycle Pipeline | `RoomController.setup/enter_room/spawn_enemies/entity_died/check_clear/generate_reward`。 |
-| Run Lifecycle Pipeline | `RunDirector.start_run/enter_next_room/on_room_cleared/select_reward/complete/fail`。 |
+| Room Lifecycle Pipeline | `RoomController.setup/enter_room/spawn_enemies/check_clear_condition/generate_reward`；enemy death 通过 EventRouter `entity_died` signal 驱动私有 `_on_entity_died`。 |
+| Run Lifecycle Pipeline | `RunDirector.start_run/enter_next_room/on_room_cleared/select_reward/complete_run/fail_run`。 |
 | Dungeon Generation Pipeline | fixed seed 生成 deterministic `RoomGraph`，room order 和 length 正确。 |
 | Experience & Level Up Pipeline | `ExperienceComponent.add_xp()` 跨多级升级，save payload 正确。 |
-| Meta Progression & Upgrade Pipeline | currency、unlock、effects、content unlock signals。 |
+| Meta Progression & Upgrade Pipeline | `ProgressionSystem.add_currency/can_unlock/unlock_or_level_up`、effects、content unlock signals。 |
 | Save Pipeline | `SaveManager.save_game(root)` 收集多个 `Saveable`，写出 versioned payload。 |
 | Load & Migration Pipeline | legacy save data 经过 `SaveMigration` 后恢复到 saveables。 |
 | Scene Routing Pipeline | `SceneRouter.change_scene()` success/fail signal 和 transition lock。 |
@@ -174,7 +185,7 @@ TestRoot
 | Feedback Pipeline | `FeedbackSystem` 监听 damage/death event，调用 damage number/VFX/audio collaborators。 |
 | Analytics Pipeline | gameplay event 调用 injected `AnalyticsService` mock/probe。 |
 | Rewarded Ad Pipeline | `AdServiceMock.show_rewarded_ad()` async complete 后 grant reward/revive。 |
-| IAP Pipeline | `IAPServiceMock.load_products/purchase/restore` signals 和 purchased state。 |
+| IAP Pipeline | `IAPServiceMock.load_products/purchase/restore_purchases` signals 和 purchased state。 |
 | Cloud Save Pipeline | `CloudSaveServiceMock.save_to_cloud/load_from_cloud` round-trip dictionary。 |
 | Debug Overlay Pipeline | `DebugOverlay` 绑定 target entity，读取 state/health/recent events，并验证 `DebugOverlay._ready()` 注册 `"debug"` service。 |
 
@@ -212,6 +223,7 @@ TestRoot
 - Resource Spend & Restore Pipeline
 - Item Pickup Pipeline
 - Inventory Add & Remove Pipeline
+- Equipment Pipeline
 
 核心场景：
 
@@ -231,6 +243,7 @@ TestRoot
 - `test_tc_int_game_03_time_pause_blocks_action_progress`
 - `test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results`
 - `test_tc_int_game_05_command_payload_context_blackboard_effect_event_trace`
+- `test_tc_int_game_06_equip_applies_and_unequip_reverts_stat_modifier`
 
 ### `test_combat_status_feedback_integration.gd`
 
@@ -312,7 +325,7 @@ TestRoot
 
 1. Experience component 连续升级。
 2. Progression unlock 消耗 currency、执行 effects、解锁 content id。
-3. SaveManager 保存 player inventory/progression/experience 到临时 path。
+3. `SaveManager.save_game(root)` 收集 `node is Saveable` 写出 versioned payload；`ExperienceComponent`、`ProgressionSystem` 是 `Saveable`，会被收集。注意 `InventoryController extends Node` 不是 `Saveable`，不会被 `save_game` 自动收集——inventory 持久化要么直接 round-trip `to_save_data`/`from_save_data` 并断言，要么显式断言 `save_game` 不收集它并记录为已知限制。
 4. 旧版本 payload 经 migration 后 load。
 5. Analytics probe 记录 gameplay facts。
 6. Ad/IAP/Cloud mock async signal 完成后状态可验证。
@@ -353,7 +366,7 @@ TestRoot
 
 ## 执行顺序计划
 
-1. 建立 `test/integration/fixtures/` 或在每个 test file 内部定义最小 helper。优先少文件、低抽象，只有 scene/resource builder 重复明显时再抽 helper。
+1. 建立单一共享 helper `test/integration/int_test_helpers.gd`（inner class / static builder 形式），集中 TestContentBuilder、TestSceneBuilder、TestStates、DeterministicRandom、Probe Services。六个 test file 都会用到这些 builder，分散定义会造成 6× 重复。
 2. 先实现 `test_runtime_bootstrap_integration.gd`，确认 bootstrap、content、service 基线可靠；其中 content case 同时覆盖内存 resource 和临时 `.tres` resource path。
 3. 实现 `test_gameplay_pipeline_integration.gd`，作为最高优先级端到端主链路。
 4. 实现 combat/status/death/feedback/debug integration，覆盖高风险 runtime 状态变化。
@@ -368,10 +381,13 @@ TestRoot
 
 - `ContentRegistry` 的真实 path 加载要使用临时 `.tres`，并在 teardown 清理，避免遗留测试内容。
 - `EntitySpawner`、`SceneRouter`、`SpawnSceneEffect` 依赖真实 `PackedScene` path，需要测试内创建可加载 scene resource。
-- platform mocks 使用 timer async signal，测试必须 `await` 足够长或等待 signal。
-- `ServiceRegistry` 是 autoload，全局污染风险高，必须每个 test 清理。
-- `CombatResolver.get_default()` 是 static singleton，若后续测试修改其内部状态，需要显式恢复。
-- `GameBootstrap` 会把部分 Node service 加到 `ServiceRegistry` autoload 下，测试 teardown 需要避免残留 child 影响后续 bootstrap。
+- platform mocks 使用 timer async signal，测试必须 `await` 具体完成 signal（`rewarded_ad_completed` / `purchase_completed` / `cloud_load_completed`）并加 watchdog timeout，不要用固定 sleep，避免 flake。
+- `ServiceRegistry` 是 autoload，全局污染风险高，必须每个 test 清理（见测试原则的 child-free + `clear()` 顺序）。
+- `CombatResolver.get_default()` 是 static singleton；integration 测试统一用 `CombatResolver.new()`（与 unit test 一致），或在 `after_each` 重置 `_default`，不要修改共享 default 的内部状态。
+- `GameBootstrap` 把 ~12 个 Node service `add_child` 到 `ServiceRegistry` autoload 下，而 `ServiceRegistry.clear()` 不 free 它们；teardown 必须先 `for c in ServiceRegistry.get_children(): c.queue_free()` 再 `clear()`，否则下次 boot 因 `has_service("events")` 为 false 形成重复服务。
+- `HitboxComponent` / `HurtboxComponent` / `InteractionComponent` 是 `Area2D`，headless overlap 需要 `CollisionShape2D`、匹配的 `collision_layer` / `collision_mask`，并在触发后 `await get_tree().physics_frame`（通常两帧）；physics frame 走真实时间，pause/scale 测试不要依赖它。
+- HFSM 只有抽象 `State` / `StateMachine`，具体 state 在 `game/`；Main Gameplay / HFSM / Action Lifecycle 测试必须自带 test-only `State` 子类，并接线 `CommandReceiver.state_machine` + `CommandRouter.register_receiver`。
+- `SaveManager.save_game` 只收集 `node is Saveable`；`ExperienceComponent` / `ProgressionSystem` 是 `Saveable`，但 `InventoryController` 不是，inventory 不会被自动保存。
 - `UIManager`、`FeedbackSystem` 可能需要具体 child/root path，测试应使用最小可运行 scene tree，而不是绕过公开 API。
 
 ## 完成标准

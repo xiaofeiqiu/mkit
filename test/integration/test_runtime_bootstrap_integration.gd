@@ -3,9 +3,15 @@ extends GutTest
 
 var _tres_path: String = "res://test/integration/mkit_int_runtime_boot_path_item.tres"
 var _save_path: String = "/tmp/mkit_runtime_bootstrap_integration_save.json"
+var _master_bus_index: int = -1
+var _master_original_db: float = 0.0
+var _master_volume_captured: bool = false
 
 
 func after_each() -> void:
+	if _master_volume_captured and _master_bus_index >= 0:
+		AudioServer.set_bus_volume_db(_master_bus_index, _master_original_db)
+	_master_volume_captured = false
 	IntTestHelpers.remove_file(_tres_path)
 	IntTestHelpers.remove_file(_save_path)
 	IntTestHelpers.cleanup_service_registry()
@@ -32,6 +38,7 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 	assert_true(ServiceRegistry.get_service("cloud_save") is CloudSaveService)
 	assert_true(ServiceRegistry.get_service("quest") is QuestSystem)
 	assert_true(ServiceRegistry.get_service("shop") is ShopController)
+	assert_true(ServiceRegistry.get_service("dialogue") is DialogueController)
 	assert_true(ServiceRegistry.get_service("world") is WorldRouter)
 	assert_true(ServiceRegistry.get_service("audio") is AudioManager)
 
@@ -104,6 +111,10 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 	shop.close_shop()
 	assert_null(shop.current_shop)
 
+	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueController
+	assert_false(dialogue.start("", GameplayContext.new()))
+	assert_false(dialogue.is_active())
+
 	var world := ServiceRegistry.get_service("world") as WorldRouter
 	assert_eq(world.current_zone_id, "")
 	assert_null(world.get_current_zone())
@@ -162,8 +173,38 @@ func test_tc_int_boot_04_boot_is_idempotent_when_services_already_registered() -
 	assert_eq(ServiceRegistry.get_child_count(), child_count)
 
 
+func test_tc_int_boot_05_audio_bus_volume_saves_and_loads_through_bootstrap() -> void:
+	_boot_with_databases()
+	_capture_master_volume()
+	var audio := ServiceRegistry.get_service("audio") as AudioManager
+	var save := ServiceRegistry.get_service("save") as SaveManager
+	assert_not_null(audio)
+	assert_not_null(save)
+	save.save_path = _save_path
+
+	assert_true(audio.set_bus_volume("Master", -6.0))
+	watch_signals(save)
+	assert_true(save.save_game(ServiceRegistry))
+	assert_signal_emitted_with_parameters(save, "save_completed", [_save_path])
+
+	assert_true(audio.set_bus_volume("Master", -2.0))
+	assert_almost_eq(audio.get_bus_volume("Master"), -2.0, 0.001)
+
+	assert_true(save.load_game(ServiceRegistry))
+	assert_signal_emitted_with_parameters(save, "load_completed", [_save_path])
+	assert_almost_eq(audio.get_bus_volume("Master"), -6.0, 0.001)
+	assert_almost_eq(AudioServer.get_bus_volume_db(_master_bus_index), -6.0, 0.001)
+
+
 func _boot_with_databases(databases: Array[ResourceDatabase] = []) -> GameBootstrap:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = databases
 	add_child_autofree(bootstrap)
 	return bootstrap
+
+
+func _capture_master_volume() -> void:
+	_master_bus_index = AudioServer.get_bus_index("Master")
+	if _master_bus_index >= 0:
+		_master_original_db = AudioServer.get_bus_volume_db(_master_bus_index)
+		_master_volume_captured = true

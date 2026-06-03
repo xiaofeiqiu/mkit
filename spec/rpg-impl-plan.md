@@ -36,8 +36,8 @@
 | M2 | dialogue 模块(doc + unit + integration) | 11 / 11 | ✅ 完成 |
 | M3 | shop 模块(doc + unit + integration) | 8 / 8 | ✅ 完成 |
 | M4 | world 模块(doc + unit + integration) | 8 / 8 | ✅ 完成 |
-| M5 | bootstrap 接线 | 0 / 2 | 🔄 进行中 |
-| M6 | Audio 增强(可选) | 0 / 3 | ☐ 未开始 |
+| M5 | bootstrap 接线 | 2 / 2 | ✅ 完成 |
+| M6 | Audio 增强(可选) | 5 / 5 | ✅ 完成 |
 | M7 | quest_log UI(可选,含 doc) | 0 / 2 | ☐ 未开始 |
 | M8 | demo 内容(game/) | 0 / 6 | ☐ 未开始 |
 | M9 | 全循环 integration + 矩阵登记 | 0 / 2 | ☐ 未开始 |
@@ -158,7 +158,7 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 > 依赖 M1–M4。设计见「既有文件需要的最小改动 §3」。
 
 - [x] **`kernel/bootstrap/game_bootstrap.gd`** — 在 `_register_kernel_services()` 后新增注册 `quest` / `dialogue` / `shop` / `world` 四个 Node service(构造 → `add_child` → `register_service(id, svc)`,与 `progression` 同模式)。`quest` 已在 M1、`shop` 已在 M3、`world` 已在 M5、`dialogue` 已在 M2 接入 —— 四件已全部就位。
-- [ ] **验证** — `make ut` 全量全绿(确认未污染 ServiceRegistry)。结果:本轮补 `test_runtime_bootstrap_integration.gd` 对 `world` service 的断言;`make ut` 102/102 kernel + 182/182 modules 全绿,`make int` 32/32 全绿。该验证覆盖已存在并已接入的 `quest` / `shop` / `world`;M2 已把 `dialogue` 接入 bootstrap 并由 Dialogue Pipeline integration 经真实 `GameBootstrap` 验证其可达,剩余 `test_runtime_bootstrap_integration.gd` 补一条 `dialogue` 断言即可收尾 M5。
+- [x] **验证** — `make ut` 全量全绿(确认未污染 ServiceRegistry)。结果:本轮补 `test_runtime_bootstrap_integration.gd` 对 `dialogue` service 的断言;`make ut` 102/102 kernel + 191/191 modules 全绿,`make int` 33/33 全绿。该验证覆盖已接入的 `quest` / `shop` / `dialogue` / `world`,M5 收尾完成。
 
 ---
 
@@ -166,9 +166,11 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > 改既有 `modules/ui/audio_manager.gd`。设计见「Audio 增强」。
 
-- [ ] `play_music(music_id, fade_seconds)` 真正实现淡入淡出。
-- [ ] 新增 `set_bus_volume(bus, db)` 并接 `Saveable` 持久化音量。
-- [ ] 由 `WorldRouter.zone_changed` 驱动按 zone 自动换 BGM(M4 已预留调用)。
+- [x] `play_music(music_id, fade_seconds)` 真正实现淡入淡出。
+- [x] 新增 `set_bus_volume(bus, db)` 并接 `Saveable` 持久化音量。
+- [x] 由 `WorldRouter.zone_changed` 驱动按 zone 自动换 BGM(M4 已预留调用)。
+- [x] **文档** — `docs/ref/AudioManager.md` 已同步 `Saveable`、music fade、bus volume API 与存档行为。
+- [x] **验证** — 新增 `test/unit/modules/test_audio_manager.gd` 7 case(SFX 播放、music immediate/fade/stop/重复请求取消 pending tween、bus volume 成功与拒绝路径、Saveable round-trip);扩展 `test_runtime_bootstrap_integration.gd` 1 case,经真实 `GameBootstrap`/`ServiceRegistry`/`SaveManager` 验证 `audio` service 的 bus volume save/load round-trip。结果:`make ut` 102/102 kernel + 198/198 modules 全绿,`make int` 34/34 全绿。
 
 ---
 
@@ -230,3 +232,5 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 - _(更新)_ 清偿文档欠账:补齐 M3 shop(ShopDefinition / ShopEntry / ShopController / ShopUI)与 M4 world(ZoneDefinition / SpawnPoint / Portal / WorldRouter)的 `docs/ref/<ClassName>.md`,在 `docs/module_layer.md` 新增 **Shop** / **World** domain 段(ShopUI 列入 **UI & Feedback**,沿用 RewardSelectionUI 先例),在 `docs/pipeline.md` 新增 **Shop Pipeline** 与 **World Navigation Pipeline** 段。M3、M4 由 ⚠️ 转 ✅,当前无文档欠账。四条新 pipeline 在 `spec/int-test.md` 覆盖矩阵的登记仍归 M9(该文件尚未创建,沿用 M1 Quest Pipeline 先例)。
 - _(更新)_ M5 bootstrap 接线开始:在 `game_bootstrap.gd` 注册 `world` service,并更新 runtime bootstrap integration 对 `WorldRouter` 的断言。`dialogue` service 仍等待 M2 dialogue 模块实现后才能接入。
 - _(更新)_ M2 dialogue 模块完成:新增 `DialogueDefinition`/`DialogueNode`/`DialogueChoice`(Resource)、`DialogueRuntime`(RefCounted)、`DialogueController`(Node,service `dialogue`)、`DialogueInteractable`(extends Interactable,发 `npc_talked`)与 `modules/ui/dialogue_ui.gd`(`DialogueUI`)。unit `test_dialogue_controller.gd` 5 case(start 进起始节点跑 on_enter / 选项按 conditions 过滤 / choose 跑 effects 并推进 / 线性 advance 至结束发 `dialogue_ended` / 活动会话期间二次 start 被拒);Dialogue Pipeline integration 跨 **interaction + dialogue + quest**(`InteractionComponent.try_interact` → `DialogueInteractable` → `DialogueController.start` →选项挂 `AcceptQuestEffect` 接任务 → 与目标 NPC 对话发 `npc_talked` →任务 auto-complete 发奖)。文档:7 个 `docs/ref` 页 + `module_layer.md` **Dialogue** domain 段(DialogueUI 列入 **UI & Feedback**)+ `pipeline.md` **Dialogue Pipeline** 段。沿用 M1/M3 先例把 `dialogue` 接入 `game_bootstrap.gd`,至此 M5 bootstrap 四件(quest/shop/dialogue/world)已全部就位。验证:`make ut-kernel` 102/102、`make ut-modules` 187/187、`make int` 33/33 全绿。
+- _(2026-06-03 更新)_ M5 bootstrap 接线完成:补 `test_runtime_bootstrap_integration.gd` 对 `dialogue` service 的注册断言与空 id start 失败路径断言;`make ut` 102/102 kernel + 191/191 modules 全绿,`make int` 33/33 全绿。M5 由 🔄 转 ✅。
+- _(2026-06-03 更新)_ M6 Audio 增强完成:`AudioManager` 改为 `Saveable`,实现 `play_music(music_id, fade_seconds)` tween 淡出/换 stream/淡入,新增 `set_bus_volume` / `get_bus_volume` 与 `bus_volumes` 存档;补 `test_audio_manager.gd` 7 case 与 runtime bootstrap audio save/load integration 1 case;`WorldRouter` 按 zone `bgm_id` 调 `AudioManager.play_music` 的既有链路继续由 World Pipeline integration 覆盖。验证:`make ut` 102/102 kernel + 198/198 modules、`make int` 34/34 全绿。

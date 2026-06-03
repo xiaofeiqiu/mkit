@@ -155,13 +155,13 @@ func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 	if not _run_reward_effects(definition, ctx):
 		return false
 	state.status = "turned_in"
+	if definition != null and definition.repeatable:
+		state.status = "available"
+		state.objective_progress = {}
 	quest_turned_in.emit(quest_id)
 	var events := _get_events()
 	if events != null:
 		events.emit_quest_turned_in(quest_id)
-	if definition != null and definition.repeatable:
-		state.status = "available"
-		state.objective_progress = {}
 	return true
 
 

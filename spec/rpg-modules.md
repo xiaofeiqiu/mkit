@@ -229,6 +229,22 @@ func to_save_data() -> Dictionary
 func from_save_data(data: Dictionary) -> void
 ```
 
+### QuestLogUI(放 `modules/ui/`)
+
+#### 文件
+`res://addons/mkit/modules/ui/quest_log_ui.gd`
+
+#### 接口
+```gdscript
+class_name QuestLogUI
+extends Control
+var quest_system: QuestSystem = null
+func bind(system: QuestSystem) -> void
+func refresh() -> void
+```
+
+订阅 `QuestSystem.quest_accepted` / `objective_advanced` / `quest_completed` / `quest_turned_in` 后刷新 `QuestContainer`;标题优先用 `QuestDefinition.display_name`,缺失 definition 时回退到 `quest_id`;objective 行显示 `description current/required_count`。这是 UI 层默认任务日志,不持有任务推进或奖励逻辑。
+
 ### QuestSystem
 
 #### 概念说明
@@ -675,6 +691,11 @@ World Navigation Pipeline
   - `test_tc_quest_04_auto_complete_grants_reward_effects`
   - `test_tc_quest_05_manual_turn_in_grants_reward_and_repeatable_resets`
   - `test_tc_quest_06_save_load_roundtrips_quest_log`
+- `test_quest_log_ui.gd`
+  - `test_tc_qlui_01_bind_renders_empty_and_refreshes_from_quest_signals`
+  - `test_tc_qlui_02_refresh_sorts_states_and_falls_back_to_quest_id`
+  - `test_tc_qlui_03_bind_with_missing_container_is_safe`
+  - `test_tc_qlui_04_repeatable_turn_in_renders_final_reset_state`
 - `test_dialogue_controller.gd`
   - `test_tc_dlg_01_start_enters_start_node_and_runs_enter_effects`
   - `test_tc_dlg_02_choices_filtered_by_conditions`
@@ -712,10 +733,11 @@ World Navigation Pipeline
 5. **world 模块**:实现 ZoneDefinition/SpawnPoint/Portal/WorldRouter,接 SceneRouter 与 AudioManager;写 `test_world_router.gd`。
 6. **bootstrap 接线**:在 `game_bootstrap.gd` 注册 quest/dialogue/shop/world 四个 service。
 7. **(可选)Audio 增强**:实现 fade、音量持久化、按 zone 换曲。
-8. **demo 内容**:做 `game/demo/phase8_village_rpg`(村庄/房间/野外三场景 + NPC + 任务/对话/商店/zone 资源),手动跑通完整循环。
-9. **integration**:按 `spec/int-test.md` 补四条新 pipeline 的端到端 case。
-10. **`.uid` 与文档**:每个新 `.gd` 跑一次 Godot/GUT 生成 `.gd.uid` 并提交;按"文档计划"补 `docs/ref` 与 layer/pipeline/readme。
-11. **全量验证**:`make ut` 全绿;layering 自查(无 addon→game 反向依赖、无 addon 内具体内容)。
+8. **(可选)QuestLogUI**:实现任务日志 UI,绑定 QuestSystem 信号显示任务列表与 objective 进度。
+9. **demo 内容**:做 `game/demo/phase8_village_rpg`(村庄/房间/野外三场景 + NPC + 任务/对话/商店/zone 资源),手动跑通完整循环。
+10. **integration**:按 `spec/int-test.md` 补四条新 pipeline 的端到端 case。
+11. **`.uid` 与文档**:每个新 `.gd` 跑一次 Godot/GUT 生成 `.gd.uid` 并提交;按"文档计划"补 `docs/ref` 与 layer/pipeline/readme。
+12. **全量验证**:`make ut` 全绿;layering 自查(无 addon→game 反向依赖、无 addon 内具体内容)。
 
 ## 风险与约束
 

@@ -131,6 +131,7 @@ Module Layer 位于 Game Content Layer 之下、Kernel Layer 之上。它提供�
 - [DamageNumberSystem](ref/DamageNumberSystem.md)
 - [DialogueUI](ref/DialogueUI.md)
 - [FeedbackSystem](ref/FeedbackSystem.md)
+- [QuestLogUI](ref/QuestLogUI.md)
 - [RewardSelectionUI](ref/RewardSelectionUI.md)
 - [ShopUI](ref/ShopUI.md)
 - [UIManager](ref/UIManager.md)

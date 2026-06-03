@@ -38,7 +38,7 @@
 | M4 | world 模块(doc + unit + integration) | 8 / 8 | ✅ 完成 |
 | M5 | bootstrap 接线 | 2 / 2 | ✅ 完成 |
 | M6 | Audio 增强(可选) | 5 / 5 | ✅ 完成 |
-| M7 | quest_log UI(可选,含 doc) | 0 / 2 | ☐ 未开始 |
+| M7 | quest_log UI(可选,含 doc) | 3 / 3 | ✅ 完成 |
 | M8 | demo 内容(game/) | 0 / 6 | ☐ 未开始 |
 | M9 | 全循环 integration + 矩阵登记 | 0 / 2 | ☐ 未开始 |
 | M10 | 文档最终审计 + readme | 0 / 2 | ☐ 未开始 |
@@ -176,8 +176,13 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 ## M7 — quest_log UI(可选)
 
-- [ ] `modules/ui/quest_log_ui.gd` — `QuestLogUI`(Control),订阅 QuestSystem 信号显示任务列表与进度。
-- [ ] **文档** — `docs/ref/QuestLogUI.md`;`docs/module_layer.md` ui 段补链接。
+- [x] `modules/ui/quest_log_ui.gd` — `QuestLogUI`(Control),订阅 QuestSystem 信号显示任务列表与进度。
+- [x] `test/unit/modules/test_quest_log_ui.gd` — cases:
+  - `test_tc_qlui_01_bind_renders_empty_and_refreshes_from_quest_signals`
+  - `test_tc_qlui_02_refresh_sorts_states_and_falls_back_to_quest_id`
+  - `test_tc_qlui_03_bind_with_missing_container_is_safe`
+  - `test_tc_qlui_04_repeatable_turn_in_renders_final_reset_state`
+- [x] **文档/验证** — `docs/ref/QuestLogUI.md`;`docs/ref/QuestSystem.md` 同步 repeatable turn-in 信号语义;`docs/module_layer.md` ui 段补链接;`spec/rpg-modules.md` 补 QuestLogUI 接口与测试计划。UI 不新增 runtime pipeline,无需新增 integration。结果:单文件 `test_quest_log_ui.gd` 4/4 通过;`make ut-modules` 15 scripts / 202 tests / 202 passing 全绿。新增 `quest_log_ui.gd.uid` 与 `test_quest_log_ui.gd.uid` 已由 Godot 生成。
 
 ---
 
@@ -234,3 +239,4 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 - _(更新)_ M2 dialogue 模块完成:新增 `DialogueDefinition`/`DialogueNode`/`DialogueChoice`(Resource)、`DialogueRuntime`(RefCounted)、`DialogueController`(Node,service `dialogue`)、`DialogueInteractable`(extends Interactable,发 `npc_talked`)与 `modules/ui/dialogue_ui.gd`(`DialogueUI`)。unit `test_dialogue_controller.gd` 5 case(start 进起始节点跑 on_enter / 选项按 conditions 过滤 / choose 跑 effects 并推进 / 线性 advance 至结束发 `dialogue_ended` / 活动会话期间二次 start 被拒);Dialogue Pipeline integration 跨 **interaction + dialogue + quest**(`InteractionComponent.try_interact` → `DialogueInteractable` → `DialogueController.start` →选项挂 `AcceptQuestEffect` 接任务 → 与目标 NPC 对话发 `npc_talked` →任务 auto-complete 发奖)。文档:7 个 `docs/ref` 页 + `module_layer.md` **Dialogue** domain 段(DialogueUI 列入 **UI & Feedback**)+ `pipeline.md` **Dialogue Pipeline** 段。沿用 M1/M3 先例把 `dialogue` 接入 `game_bootstrap.gd`,至此 M5 bootstrap 四件(quest/shop/dialogue/world)已全部就位。验证:`make ut-kernel` 102/102、`make ut-modules` 187/187、`make int` 33/33 全绿。
 - _(2026-06-03 更新)_ M5 bootstrap 接线完成:补 `test_runtime_bootstrap_integration.gd` 对 `dialogue` service 的注册断言与空 id start 失败路径断言;`make ut` 102/102 kernel + 191/191 modules 全绿,`make int` 33/33 全绿。M5 由 🔄 转 ✅。
 - _(2026-06-03 更新)_ M6 Audio 增强完成:`AudioManager` 改为 `Saveable`,实现 `play_music(music_id, fade_seconds)` tween 淡出/换 stream/淡入,新增 `set_bus_volume` / `get_bus_volume` 与 `bus_volumes` 存档;补 `test_audio_manager.gd` 7 case 与 runtime bootstrap audio save/load integration 1 case;`WorldRouter` 按 zone `bgm_id` 调 `AudioManager.play_music` 的既有链路继续由 World Pipeline integration 覆盖。验证:`make ut` 102/102 kernel + 198/198 modules、`make int` 34/34 全绿。
+- _(2026-06-03 更新)_ M7 QuestLogUI 完成:新增 `modules/ui/quest_log_ui.gd` 绑定 `QuestSystem` 信号渲染 `QuestLog.states` 的任务标题、状态与 objective 进度;缺失 `QuestDefinition` 时回退显示 `quest_id`;重复绑定不同 QuestSystem 会断开旧信号。补 `test_quest_log_ui.gd` 4 case、`docs/ref/QuestLogUI.md`、`docs/ref/QuestSystem.md` repeatable turn-in 信号语义、`docs/module_layer.md` UI & Feedback 链接与 `spec/rpg-modules.md` 的 QuestLogUI 设计/测试计划。UI 不新增 runtime pipeline,无需新增 integration。验证:单文件 4/4 通过;`make ut-modules` 15 scripts / 202 tests / 202 passing 全绿。

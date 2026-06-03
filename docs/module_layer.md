@@ -77,6 +77,19 @@ Module Layer 位于 Game Content Layer 之下、Kernel Layer 之上。它提供�
 - [QuestState](ref/QuestState.md)
 - [QuestSystem](ref/QuestSystem.md)
 
+### Shop
+
+- [ShopController](ref/ShopController.md)
+- [ShopDefinition](ref/ShopDefinition.md)
+- [ShopEntry](ref/ShopEntry.md)
+
+### World
+
+- [Portal](ref/Portal.md)
+- [SpawnPoint](ref/SpawnPoint.md)
+- [WorldRouter](ref/WorldRouter.md)
+- [ZoneDefinition](ref/ZoneDefinition.md)
+
 ### Room, Run & Generation
 
 - [DungeonGenerator](ref/DungeonGenerator.md)
@@ -109,5 +122,6 @@ Module Layer 位于 Game Content Layer 之下、Kernel Layer 之上。它提供�
 - [DamageNumberSystem](ref/DamageNumberSystem.md)
 - [FeedbackSystem](ref/FeedbackSystem.md)
 - [RewardSelectionUI](ref/RewardSelectionUI.md)
+- [ShopUI](ref/ShopUI.md)
 - [UIManager](ref/UIManager.md)
 - [VFXSpawner](ref/VFXSpawner.md)

@@ -408,6 +408,26 @@ UI or script requests equip
   -> unequip reverses modifiers and returns item to inventory flow
 ```
 
+## Shop Pipeline
+
+主要类：[ShopController](ref/ShopController.md), [ShopDefinition](ref/ShopDefinition.md), [ShopEntry](ref/ShopEntry.md), [InventoryController](ref/InventoryController.md), [ProgressionSystem](ref/ProgressionSystem.md), [ItemInstance](ref/ItemInstance.md), [EventRouter](ref/EventRouter.md)
+
+```text
+Player opens shop
+  -> ShopController.open_shop(shop_id)
+  -> ContentRegistry returns ShopDefinition
+  -> emit shop_opened
+  -> buy() checks ShopEntry conditions/stock/inventory space/currency
+  -> ProgressionSystem.spend_currency()
+  -> InventoryController.add_item()
+  -> rollback currency if inventory rejects item
+  -> decrement ShopEntry stock
+  -> emit item_purchased / EventRouter.emit_item_purchased
+  -> sell() locates instance, removes from inventory, adds currency
+  -> emit item_sold / EventRouter.emit_item_sold
+  -> transaction_failed on any rejection
+```
+
 ## Loot Roll Pipeline
 
 主要类：[LootSystem](ref/LootSystem.md), [LootTableDefinition](ref/LootTableDefinition.md), [LootEntry](ref/LootEntry.md), [LootRollResult](ref/LootRollResult.md), [ConditionEvaluator](ref/ConditionEvaluator.md), [RandomService](ref/RandomService.md)
@@ -561,6 +581,25 @@ System requests scene change
   -> emit scene_change_requested
   -> get_tree().change_scene_to_file()
   -> emit scene_changed or scene_change_failed
+```
+
+## World Navigation Pipeline
+
+主要类：[WorldRouter](ref/WorldRouter.md), [ZoneDefinition](ref/ZoneDefinition.md), [Portal](ref/Portal.md), [SpawnPoint](ref/SpawnPoint.md), [SceneRouter](ref/SceneRouter.md), [EventRouter](ref/EventRouter.md), [AudioManager](ref/AudioManager.md)
+
+```text
+Portal interaction or script requests zone change
+  -> Portal._interact_impl() gets world service
+  -> WorldRouter.go_to_zone(zone_id, spawn_id)
+  -> ContentRegistry returns ZoneDefinition
+  -> record pending zone/spawn, fallback to default_spawn_id
+  -> SceneRouter.change_scene(scene_path)
+  -> scene_changed callback finalizes deferred
+  -> place_player_at_spawn() moves persistent player to matching SpawnPoint
+  -> update current_zone_id
+  -> emit zone_changed / EventRouter.emit_zone_changed
+  -> emit zone_entered DomainEvent advances quest objectives
+  -> AudioManager.play_music(zone bgm_id)
 ```
 
 ## UI Screen Pipeline

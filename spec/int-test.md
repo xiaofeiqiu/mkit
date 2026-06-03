@@ -23,10 +23,24 @@ spec/int-test.md
 建议入口：
 
 ```bash
-$GODOT --headless -s addons/gut/gut_cmdln.gd -gdir=res://test/integration -gexit
+make int
 ```
 
-后续可按需在 `Makefile` 增加 `it` 或 `integration` 目标，但本设计阶段不修改命令入口。
+等价底层命令：
+
+```bash
+$GODOT --headless --log-file /tmp/mkit_godot_int.log -s addons/gut/gut_cmdln.gd -gdir=res://test/integration -gexit
+```
+
+当前 `Makefile` 已提供 `int` 目标，integration plan 后续新增测试文件时应保持通过该入口运行。
+
+## 当前实现状态
+
+- 已存在 `test/integration/test_quest_pipeline_integration.gd`，覆盖真实 `GameBootstrap`、`quest` service、content 注册、combat/death 事件、reward effects、inventory、progression currency 和 save/load round-trip。
+- `GameBootstrap` 当前注册 `quest` service，并注册 `events`、`content`、`random`、`time`、`actions`、`effects`、`commands`、`scenes`、`pool`、`save`、`progression`、`analytics`、`ads`、`iap`、`cloud_save` 等基础服务。
+- `SpawnSceneEffect` 当前实现只覆盖 direct PackedScene load，不使用 `ObjectPool`。ObjectPool 仍可单独测 service API，但不能把它写成 SpawnSceneEffect 的现有集成行为。
+- `InventoryController` 当前不是 `Saveable`，integration 只能直接 round-trip `to_save_data()` / `from_save_data()`，或明确断言 `SaveManager.save_game()` 不会自动收集 inventory。
+- 其余 integration suites 仍是设计计划，尚未在 `test/integration/` 落地。
 
 ## 测试原则
 
@@ -54,12 +68,14 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gdir=res://test/integration -gexit
 - `StatDefinition`
 - `StatModifierDefinition`
 - `ExperienceCurve`
+- `QuestDefinition`
+- `QuestObjectiveDefinition`
 
 同时提供 test-only resource helpers：
 
 - `PassingCondition` / `FailingCondition`，用于 ability、loot、reward 的 condition filtering。
 - `ProbeEffect` / `FailingEffect`，用于验证 `EffectExecutor` 顺序、stop-on-failure、context payload 和 result trace。
-- 常用 builtin effect factory，例如 `GrantItemEffect`、`HealEffect`、`ApplyStatusEffect`、`ApplyStatModifierEffect`。
+- 常用 builtin effect factory，例如 `GrantItemEffect`、`HealEffect`、`ApplyStatusEffect`、`ApplyStatModifierEffect`、`AcceptQuestEffect`、`AdvanceObjectiveEffect`、`CompleteQuestEffect`。
 
 同时提供一个专门 helper 保存临时 `.tres`：
 
@@ -137,7 +153,7 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 - `ProbeAnalyticsService extends AnalyticsService`
 - `ProbeSaveable extends Saveable`
 - `ProbeScreen extends Control`
-- feedback collaborator probes（damage number / VFX / audio），供 `FeedbackSystem` 注入；先确认 `FeedbackSystem` 在 collaborator 为 null 时是否安全，否则 `cmb_01` 断言 feedback 时必须注入这些 probe。
+- feedback collaborator probes（damage number / VFX / audio），供 `FeedbackSystem` 注入。当前 `FeedbackSystem` 在 collaborator 为 null 时安全跳过；只有需要断言具体 show/spawn/play 调用时才注入 probe。
 
 这些只存在于 `test/integration/`，不进入 addon。
 
@@ -156,7 +172,8 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 | Time Scaling & Pause Pipeline | `TimeService` pause/scale 影响 `ActionRunner._process()` 的 action progress。 |
 | Condition Evaluation Pipeline | ability/reward/loot 使用 passing/failing `Condition` 过滤。 |
 | Effect Execution Pipeline | `EffectExecutor.execute_many()` 执行成功和失败 effect，验证 stop-on-failure。 |
-| Scene Spawn & Object Pool Pipeline | `SpawnSceneEffect` 使用 direct load 或 `ObjectPool` acquire 实例化 scene。 |
+| Scene Spawn Pipeline | `SpawnSceneEffect` 使用 direct PackedScene load 实例化 scene，覆盖 `scene_path`、`spawn_at_target`、source/target position 和 direction handoff。 |
+| Object Pool Pipeline | 直接测试 `ObjectPool.acquire/release`，不要把它写进 `SpawnSceneEffect` 的当前行为。 |
 | Entity Spawn Pipeline | `EntitySpawner.spawn_entity()` 从 `EntityDefinition` 实例化 scene，初始化 identity/stats/starting abilities。 |
 | Stats & Modifier Pipeline | effect/status/equipment 添加 modifier，验证 final stat、signal 和移除。 |
 | Resource Spend & Restore Pipeline | ability cost 消耗 mana/stamina，restore clamp 到 `max_<resource>`。 |
@@ -170,7 +187,7 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 | Interaction Pipeline | `InteractionComponent` 选择 nearby `Interactable`，执行 interact effects。 |
 | Inventory Add & Remove Pipeline | `InventoryController.add_item(ItemInstance)` / `remove_item_by_instance_id(instance_id, quantity)` stack、capacity、events（没有 `remove_item`）。 |
 | Item Pickup Pipeline | `GrantItemEffect` 创建 `ItemInstance` 并进入 inventory。 |
-| Quest Pipeline | `GameBootstrap` 注册 `quest` service；临时 `QuestDefinition` 进入 `ContentRegistry`；`DealDamageEffect -> CombatResolver -> HealthComponent -> EventRouter.entity_died` 推进 objective；`QuestSystem` auto-complete 执行 reward effects；`SaveManager` round-trip 任务与货币状态。 |
+| Quest Pipeline | 已有 `test_quest_pipeline_integration.gd` 覆盖：`GameBootstrap` 注册 `quest` service；临时 `QuestDefinition` 进入 `ContentRegistry`；`DealDamageEffect -> CombatResolver -> HealthComponent -> EventRouter.entity_died` 推进 objective；`QuestSystem` auto-complete 执行 reward effects；`SaveManager` round-trip 任务与货币状态。 |
 | Equipment Pipeline | equip/unequip item modifier，验证 stats 回滚。 |
 | Loot Roll Pipeline | `LootSystem.roll_table()` deterministic weighted roll，conditions filter，生成 item instances。 |
 | Reward Selection Pipeline | `RewardSystem.generate_options/apply_selected()`，执行 effects，发 reward event。 |
@@ -282,7 +299,8 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 
 覆盖：
 
-- Scene Spawn & Object Pool Pipeline
+- Scene Spawn Pipeline
+- Object Pool Pipeline
 - Entity Spawn Pipeline
 - Room Lifecycle Pipeline
 - Run Lifecycle Pipeline
@@ -299,6 +317,8 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 5. room reward pool 生成 deterministic reward options。
 6. `RunDirector.start_run(seed)` 生成 deterministic room graph。
 7. reward selected 后 run 进入下一房间或 complete。
+8. `SpawnSceneEffect` direct load 临时 PackedScene，并验证 source/target position 与 direction handoff。
+9. `ObjectPool` 作为独立 service API 做 acquire/release round-trip，不与 `SpawnSceneEffect` 绑定。
 
 核心 cases：
 
@@ -306,10 +326,13 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 - `test_tc_int_run_02_room_enter_spawns_enemies_and_clear_generates_reward`
 - `test_tc_int_run_03_run_seed_generates_deterministic_room_graph`
 - `test_tc_int_run_04_select_reward_applies_effect_and_advances_run`
-- `test_tc_int_run_05_spawn_scene_effect_uses_pool_or_loads_scene`
+- `test_tc_int_run_05_spawn_scene_effect_loads_scene_and_initializes_position`
 - `test_tc_int_run_06_loot_roll_then_inventory_pickup_roundtrip`
+- `test_tc_int_run_07_object_pool_acquire_release_roundtrip`
 
 ### `test_quest_pipeline_integration.gd`
+
+状态：已存在，作为当前 integration 基线。
 
 覆盖：
 
@@ -397,25 +420,27 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 
 ## 执行顺序计划
 
-1. 建立单一共享 helper `test/integration/int_test_helpers.gd`（inner class / static builder 形式），集中 TestContentBuilder、TestSceneBuilder、TestStates、DeterministicRandom、Probe Services。六个 test file 都会用到这些 builder，分散定义会造成 6× 重复。
-2. 先实现 `test_runtime_bootstrap_integration.gd`，确认 bootstrap、content、service 基线可靠；其中 content case 同时覆盖内存 resource 和临时 `.tres` resource path。
-3. 实现 `test_gameplay_pipeline_integration.gd`，作为最高优先级端到端主链路。
-4. 实现 combat/status/death/feedback/debug integration，覆盖高风险 runtime 状态变化。
-5. 实现 spawn/room/run/reward/loot integration，覆盖需要临时 scene path 的链路。
-6. 实现 progression/save/platform async integration，注意所有 save path 使用测试临时路径。
-7. 实现 UI/interaction/AI/scene integration，必要时使用 minimal scenes/screens。
-8. 为每个新增 `.gd` 运行 Godot/GUT 生成 `.gd.uid`。
-9. 为每个新增 integration test file 增加 `spec/test-spec/test_<file>.md`，记录 helper、覆盖 pipeline 和核心 cases。
-10. 运行 `res://test/integration`，再运行相关 unit suite，确保 integration 没有污染 `ServiceRegistry` 或 runtime globals。
+1. 保留已完成的 `test_quest_pipeline_integration.gd` 作为 smoke-grade integration 基线；后续变更先跑 `make int`，确认 quest 端到端不退化。
+2. 建立单一共享 helper `test/integration/int_test_helpers.gd`（inner class / static builder 形式），逐步把 quest test 里的 `_make_database()`、`_make_player()`、`_make_enemy()`、teardown 规则迁入 helper，避免后续 test file 复制同一套场景构造。
+3. 实现 `test_runtime_bootstrap_integration.gd`，确认 bootstrap、content、service 基线可靠；其中 content case 同时覆盖内存 resource 和临时 `.tres` resource path，并断言 `quest` service 已注册。
+4. 实现 `test_gameplay_pipeline_integration.gd`，作为最高优先级端到端主链路。
+5. 实现 combat/status/death/feedback/debug integration，覆盖高风险 runtime 状态变化。
+6. 实现 spawn/room/run/reward/loot integration，覆盖需要临时 scene path 的链路；`SpawnSceneEffect` 只按当前 direct load 行为测试，ObjectPool 单独测。
+7. 实现 progression/save/platform async integration，注意所有 save path 使用测试临时路径。
+8. 实现 UI/interaction/AI/scene integration，必要时使用 minimal scenes/screens。
+9. 为每个新增 `.gd` 运行 Godot/GUT 生成 `.gd.uid`。
+10. 为每个新增 integration test file 增加 `spec/test-spec/test_<file>.md`，记录 helper、覆盖 pipeline 和核心 cases；当前还需为已存在的 `test_quest_pipeline_integration.gd` 补 `spec/test-spec/test_quest_pipeline_integration.md`。
+11. 运行 `make int`，再运行相关 unit suite，确保 integration 没有污染 `ServiceRegistry` 或 runtime globals。
 
 ## 风险与约束
 
 - `ContentRegistry` 的真实 path 加载要使用临时 `.tres`，并在 teardown 清理，避免遗留测试内容。
 - `EntitySpawner`、`SceneRouter`、`SpawnSceneEffect` 依赖真实 `PackedScene` path，需要测试内创建可加载 scene resource。
+- `SpawnSceneEffect` 当前不走 `ObjectPool`，不要为它设计 pool acquire 断言；ObjectPool 的生命周期应作为独立 service pipeline 覆盖。
 - platform mocks 使用 timer async signal，测试必须 `await` 具体完成 signal（`rewarded_ad_completed` / `purchase_completed` / `cloud_load_completed`）并加 watchdog timeout，不要用固定 sleep，避免 flake。
 - `ServiceRegistry` 是 autoload，全局污染风险高，必须每个 test 清理（见测试原则的 child-free + `clear()` 顺序）。
 - `CombatResolver.get_default()` 是 static singleton；integration 测试统一用 `CombatResolver.new()`（与 unit test 一致），或在 `after_each` 重置 `_default`，不要修改共享 default 的内部状态。
-- `GameBootstrap` 把 ~12 个 Node service `add_child` 到 `ServiceRegistry` autoload 下，而 `ServiceRegistry.clear()` 不 free 它们；teardown 必须先 `for c in ServiceRegistry.get_children(): c.queue_free()` 再 `clear()`，否则下次 boot 因 `has_service("events")` 为 false 形成重复服务。
+- `GameBootstrap` 把多个 Node service（当前包括 EventRouter、ContentRegistry、ActionRunner、CommandRouter、SceneRouter、ObjectPool、SaveManager、ProgressionSystem、Analytics/Ads/IAP/Cloud mocks、QuestSystem）`add_child` 到 `ServiceRegistry` autoload 下，而 `ServiceRegistry.clear()` 不 free 它们；teardown 必须先 `for c in ServiceRegistry.get_children(): c.queue_free()` 再 `clear()`，否则下次 boot 因 `has_service("events")` 为 false 形成重复服务。
 - `HitboxComponent` / `HurtboxComponent` / `InteractionComponent` 是 `Area2D`，headless overlap 需要 `CollisionShape2D`、匹配的 `collision_layer` / `collision_mask`，并在触发后 `await get_tree().physics_frame`（通常两帧）；physics frame 走真实时间，pause/scale 测试不要依赖它。
 - HFSM 只有抽象 `State` / `StateMachine`，具体 state 在 `game/`；Main Gameplay / HFSM / Action Lifecycle 测试必须自带 test-only `State` 子类，并接线 `CommandReceiver.state_machine` + `CommandRouter.register_receiver`。
 - `SaveManager.save_game` 只收集 `node is Saveable`；`ExperienceComponent` / `ProgressionSystem` 是 `Saveable`，但 `InventoryController` 不是，inventory 不会被自动保存。
@@ -424,9 +449,10 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 ## 完成标准
 
 - `docs/pipeline.md` 中每个 pipeline 至少被一个 integration case 明确覆盖。
+- `make int` 通过，并写入 `/tmp/mkit_godot_int.log` 便于排查失败。
 - 所有随机选择 deterministic。
 - 所有临时 save/scene/resource 文件可清理或位于测试临时路径。
 - 测试不依赖 `game/demo/` 具体内容。
 - 测试不修改 `addons/mkit/` runtime 行为。
-- 每个新增 integration test file 都有对应的 `spec/test-spec/test_<file>.md`。
+- 每个 integration test file 都有对应的 `spec/test-spec/test_<file>.md`；当前已存在的 `test_quest_pipeline_integration.gd` 也需要补齐对应 spec。
 - 新增 test code 时同步生成 `.gd.uid`。

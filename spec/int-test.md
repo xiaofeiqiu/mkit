@@ -170,6 +170,7 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 | Interaction Pipeline | `InteractionComponent` 选择 nearby `Interactable`，执行 interact effects。 |
 | Inventory Add & Remove Pipeline | `InventoryController.add_item(ItemInstance)` / `remove_item_by_instance_id(instance_id, quantity)` stack、capacity、events（没有 `remove_item`）。 |
 | Item Pickup Pipeline | `GrantItemEffect` 创建 `ItemInstance` 并进入 inventory。 |
+| Quest Pipeline | `GameBootstrap` 注册 `quest` service；临时 `QuestDefinition` 进入 `ContentRegistry`；`DealDamageEffect -> CombatResolver -> HealthComponent -> EventRouter.entity_died` 推进 objective；`QuestSystem` auto-complete 执行 reward effects；`SaveManager` round-trip 任务与货币状态。 |
 | Equipment Pipeline | equip/unequip item modifier，验证 stats 回滚。 |
 | Loot Roll Pipeline | `LootSystem.roll_table()` deterministic weighted roll，conditions filter，生成 item instances。 |
 | Reward Selection Pipeline | `RewardSystem.generate_options/apply_selected()`，执行 effects，发 reward event。 |
@@ -307,6 +308,36 @@ HFSM 只提供抽象 `State` / `StateMachine`，具体 state 在 `game/`，addon
 - `test_tc_int_run_04_select_reward_applies_effect_and_advances_run`
 - `test_tc_int_run_05_spawn_scene_effect_uses_pool_or_loads_scene`
 - `test_tc_int_run_06_loot_roll_then_inventory_pickup_roundtrip`
+
+### `test_quest_pipeline_integration.gd`
+
+覆盖：
+
+- Runtime Bootstrap Pipeline
+- Content Load & Validation Pipeline
+- Service Lookup Pipeline
+- Effect Execution Pipeline
+- Damage Resolution Pipeline
+- Death Pipeline
+- Inventory Add & Remove Pipeline
+- Item Pickup Pipeline
+- Meta Progression & Upgrade Pipeline
+- Save Pipeline
+- Quest Pipeline
+
+核心场景：
+
+1. `GameBootstrap.boot()` 注册 `quest`、`events`、`content`、`effects`、`progression`、`save` services。
+2. 临时 `ResourceDatabase` 注册 `QuestDefinition`、`QuestObjectiveDefinition` 和 reward `ItemDefinition`。
+3. 开发者通过 `ServiceRegistry.get_service("quest")` 接任务。
+4. `DealDamageEffect` 通过真实 combat/health 管线击杀带 tag 的 enemy。
+5. `QuestSystem` 监听 `EventRouter.entity_died` 桥接出的 `enemy_killed` event,推进 objective 并 auto-complete。
+6. reward effects 经 `EffectExecutor` 给 player inventory 发物品、给 `ProgressionSystem` 加货币。
+7. `SaveManager.save_game/load_game` round-trip 恢复 `QuestSystem` 与 `ProgressionSystem` 状态。
+
+核心 cases：
+
+- `test_tc_int_quest_01_bootstrap_combat_reward_and_save_roundtrip`
 
 ### `test_progression_save_platform_integration.gd`
 

@@ -304,6 +304,27 @@ DamageResult is lethal
   -> VFX / Audio / UI / Analytics react
 ```
 
+## Quest Pipeline
+
+主要类：[QuestSystem](ref/QuestSystem.md), [QuestDefinition](ref/QuestDefinition.md), [QuestObjectiveDefinition](ref/QuestObjectiveDefinition.md), [QuestState](ref/QuestState.md), [QuestLog](ref/QuestLog.md), [AcceptQuestEffect](ref/AcceptQuestEffect.md), [AdvanceObjectiveEffect](ref/AdvanceObjectiveEffect.md), [CompleteQuestEffect](ref/CompleteQuestEffect.md), [EventRouter](ref/EventRouter.md), [EffectExecutor](ref/EffectExecutor.md)
+
+```text
+Dialogue / interaction / script / UI accepts quest
+  -> AcceptQuestEffect or QuestSystem.accept_quest()
+  -> QuestState becomes active
+  -> EventRouter emits quest_accepted
+  -> gameplay systems emit DomainEvent facts
+  -> entity_died signal bridges to enemy_killed
+  -> inventory_changed with added payload bridges to item_acquired
+  -> QuestSystem.notify_event() matches QuestObjectiveDefinition
+  -> objective progress advances
+  -> all required objectives complete
+  -> CompleteQuestEffect or QuestSystem.complete_quest()
+  -> turn_in executes reward_effects through EffectExecutor and stops on failure
+  -> EventRouter emits quest_completed / quest_turned_in
+  -> QuestLog persists through SaveManager
+```
+
 ## Enemy AI Pipeline
 
 主要类：[Brain](ref/Brain.md), [SimpleAIEnemyBrain](ref/SimpleAIEnemyBrain.md), [GameCommand](ref/GameCommand.md), [CommandRouter](ref/CommandRouter.md)

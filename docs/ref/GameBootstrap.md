@@ -30,7 +30,7 @@ func boot() -> void
 ## 函数使用场景
 
 - **boot()**：公开启动流程入口。依次调用内部六个步骤，确保服务注册、内容加载、内容校验、运行时初始化、存档读取和进入初始场景按顺序发生。
-- **_register_kernel_services()**：内部辅助。创建 EventRouter、ContentRegistry、RandomService、TimeService、ActionRunner、EffectExecutor、CommandRouter、SceneRouter、SaveManager、ProgressionSystem、ObjectPool 并注册到 ServiceRegistry。
+- **_register_kernel_services()**：内部辅助。创建 EventRouter、ContentRegistry、RandomService、TimeService、ActionRunner、EffectExecutor、CommandRouter、SceneRouter、SaveManager、ProgressionSystem、ObjectPool、QuestSystem 和平台 mock services，并注册到 ServiceRegistry。
 - **_load_content()**：内部辅助。遍历 `resource_databases`，对每个 ResourceDatabase 调用 ContentRegistry.load_database。
 - **_validate_content()**：内部辅助。调用 ContentRegistry.validate_all，若失败则 push_error，防止带有重复 ID 的内容进入游戏。
 - **_initialize_runtime_systems()**：内部辅助。游戏特定的运行时初始化扩展点，默认为空。

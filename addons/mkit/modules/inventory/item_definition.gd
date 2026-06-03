@@ -5,6 +5,7 @@ extends Resource
 @export_multiline var description: String = ""
 @export var item_type: String = "material"
 @export var rarity: String = "common"
+@export var value: int = 0
 @export var icon: Texture2D
 @export var stackable: bool = true
 @export var max_stack: int = 99

@@ -29,7 +29,7 @@ func validate_all() -> ContentValidationResult
 ## 函数使用场景
 
 - **load_database()**：批量加载入口。例：GameBootstrap 启动时对每个 ResourceDatabase 调用此方法，注册所有物品、技能、房间定义。
-- **register_resource()**：单个注册入口。例：运行时动态注册临时内容。
+- **register_resource()**：单个注册入口。例：运行时动态注册临时内容。当前稳定 ID 字段包括 item_id、ability_id、status_id、room_id、upgrade_id、entity_definition_id、enemy_id、loot_table_id、reward_id、stat_id、quest_id、dialogue_id、shop_id、zone_id。
 - **get_resource()**：按 ID 查找资源。例：LootSystem 掷出 `item.potion_small` 后通过此方法获取 ItemDefinition，再创建 ItemInstance。
 - **get_typed_resource()**：带类型过滤的查找。例：AbilityController 获取 AbilityDefinition 时验证类型。
 - **get_all_by_type()**：按类型获取所有资源。例：RewardSystem 获取所有 RewardDefinition 构建候选池。

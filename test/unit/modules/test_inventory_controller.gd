@@ -223,3 +223,8 @@ func test_tc_inv_21_add_item_triggers_inventory_changed_event() -> void:
 	watch_signals(events)
 	inv.add_item(ItemInstance.create("key", 1))
 	assert_signal_emitted(events, "inventory_changed")
+	var de: DomainEvent = events.recent_events.back()
+	assert_eq(de.event_type, "inventory_changed")
+	assert_eq(de.payload.get("item_id"), "key")
+	assert_eq(de.payload.get("quantity"), 1)
+	assert_eq(de.payload.get("change_type"), "added")

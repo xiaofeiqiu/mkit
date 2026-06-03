@@ -66,16 +66,17 @@ func add_item(item: ItemInstance) -> bool:
 				remaining -= moved
 				if remaining <= 0:
 					item_added.emit(item)
-					_emit_inventory_changed()
+					_emit_inventory_changed(item, original_quantity, "added")
 					return true
 	var placed_original := false
 	while remaining > 0:
 		var empty := model.find_first_empty_slot()
 		if empty == null:
+			var added_quantity := original_quantity - remaining
 			item.quantity = remaining
 			if remaining < original_quantity:
 				item_added.emit(item)
-			_emit_inventory_changed()
+			_emit_inventory_changed(item if added_quantity > 0 else null, added_quantity, "added")
 			return false
 		var amount := min(remaining, stack_size)
 		var stack: ItemInstance
@@ -88,7 +89,7 @@ func add_item(item: ItemInstance) -> bool:
 		empty.item = stack
 		remaining -= amount
 	item_added.emit(item)
-	_emit_inventory_changed()
+	_emit_inventory_changed(item, original_quantity, "added")
 	return true
 
 
@@ -100,12 +101,14 @@ func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 		return false
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
+			var removed_quantity: int = min(quantity, slot.item.quantity)
+			var changed_item := slot.item
 			slot.item.quantity -= quantity
 			if slot.item.quantity <= 0:
 				var removed := slot.item
 				slot.clear()
 				item_removed.emit(removed)
-			_emit_inventory_changed()
+			_emit_inventory_changed(changed_item, removed_quantity, "removed")
 			return true
 	return false
 
@@ -150,16 +153,20 @@ func from_save_data(data: Dictionary) -> void:
 	for i in range(min(items.size(), model.slots.size())):
 		if items[i] != null:
 			model.slots[i].item = ItemInstance.from_save_data(items[i])
-	_emit_inventory_changed()
+	_emit_inventory_changed(null, 0, "loaded")
 
 
-func _emit_inventory_changed() -> void:
+func _emit_inventory_changed(
+	item: ItemInstance = null, quantity: int = 0, change_type: String = ""
+) -> void:
 	inventory_changed.emit()
 	var events: EventRouter = null
 	if ServiceRegistry.has_service("events"):
 		events = ServiceRegistry.get_service("events") as EventRouter
 	if events != null:
-		events.emit_inventory_changed(_get_owner_id())
+		events.emit_inventory_changed(
+			_get_owner_id(), item.definition_id if item != null else "", quantity, change_type
+		)
 
 
 func _get_owner_id() -> String:

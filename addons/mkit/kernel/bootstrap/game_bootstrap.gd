@@ -77,6 +77,10 @@ func _register_kernel_services() -> void:
 	ServiceRegistry.register_service("ads", ads)
 	ServiceRegistry.register_service("iap", iap)
 	ServiceRegistry.register_service("cloud_save", cloud_save)
+	var quest := QuestSystem.new()
+	quest.name = "QuestSystem"
+	ServiceRegistry.add_child(quest)
+	ServiceRegistry.register_service("quest", quest)
 
 
 func _load_content() -> void:

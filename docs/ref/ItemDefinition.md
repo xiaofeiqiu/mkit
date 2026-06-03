@@ -19,6 +19,7 @@ ItemDefinition 是一个物品类型的静态定义，例如小药水、铁剑�
 - **description**：代码字段。描述文本。
 - **item_type**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **rarity**：稀有度。例：common、rare、legendary，用于掉落权重和 UI 颜色。
+- **value**：基础价值。例：商店模块可用它作为买价/卖价计算的默认基准。
 - **icon**：代码字段。图标资源。
 - **stackable**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **max_stack**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
@@ -38,6 +39,7 @@ extends Resource
 @export_multiline var description: String = ""
 @export var item_type: String = "material"
 @export var rarity: String = "common"
+@export var value: int = 0
 @export var icon: Texture2D
 @export var stackable: bool = true
 @export var max_stack: int = 99

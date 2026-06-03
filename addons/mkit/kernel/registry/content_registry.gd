@@ -78,7 +78,11 @@ func _extract_content_id(res: Resource) -> String:
 		"enemy_id",
 		"loot_table_id",
 		"reward_id",
-		"stat_id"
+		"stat_id",
+		"quest_id",
+		"dialogue_id",
+		"shop_id",
+		"zone_id"
 	]:
 		if property_name in res:
 			return str(res.get(property_name))

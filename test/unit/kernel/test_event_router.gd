@@ -70,8 +70,15 @@ func test_tc_er_07_emit_entity_died_fires_with_id_and_ref() -> void:
 
 func test_tc_er_08_emit_inventory_changed_fires() -> void:
 	watch_signals(events)
-	events.emit_inventory_changed("player")
+	events.emit_inventory_changed("player", "item.herb", 3, "added")
 	assert_signal_emitted_with_parameters(events, "inventory_changed", ["player"])
+	var de: DomainEvent = events.recent_events.back()
+	assert_eq(de.event_type, "inventory_changed")
+	assert_eq(de.target_id, "item.herb")
+	assert_eq(de.payload.get("owner_id"), "player")
+	assert_eq(de.payload.get("item_id"), "item.herb")
+	assert_eq(de.payload.get("quantity"), 3)
+	assert_eq(de.payload.get("change_type"), "added")
 
 
 func test_tc_er_09_emit_run_started_fires_and_records() -> void:
@@ -102,6 +109,91 @@ func test_tc_er_12_emit_damage_applied_fires_and_creates_domain_event() -> void:
 	events.emit_damage_applied(result)
 	assert_signal_emitted(events, "damage_applied")
 	assert_eq(events.recent_events.back().event_type, "damage_applied")
+
+
+# --- rpg domain emit helpers ---
+
+
+func test_tc_er_13_emit_quest_accepted_fires_typed_and_domain() -> void:
+	watch_signals(events)
+	events.emit_quest_accepted("quest.gather_herbs")
+	assert_signal_emitted_with_parameters(events, "quest_accepted", ["quest.gather_herbs"])
+	var de: DomainEvent = events.recent_events.back()
+	assert_eq(de.event_type, "quest_accepted")
+	assert_eq(de.payload.get("quest_id"), "quest.gather_herbs")
+
+
+func test_tc_er_14_emit_quest_objective_advanced_carries_progress() -> void:
+	watch_signals(events)
+	events.emit_quest_objective_advanced("quest.kill", "obj.goblins", 3, 5)
+	assert_signal_emitted_with_parameters(
+		events, "quest_objective_advanced", ["quest.kill", "obj.goblins", 3, 5]
+	)
+	var de: DomainEvent = events.recent_events.back()
+	assert_eq(de.event_type, "quest_objective_advanced")
+	assert_eq(de.payload.get("current"), 3)
+	assert_eq(de.payload.get("required"), 5)
+
+
+func test_tc_er_15_emit_quest_completed_fires() -> void:
+	watch_signals(events)
+	events.emit_quest_completed("quest.kill")
+	assert_signal_emitted_with_parameters(events, "quest_completed", ["quest.kill"])
+	assert_eq(events.recent_events.back().event_type, "quest_completed")
+
+
+func test_tc_er_16_emit_quest_turned_in_fires() -> void:
+	watch_signals(events)
+	events.emit_quest_turned_in("quest.kill")
+	assert_signal_emitted_with_parameters(events, "quest_turned_in", ["quest.kill"])
+	assert_eq(events.recent_events.back().payload.get("quest_id"), "quest.kill")
+
+
+func test_tc_er_17_emit_dialogue_started_fires_and_records() -> void:
+	watch_signals(events)
+	events.emit_dialogue_started("dlg.elder")
+	assert_signal_emitted_with_parameters(events, "dialogue_started", ["dlg.elder"])
+	assert_eq(events.recent_events.back().event_type, "dialogue_started")
+
+
+func test_tc_er_18_emit_dialogue_ended_fires() -> void:
+	watch_signals(events)
+	events.emit_dialogue_ended("dlg.elder")
+	assert_signal_emitted_with_parameters(events, "dialogue_ended", ["dlg.elder"])
+
+
+func test_tc_er_19_emit_npc_talked_payload_has_npc_id() -> void:
+	watch_signals(events)
+	events.emit_npc_talked("npc.elder")
+	assert_signal_emitted_with_parameters(events, "npc_talked", ["npc.elder"])
+	assert_eq(events.recent_events.back().payload.get("npc_id"), "npc.elder")
+
+
+func test_tc_er_20_emit_zone_changed_carries_from_and_to() -> void:
+	watch_signals(events)
+	events.emit_zone_changed("village", "field")
+	assert_signal_emitted_with_parameters(events, "zone_changed", ["village", "field"])
+	var de: DomainEvent = events.recent_events.back()
+	assert_eq(de.payload.get("from_zone_id"), "village")
+	assert_eq(de.payload.get("to_zone_id"), "field")
+
+
+func test_tc_er_21_emit_item_purchased_carries_quantity() -> void:
+	watch_signals(events)
+	events.emit_item_purchased("shop.village", "item.potion", 2)
+	assert_signal_emitted_with_parameters(
+		events, "item_purchased", ["shop.village", "item.potion", 2]
+	)
+	var de: DomainEvent = events.recent_events.back()
+	assert_eq(de.event_type, "item_purchased")
+	assert_eq(de.payload.get("quantity"), 2)
+
+
+func test_tc_er_22_emit_item_sold_carries_quantity() -> void:
+	watch_signals(events)
+	events.emit_item_sold("shop.village", "item.pelt", 3)
+	assert_signal_emitted_with_parameters(events, "item_sold", ["shop.village", "item.pelt", 3])
+	assert_eq(events.recent_events.back().payload.get("quantity"), 3)
 
 
 class _FakeDamageResult:

@@ -41,10 +41,10 @@ Game Content
 
 ## Docs Index
 
-- [Module Layer](module_layer.md)：可复用 gameplay domain 模块，例如 entity、combat、stats、ability、inventory、loot、room、run、progression、AI、interaction、UI feedback。
+- [Module Layer](module_layer.md)：可复用 gameplay domain 模块，例如 entity、combat、stats、ability、inventory、loot、quest、room、run、progression、AI、interaction、UI feedback。
 - [Kernel Layer](kernel_layer.md)：runtime foundation，例如 service registry、content registry、command router、event router、HFSM、action runner、condition evaluator、effect executor、save、random、time、object pool、debug。
 - [Platform Adapter Layer](platform_adapter_layer.md)：平台能力接口和 mock，例如 ads、IAP、analytics、cloud save。
-- [Pipeline](pipeline.md)：完整运行管线索引，覆盖启动、内容注册、命令、事件、HFSM、Action、Effect、战斗、背包、房间、奖励、存档、UI、平台服务和 Debug。
+- [Pipeline](pipeline.md)：完整运行管线索引，覆盖启动、内容注册、命令、事件、HFSM、Action、Effect、战斗、背包、任务、房间、奖励、存档、UI、平台服务和 Debug。
 
 Game Content 属于具体项目内容层，通常放在 `res://game/`。它不是 Mkit 可复用层的一部分，因此这里不维护单独的 layer 文档。
 
@@ -85,6 +85,7 @@ ItemDefinition     -> ItemInstance     -> InventoryController / EquipmentControl
 StatusDefinition   -> StatusInstance   -> StatusEffectController
 RoomDefinition     -> RoomRuntime      -> RoomController / RunDirector
 DamageRequest      -> DamageResult     -> CombatResolver / HealthComponent
+QuestDefinition    -> QuestState       -> QuestSystem
 ```
 
 ## Class Reference

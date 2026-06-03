@@ -182,3 +182,12 @@ func test_tc_cr_15_receive_null_returns_false() -> void:
 	var result := recv.receive_command(null)
 	assert_false(result)
 	recv.free()
+
+
+func test_tc_cr_16_receive_command_marks_consumed_when_fallback_handles() -> void:
+	var recv := StubReceiver.new()
+	recv.auto_register = false
+	var cmd := GameCommand.create("interact", "src", "target")
+	assert_true(recv.receive_command(cmd))
+	assert_true(cmd.consumed)
+	recv.free()

@@ -24,9 +24,9 @@ func can_add_item(item: ItemInstance) -> bool:
 	var definition := get_item_definition(item.definition_id)
 	if definition == null:
 		return false
-	if model.find_stackable_slot(definition, item) != null:
-		return true
-	return model.find_first_empty_slot() != null
+	if definition.stackable and definition.max_stack <= 0:
+		return false
+	return _free_space_for(definition) >= item.quantity
 
 
 func add_item(item: ItemInstance) -> bool:
@@ -53,6 +53,8 @@ func add_item(item: ItemInstance) -> bool:
 			"InventoryController.add_item: invalid stack size for item %s" % item.definition_id
 		)
 		return false
+	if _free_space_for(definition) < item.quantity:
+		return false
 	var remaining := item.quantity
 	var original_quantity := item.quantity
 	if definition.stackable:
@@ -72,12 +74,7 @@ func add_item(item: ItemInstance) -> bool:
 	while remaining > 0:
 		var empty := model.find_first_empty_slot()
 		if empty == null:
-			var added_quantity := original_quantity - remaining
-			item.quantity = remaining
-			if remaining < original_quantity:
-				item_added.emit(item)
-			_emit_inventory_changed(item if added_quantity > 0 else null, added_quantity, "added")
-			return false
+			break
 		var amount := min(remaining, stack_size)
 		var stack: ItemInstance
 		if not placed_original:
@@ -91,6 +88,19 @@ func add_item(item: ItemInstance) -> bool:
 	item_added.emit(item)
 	_emit_inventory_changed(item, original_quantity, "added")
 	return true
+
+
+func _free_space_for(definition: ItemDefinition) -> int:
+	var stack_size := definition.max_stack if definition.stackable else 1
+	if stack_size <= 0:
+		return 0
+	var total := 0
+	for slot in model.slots:
+		if slot.item == null:
+			total += stack_size
+		elif definition.stackable and slot.item.definition_id == definition.item_id:
+			total += max(0, stack_size - slot.item.quantity)
+	return total
 
 
 func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:

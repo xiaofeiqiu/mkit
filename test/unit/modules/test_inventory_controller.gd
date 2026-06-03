@@ -107,6 +107,45 @@ func test_tc_inv_08_stackable_overflows_to_new_slot() -> void:
 	assert_eq(count, 8)
 
 
+# --- capacity-aware can_add_item / atomic add_item (regression: shop dupe) ---
+
+
+func test_tc_inv_22_can_add_item_false_when_quantity_exceeds_free_slots() -> void:
+	content._defs["coin"] = _make_item_def("coin")
+	for i in 3:
+		inv.add_item(ItemInstance.create("coin", 1))
+	assert_true(inv.can_add_item(ItemInstance.create("coin", 2)))
+	assert_false(inv.can_add_item(ItemInstance.create("coin", 3)))
+
+
+func test_tc_inv_23_add_item_atomic_when_non_stackable_overflows() -> void:
+	content._defs["coin"] = _make_item_def("coin")
+	for i in 3:
+		inv.add_item(ItemInstance.create("coin", 1))
+	var result := inv.add_item(ItemInstance.create("coin", 3))
+	assert_false(result)
+	var count := 0
+	for slot in inv.model.slots:
+		if slot.item != null and slot.item.definition_id == "coin":
+			count += slot.item.quantity
+	assert_eq(count, 3)
+
+
+func test_tc_inv_24_add_item_atomic_when_stackable_overflows() -> void:
+	content._defs["potion"] = _make_item_def("potion", true, 10)
+	var small := InventoryController.new()
+	small.capacity = 1
+	entity.add_child(small)
+	small._ready()
+	small.add_item(ItemInstance.create("potion", 8))
+	assert_true(small.can_add_item(ItemInstance.create("potion", 2)))
+	assert_false(small.can_add_item(ItemInstance.create("potion", 5)))
+	var result := small.add_item(ItemInstance.create("potion", 5))
+	assert_false(result)
+	assert_eq(small.find_item_by_definition("potion").quantity, 8)
+	small.free()
+
+
 # --- remove_item_by_instance_id ---
 
 

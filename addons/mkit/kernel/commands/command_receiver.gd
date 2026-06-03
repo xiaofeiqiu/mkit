@@ -38,7 +38,10 @@ func receive_command(command: GameCommand) -> bool:
 		if handled:
 			command.mark_consumed()
 			return true
-	return handle_unhandled_command(command)
+	var fallback_handled := handle_unhandled_command(command)
+	if fallback_handled:
+		command.mark_consumed()
+	return fallback_handled
 
 
 func handle_unhandled_command(command: GameCommand) -> bool:

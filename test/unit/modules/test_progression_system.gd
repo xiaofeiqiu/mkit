@@ -83,6 +83,36 @@ func test_tc_prog_06_add_negative_reduces_balance() -> void:
 	assert_eq(progression.get_currency("gold"), 70)
 
 
+# --- spend_currency ---
+
+
+func test_tc_prog_18_spend_currency_deducts_and_emits() -> void:
+	progression.add_currency("gold", 100)
+	watch_signals(progression)
+	assert_true(progression.spend_currency("gold", 30))
+	assert_eq(progression.get_currency("gold"), 70)
+	assert_signal_emitted_with_parameters(progression, "currency_changed", ["gold", 70])
+
+
+func test_tc_prog_19_spend_currency_rejects_when_insufficient() -> void:
+	progression.add_currency("gold", 20)
+	watch_signals(progression)
+	assert_false(progression.spend_currency("gold", 50))
+	assert_eq(progression.get_currency("gold"), 20)
+	assert_signal_not_emitted(progression, "currency_changed")
+
+
+func test_tc_prog_20_spend_currency_rejects_non_positive_amount() -> void:
+	progression.add_currency("gold", 20)
+	assert_false(progression.spend_currency("gold", 0))
+	assert_false(progression.spend_currency("gold", -5))
+	assert_eq(progression.get_currency("gold"), 20)
+
+
+func test_tc_prog_21_spend_currency_rejects_empty_id() -> void:
+	assert_false(progression.spend_currency("", 10))
+
+
 # --- can_unlock ---
 
 

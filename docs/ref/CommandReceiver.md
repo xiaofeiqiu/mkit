@@ -38,8 +38,8 @@ func handle_unhandled_command(command: GameCommand) -> bool
 
 ## 函数使用场景
 
-- **receive_command()**：命令投递入口。例：CommandRouter 找到玩家的 receiver 后调用此方法，先记录历史，再让 StateMachine 处理，处理不了则调用 `handle_unhandled_command`。
-- **handle_unhandled_command()**：未处理命令的 fallback 扩展点。例：子类可覆盖此方法，处理 StateMachine 不负责的命令，如打开背包 UI。
+- **receive_command()**：命令投递入口。例：CommandRouter 找到玩家的 receiver 后调用此方法，先记录历史，再让 StateMachine 处理，处理不了则调用 `handle_unhandled_command`；只要 StateMachine 或 fallback 返回 handled，就会把 `GameCommand.consumed` 标记为 true。
+- **handle_unhandled_command()**：未处理命令的 fallback 扩展点。例：子类可覆盖此方法，处理 StateMachine 不负责的命令，如打开背包 UI；返回 true 即表示命令已被接收端消费。
 
 ## 使用示例
 

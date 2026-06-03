@@ -81,6 +81,10 @@ func _register_kernel_services() -> void:
 	quest.name = "QuestSystem"
 	ServiceRegistry.add_child(quest)
 	ServiceRegistry.register_service("quest", quest)
+	var shop := ShopController.new()
+	shop.name = "ShopController"
+	ServiceRegistry.add_child(shop)
+	ServiceRegistry.register_service("shop", shop)
 
 
 func _load_content() -> void:

@@ -157,18 +157,31 @@ System has one or more effects
   -> record trace for debug
 ```
 
-## Scene Spawn & Object Pool Pipeline
+## Scene Spawn Pipeline
 
-主要类：[SpawnSceneEffect](ref/SpawnSceneEffect.md), [ObjectPool](ref/ObjectPool.md), [GameplayContext](ref/GameplayContext.md)
+主要类：[SpawnSceneEffect](ref/SpawnSceneEffect.md), [GameplayContext](ref/GameplayContext.md)
 
 ```text
 SpawnSceneEffect.apply(context)
-  -> resolve spawn parent
-  -> ObjectPool.acquire(scene_path) if enabled
-  -> otherwise load PackedScene and instantiate
-  -> add to parent
-  -> initialize position/direction/setup(context)
+  -> load PackedScene and instantiate
+  -> add to SceneTree.current_scene
+  -> initialize Node2D position from target/source/context
+  -> call set_direction(context.direction) when available
   -> return EffectResult
+```
+
+## Object Pool Pipeline
+
+主要类：[ObjectPool](ref/ObjectPool.md)
+
+```text
+System requests pooled scene instance
+  -> ObjectPool.acquire(scene_path, parent)
+  -> reuse inactive node or load PackedScene and instantiate
+  -> activate node and call on_pool_acquired() if available
+  -> caller uses node
+  -> ObjectPool.release(scene_path, node)
+  -> deactivate node and call on_pool_released() if available
 ```
 
 ## Entity Spawn Pipeline
@@ -439,9 +452,9 @@ RunDirector loads room
   -> listen for entity_died
   -> update active_enemy_ids
   -> check_clear_condition()
-  -> emit room_cleared
   -> generate_reward()
   -> emit reward_ready
+  -> emit room_cleared
 ```
 
 ## Run Lifecycle Pipeline
@@ -644,3 +657,7 @@ DebugOverlay watches target entity
   -> read EventRouter recent events
   -> render runtime debug text
 ```
+
+## Integration Coverage
+
+Integration coverage ownership is tracked in `spec/int-test.md` under `Full coverage verification ledger`. Any change that adds, removes, renames, or splits a `## ... Pipeline` section in this document must update that ledger and the affected suggested integration test file section in the same change.

@@ -31,7 +31,7 @@
 | M0 | Kernel 地基(改既有文件) | 4 / 4 | ✅ 完成 |
 | M1 | quest 模块(含 unit + integration) | 11 / 11 | ✅ 完成 |
 | M2 | dialogue 模块(含 unit + integration) | 0 / 10 | ☐ 未开始 |
-| M3 | shop 模块(含 unit + integration) | 0 / 7 | ☐ 未开始 |
+| M3 | shop 模块(含 unit + integration) | 7 / 7 | ✅ 完成 |
 | M4 | world 模块(含 unit + integration) | 0 / 7 | ☐ 未开始 |
 | M5 | bootstrap 接线 | 0 / 2 | ☐ 未开始 |
 | M6 | Audio 增强(可选) | 0 / 3 | ☐ 未开始 |
@@ -111,18 +111,18 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > 复用 progression 货币 + inventory,只补交易层。设计见「模块三」。依赖 M0(item value)。
 
-- [ ] `shop_definition.gd` — `ShopDefinition`(Resource)
-- [ ] `shop_entry.gd` — `ShopEntry`(Resource)
-- [ ] `shop_controller.gd` — `ShopController`(Node,service `shop`)
-- [ ] `modules/ui/shop_ui.gd` — `ShopUI`(Control)
-- [ ] `test/unit/modules/test_shop_controller.gd` — cases:
+- [x] `shop_definition.gd` — `ShopDefinition`(Resource)
+- [x] `shop_entry.gd` — `ShopEntry`(Resource)
+- [x] `shop_controller.gd` — `ShopController`(Node,service `shop`)
+- [x] `modules/ui/shop_ui.gd` — `ShopUI`(Control)
+- [x] `test/unit/modules/test_shop_controller.gd` — cases:
   - `test_tc_shop_01_buy_spends_currency_and_grants_item`
   - `test_tc_shop_02_buy_fails_when_currency_insufficient`
   - `test_tc_shop_03_stock_decrements_and_blocks_when_zero`
   - `test_tc_shop_04_sell_removes_item_and_adds_currency`
   - `test_tc_shop_05_price_override_and_multipliers`
-- [ ] `test/integration/test_shop_pipeline_integration.gd` — **开发者视角端到端**:经 `ServiceRegistry` 取 `shop` / `progression` / 买家 `Controllers/InventoryController` → `open_shop` → 货币不足时 `buy` 失败(`transaction_failed`)→ `add_currency` 后 `buy` 成功(扣币 + 入包 + `item_purchased` 事件)→ `sell` 回收(移除物品 + 加币)→ `stock` 递减为 0 后再买被拦。覆盖 **Shop Pipeline**。
-- [ ] **验证** — 生成 `.uid`;`make ut-modules` + 该 integration 全绿。结果:_(待填)_
+- [x] `test/integration/test_shop_pipeline_integration.gd` — **开发者视角端到端**:经 `ServiceRegistry` 取 `shop` / `progression` / 买家 `Controllers/InventoryController` → `open_shop` → 货币不足时 `buy` 失败(`transaction_failed`)→ `add_currency` 后 `buy` 成功(扣币 + 入包 + `item_purchased` 事件)→ `sell` 回收(移除物品 + 加币)→ `stock` 递减为 0 后再买被拦。覆盖 **Shop Pipeline**。
+- [x] **验证** — 生成 `.uid`;`make ut-modules` + 该 integration 全绿。结果:`make ut-kernel` 101/101、`make ut-modules` 172/172(新增 `test_shop_controller.gd` 5 case + `test_progression_system.gd` 补 `spend_currency` 4 case `prog_18~21`)、`make int` 2/2(quest + shop)全绿。补充改动:① `progression_system.gd` 新增公开 `spend_currency(currency_id, amount) -> bool`(设计文档 ShopController 假设其存在,实际仅在 `ProgressionState` 上,补到 System 层以发 `currency_changed`);② 沿用 M1/quest 先例,把 `shop` service 接入 `game_bootstrap.gd`(供 Shop Pipeline integration 走真实 bootstrap)。设计取舍:`ShopEntry.price_override >= 0` 时为最终买价(不再乘 `buy_price_multiplier`),倍率只作用于 `ItemDefinition.value`。
 
 ---
 
@@ -148,7 +148,7 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > 依赖 M1–M4。设计见「既有文件需要的最小改动 §3」。
 
-- [ ] **`kernel/bootstrap/game_bootstrap.gd`** — 在 `_register_kernel_services()` 后新增注册 `quest` / `dialogue` / `shop` / `world` 四个 Node service(构造 → `add_child` → `register_service(id, svc)`,与 `progression` 同模式)。`quest` 已在 M1 为 Quest Pipeline integration 接入,本项剩余 `dialogue` / `shop` / `world`。
+- [ ] **`kernel/bootstrap/game_bootstrap.gd`** — 在 `_register_kernel_services()` 后新增注册 `quest` / `dialogue` / `shop` / `world` 四个 Node service(构造 → `add_child` → `register_service(id, svc)`,与 `progression` 同模式)。`quest` 已在 M1、`shop` 已在 M3 为各自 Pipeline integration 接入,本项剩余 `dialogue` / `world`。
 - [ ] **验证** — `make ut` 全量全绿(确认未污染 ServiceRegistry)。结果:_(待填)_
 
 ---
@@ -216,3 +216,4 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 - _(创建)_ 初版落地计划,对应设计文档 `spec/rpg-modules.md`。
 - _(更新)_ 新增「测试规则(强制)」;把 integration test 从 M9 下放到 M1–M4 各模块(代码与 unit+integration 同批交付、随增量推进、以 developer 视角端到端);M9 改为全循环 integration + 矩阵登记。
 - _(更新)_ M1 quest 模块完成;新增 Quest Pipeline integration,并为 M1 integration 将 `quest` service 接入 `GameBootstrap`。
+- _(更新)_ M3 shop 模块完成;新增 Shop Pipeline integration,并为该 integration 将 `shop` service 接入 `GameBootstrap`(M5 剩余 `dialogue` / `world`);为商店交易补 `ProgressionSystem.spend_currency`。

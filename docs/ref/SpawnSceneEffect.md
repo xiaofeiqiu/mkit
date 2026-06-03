@@ -28,7 +28,7 @@ extends GameEffect
 
 ## 函数使用场景
 
-- **`_apply_impl(context)`**：内部实现方法。校验 scene_path，加载并实例化 PackedScene，把实例添加到 current_scene；若实例是 Node2D，则设置 global_position。位置优先使用 context.position；`spawn_at_target=true` 且 context.target 是 Node2D 时使用目标位置，否则若 context.source 是 Node2D 则使用来源实体位置。若 context.direction 非零且生成物有 `set_direction()` 方法，会调用该方法写入方向。
+- **`_apply_impl(context)`**：内部实现方法。校验 scene_path，加载并实例化 PackedScene，把实例添加到 current_scene；若实例是 Node2D，则设置 global_position。`spawn_at_target=true` 且 context.target 是 Node2D 时使用目标位置；否则若 context.source 是 Node2D，则使用来源实体位置；两者都不可用时使用 context.position。若 context.direction 非零且生成物有 `set_direction()` 方法，会调用该方法写入方向。
 
 ## 使用示例
 

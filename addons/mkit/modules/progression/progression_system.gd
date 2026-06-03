@@ -24,6 +24,17 @@ func add_currency(currency_id: String, amount: int) -> void:
 	currency_changed.emit(currency_id, state.get_currency(currency_id))
 
 
+func spend_currency(currency_id: String, amount: int) -> bool:
+	if currency_id.strip_edges() == "":
+		return false
+	if amount <= 0:
+		return false
+	if not state.spend_currency(currency_id, amount):
+		return false
+	currency_changed.emit(currency_id, state.get_currency(currency_id))
+	return true
+
+
 func get_currency(currency_id: String) -> int:
 	if currency_id.strip_edges() == "":
 		return 0

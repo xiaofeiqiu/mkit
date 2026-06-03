@@ -85,6 +85,18 @@ func _register_kernel_services() -> void:
 	shop.name = "ShopController"
 	ServiceRegistry.add_child(shop)
 	ServiceRegistry.register_service("shop", shop)
+	var audio := AudioManager.new()
+	audio.name = "AudioManager"
+	ServiceRegistry.add_child(audio)
+	ServiceRegistry.register_service("audio", audio)
+	var dialogue := DialogueController.new()
+	dialogue.name = "DialogueController"
+	ServiceRegistry.add_child(dialogue)
+	ServiceRegistry.register_service("dialogue", dialogue)
+	var world := WorldRouter.new()
+	world.name = "WorldRouter"
+	ServiceRegistry.add_child(world)
+	ServiceRegistry.register_service("world", world)
 
 
 func _load_content() -> void:

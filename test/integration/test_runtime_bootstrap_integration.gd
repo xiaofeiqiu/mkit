@@ -32,6 +32,8 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 	assert_true(ServiceRegistry.get_service("cloud_save") is CloudSaveService)
 	assert_true(ServiceRegistry.get_service("quest") is QuestSystem)
 	assert_true(ServiceRegistry.get_service("shop") is ShopController)
+	assert_true(ServiceRegistry.get_service("world") is WorldRouter)
+	assert_true(ServiceRegistry.get_service("audio") is AudioManager)
 
 	var events := ServiceRegistry.get_service("events") as EventRouter
 	watch_signals(events)
@@ -101,6 +103,10 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 	var shop := ServiceRegistry.get_service("shop") as ShopController
 	shop.close_shop()
 	assert_null(shop.current_shop)
+
+	var world := ServiceRegistry.get_service("world") as WorldRouter
+	assert_eq(world.current_zone_id, "")
+	assert_null(world.get_current_zone())
 
 
 func test_tc_int_boot_02_boot_loads_memory_resource_database_and_validation_passes() -> void:

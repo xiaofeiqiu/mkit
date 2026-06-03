@@ -16,9 +16,8 @@ WorldRouter 是世界导航域的运行时 Node，注册为 ServiceRegistry 的 
 
 - **zone_changed**：区域切换收尾时发出，携带 from_zone_id 与 to_zone_id。
 - **player_group**：持久玩家所在的组名，默认 `player`。WorldRouter 取该组首个成员作为落点放置对象。
-- **spawn_group**：SpawnPoint 所在的组名，默认 `spawn_point`。
 - **current_zone_id**：当前所在区域 ID；收尾后更新。
-- **scene_router**：SceneRouter 引用，实际执行场景切换；为空时从 `scenes` service 懒加载。
+- **scene_router**：SceneRouter 引用，实际执行场景切换；为空时从 `scenes` service 懒加载。重解析到新 SceneRouter 时会先断开旧 router 的 scene_changed 连接，避免重复收尾。
 - **content**：ContentRegistry 引用；为空时从 `content` service 懒加载。
 
 ## 接口
@@ -28,7 +27,6 @@ class_name WorldRouter
 extends Node
 signal zone_changed(from_zone_id: String, to_zone_id: String)
 @export var player_group: String = "player"
-@export var spawn_group: String = "spawn_point"
 var current_zone_id: String = ""
 var scene_router: SceneRouter = null
 var content: ContentRegistry = null
@@ -40,11 +38,11 @@ func place_player_at_spawn(spawn_id: String) -> bool
 
 ## 函数使用场景
 
-- **`go_to_zone(zone_id, spawn_id)`**：Portal、脚本或 UI 请求换区域时调用。它查 ZoneDefinition、记录 pending zone/spawn（spawn_id 为空则用 ZoneDefinition.default_spawn_id），再调 SceneRouter.change_scene；定义缺失、无 scene_router 或切换失败时清空 pending 并返回 false。
+- **`go_to_zone(zone_id, spawn_id)`**：Portal、脚本或 UI 请求换区域时调用。它查 ZoneDefinition、记录 pending zone/spawn（spawn_id 为空则用 ZoneDefinition.default_spawn_id），再调 SceneRouter.change_scene；定义缺失、无 scene_router 或切换失败时清空 pending 并返回 false。已有一次换区尚未收尾（pending 非空）时拒绝新的请求并返回 false，避免 pending 被覆盖。
 - **`get_current_zone()`**：读取当前 zone 的 ZoneDefinition（按 current_zone_id 查表）。
 - **`get_zone(zone_id)`**：从 ContentRegistry 读取 ZoneDefinition；zone_id 为空或内容缺失时返回 null。
-- **`place_player_at_spawn(spawn_id)`**：在 spawn_group 中按 spawn_id 找 SpawnPoint，把 player_group 首个成员移到其 global_position；找不到落点或玩家时返回 false。
-- **`_on_scene_changed` / `_finalize_zone_entry`**：内部收尾。SceneRouter 的 `change_scene` 是 deferred（scene_changed 早于树切换发出），故收尾用 `call_deferred` 推迟到新场景就绪后：放玩家落点、更新 current_zone_id、发 zone_changed、经 EventRouter 发 emit_zone_changed 与 `zone_entered` DomainEvent，最后按 ZoneDefinition.bgm_id 调 AudioManager.play_music。
+- **`place_player_at_spawn(spawn_id)`**：在 `SpawnPoint.GROUP` 组中按 spawn_id 找 SpawnPoint，把 player_group 首个成员移到其 global_position；找不到落点或玩家时返回 false。
+- **`_on_scene_changed` / `_finalize_zone_entry`**：内部收尾。SceneRouter 的 `change_scene` 是 deferred（scene_changed 早于树切换发出），故收尾用 `call_deferred` 推迟到新场景就绪后：放玩家落点、更新 current_zone_id、发 zone_changed、经 EventRouter 发 emit_zone_changed 与 `zone_entered` DomainEvent，最后按 ZoneDefinition.bgm_id 调 AudioManager.play_music（音乐由 bootstrap 注册的 `audio` service 提供）。新场景的 SpawnPoint 可能尚未就绪：放置失败时会再 `call_deferred` 重试一帧，仍失败则 `push_warning` 并照常完成进区，不阻断流程。
 
 ## 使用示例
 

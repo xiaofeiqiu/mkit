@@ -77,6 +77,15 @@ Module Layer 位于 Game Content Layer 之下、Kernel Layer 之上。它提供�
 - [QuestState](ref/QuestState.md)
 - [QuestSystem](ref/QuestSystem.md)
 
+### Dialogue
+
+- [DialogueChoice](ref/DialogueChoice.md)
+- [DialogueController](ref/DialogueController.md)
+- [DialogueDefinition](ref/DialogueDefinition.md)
+- [DialogueInteractable](ref/DialogueInteractable.md)
+- [DialogueNode](ref/DialogueNode.md)
+- [DialogueRuntime](ref/DialogueRuntime.md)
+
 ### Shop
 
 - [ShopController](ref/ShopController.md)
@@ -120,6 +129,7 @@ Module Layer 位于 Game Content Layer 之下、Kernel Layer 之上。它提供�
 
 - [AudioManager](ref/AudioManager.md)
 - [DamageNumberSystem](ref/DamageNumberSystem.md)
+- [DialogueUI](ref/DialogueUI.md)
 - [FeedbackSystem](ref/FeedbackSystem.md)
 - [RewardSelectionUI](ref/RewardSelectionUI.md)
 - [ShopUI](ref/ShopUI.md)

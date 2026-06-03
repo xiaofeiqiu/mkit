@@ -78,11 +78,12 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 
 	var audio := AudioProbe.new()
 	add_child_autofree(audio)
+	ServiceRegistry.unregister_service("audio")
 	ServiceRegistry.register_service("audio", audio)
 
-	var world := WorldRouter.new()
-	add_child_autofree(world)
-	ServiceRegistry.register_service("world", world)
+	var world := ServiceRegistry.get_service("world") as WorldRouter
+	assert_not_null(world)
+	world.scene_router = null
 
 	var player := _make_player()
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController

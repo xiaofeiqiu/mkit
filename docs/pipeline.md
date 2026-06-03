@@ -317,6 +317,27 @@ DamageResult is lethal
   -> VFX / Audio / UI / Analytics react
 ```
 
+## Dialogue Pipeline
+
+主要类：[DialogueController](ref/DialogueController.md), [DialogueDefinition](ref/DialogueDefinition.md), [DialogueNode](ref/DialogueNode.md), [DialogueChoice](ref/DialogueChoice.md), [DialogueRuntime](ref/DialogueRuntime.md), [DialogueInteractable](ref/DialogueInteractable.md), [DialogueUI](ref/DialogueUI.md), [Interactable](ref/Interactable.md), [InteractionComponent](ref/InteractionComponent.md), [EffectExecutor](ref/EffectExecutor.md), [EventRouter](ref/EventRouter.md)
+
+```text
+InteractionComponent.try_interact()
+  -> DialogueInteractable._interact_impl()
+  -> DialogueController.start(dialogue_id, context)
+  -> EventRouter emits dialogue_started
+  -> DialogueInteractable emits npc_talked (typed signal + DomainEvent)
+  -> enter start node: run on_enter_effects through EffectExecutor
+  -> emit node_entered (DialogueUI shows speaker/text)
+  -> node has choices: filter by conditions -> emit choices_presented
+  -> DialogueUI renders buttons -> choose(index)
+  -> run choice effects through EffectExecutor (e.g. AcceptQuestEffect)
+  -> jump to next_node_id or, when empty, end()
+  -> linear node: advance() walks next_node_id until end
+  -> end() emits dialogue_ended (typed signal + DomainEvent)
+  -> npc_talked / dialogue facts flow into Quest Pipeline
+```
+
 ## Quest Pipeline
 
 主要类：[QuestSystem](ref/QuestSystem.md), [QuestDefinition](ref/QuestDefinition.md), [QuestObjectiveDefinition](ref/QuestObjectiveDefinition.md), [QuestState](ref/QuestState.md), [QuestLog](ref/QuestLog.md), [AcceptQuestEffect](ref/AcceptQuestEffect.md), [AdvanceObjectiveEffect](ref/AdvanceObjectiveEffect.md), [CompleteQuestEffect](ref/CompleteQuestEffect.md), [EventRouter](ref/EventRouter.md), [EffectExecutor](ref/EffectExecutor.md)

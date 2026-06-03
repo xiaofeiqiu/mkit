@@ -1,12 +1,13 @@
 class_name WorldRouter
 extends Node
 signal zone_changed(from_zone_id: String, to_zone_id: String)
+const _MAX_FINALIZE_RETRIES: int = 1
 @export var player_group: String = "player"
-@export var spawn_group: String = "spawn_point"
 var current_zone_id: String = ""
 var _pending_zone_id: String = ""
 var _pending_spawn_id: String = ""
 var scene_router: SceneRouter = null
+var _connected_scene_router: SceneRouter = null
 var content: ContentRegistry = null
 
 
@@ -19,12 +20,26 @@ func _resolve_services() -> void:
 		content = ServiceRegistry.get_service("content") as ContentRegistry
 	if scene_router == null and ServiceRegistry.has_service("scenes"):
 		scene_router = ServiceRegistry.get_service("scenes") as SceneRouter
+	_bind_scene_router()
+
+
+func _bind_scene_router() -> void:
+	if scene_router == _connected_scene_router:
+		return
+	if (
+		_connected_scene_router != null
+		and _connected_scene_router.scene_changed.is_connected(_on_scene_changed)
+	):
+		_connected_scene_router.scene_changed.disconnect(_on_scene_changed)
+	_connected_scene_router = scene_router
 	if scene_router != null and not scene_router.scene_changed.is_connected(_on_scene_changed):
 		scene_router.scene_changed.connect(_on_scene_changed)
 
 
 func go_to_zone(zone_id: String, spawn_id: String = "") -> bool:
 	_resolve_services()
+	if _pending_zone_id != "":
+		return false
 	var definition := get_zone(zone_id)
 	if definition == null:
 		return false
@@ -67,18 +82,26 @@ func place_player_at_spawn(spawn_id: String) -> bool:
 func _on_scene_changed(_scene_path: String) -> void:
 	if _pending_zone_id == "":
 		return
-	_finalize_zone_entry.call_deferred()
+	_finalize_zone_entry.call_deferred(_MAX_FINALIZE_RETRIES)
 
 
-func _finalize_zone_entry() -> void:
+func _finalize_zone_entry(retries_left: int) -> void:
 	if _pending_zone_id == "":
 		return
+	if not place_player_at_spawn(_pending_spawn_id):
+		if retries_left > 0:
+			_finalize_zone_entry.call_deferred(retries_left - 1)
+			return
+		push_warning(
+			(
+				"WorldRouter: could not place player at spawn '%s' while entering zone '%s'"
+				% [_pending_spawn_id, _pending_zone_id]
+			)
+		)
 	var from_zone_id := current_zone_id
 	var to_zone_id := _pending_zone_id
-	var spawn_id := _pending_spawn_id
 	_pending_zone_id = ""
 	_pending_spawn_id = ""
-	place_player_at_spawn(spawn_id)
 	current_zone_id = to_zone_id
 	zone_changed.emit(from_zone_id, to_zone_id)
 	var events := _get_events()
@@ -98,7 +121,7 @@ func _find_spawn_point(spawn_id: String) -> Node2D:
 	var tree := get_tree()
 	if tree == null:
 		return null
-	for node in tree.get_nodes_in_group(spawn_group):
+	for node in tree.get_nodes_in_group(SpawnPoint.GROUP):
 		var spawn := node as SpawnPoint
 		if spawn != null and spawn.spawn_id == spawn_id:
 			return spawn
@@ -124,6 +147,4 @@ func _get_events() -> EventRouter:
 func _get_audio() -> AudioManager:
 	if ServiceRegistry.has_service("audio"):
 		return ServiceRegistry.get_service("audio") as AudioManager
-	if ServiceRegistry.has_service("ui"):
-		return ServiceRegistry.get_service("ui") as AudioManager
 	return null

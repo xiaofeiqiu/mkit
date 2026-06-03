@@ -97,21 +97,23 @@ func _make_player(pos: Vector2 = Vector2.ZERO) -> Node2D:
 
 func test_tc_world_01_go_to_zone_changes_scene_and_sets_pending_spawn() -> void:
 	_make_zone("zone.village", "res://village.tscn", "village_center")
-	var world := _make_world()
 
+	var world := _make_world()
 	assert_true(world.go_to_zone("zone.village", "gate"))
 	assert_eq(scenes.changed_paths.size(), 1)
 	assert_eq(scenes.changed_paths[0], "res://village.tscn")
 	assert_eq(world._pending_zone_id, "zone.village")
 	assert_eq(world._pending_spawn_id, "gate")
 
-	assert_true(world.go_to_zone("zone.village"))
-	assert_eq(world._pending_spawn_id, "village_center")
+	var world_default := _make_world()
+	assert_true(world_default.go_to_zone("zone.village"))
+	assert_eq(world_default._pending_spawn_id, "village_center")
 
+	var world_fail := _make_world()
 	scenes.return_value = false
-	assert_false(world.go_to_zone("zone.village", "gate"))
-	assert_eq(world._pending_zone_id, "")
-	assert_eq(world._pending_spawn_id, "")
+	assert_false(world_fail.go_to_zone("zone.village", "gate"))
+	assert_eq(world_fail._pending_zone_id, "")
+	assert_eq(world_fail._pending_spawn_id, "")
 
 
 # --- placement moves the player to the matching spawn point ---
@@ -183,3 +185,61 @@ func test_tc_world_04_missing_zone_definition_fails_gracefully() -> void:
 	assert_false(world.go_to_zone("", "anywhere"))
 	assert_eq(scenes.changed_paths.size(), 0)
 	assert_null(world.get_current_zone())
+
+
+# --- placement failure still enters the zone + plays BGM (caller is warned, not blocked) ---
+
+
+func test_tc_world_05_placement_failure_still_enters_zone_and_plays_bgm() -> void:
+	var audio := AudioProbe.new()
+	add_child_autofree(audio)
+	ServiceRegistry.register_service("audio", audio)
+	_make_zone("zone.void", "res://void.tscn", "nowhere", "bgm.void")
+	scenes.auto_emit = true
+	var world := _make_world()
+	var player := _make_player(Vector2(7, 7))
+
+	watch_signals(world)
+	assert_true(world.go_to_zone("zone.void", "nowhere"))
+	for i in 6:
+		await get_tree().process_frame
+
+	assert_eq(world.current_zone_id, "zone.void")
+	assert_eq(player.global_position, Vector2(7, 7))
+	assert_signal_emitted_with_parameters(world, "zone_changed", ["", "zone.void"])
+	assert_eq(audio.played.size(), 1)
+	assert_eq(audio.played[0], "bgm.void")
+
+
+# --- a second go_to_zone is rejected while a transition is still pending ---
+
+
+func test_tc_world_06_reentrant_go_to_zone_rejected_while_pending() -> void:
+	_make_zone("zone.a", "res://a.tscn", "spawn.a")
+	_make_zone("zone.b", "res://b.tscn", "spawn.b")
+	var world := _make_world()
+
+	assert_true(world.go_to_zone("zone.a", "spawn.a"))
+	assert_eq(world._pending_zone_id, "zone.a")
+	assert_false(world.go_to_zone("zone.b", "spawn.b"))
+	assert_eq(world._pending_zone_id, "zone.a")
+	assert_eq(world._pending_spawn_id, "spawn.a")
+	assert_eq(scenes.changed_paths.size(), 1)
+
+
+# --- re-resolving to a new scene router disconnects the old one ---
+
+
+func test_tc_world_07_rebinding_scene_router_disconnects_old_one() -> void:
+	var world := _make_world()
+	assert_true(scenes.scene_changed.is_connected(world._on_scene_changed))
+
+	var new_scenes := StubSceneRouter.new()
+	add_child_autofree(new_scenes)
+	ServiceRegistry.unregister_service("scenes")
+	ServiceRegistry.register_service("scenes", new_scenes)
+	world.scene_router = null
+	world._resolve_services()
+
+	assert_false(scenes.scene_changed.is_connected(world._on_scene_changed))
+	assert_true(new_scenes.scene_changed.is_connected(world._on_scene_changed))

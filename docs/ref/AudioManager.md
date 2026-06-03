@@ -2,7 +2,7 @@
 
 ## 概念说明
 
-AudioManager 是音效和音乐播放的轻量管理器。它按 audio_id 查找 AudioStream，播放 SFX/Music，并隔离具体音频节点和 bus 配置。Combat、Inventory 和 Room 不应该直接操作 AudioStreamPlayer；FeedbackSystem 只发出 play_sfx 请求。
+AudioManager 是音效和音乐播放的轻量管理器。它按 audio_id 查找 AudioStream，播放 SFX/Music，并隔离具体音频节点和 bus 配置。Combat、Inventory 和 Room 不应该直接操作 AudioStreamPlayer；FeedbackSystem 只发出 play_sfx 请求。GameBootstrap 会注册一个 AudioManager 为 `audio` service，使 WorldRouter 等系统按 zone 切换 BGM 时默认可用；游戏侧填充 sfx_map / music_map 即可，或替换为自定义实现。
 
 ## 设计目的
 

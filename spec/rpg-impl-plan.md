@@ -33,10 +33,10 @@
 |---|---|---|---|
 | M0 | Kernel 地基(改既有文件) | 4 / 4 | ✅ 完成 |
 | M1 | quest 模块(doc + unit + integration) | 12 / 12 | ✅ 完成 |
-| M2 | dialogue 模块(doc + unit + integration) | 0 / 11 | ☐ 未开始 |
+| M2 | dialogue 模块(doc + unit + integration) | 11 / 11 | ✅ 完成 |
 | M3 | shop 模块(doc + unit + integration) | 8 / 8 | ✅ 完成 |
 | M4 | world 模块(doc + unit + integration) | 8 / 8 | ✅ 完成 |
-| M5 | bootstrap 接线 | 0 / 2 | ☐ 未开始 |
+| M5 | bootstrap 接线 | 0 / 2 | 🔄 进行中 |
 | M6 | Audio 增强(可选) | 0 / 3 | ☐ 未开始 |
 | M7 | quest_log UI(可选,含 doc) | 0 / 2 | ☐ 未开始 |
 | M8 | demo 内容(game/) | 0 / 6 | ☐ 未开始 |
@@ -95,22 +95,22 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > NPC 对话树,选项挂 Condition/Effect(可接 M1 的 quest effects)。设计见「模块二」。
 
-- [ ] `dialogue_definition.gd` — `DialogueDefinition`(Resource)
-- [ ] `dialogue_node.gd` — `DialogueNode`(Resource)
-- [ ] `dialogue_choice.gd` — `DialogueChoice`(Resource)
-- [ ] `dialogue_runtime.gd` — `DialogueRuntime`(RefCounted)
-- [ ] `dialogue_controller.gd` — `DialogueController`(Node,service `dialogue`)
-- [ ] `dialogue_interactable.gd` — `DialogueInteractable`(extends Interactable,发 `npc_talked`)
-- [ ] `modules/ui/dialogue_ui.gd` — `DialogueUI`(Control)
-- [ ] `test/unit/modules/test_dialogue_controller.gd` — cases:
+- [x] `dialogue_definition.gd` — `DialogueDefinition`(Resource)
+- [x] `dialogue_node.gd` — `DialogueNode`(Resource)
+- [x] `dialogue_choice.gd` — `DialogueChoice`(Resource)
+- [x] `dialogue_runtime.gd` — `DialogueRuntime`(RefCounted)
+- [x] `dialogue_controller.gd` — `DialogueController`(Node,service `dialogue`)
+- [x] `dialogue_interactable.gd` — `DialogueInteractable`(extends Interactable,发 `npc_talked`)
+- [x] `modules/ui/dialogue_ui.gd` — `DialogueUI`(Control)
+- [x] `test/unit/modules/test_dialogue_controller.gd` — cases:
   - `test_tc_dlg_01_start_enters_start_node_and_runs_enter_effects`
   - `test_tc_dlg_02_choices_filtered_by_conditions`
   - `test_tc_dlg_03_choose_runs_effects_and_advances`
   - `test_tc_dlg_04_linear_advance_until_end_emits_ended`
   - `test_tc_dlg_05_second_start_rejected_while_active`
-- [ ] `test/integration/test_dialogue_pipeline_integration.gd` — **开发者视角端到端**:`InteractionComponent` 选中场景里的 `DialogueInteractable` → `try_interact` → `DialogueController.start` → `node_entered` 跑 on_enter_effects → `choose` 一个挂 `AcceptQuestEffect` 的选项 → 经 service `quest` 出现 active 任务 → `dialogue_ended` + `npc_talked` 事件推进"与 X 对话"任务目标。跨 **interaction + dialogue + quest**。覆盖 **Dialogue Pipeline**。
-- [ ] **文档** — `docs/ref/`:DialogueDefinition、DialogueNode、DialogueChoice、DialogueRuntime、DialogueController、DialogueInteractable、DialogueUI;`docs/module_layer.md` 加 dialogue domain;`docs/pipeline.md` 加 **Dialogue Pipeline** 段。
-- [ ] **验证** — 生成 `.uid`;`make ut-modules` + 该 integration 全绿。结果:_(待填)_
+- [x] `test/integration/test_dialogue_pipeline_integration.gd` — **开发者视角端到端**:`InteractionComponent` 选中场景里的 `DialogueInteractable` → `try_interact` → `DialogueController.start` → `node_entered` 跑 on_enter_effects → `choose` 一个挂 `AcceptQuestEffect` 的选项 → 经 service `quest` 出现 active 任务 → `dialogue_ended` + `npc_talked` 事件推进"与 X 对话"任务目标。跨 **interaction + dialogue + quest**。覆盖 **Dialogue Pipeline**。
+- [x] **文档** — `docs/ref/`:DialogueDefinition、DialogueNode、DialogueChoice、DialogueRuntime、DialogueController、DialogueInteractable、DialogueUI;`docs/module_layer.md` 加 dialogue domain;`docs/pipeline.md` 加 **Dialogue Pipeline** 段。
+- [x] **验证** — 生成 `.uid`;`make ut-modules` + 该 integration 全绿。结果:`make ut-kernel` 102/102、`make ut-modules` 187/187(新增 `test_dialogue_controller.gd` 5 case)、`make int` 33/33(新增 Dialogue Pipeline 1 case)全绿。设计取舍:① `choose(index)` 的 index 以 `get_available_choices()`(经 conditions 过滤后)的可见列表为准,与 DialogueUI 呈现的按钮一一对应;越界为安全 no-op。② 进入节点顺序为 `on_enter_effects`(EffectExecutor)→ `node_entered` →(有 choices 时)`choices_presented`(携过滤后可见项);线性节点靠 `advance()` 沿 `next_node_id` 走到空即 `end()`。③ `DialogueInteractable._interact_impl` 先 `start` 成功再发 `npc_talked`(`emit_npc_talked` 同发 typed signal + DomainEvent),供 QuestSystem 走统一 `notify_event` 匹配路径。④ 沿用 M1/quest、M3/shop 先例,把 `dialogue` service 接入 `game_bootstrap.gd`(供 Dialogue Pipeline integration 走真实 bootstrap);至此 M5 的 bootstrap 注册四件(quest/shop/dialogue/world)已全部就位。
 
 ---
 
@@ -149,7 +149,7 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
   - `test_tc_world_04_missing_zone_definition_fails_gracefully`
 - [x] `test/integration/test_world_pipeline_integration.gd` — **开发者视角端到端**:临时保存两个含 `SpawnPoint` + `Portal` 的 `.tscn` → `WorldRouter.go_to_zone(zone, spawn)` 进村 → 取出村内 `Portal` 调 `interact()`(经 `ServiceRegistry` 取 `world`)跳野外 → 持久化玩家(group `player`)被移到匹配 `spawn_id` 的 SpawnPoint → `zone_changed`/`zone_entered` 事件触发 → 推进"到达 X"任务目标至 `auto_complete` turn-in 发奖(入背包 + 加货币) + 注入的 AudioManager probe 收到两段 `play_music(bgm_id)`。覆盖 **World Navigation Pipeline**。
 - [x] **文档** — `docs/ref/`:ZoneDefinition、SpawnPoint、Portal、WorldRouter 已建;`docs/module_layer.md` 已加 **World** domain 段(Portal/SpawnPoint/WorldRouter/ZoneDefinition);`docs/pipeline.md` 已加 **World Navigation Pipeline** 段。本 milestone 由 ⚠️ 转 ✅。
-- [x] **验证** — 生成 `.uid`;`make ut-modules` + 该 integration 全绿。结果:`make ut-kernel` 102/102、`make ut-modules` 182/182(新增 `test_world_router.gd` 4 case)、`make int` 32/32(新增 world pipeline 1 case)全绿。设计取舍:① `WorldRouter` 包裹 `SceneRouter`,因真实 `change_scene_to_file` 是 deferred(`scene_changed` 先于树切换发出),落点放置/发事件/切 BGM 在 `scene_changed` 回调里 `call_deferred` 收尾,故 integration test 在每次跳转后 `await process_frame`。② integration 用真实 `GameBootstrap`/`EventRouter`/`QuestSystem`/`EffectExecutor`/`ContentRegistry`/`ProgressionSystem`,但把 `scenes` 换成 `TestSceneRouter`(把 `.tscn` 挂到 host 节点而非调真实 `change_scene_to_file`——后者会替换 GUT runner 的 current_scene 破坏测试)。③ `world` service 接入 `game_bootstrap.gd` 留待 M5(随 `dialogue` 一并),本 integration 自行 `register_service("world", …)`,`Portal._interact_impl` 经 `ServiceRegistry` 取 `world`,符合真实开发者用法。④ 玩家设计为跨场景持久节点(不随 zone 场景 free),`WorldRouter` 只把它移到落点;zone 场景只放 `SpawnPoint`/`Portal`。
+- [x] **验证** — 生成 `.uid`;`make ut-modules` + 该 integration 全绿。结果:`make ut-kernel` 102/102、`make ut-modules` 182/182(新增 `test_world_router.gd` 4 case)、`make int` 32/32(新增 world pipeline 1 case)全绿。设计取舍:① `WorldRouter` 包裹 `SceneRouter`,因真实 `change_scene_to_file` 是 deferred(`scene_changed` 先于树切换发出),落点放置/发事件/切 BGM 在 `scene_changed` 回调里 `call_deferred` 收尾,故 integration test 在每次跳转后 `await process_frame`。② integration 用真实 `GameBootstrap`/`EventRouter`/`QuestSystem`/`EffectExecutor`/`ContentRegistry`/`ProgressionSystem`,但把 `scenes` 换成 `TestSceneRouter`(把 `.tscn` 挂到 host 节点而非调真实 `change_scene_to_file`——后者会替换 GUT runner 的 current_scene 破坏测试)。③ `world` service 已在 M5 接入 `game_bootstrap.gd`;本 integration 现在使用 bootstrap 注册的 `WorldRouter`,`Portal._interact_impl` 经 `ServiceRegistry` 取 `world`,符合真实开发者用法。④ 玩家设计为跨场景持久节点(不随 zone 场景 free),`WorldRouter` 只把它移到落点;zone 场景只放 `SpawnPoint`/`Portal`。
 
 ---
 
@@ -157,8 +157,8 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > 依赖 M1–M4。设计见「既有文件需要的最小改动 §3」。
 
-- [ ] **`kernel/bootstrap/game_bootstrap.gd`** — 在 `_register_kernel_services()` 后新增注册 `quest` / `dialogue` / `shop` / `world` 四个 Node service(构造 → `add_child` → `register_service(id, svc)`,与 `progression` 同模式)。`quest` 已在 M1、`shop` 已在 M3 为各自 Pipeline integration 接入,本项剩余 `dialogue` / `world`。
-- [ ] **验证** — `make ut` 全量全绿(确认未污染 ServiceRegistry)。结果:_(待填)_
+- [x] **`kernel/bootstrap/game_bootstrap.gd`** — 在 `_register_kernel_services()` 后新增注册 `quest` / `dialogue` / `shop` / `world` 四个 Node service(构造 → `add_child` → `register_service(id, svc)`,与 `progression` 同模式)。`quest` 已在 M1、`shop` 已在 M3、`world` 已在 M5、`dialogue` 已在 M2 接入 —— 四件已全部就位。
+- [ ] **验证** — `make ut` 全量全绿(确认未污染 ServiceRegistry)。结果:本轮补 `test_runtime_bootstrap_integration.gd` 对 `world` service 的断言;`make ut` 102/102 kernel + 182/182 modules 全绿,`make int` 32/32 全绿。该验证覆盖已存在并已接入的 `quest` / `shop` / `world`;M2 已把 `dialogue` 接入 bootstrap 并由 Dialogue Pipeline integration 经真实 `GameBootstrap` 验证其可达,剩余 `test_runtime_bootstrap_integration.gd` 补一条 `dialogue` 断言即可收尾 M5。
 
 ---
 
@@ -224,7 +224,9 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 - _(创建)_ 初版落地计划,对应设计文档 `spec/rpg-modules.md`。
 - _(更新)_ 新增「测试规则(强制)」;把 integration test 从 M9 下放到 M1–M4 各模块(代码与 unit+integration 同批交付、随增量推进、以 developer 视角端到端);M9 改为全循环 integration + 矩阵登记。
 - _(更新)_ M1 quest 模块完成;新增 Quest Pipeline integration,并为 M1 integration 将 `quest` service 接入 `GameBootstrap`。
-- _(更新)_ M3 shop 模块完成;新增 Shop Pipeline integration,并为该 integration 将 `shop` service 接入 `GameBootstrap`(M5 剩余 `dialogue` / `world`);为商店交易补 `ProgressionSystem.spend_currency`。
-- _(更新)_ M4 world 模块完成:`ZoneDefinition`/`SpawnPoint`/`Portal`/`WorldRouter` + unit(`test_world_router.gd` 4 case)+ World Navigation Pipeline integration(Portal→WorldRouter→SceneRouter→落点放置→`zone_entered` 推进任务→turn-in 发奖→BGM)。`WorldRouter` 落点收尾走 `scene_changed` 的 `call_deferred`(适配真实 deferred 场景切换);integration 以 `TestSceneRouter`(挂载 `.tscn` 到 host)替换真实 `change_scene_to_file` 以免破坏 GUT runner。`world` 仍待 M5 接入 `game_bootstrap.gd`(随 `dialogue` 一并)。
+- _(更新)_ M3 shop 模块完成;新增 Shop Pipeline integration,并为该 integration 将 `shop` service 接入 `GameBootstrap`(当时 M5 剩余 `dialogue` / `world`);为商店交易补 `ProgressionSystem.spend_currency`。
+- _(更新)_ M4 world 模块完成:`ZoneDefinition`/`SpawnPoint`/`Portal`/`WorldRouter` + unit(`test_world_router.gd` 4 case)+ World Navigation Pipeline integration(Portal→WorldRouter→SceneRouter→落点放置→`zone_entered` 推进任务→turn-in 发奖→BGM)。`WorldRouter` 落点收尾走 `scene_changed` 的 `call_deferred`(适配真实 deferred 场景切换);integration 以 `TestSceneRouter`(挂载 `.tscn` 到 host)替换真实 `change_scene_to_file` 以免破坏 GUT runner。`world` 已在 M5 接入 `game_bootstrap.gd`,剩余 `dialogue` 等 M2 实现。
 - _(更新)_ 把「测试规则」升级为「**交付规则**」:**doc + unit + integration 三件套**随每个 milestone 同批交付,文档不再堆到 M10(M10 退化为最终一致性审计 + readme)。据此:M1 quest 补登 ✅ 文档项;M3 shop、M4 world 因当时未随交付补 `docs/ref`/layer/pipeline 文档,降级为 ⚠️ 待补文档(代码与测试仍全绿);M10 相应缩减为审计 + readme 两项。
 - _(更新)_ 清偿文档欠账:补齐 M3 shop(ShopDefinition / ShopEntry / ShopController / ShopUI)与 M4 world(ZoneDefinition / SpawnPoint / Portal / WorldRouter)的 `docs/ref/<ClassName>.md`,在 `docs/module_layer.md` 新增 **Shop** / **World** domain 段(ShopUI 列入 **UI & Feedback**,沿用 RewardSelectionUI 先例),在 `docs/pipeline.md` 新增 **Shop Pipeline** 与 **World Navigation Pipeline** 段。M3、M4 由 ⚠️ 转 ✅,当前无文档欠账。四条新 pipeline 在 `spec/int-test.md` 覆盖矩阵的登记仍归 M9(该文件尚未创建,沿用 M1 Quest Pipeline 先例)。
+- _(更新)_ M5 bootstrap 接线开始:在 `game_bootstrap.gd` 注册 `world` service,并更新 runtime bootstrap integration 对 `WorldRouter` 的断言。`dialogue` service 仍等待 M2 dialogue 模块实现后才能接入。
+- _(更新)_ M2 dialogue 模块完成:新增 `DialogueDefinition`/`DialogueNode`/`DialogueChoice`(Resource)、`DialogueRuntime`(RefCounted)、`DialogueController`(Node,service `dialogue`)、`DialogueInteractable`(extends Interactable,发 `npc_talked`)与 `modules/ui/dialogue_ui.gd`(`DialogueUI`)。unit `test_dialogue_controller.gd` 5 case(start 进起始节点跑 on_enter / 选项按 conditions 过滤 / choose 跑 effects 并推进 / 线性 advance 至结束发 `dialogue_ended` / 活动会话期间二次 start 被拒);Dialogue Pipeline integration 跨 **interaction + dialogue + quest**(`InteractionComponent.try_interact` → `DialogueInteractable` → `DialogueController.start` →选项挂 `AcceptQuestEffect` 接任务 → 与目标 NPC 对话发 `npc_talked` →任务 auto-complete 发奖)。文档:7 个 `docs/ref` 页 + `module_layer.md` **Dialogue** domain 段(DialogueUI 列入 **UI & Feedback**)+ `pipeline.md` **Dialogue Pipeline** 段。沿用 M1/M3 先例把 `dialogue` 接入 `game_bootstrap.gd`,至此 M5 bootstrap 四件(quest/shop/dialogue/world)已全部就位。验证:`make ut-kernel` 102/102、`make ut-modules` 187/187、`make int` 33/33 全绿。

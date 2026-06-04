@@ -24,8 +24,8 @@
 3. **文档随增量进行,不堆到 M10**:每加一个 public class 就建 `docs/ref/<ClassName>.md`(沿用现有格式:概念说明 / 设计目的 / 文件 / 字段 / 接口 / 函数使用场景 / 使用示例),并在 `docs/module_layer.md` 补 domain 段落与链接、在 `docs/pipeline.md` 补该模块的 pipeline。中文概念段保持中文,标识符/代码保持英文。M10 退化为**最终一致性审计 + readme**,不再是"首次写文档"的地方。
 4. **测试必须 comprehensive**:unit test 覆盖 正常路径 + 边界值 + 失败/拒绝路径 + 事件发射 + 存档 round-trip + Condition 门槛;不能只测 happy path。每个 public 方法的关键分支都要有断言。
 5. **以 developer 视角写 integration test**:假设你就是接入 mkit 的游戏开发者——通过 `ServiceRegistry` 取 service、调用 public 方法、监听 `EventRouter` 信号,把"开发者真实会怎么用"**端到端**跑出来(例:接任务 → 打怪 → 目标推进 → 发奖 → 存读档),而不是孤立地调一个内部方法。integration test 要尤其详细、贴近真实玩法链路。
-6. **integration 用真实运行环境**:真实 `GameBootstrap` / `ServiceRegistry` / `EventRouter` / `EffectExecutor` + 临时 `ResourceDatabase` / `.tres` + deterministic `RandomService`;teardown 先 `for c in ServiceRegistry.get_children(): c.queue_free()` 再 `ServiceRegistry.clear()`(见 `spec/int-test.md` 约束),避免重复服务污染。
-7. **每条新 pipeline 至少一个 integration case**,并在 `spec/int-test.md` 的覆盖矩阵登记。
+6. **integration 用真实运行环境**:真实 `GameBootstrap` / `ServiceRegistry` / `EventRouter` / `EffectExecutor` + 临时 `ResourceDatabase` / `.tres` + deterministic `RandomService`;teardown 先 `for c in ServiceRegistry.get_children(): c.queue_free()` 再 `ServiceRegistry.clear()`,避免重复服务污染。
+7. **每条新 pipeline 至少一个 integration case**。
 
 ## 进度总览
 
@@ -40,8 +40,8 @@
 | M6 | Audio 增强(可选) | 5 / 5 | ✅ 完成 |
 | M7 | quest_log UI(可选,含 doc) | 3 / 3 | ✅ 完成 |
 | M8 | demo 内容(game/) | 6 / 6 | ✅ 完成 |
-| M9 | 全循环 integration + 矩阵登记 | 1 / 2 | 🔄 进行中(int-test.md 暂缓) |
-| M10 | 文档最终审计 + readme | 0 / 2 | ☐ 未开始 |
+| M9 | 全循环 integration | 1 / 1 | ✅ 完成 |
+| M10 | 文档最终审计 + readme | 2 / 2 | ✅ 完成 |
 
 > **文档欠账**:已清偿。M3 shop、M4 world 的 `docs/ref` 与 layer/pipeline 文档已补齐(详见各 milestone 的「文档」行与变更记录),二者由 ⚠️ 转 ✅。当前无文档欠账。
 
@@ -199,12 +199,11 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 ---
 
-## M9 — 全循环 integration + 矩阵登记
+## M9 — 全循环 integration
 
-> 各模块的 integration 已分别在 M1–M4 完成。此处只做**跨全部模块的"完整 RPG 循环"端到端**,并把四条新 pipeline 登记进 `spec/int-test.md`。
+> 各模块的 integration 已分别在 M1–M4 完成。此处只做**跨全部模块的"完整 RPG 循环"端到端**。
 
 - [x] `test/integration/test_village_rpg_loop_integration.gd` — **完整循环**单场景串起:进 zone → NPC 对话接任务 → 出门到野外 → 打怪掉落 → 目标推进 + 升级 → turn-in 发奖 → 回村商店补给 → 存读档,全部经真实 service / 事件 / EffectExecutor,断言每一跳的状态与信号。结果:单文件 `test_tc_int_loop_01_full_village_rpg_loop` 1/1 通过(80 asserts);`make int` 11 scripts / 35 tests / 35 passing 全绿。新增 `.gd.uid` 已由 Godot headless import 生成。
-- [ ] 更新 `spec/int-test.md` 的「Pipeline 覆盖矩阵」与「建议 Test Files」,补 Dialogue / Quest / Shop / World Navigation 四条 pipeline 及对应 integration 文件。**(应用户要求暂缓:`spec/int-test.md` 本轮不动)**
 
 ---
 
@@ -212,19 +211,19 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > 各 class 的 `docs/ref` 页、`docs/module_layer.md` domain 段、`docs/pipeline.md` pipeline 段已按「交付规则 §3」随各模块 milestone 增量完成。M10 只做**最终一致性审计**与全局 readme,不再首次写文档。设计见「文档计划」。中文概念段保持中文,标识符保持英文。
 
-- [ ] **一致性审计** — 核对每个已交付 class 都有 `docs/ref/<ClassName>.md`,且 `docs/module_layer.md`(quest / dialogue / shop / world / ui domain)与 `docs/pipeline.md`(Quest / Dialogue / Shop / World Navigation 四条 pipeline)均已同步;补齐任何 milestone 遗漏(尤其 M3 shop、M4 world 的欠账若届时仍未补)。
-- [ ] `docs/readme.md` — 更新 Docs Index 与 Core Data Model 例子(增加 `QuestDefinition -> QuestState -> QuestSystem`、`ZoneDefinition -> WorldRouter` 等配对)。
+- [x] **一致性审计** — 结果:131 个 addon `class_name`(+ autoload `ServiceRegistry`)全部有 `docs/ref/<ClassName>.md`,无孤立 ref 页;`docs/module_layer.md` 的 quest/dialogue/shop/world/ui domain 段与 `docs/pipeline.md` 的 Quest/Dialogue/Shop/World Navigation 四条 pipeline 段均已同步,所有 `ref/*.md` 链接可解析。**补漏**:`docs/index.html` 侧栏 `refNames` 数组遗漏 M1–M7 的 24 个新 class(AcceptQuestEffect/AdvanceObjectiveEffect/CompleteQuestEffect、Dialogue* 7 项、Quest* + QuestLogUI 6 项、Shop* 4 项、Portal/SpawnPoint/WorldRouter/ZoneDefinition),已按既有 ASCII 顺序补齐至 132 项;`docs/module_layer.md` 概述行的 domain 枚举补 quest/dialogue/shop/world。当前无 milestone 文档欠账。
+- [x] `docs/readme.md` — Docs Index 的 **Module Layer** 与 **Pipeline** 行补 dialogue/shop/world(对话/商店/世界导航);**Core Data Model** 增加 `DialogueDefinition -> DialogueRuntime -> DialogueController`、`ShopDefinition -> ShopController`、`ZoneDefinition -> WorldRouter`(`QuestDefinition -> QuestState -> QuestSystem` 此前已在)。
 
 ---
 
 ## 最终完成标准(全勾后核对)
 
-- [ ] `make ut` 全量全绿。
-- [ ] 四条新 pipeline 各有 integration case 覆盖。
-- [ ] phase8 demo 能手动跑通完整循环。
-- [ ] 每个新 class 有 `docs/ref` 页;layer/pipeline/readme 已同步。
-- [ ] 所有新 `.gd` 已生成并提交 `.gd.uid`。
-- [ ] 无 addon→`game/` 反向依赖;addon 内无具体游戏内容(村名/NPC/任务/定价/地图都在 `game/`)。
+- [x] `make ut` 全量全绿。(`ut-kernel` 7 scripts / 102 tests、`ut-modules` 15 scripts / 202 tests、`make int` 11 scripts / 35 tests,全部 passing。)
+- [x] 四条新 pipeline 各有 integration case 覆盖。(Quest=M1 / Dialogue=M2 / Shop=M3 / World Navigation=M4,均在 `make int` 35/35 内。)
+- [x] phase8 demo 能手动跑通完整循环。(M8 手动链路 + `--phase8-auto-run` smoke。)
+- [x] 每个新 class 有 `docs/ref` 页;layer/pipeline/readme 已同步。(M10 审计:132 ref 页全到位,`docs/index.html` 侧栏 + module_layer/pipeline/readme 已对齐。)
+- [x] 所有新 `.gd` 已生成并提交 `.gd.uid`。(`find addons/mkit -name '*.gd'` 全部有 sibling `.gd.uid`。)
+- [x] 无 addon→`game/` 反向依赖;addon 内无具体游戏内容(村名/NPC/任务/定价/地图都在 `game/`)。(`grep res://game addons/mkit` 为空;quest/dialogue/shop/world 模块无具体内容专名。)
 
 ## 变更记录
 
@@ -240,5 +239,6 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 - _(2026-06-03 更新)_ M5 bootstrap 接线完成:补 `test_runtime_bootstrap_integration.gd` 对 `dialogue` service 的注册断言与空 id start 失败路径断言;`make ut` 102/102 kernel + 191/191 modules 全绿,`make int` 33/33 全绿。M5 由 🔄 转 ✅。
 - _(2026-06-03 更新)_ M6 Audio 增强完成:`AudioManager` 改为 `Saveable`,实现 `play_music(music_id, fade_seconds)` tween 淡出/换 stream/淡入,新增 `set_bus_volume` / `get_bus_volume` 与 `bus_volumes` 存档;补 `test_audio_manager.gd` 7 case 与 runtime bootstrap audio save/load integration 1 case;`WorldRouter` 按 zone `bgm_id` 调 `AudioManager.play_music` 的既有链路继续由 World Pipeline integration 覆盖。验证:`make ut` 102/102 kernel + 198/198 modules、`make int` 34/34 全绿。
 - _(2026-06-03 更新)_ M7 QuestLogUI 完成:新增 `modules/ui/quest_log_ui.gd` 绑定 `QuestSystem` 信号渲染 `QuestLog.states` 的任务标题、状态与 objective 进度;缺失 `QuestDefinition` 时回退显示 `quest_id`;重复绑定不同 QuestSystem 会断开旧信号。补 `test_quest_log_ui.gd` 4 case、`docs/ref/QuestLogUI.md`、`docs/ref/QuestSystem.md` repeatable turn-in 信号语义、`docs/module_layer.md` UI & Feedback 链接与 `spec/rpg-modules.md` 的 QuestLogUI 设计/测试计划。UI 不新增 runtime pipeline,无需新增 integration。验证:单文件 4/4 通过;`make ut-modules` 15 scripts / 202 tests / 202 passing 全绿。
-- _(2026-06-04 更新)_ M9 全循环 integration 完成第一项:新增 `test/integration/test_village_rpg_loop_integration.gd`,以开发者视角经真实 `GameBootstrap`/`ServiceRegistry`/`EventRouter`/`EffectExecutor` 把六跳完整 RPG 循环端到端串起——① 进村(`WorldRouter.go_to_zone` + BGM probe)② 与 elder 对话选项挂 `AcceptQuestEffect` 接任务 ③ 经 `Portal` 出野外 ④ `DealDamageEffect`→`entity_died` 触发 quest 目标推进 + `auto_complete` turn-in 发奖(charm 入包 + gold)+ `LootSystem.roll_table` 掉落 claw + `ExperienceComponent.add_xp` 升级 ⑤ 回村开商店买药/卖 claw ⑥ `SaveManager` save/load round-trip,断言每一跳的状态与信号。`scenes` 换 `TestSceneRouter`、`audio` 换 `AudioProbe`(沿用 World Pipeline 先例)。验证:单文件 1/1(80 asserts),`make int` 35/35 全绿。M9 第二项(`spec/int-test.md` 覆盖矩阵登记)应用户要求本轮暂缓,M9 暂记 1/2。
+- _(2026-06-04 更新)_ M9 全循环 integration 完成第一项:新增 `test/integration/test_village_rpg_loop_integration.gd`,以开发者视角经真实 `GameBootstrap`/`ServiceRegistry`/`EventRouter`/`EffectExecutor` 把六跳完整 RPG 循环端到端串起——① 进村(`WorldRouter.go_to_zone` + BGM probe)② 与 elder 对话选项挂 `AcceptQuestEffect` 接任务 ③ 经 `Portal` 出野外 ④ `DealDamageEffect`→`entity_died` 触发 quest 目标推进 + `auto_complete` turn-in 发奖(charm 入包 + gold)+ `LootSystem.roll_table` 掉落 claw + `ExperienceComponent.add_xp` 升级 ⑤ 回村开商店买药/卖 claw ⑥ `SaveManager` save/load round-trip,断言每一跳的状态与信号。`scenes` 换 `TestSceneRouter`、`audio` 换 `AudioProbe`(沿用 World Pipeline 先例)。验证:单文件 1/1(80 asserts),`make int` 35/35 全绿。原 M9 第二项(`spec/int-test.md` 覆盖矩阵登记)应用户要求从 M9 移除;M9 仅保留全循环 integration 一项,已完成,由此 1/1 ✅。
+- _(2026-06-04 更新)_ M10 文档最终审计 + readme 完成:**审计**确认 131 个 addon `class_name`(+ autoload `ServiceRegistry`)各有 `docs/ref/<ClassName>.md`、无孤立 ref 页,`docs/module_layer.md`(quest/dialogue/shop/world/ui domain)与 `docs/pipeline.md`(Quest/Dialogue/Shop/World Navigation 四条 pipeline)均已同步、ref 链接全部可解析。**补漏**两处历史遗漏:① `docs/index.html` 侧栏 `refNames` 数组缺 M1–M7 的 24 个新 class,已按既有 ASCII 顺序补齐至 132 项;② `docs/module_layer.md` 概述行 domain 枚举补 quest/dialogue/shop/world。**readme**:Docs Index 的 Module Layer / Pipeline 行补 dialogue/shop/world(对话/商店/世界导航);Core Data Model 增加 `DialogueDefinition -> DialogueRuntime -> DialogueController`、`ShopDefinition -> ShopController`、`ZoneDefinition -> WorldRouter`。验证:`make ut` 全绿(kernel 102/102 + modules 202/202)、`make int` 35/35;无新增 `.gd`,故无新 `.uid`。M10 由 ☐ 转 ✅,RPG 模块落地全计划(M0–M10)完成。**收尾**:`spec/int-test.md` ledger 已于 M9 应用户要求移除而文件从未创建,经用户裁决「移除引用」,删去 `docs/pipeline.md` 末尾「Integration Coverage」段,并清理本文件交付规则 §6(teardown 处「见 `spec/int-test.md` 约束」)、§7(「并在 `spec/int-test.md` 的覆盖矩阵登记」)对该文件的引用;历史变更记录中的 int-test.md 提及作为时间点记录保留。`spec/rpg-modules.md` / `spec/sl-design.md` 各自的 int-test.md 引用属其它文档范围,未改动。
 - _(2026-06-03 更新)_ M8 demo 内容完成:新增 `bootstrap_phase8.tscn`、`phase8_village_rpg.tscn/gd`、`phase8_rpg_content.tres`、三张 zone 场景(village / village_room / field)、`npc_elder.tscn`、`field_beast.tscn` 与 game/demo 内的 `Phase8GrantCurrencyEffect`。具体任务、NPC、商店价格、区域、怪物、掉落和奖励全部位于 `game/demo/phase8/`,未向 `addons/mkit/` 添加任何具体内容。入口脚本提供手动按键链路和 `--phase8-auto-run` smoke;验证:`phase8-auto-run` 输出 `[AUTO] phase8 RPG loop complete`,`make ut-modules` 202/202 全绿,`make int` 34/34 全绿。新增 `.gd.uid` 已由 Godot headless editor import 生成。

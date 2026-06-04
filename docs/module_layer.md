@@ -2,7 +2,7 @@
 
 ## Layer Level
 
-Module Layer 位于 Game Content Layer 之下、Kernel Layer 之上。它提供可复用的 gameplay domain 模块，例如 entity、combat、stats、ability、inventory、room、loot、progression、AI、interaction 和 UI feedback。
+Module Layer 位于 Game Content Layer 之下、Kernel Layer 之上。它提供可复用的 gameplay domain 模块，例如 entity、combat、stats、ability、inventory、loot、quest、dialogue、shop、world、room、progression、AI、interaction 和 UI feedback。
 
 这个 layer 可以依赖 Kernel Layer 的命令、事件、上下文、状态机、action、condition、effect、registry、save 等基础能力；它不应该依赖任何具体游戏内容。
 

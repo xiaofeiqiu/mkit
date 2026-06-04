@@ -27,6 +27,7 @@ var parent_node: Node
 
 func before_each() -> void:
 	content = StubContent.new()
+	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
 	spawner = EntitySpawner.new()
 	add_child_autofree(spawner)

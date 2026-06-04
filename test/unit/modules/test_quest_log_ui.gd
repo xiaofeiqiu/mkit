@@ -22,6 +22,7 @@ var empty_label: Label
 
 func before_each() -> void:
 	content = StubContent.new()
+	add_child_autofree(content)
 	events = EventRouter.new()
 	add_child_autofree(events)
 	effects = EffectExecutor.new()
@@ -71,6 +72,7 @@ func test_tc_qlui_01_bind_renders_empty_and_refreshes_from_quest_signals() -> vo
 
 	assert_true(quest.turn_in_quest("quest.alpha", null))
 	assert_eq(_label_text(0, "StatusLabel"), "Status: turned_in")
+	await get_tree().process_frame
 
 
 func test_tc_qlui_02_refresh_sorts_states_and_falls_back_to_quest_id() -> void:
@@ -114,6 +116,7 @@ func test_tc_qlui_04_repeatable_turn_in_renders_final_reset_state() -> void:
 	assert_eq(quest.get_state("quest.repeat").status, "available")
 	assert_eq(_label_text(0, "StatusLabel"), "Status: available")
 	assert_eq(_label_text(0, "Objective_obj_repeat"), "Repeat step 0/1")
+	await get_tree().process_frame
 
 
 func _make_objective(

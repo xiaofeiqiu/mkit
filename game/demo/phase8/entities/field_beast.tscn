@@ -1,0 +1,70 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="1_identity"]
+[ext_resource type="Script" path="res://addons/mkit/modules/stats/stats_component.gd" id="2_stats"]
+[ext_resource type="Script" path="res://addons/mkit/modules/health/health_component.gd" id="3_health"]
+[ext_resource type="Script" path="res://addons/mkit/modules/combat/hurtbox_component.gd" id="4_hurtbox"]
+[ext_resource type="Script" path="res://addons/mkit/modules/status_effects/status_effect_controller.gd" id="5_status"]
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="6_root"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="7_receiver"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="8_state_machine"]
+
+[sub_resource type="RectangleShape2D" id="RectShape_hurt"]
+size = Vector2(34, 34)
+
+[node name="FieldBeast" type="CharacterBody2D" groups=["enemy"]]
+script = ExtResource("6_root")
+
+[node name="EntityIdentity" type="Node" parent="."]
+script = ExtResource("1_identity")
+entity_id = "enemy.phase8.field_beast"
+display_name = "Field Beast"
+faction = "enemy"
+tags = Array[String](["enemy", "living", "field_beast"])
+
+[node name="CommandReceiver" type="Node" parent="."]
+script = ExtResource("7_receiver")
+receiver_id = "enemy.phase8.field_beast"
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("8_state_machine")
+auto_start = false
+
+[node name="Components" type="Node2D" parent="."]
+
+[node name="StatsComponent" type="Node" parent="Components"]
+script = ExtResource("2_stats")
+base_stats = {
+"defense": 0.0,
+"max_hp": 35.0
+}
+
+[node name="HealthComponent" type="Node" parent="Components"]
+script = ExtResource("3_health")
+current_hp = 35.0
+destroy_on_death = false
+
+[node name="HurtboxComponent" type="Area2D" parent="Components"]
+script = ExtResource("4_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Components/HurtboxComponent"]
+shape = SubResource("RectShape_hurt")
+
+[node name="Controllers" type="Node" parent="."]
+
+[node name="StatusEffectController" type="Node" parent="Controllers"]
+script = ExtResource("5_status")
+
+[node name="Presentation" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Presentation"]
+color = Color(0.78, 0.16, 0.14, 1)
+polygon = PackedVector2Array(-18, -18, 18, -18, 22, 10, 0, 22, -22, 10)
+
+[node name="NameLabel" type="Label" parent="Presentation"]
+offset_left = -54.0
+offset_top = -48.0
+offset_right = 54.0
+offset_bottom = -24.0
+text = "Field Beast"
+horizontal_alignment = 1

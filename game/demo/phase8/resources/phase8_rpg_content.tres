@@ -1,0 +1,187 @@
+[gd_resource type="Resource" load_steps=26 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/kernel/registry/resource_database.gd" id="1_db"]
+[ext_resource type="Script" path="res://addons/mkit/modules/inventory/item_definition.gd" id="2_item"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/heal_effect.gd" id="3_heal"]
+[ext_resource type="Script" path="res://addons/mkit/modules/loot/loot_entry.gd" id="4_loot_entry"]
+[ext_resource type="Script" path="res://addons/mkit/modules/loot/loot_table_definition.gd" id="5_loot_table"]
+[ext_resource type="Script" path="res://addons/mkit/modules/quest/quest_objective_definition.gd" id="6_quest_obj"]
+[ext_resource type="Script" path="res://addons/mkit/modules/quest/quest_definition.gd" id="7_quest"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/grant_item_effect.gd" id="8_grant_item"]
+[ext_resource type="Script" path="res://game/demo/phase8/phase8_grant_currency_effect.gd" id="9_grant_gold"]
+[ext_resource type="Script" path="res://addons/mkit/modules/quest/accept_quest_effect.gd" id="10_accept"]
+[ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_choice.gd" id="11_choice"]
+[ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_node.gd" id="12_dialogue_node"]
+[ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_definition.gd" id="13_dialogue"]
+[ext_resource type="Script" path="res://addons/mkit/modules/shop/shop_entry.gd" id="14_shop_entry"]
+[ext_resource type="Script" path="res://addons/mkit/modules/shop/shop_definition.gd" id="15_shop"]
+[ext_resource type="Script" path="res://addons/mkit/modules/world/zone_definition.gd" id="16_zone"]
+
+[sub_resource type="Resource" id="Resource_heal_potion_effect"]
+script = ExtResource("3_heal")
+effect_id = "effect.phase8.herb_potion_heal"
+base_amount = 35.0
+
+[sub_resource type="Resource" id="Resource_item_potion"]
+script = ExtResource("2_item")
+item_id = "item.phase8.herb_potion"
+display_name = "Herb Potion"
+description = "Restores 35 HP."
+item_type = "consumable"
+rarity = "common"
+value = 10
+stackable = true
+max_stack = 8
+tags = Array[String](["potion", "healing", "shop"])
+use_effects = Array[GameEffect]([SubResource("Resource_heal_potion_effect")])
+
+[sub_resource type="Resource" id="Resource_item_claw"]
+script = ExtResource("2_item")
+item_id = "item.phase8.beast_claw"
+display_name = "Beast Claw"
+description = "A field beast trophy that the village shop will buy."
+item_type = "material"
+rarity = "common"
+value = 8
+stackable = true
+max_stack = 20
+tags = Array[String](["trophy", "field_beast"])
+
+[sub_resource type="Resource" id="Resource_item_charm"]
+script = ExtResource("2_item")
+item_id = "item.phase8.village_charm"
+display_name = "Village Charm"
+description = "Quest reward from the elder."
+item_type = "quest_reward"
+rarity = "rare"
+value = 0
+stackable = true
+max_stack = 1
+tags = Array[String](["quest_reward"])
+
+[sub_resource type="Resource" id="Resource_loot_claw_entry"]
+script = ExtResource("4_loot_entry")
+content_id = "item.phase8.beast_claw"
+weight = 1.0
+min_quantity = 1
+max_quantity = 1
+
+[sub_resource type="Resource" id="Resource_loot_field_beast"]
+script = ExtResource("5_loot_table")
+loot_table_id = "loot.phase8.field_beast"
+rolls = 1
+entries = Array[LootEntry]([SubResource("Resource_loot_claw_entry")])
+allow_empty = false
+empty_weight = 0.0
+
+[sub_resource type="Resource" id="Resource_quest_objective_kill"]
+script = ExtResource("6_quest_obj")
+objective_id = "obj.phase8.kill_field_beast"
+description = "Defeat a field beast"
+event_type = "enemy_killed"
+match_key = "tags"
+match_value = "field_beast"
+required_count = 1
+
+[sub_resource type="Resource" id="Resource_reward_charm"]
+script = ExtResource("8_grant_item")
+effect_id = "effect.phase8.reward_charm"
+item_id = "item.phase8.village_charm"
+quantity = 1
+give_to_source = true
+
+[sub_resource type="Resource" id="Resource_reward_gold"]
+script = ExtResource("9_grant_gold")
+effect_id = "effect.phase8.reward_gold"
+currency_id = "gold"
+amount = 30
+
+[sub_resource type="Resource" id="Resource_quest_field_report"]
+script = ExtResource("7_quest")
+quest_id = "quest.phase8.field_report"
+display_name = "Field Report"
+description = "Help the village elder confirm that the field path is safe."
+quest_type = "side"
+objectives = Array[QuestObjectiveDefinition]([SubResource("Resource_quest_objective_kill")])
+reward_effects = Array[GameEffect]([SubResource("Resource_reward_charm"), SubResource("Resource_reward_gold")])
+auto_complete = true
+repeatable = false
+tags = Array[String](["phase8", "rpg_loop"])
+
+[sub_resource type="Resource" id="Resource_accept_quest"]
+script = ExtResource("10_accept")
+effect_id = "effect.phase8.accept_field_report"
+quest_id = "quest.phase8.field_report"
+
+[sub_resource type="Resource" id="Resource_dialogue_choice_accept"]
+script = ExtResource("11_choice")
+text = "I'll check the field."
+next_node_id = "n.accepted"
+effects = Array[GameEffect]([SubResource("Resource_accept_quest")])
+
+[sub_resource type="Resource" id="Resource_dialogue_node_offer"]
+script = ExtResource("12_dialogue_node")
+node_id = "n.offer"
+speaker_id = "npc.phase8.elder"
+text = "The road beyond the village is restless. Bring back proof from one field beast."
+choices = Array[DialogueChoice]([SubResource("Resource_dialogue_choice_accept")])
+
+[sub_resource type="Resource" id="Resource_dialogue_node_accepted"]
+script = ExtResource("12_dialogue_node")
+node_id = "n.accepted"
+speaker_id = "npc.phase8.elder"
+text = "Return after the field is clear. The shopkeeper will restock you for the road."
+
+[sub_resource type="Resource" id="Resource_dialogue_elder"]
+script = ExtResource("13_dialogue")
+dialogue_id = "dialogue.phase8.elder"
+start_node_id = "n.offer"
+nodes = Array[DialogueNode]([SubResource("Resource_dialogue_node_offer"), SubResource("Resource_dialogue_node_accepted")])
+
+[sub_resource type="Resource" id="Resource_shop_entry_potion"]
+script = ExtResource("14_shop_entry")
+item_id = "item.phase8.herb_potion"
+price_override = 10
+stock = 5
+
+[sub_resource type="Resource" id="Resource_shop_village"]
+script = ExtResource("15_shop")
+shop_id = "shop.phase8.village_supply"
+display_name = "Village Supply"
+currency_id = "gold"
+entries = Array[ShopEntry]([SubResource("Resource_shop_entry_potion")])
+buy_price_multiplier = 1.0
+sell_price_multiplier = 0.5
+allow_sell = true
+
+[sub_resource type="Resource" id="Resource_zone_village"]
+script = ExtResource("16_zone")
+zone_id = "zone.phase8.village"
+display_name = "Village"
+scene_path = "res://game/demo/phase8/scenes/village.tscn"
+bgm_id = "bgm.phase8.village"
+default_spawn_id = "village_square"
+tags = Array[String](["village", "safe"])
+
+[sub_resource type="Resource" id="Resource_zone_room"]
+script = ExtResource("16_zone")
+zone_id = "zone.phase8.village_room"
+display_name = "Elder Room"
+scene_path = "res://game/demo/phase8/scenes/village_room.tscn"
+bgm_id = "bgm.phase8.room"
+default_spawn_id = "room_entry"
+tags = Array[String](["village", "interior"])
+
+[sub_resource type="Resource" id="Resource_zone_field"]
+script = ExtResource("16_zone")
+zone_id = "zone.phase8.field"
+display_name = "Field"
+scene_path = "res://game/demo/phase8/scenes/field.tscn"
+bgm_id = "bgm.phase8.field"
+default_spawn_id = "field_entry"
+tags = Array[String](["field", "combat"])
+
+[resource]
+script = ExtResource("1_db")
+database_id = "phase8_rpg_content"
+resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_loot_field_beast"), SubResource("Resource_quest_field_report"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field")])

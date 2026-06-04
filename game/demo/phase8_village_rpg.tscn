@@ -1,0 +1,134 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://game/demo/phase8_village_rpg.gd" id="1_slice"]
+[ext_resource type="PackedScene" path="res://game/demo/entities/player/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_component.gd" id="3_experience"]
+[ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_curve.gd" id="4_curve"]
+[ext_resource type="Script" path="res://addons/mkit/modules/ui/dialogue_ui.gd" id="5_dialogue_ui"]
+[ext_resource type="Script" path="res://addons/mkit/modules/ui/quest_log_ui.gd" id="6_quest_log_ui"]
+[ext_resource type="Script" path="res://addons/mkit/modules/ui/shop_ui.gd" id="7_shop_ui"]
+
+[sub_resource type="Resource" id="Resource_phase8_curve"]
+script = ExtResource("4_curve")
+base_xp = 40
+growth_factor = 1.4
+max_level = 8
+
+[node name="Phase8VillageRpg" type="Node2D"]
+script = ExtResource("1_slice")
+
+[node name="WorldHost" type="Node2D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(160, 260)
+
+[node name="ExperienceComponent" type="Node" parent="Player/Components"]
+script = ExtResource("3_experience")
+save_id = "player_experience"
+curve = SubResource("Resource_phase8_curve")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Instructions" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 512.0
+offset_right = 980.0
+offset_bottom = 560.0
+text = ""
+
+[node name="StatsPanel" type="VBoxContainer" parent="HUD"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -430.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 300.0
+grow_horizontal = 0
+
+[node name="ZoneInfo" type="Label" parent="HUD/StatsPanel"]
+text = "Zone: --"
+
+[node name="QuestInfo" type="Label" parent="HUD/StatsPanel"]
+text = "Quest: --"
+
+[node name="PlayerInfo" type="Label" parent="HUD/StatsPanel"]
+text = "Player: --"
+
+[node name="InventoryInfo" type="Label" parent="HUD/StatsPanel"]
+text = "Bag: empty"
+
+[node name="ShopInfo" type="Label" parent="HUD/StatsPanel"]
+text = "Shop: closed"
+
+[node name="EventLog" type="Label" parent="HUD/StatsPanel"]
+text = ""
+
+[node name="DialoguePanel" type="Control" parent="HUD"]
+visible = false
+offset_left = 16.0
+offset_top = 320.0
+offset_right = 540.0
+offset_bottom = 500.0
+script = ExtResource("5_dialogue_ui")
+
+[node name="SpeakerLabel" type="Label" parent="HUD/DialoguePanel"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 524.0
+offset_bottom = 24.0
+text = ""
+
+[node name="TextLabel" type="Label" parent="HUD/DialoguePanel"]
+offset_left = 0.0
+offset_top = 28.0
+offset_right = 524.0
+offset_bottom = 84.0
+autowrap_mode = 3
+text = ""
+
+[node name="ChoiceContainer" type="VBoxContainer" parent="HUD/DialoguePanel"]
+offset_left = 0.0
+offset_top = 92.0
+offset_right = 524.0
+offset_bottom = 180.0
+
+[node name="QuestLogPanel" type="Control" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 340.0
+offset_bottom = 160.0
+script = ExtResource("6_quest_log_ui")
+
+[node name="EmptyLabel" type="Label" parent="HUD/QuestLogPanel"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 320.0
+offset_bottom = 24.0
+text = "No active quests"
+
+[node name="QuestContainer" type="VBoxContainer" parent="HUD/QuestLogPanel"]
+offset_left = 0.0
+offset_top = 28.0
+offset_right = 320.0
+offset_bottom = 144.0
+
+[node name="ShopPanel" type="Control" parent="HUD"]
+visible = false
+offset_left = 16.0
+offset_top = 170.0
+offset_right = 340.0
+offset_bottom = 300.0
+script = ExtResource("7_shop_ui")
+
+[node name="ShopTitle" type="Label" parent="HUD/ShopPanel"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 320.0
+offset_bottom = 24.0
+text = "Village Supply"
+
+[node name="EntryContainer" type="VBoxContainer" parent="HUD/ShopPanel"]
+offset_left = 0.0
+offset_top = 30.0
+offset_right = 320.0
+offset_bottom = 130.0

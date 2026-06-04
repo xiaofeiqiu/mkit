@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="2_identity"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="3_receiver"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="4_state_machine"]
+[ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_interactable.gd" id="5_dialogue"]
+
+[node name="Elder" type="CharacterBody2D" groups=["npc"]]
+script = ExtResource("1_root")
+
+[node name="EntityIdentity" type="Node" parent="."]
+script = ExtResource("2_identity")
+entity_id = "npc.phase8.elder"
+display_name = "Village Elder"
+faction = "npc"
+tags = Array[String](["npc", "quest_giver", "elder"])
+
+[node name="CommandReceiver" type="Node" parent="."]
+script = ExtResource("3_receiver")
+receiver_id = "npc.phase8.elder"
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("4_state_machine")
+auto_start = false
+
+[node name="Components" type="Node" parent="."]
+
+[node name="Controllers" type="Node" parent="."]
+
+[node name="DialogueInteractable" type="Node" parent="Controllers"]
+script = ExtResource("5_dialogue")
+interaction_id = "interaction.phase8.elder"
+display_text = "Talk"
+dialogue_id = "dialogue.phase8.elder"
+npc_id = "npc.phase8.elder"
+
+[node name="Presentation" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Presentation"]
+color = Color(0.33, 0.45, 0.85, 1)
+polygon = PackedVector2Array(-14, -18, 14, -18, 18, 18, -18, 18)
+
+[node name="NameLabel" type="Label" parent="Presentation"]
+offset_left = -42.0
+offset_top = -44.0
+offset_right = 42.0
+offset_bottom = -20.0
+text = "Elder"
+horizontal_alignment = 1

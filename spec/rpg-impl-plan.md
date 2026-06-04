@@ -39,7 +39,7 @@
 | M5 | bootstrap 接线 | 2 / 2 | ✅ 完成 |
 | M6 | Audio 增强(可选) | 5 / 5 | ✅ 完成 |
 | M7 | quest_log UI(可选,含 doc) | 3 / 3 | ✅ 完成 |
-| M8 | demo 内容(game/) | 0 / 6 | ☐ 未开始 |
+| M8 | demo 内容(game/) | 6 / 6 | ✅ 完成 |
 | M9 | 全循环 integration + 矩阵登记 | 0 / 2 | ☐ 未开始 |
 | M10 | 文档最终审计 + readme | 0 / 2 | ☐ 未开始 |
 
@@ -190,12 +190,12 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > 验证"完整 RPG 循环"能真的跑通。设计见「game/ 内容放置」。
 
-- [ ] `bootstrap_phase8.tscn` — 注册新 service + 加载新 ResourceDatabase。
-- [ ] `phase8_village_rpg.tscn` + `phase8_village_rpg.gd` — 入口/驱动脚本。
-- [ ] 场景:`village.tscn` / `village_room.tscn` / `field.tscn`(NPC + Portal + SpawnPoint + 刷怪 + 回村)。
-- [ ] Resources:`QuestDefinition`/`QuestObjectiveDefinition`、`DialogueDefinition`/`DialogueNode`/`DialogueChoice`、`ShopDefinition`/`ShopEntry`、`ZoneDefinition`,并给现有怪/物品填 `value` 与 BGM/SFX 映射。
-- [ ] NPC 实体:EntityRoot(无战斗组件)+ `DialogueInteractable`,沿用既有实体节点布局。
-- [ ] **手动跑通** — 进村→进房间→NPC 对话接任务→出房→野外打怪掉落升级→任务自动/turn-in 发奖→回村商店补给→BGM/SFX 正常。结果:_(待填)_
+- [x] `bootstrap_phase8.tscn` — 注册新 service + 加载新 ResourceDatabase。新增 `game/demo/bootstrap_phase8.tscn`,加载 `game/demo/phase8/resources/phase8_rpg_content.tres`,入口为 `phase8_village_rpg.tscn`。
+- [x] `phase8_village_rpg.tscn` + `phase8_village_rpg.gd` — 入口/驱动脚本。入口持有持久玩家、WorldHost、DialogueUI / QuestLogUI / ShopUI 与 HUD;脚本通过 `ServiceRegistry` 取 `world` / `dialogue` / `quest` / `shop` / `progression` / `effects` / `audio`,并把 zone 切换嵌入到 WorldHost,避免 demo 入口和 HUD 被场景切换销毁。
+- [x] 场景:`village.tscn` / `village_room.tscn` / `field.tscn`(NPC + Portal + SpawnPoint + 刷怪 + 回村)。新增三张 zone 场景与 `SpawnPoint` / `Portal`;field 实例化 `field_beast.tscn`,village_room 实例化 `npc_elder.tscn`。
+- [x] Resources:`QuestDefinition`/`QuestObjectiveDefinition`、`DialogueDefinition`/`DialogueNode`/`DialogueChoice`、`ShopDefinition`/`ShopEntry`、`ZoneDefinition`,并给现有怪/物品填 `value` 与 BGM/SFX 映射。新增 `phase8_rpg_content.tres`,包含 `Field Report` 任务、elder dialogue、Village Supply shop、三张 ZoneDefinition、potion/claw/charm ItemDefinition、field beast LootTable;BGM/SFX id 映射在 `phase8_village_rpg.gd` 注入 `AudioManager.music_map` / `sfx_map`。
+- [x] NPC 实体:EntityRoot(无战斗组件)+ `DialogueInteractable`,沿用既有实体节点布局。新增 `game/demo/phase8/entities/npc_elder.tscn`:EntityRoot / EntityIdentity / CommandReceiver / StateMachine / Components / Controllers(DialogueInteractable) / Presentation。
+- [x] **手动跑通** — 进村→进房间→NPC 对话接任务→出房→野外打怪掉落升级→任务自动/turn-in 发奖→回村商店补给→BGM/SFX 正常。结果:新增 `--phase8-auto-run` smoke,按同一公开操作链自动执行 `R/T/T/T/R/G/K/G/B/V`;输出显示 `[AUTO] phase8 RPG loop complete`。验证命令:`/Applications/Godot.app/Contents/MacOS/Godot --headless --log-file /tmp/mkit_phase8_smoke.log --path . res://game/demo/bootstrap_phase8.tscn --phase8-auto-run --quit-after 20`;`make ut-modules` 15 scripts / 202 tests / 202 passing;`make int` 10 scripts / 34 tests / 34 passing。
 
 ---
 
@@ -240,3 +240,4 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 - _(2026-06-03 更新)_ M5 bootstrap 接线完成:补 `test_runtime_bootstrap_integration.gd` 对 `dialogue` service 的注册断言与空 id start 失败路径断言;`make ut` 102/102 kernel + 191/191 modules 全绿,`make int` 33/33 全绿。M5 由 🔄 转 ✅。
 - _(2026-06-03 更新)_ M6 Audio 增强完成:`AudioManager` 改为 `Saveable`,实现 `play_music(music_id, fade_seconds)` tween 淡出/换 stream/淡入,新增 `set_bus_volume` / `get_bus_volume` 与 `bus_volumes` 存档;补 `test_audio_manager.gd` 7 case 与 runtime bootstrap audio save/load integration 1 case;`WorldRouter` 按 zone `bgm_id` 调 `AudioManager.play_music` 的既有链路继续由 World Pipeline integration 覆盖。验证:`make ut` 102/102 kernel + 198/198 modules、`make int` 34/34 全绿。
 - _(2026-06-03 更新)_ M7 QuestLogUI 完成:新增 `modules/ui/quest_log_ui.gd` 绑定 `QuestSystem` 信号渲染 `QuestLog.states` 的任务标题、状态与 objective 进度;缺失 `QuestDefinition` 时回退显示 `quest_id`;重复绑定不同 QuestSystem 会断开旧信号。补 `test_quest_log_ui.gd` 4 case、`docs/ref/QuestLogUI.md`、`docs/ref/QuestSystem.md` repeatable turn-in 信号语义、`docs/module_layer.md` UI & Feedback 链接与 `spec/rpg-modules.md` 的 QuestLogUI 设计/测试计划。UI 不新增 runtime pipeline,无需新增 integration。验证:单文件 4/4 通过;`make ut-modules` 15 scripts / 202 tests / 202 passing 全绿。
+- _(2026-06-03 更新)_ M8 demo 内容完成:新增 `bootstrap_phase8.tscn`、`phase8_village_rpg.tscn/gd`、`phase8_rpg_content.tres`、三张 zone 场景(village / village_room / field)、`npc_elder.tscn`、`field_beast.tscn` 与 game/demo 内的 `Phase8GrantCurrencyEffect`。具体任务、NPC、商店价格、区域、怪物、掉落和奖励全部位于 `game/demo/phase8/`,未向 `addons/mkit/` 添加任何具体内容。入口脚本提供手动按键链路和 `--phase8-auto-run` smoke;验证:`phase8-auto-run` 输出 `[AUTO] phase8 RPG loop complete`,`make ut-modules` 202/202 全绿,`make int` 34/34 全绿。新增 `.gd.uid` 已由 Godot headless editor import 生成。

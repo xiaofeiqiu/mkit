@@ -40,7 +40,7 @@
 | M6 | Audio 增强(可选) | 5 / 5 | ✅ 完成 |
 | M7 | quest_log UI(可选,含 doc) | 3 / 3 | ✅ 完成 |
 | M8 | demo 内容(game/) | 6 / 6 | ✅ 完成 |
-| M9 | 全循环 integration + 矩阵登记 | 0 / 2 | ☐ 未开始 |
+| M9 | 全循环 integration + 矩阵登记 | 1 / 2 | 🔄 进行中(int-test.md 暂缓) |
 | M10 | 文档最终审计 + readme | 0 / 2 | ☐ 未开始 |
 
 > **文档欠账**:已清偿。M3 shop、M4 world 的 `docs/ref` 与 layer/pipeline 文档已补齐(详见各 milestone 的「文档」行与变更记录),二者由 ⚠️ 转 ✅。当前无文档欠账。
@@ -203,8 +203,8 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 
 > 各模块的 integration 已分别在 M1–M4 完成。此处只做**跨全部模块的"完整 RPG 循环"端到端**,并把四条新 pipeline 登记进 `spec/int-test.md`。
 
-- [ ] `test/integration/test_village_rpg_loop_integration.gd` — **完整循环**单场景串起:进 zone → NPC 对话接任务 → 出门到野外 → 打怪掉落 → 目标推进 + 升级 → turn-in 发奖 → 回村商店补给 → 存读档,全部经真实 service / 事件 / EffectExecutor,断言每一跳的状态与信号。
-- [ ] 更新 `spec/int-test.md` 的「Pipeline 覆盖矩阵」与「建议 Test Files」,补 Dialogue / Quest / Shop / World Navigation 四条 pipeline 及对应 integration 文件。
+- [x] `test/integration/test_village_rpg_loop_integration.gd` — **完整循环**单场景串起:进 zone → NPC 对话接任务 → 出门到野外 → 打怪掉落 → 目标推进 + 升级 → turn-in 发奖 → 回村商店补给 → 存读档,全部经真实 service / 事件 / EffectExecutor,断言每一跳的状态与信号。结果:单文件 `test_tc_int_loop_01_full_village_rpg_loop` 1/1 通过(80 asserts);`make int` 11 scripts / 35 tests / 35 passing 全绿。新增 `.gd.uid` 已由 Godot headless import 生成。
+- [ ] 更新 `spec/int-test.md` 的「Pipeline 覆盖矩阵」与「建议 Test Files」,补 Dialogue / Quest / Shop / World Navigation 四条 pipeline 及对应 integration 文件。**(应用户要求暂缓:`spec/int-test.md` 本轮不动)**
 
 ---
 
@@ -240,4 +240,5 @@ M1–M4 之间彼此不在编译期硬依赖(跨模块只通过 data 引用 `Gam
 - _(2026-06-03 更新)_ M5 bootstrap 接线完成:补 `test_runtime_bootstrap_integration.gd` 对 `dialogue` service 的注册断言与空 id start 失败路径断言;`make ut` 102/102 kernel + 191/191 modules 全绿,`make int` 33/33 全绿。M5 由 🔄 转 ✅。
 - _(2026-06-03 更新)_ M6 Audio 增强完成:`AudioManager` 改为 `Saveable`,实现 `play_music(music_id, fade_seconds)` tween 淡出/换 stream/淡入,新增 `set_bus_volume` / `get_bus_volume` 与 `bus_volumes` 存档;补 `test_audio_manager.gd` 7 case 与 runtime bootstrap audio save/load integration 1 case;`WorldRouter` 按 zone `bgm_id` 调 `AudioManager.play_music` 的既有链路继续由 World Pipeline integration 覆盖。验证:`make ut` 102/102 kernel + 198/198 modules、`make int` 34/34 全绿。
 - _(2026-06-03 更新)_ M7 QuestLogUI 完成:新增 `modules/ui/quest_log_ui.gd` 绑定 `QuestSystem` 信号渲染 `QuestLog.states` 的任务标题、状态与 objective 进度;缺失 `QuestDefinition` 时回退显示 `quest_id`;重复绑定不同 QuestSystem 会断开旧信号。补 `test_quest_log_ui.gd` 4 case、`docs/ref/QuestLogUI.md`、`docs/ref/QuestSystem.md` repeatable turn-in 信号语义、`docs/module_layer.md` UI & Feedback 链接与 `spec/rpg-modules.md` 的 QuestLogUI 设计/测试计划。UI 不新增 runtime pipeline,无需新增 integration。验证:单文件 4/4 通过;`make ut-modules` 15 scripts / 202 tests / 202 passing 全绿。
+- _(2026-06-04 更新)_ M9 全循环 integration 完成第一项:新增 `test/integration/test_village_rpg_loop_integration.gd`,以开发者视角经真实 `GameBootstrap`/`ServiceRegistry`/`EventRouter`/`EffectExecutor` 把六跳完整 RPG 循环端到端串起——① 进村(`WorldRouter.go_to_zone` + BGM probe)② 与 elder 对话选项挂 `AcceptQuestEffect` 接任务 ③ 经 `Portal` 出野外 ④ `DealDamageEffect`→`entity_died` 触发 quest 目标推进 + `auto_complete` turn-in 发奖(charm 入包 + gold)+ `LootSystem.roll_table` 掉落 claw + `ExperienceComponent.add_xp` 升级 ⑤ 回村开商店买药/卖 claw ⑥ `SaveManager` save/load round-trip,断言每一跳的状态与信号。`scenes` 换 `TestSceneRouter`、`audio` 换 `AudioProbe`(沿用 World Pipeline 先例)。验证:单文件 1/1(80 asserts),`make int` 35/35 全绿。M9 第二项(`spec/int-test.md` 覆盖矩阵登记)应用户要求本轮暂缓,M9 暂记 1/2。
 - _(2026-06-03 更新)_ M8 demo 内容完成:新增 `bootstrap_phase8.tscn`、`phase8_village_rpg.tscn/gd`、`phase8_rpg_content.tres`、三张 zone 场景(village / village_room / field)、`npc_elder.tscn`、`field_beast.tscn` 与 game/demo 内的 `Phase8GrantCurrencyEffect`。具体任务、NPC、商店价格、区域、怪物、掉落和奖励全部位于 `game/demo/phase8/`,未向 `addons/mkit/` 添加任何具体内容。入口脚本提供手动按键链路和 `--phase8-auto-run` smoke;验证:`phase8-auto-run` 输出 `[AUTO] phase8 RPG loop complete`,`make ut-modules` 202/202 全绿,`make int` 34/34 全绿。新增 `.gd.uid` 已由 Godot headless editor import 生成。

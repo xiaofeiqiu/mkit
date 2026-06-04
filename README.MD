@@ -100,6 +100,7 @@ make ut            # run all unit tests
 make ut-kernel     # run kernel unit tests
 make ut-modules    # run module unit tests
 make int           # run integration tests
+make phase8-test   # run the Phase 8 RPG loop auto-run smoke test
 make docs-server   # serve docs/ at http://localhost:8060
 ```
 

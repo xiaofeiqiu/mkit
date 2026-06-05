@@ -49,6 +49,7 @@ Kernel Layer 位于 Module Layer 之下，是 Mkit 的 reusable runtime foundati
 - [SaveManager](ref/SaveManager.md)
 - [SaveMigration](ref/SaveMigration.md)
 - [Saveable](ref/Saveable.md)
+- [SaveableComponent](ref/SaveableComponent.md)
 - [SceneRouter](ref/SceneRouter.md)
 - [ServiceRegistry](ref/ServiceRegistry.md)
 - [SpawnSceneEffect](ref/SpawnSceneEffect.md)

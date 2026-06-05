@@ -81,6 +81,7 @@ func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:
 		return
 	for stat_id in definition.base_stats.keys():
 		stats.set_base_stat(str(stat_id), float(definition.base_stats[stat_id]))
+	stats.mark_save_baseline()
 
 
 func _initialize_abilities(entity: Node, definition: EntityDefinition) -> void:

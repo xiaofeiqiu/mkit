@@ -39,11 +39,14 @@ var stacking_rule: StatModifierDefinition.StackingRule
 var remaining_duration: float = -1.0
 var tags: Array[String] = []
 static func from_definition( definition: StatModifierDefinition, source: String, duration: float = -1.0 ) -> StatModifier
+func to_save_data() -> Dictionary
+static func from_save_data(data: Dictionary) -> StatModifier
 ```
 
 ## 函数使用场景
 
 - **`from_definition(definition, source, duration)`**：工厂方法，从 StatModifierDefinition 创建运行时实例，并绑定来源 ID 和持续时间。`source` 通常是 ItemInstance.instance_id 或 StatusEffectInstance.instance_id，用于精确移除。`duration=-1` 表示永久生效（直到主动移除）。
+- **`to_save_data()` / `from_save_data(data)`**：序列化和恢复 modifier 的 primitive payload，供 StatsComponent 保存永久 modifier、ItemInstance 保存 rolled_affixes。`operation` 和 `stacking_rule` 以 enum int 写入。
 
 ## 使用示例
 

@@ -23,7 +23,7 @@ HealthComponent 是实体生命值状态的拥有者。它追踪 current/max HP�
 
 ```gdscript
 class_name HealthComponent
-extends Node
+extends SaveableComponent
 signal health_changed(current: float, max_value: float)
 signal damaged(result: DamageResult)
 signal healed(amount: float, source: Node)
@@ -37,6 +37,8 @@ func apply_damage(result: DamageResult) -> void
 func heal(amount: float, source: Node = null) -> void
 func die(killer: Node = null) -> void
 func revive(percent: float = 1.0) -> void
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景
@@ -46,6 +48,7 @@ func revive(percent: float = 1.0) -> void
 - **`heal(amount, source)`**：将 current_hp 增加 amount，但不超过 max_hp。发出 `healed` 和 `health_changed` 信号。已死亡实体不响应治疗。
 - **`die(killer)`**：标记 dead=true，将 current_hp 设为 0，发出 `died` 信号和 EventRouter `entity_died` 事件。若 `destroy_on_death=true` 则调用 `queue_free`。
 - **`revive(percent)`**：复活实体，将 current_hp 恢复到 max_hp 的指定比例，重置 dead=false，发出 `health_changed`。
+- **`to_save_data()` / `from_save_data(data)`**：作为 SaveableComponent 序列化 `{ current_hp, dead }`。恢复时按当前 StatsComponent 的 `max_hp` clamp，并在 `dead=true` 时保持 HP 为 0。
 
 ## 使用示例
 

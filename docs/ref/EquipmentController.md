@@ -22,7 +22,7 @@ EquipmentController 是装备槽和装备属性的控制器。它负责校验槽
 
 ```gdscript
 class_name EquipmentController
-extends Node
+extends SaveableComponent
 signal equipment_changed(slot_id: String, item: ItemInstance)
 @export var allowed_slots: Array[String] = ["weapon", "helmet", "armor", "ring", "amulet"]
 var equipped: Dictionary = {}
@@ -32,6 +32,8 @@ func equip(item: ItemInstance, slot_id: String) -> bool
 func unequip(slot_id: String) -> ItemInstance
 func get_equipped(slot_id: String) -> ItemInstance
 func get_item_definition(item_id: String) -> ItemDefinition
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景
@@ -40,6 +42,7 @@ func get_item_definition(item_id: String) -> ItemDefinition
 - **`equip(item, slot_id)`**：若该槽位已有装备则先 unequip，再装备新物品，通过 `_apply_item_modifiers` 把 ItemDefinition.stat_modifiers 和 rolled_affixes 都添加到 StatsComponent。发出 `equipment_changed` 信号。
 - **`unequip(slot_id)`**：移除槽位上的物品，通过 `_remove_item_modifiers` 按 item.instance_id 撤销 StatsComponent 中所有来自该物品的 modifier。返回被卸下的 ItemInstance，供调用方放回背包。
 - **`get_equipped(slot_id)`**：查询指定槽位当前装备的 ItemInstance，UI 渲染装备栏时调用。
+- **`to_save_data()` / `from_save_data(data)`**：作为 SaveableComponent 序列化 `{ slots }`，每个槽位复用 ItemInstance payload。恢复时重建已装备物品并重新应用装备 modifier。
 
 ## 使用示例
 

@@ -131,7 +131,7 @@ func from_save_data(data: Dictionary) -> void:
 | `StatsComponent` | `{ base_overrides, persistent_modifiers: [StatModifier] }` | **只存永久来源 modifier**,临时 buff 不存(见 2.5) |
 | `ResourcePoolComponent` | `current_values`(已具备) | 改基类即可 |
 | `StatusEffectController` | `active: [{ status_id, stacks, remaining_duration, source_id }]` | 读档按 id 从 content 取 definition 重新 `apply_status`,自然重挂临时 stat modifier |
-| `AbilityController` | `{ learned: [ability_id], cooldowns: { ability_id: remaining } }` | definition 由 content 重建;只存学会了哪些 + 冷却剩余 |
+| `AbilityController` | `{ learned: [ability_id], cooldowns: { ability_id: remaining }, charges: { ability_id: current }, recharge_durations: { ability_id: duration } }` | definition 由 content 重建;只存学会了哪些、冷却剩余和多充能运行时增量 |
 | `InventoryController` / `ItemInstance` | 已具备(`{capacity, items[]}` / 单 item) | 改基类即可 |
 | `EquipmentController` | `{ slots: { slot_id: ItemInstance } }` | 复用 `ItemInstance.to_save_data` |
 | `ExperienceComponent` | `{ current_level, current_xp }`(已具备) | 由 `Saveable` 迁成 `SaveableComponent`(见 2.6) |
@@ -389,7 +389,7 @@ SaveableComponent (kernel/save) ← 各 module 组件 extends           ✅ modu
 
 | 步骤 | 内容 | 进度 | 状态 |
 |---|---|---|---|
-| P1-a | `SaveableComponent` + 各组件序列化 | 0 / 11 | ☐ 未开始 |
+| P1-a | `SaveableComponent` + 各组件序列化 | 11 / 11 | ✅ 完成 |
 | P1-b | `EntitySaver` + `persistent_id` + 恢复次序 | 0 / 6 | ☐ 未开始 |
 | P1-c | `ExperienceComponent` 迁移 + save_version 1→2 | 0 / 6 | ☐ 未开始 |
 | P2-a | `SaveManager` 加固(codec / 原子写 / 槽位 / header / schema / cloud) | 0 / 15 | ☐ 未开始 |
@@ -400,17 +400,17 @@ SaveableComponent (kernel/save) ← 各 module 组件 extends           ✅ modu
 
 ### P1-a — `SaveableComponent` + 各组件序列化
 
-- [ ] `kernel/save/saveable_component.gd`(`extends Node`,virtual `get_save_key` / `to_save_data` / `from_save_data`)+ `.uid`
-- [ ] `HealthComponent` 改基类 + `to_save_data() = {current_hp, dead}`
-- [ ] `StatsComponent` 改基类 + `to_save_data`(**只存永久来源 modifier** + `base_overrides`,见 2.5)
-- [ ] `ResourcePoolComponent` 改基类(已有 `to_save_data`/`from_save_data`)
-- [ ] `StatusEffectController` 改基类 + `active[] = {status_id, stacks, remaining_duration, source_id}`
-- [ ] `AbilityController` 改基类 + `{learned[], cooldowns{}}`
-- [ ] `InventoryController` 改基类(已有方法)
-- [ ] `EquipmentController` 改基类 + `slots` 序列化(复用 `ItemInstance`)
-- [ ] **unit** — 各组件 round-trip + 边界(HP clamp 到恢复后 max_hp / Stats 不序列化临时 modifier / 冷却剩余还原)
-- [ ] **docs** — `docs/ref/SaveableComponent.md` + 同步各组件 ref 的「接口 / 存档行为」段
-- [ ] **验证** — `make ut-modules`(贴结果)
+- [x] `kernel/save/saveable_component.gd`(`extends Node`,virtual `get_save_key` / `to_save_data` / `from_save_data`)+ `.uid`
+- [x] `HealthComponent` 改基类 + `to_save_data() = {current_hp, dead}`
+- [x] `StatsComponent` 改基类 + `to_save_data`(**只存永久来源 modifier** + `base_overrides`,见 2.5)
+- [x] `ResourcePoolComponent` 改基类(已有 `to_save_data`/`from_save_data`)
+- [x] `StatusEffectController` 改基类 + `active[] = {status_id, stacks, remaining_duration, source_id}`
+- [x] `AbilityController` 改基类 + `{learned[], cooldowns{}, charges{}, recharge_durations{}}`
+- [x] `InventoryController` 改基类(已有方法)
+- [x] `EquipmentController` 改基类 + `slots` 序列化(复用 `ItemInstance`)
+- [x] **unit** — 各组件 round-trip + 边界(HP clamp 到恢复后 max_hp / Stats 不序列化临时 modifier / 多充能冷却剩余还原 / status source restore / spawned stats baseline)
+- [x] **docs** — `docs/ref/SaveableComponent.md` + 同步各组件 ref 的「接口 / 存档行为」段
+- [x] **验证** — `make ut`:kernel 102/102 + modules 213/213 passing;`make int`:35/35 passing
 
 ### P1-b — `EntitySaver` + `persistent_id` + 恢复次序
 

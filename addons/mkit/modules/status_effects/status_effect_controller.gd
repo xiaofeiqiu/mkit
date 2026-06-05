@@ -1,5 +1,5 @@
 class_name StatusEffectController
-extends Node
+extends SaveableComponent
 signal status_applied(status_id: String, stacks: int)
 signal status_removed(status_id: String)
 signal status_ticked(status_id: String)
@@ -39,6 +39,7 @@ func apply_status(
 		return true
 	var instance := StatusEffectInstance.new()
 	instance.setup(definition, source, owner, stacks, duration_override)
+	instance.source_id = _get_source_id(source)
 	active_statuses[status_id] = instance
 	_apply_stat_modifiers(instance, definition)
 	_execute_effects(definition.effects_on_apply, instance)
@@ -62,6 +63,29 @@ func has_status(status_id: String) -> bool:
 	return active_statuses.has(status_id)
 
 
+func to_save_data() -> Dictionary:
+	var active: Array = []
+	for status_id in active_statuses.keys():
+		var instance := active_statuses[status_id] as StatusEffectInstance
+		if instance != null:
+			active.append(
+				{
+					"status_id": instance.definition_id,
+					"stacks": instance.stacks,
+					"remaining_duration": instance.remaining_duration,
+					"source_id": instance.source_id
+				}
+			)
+	return {"active": active}
+
+
+func from_save_data(data: Dictionary) -> void:
+	_clear_statuses_for_load()
+	for raw in data.get("active", []):
+		if raw is Dictionary:
+			_restore_status_entry(raw)
+
+
 func get_definition(status_id: String) -> StatusEffectDefinition:
 	if content == null:
 		content = ServiceRegistry.get_service("content") as ContentRegistry
@@ -81,6 +105,7 @@ func _execute_effects(effects: Array[GameEffect], instance: StatusEffectInstance
 	context.target = instance.target
 	context.status_id = instance.definition_id
 	context.payload["stacks"] = instance.stacks
+	context.payload["source_id"] = instance.source_id
 	var executor := ServiceRegistry.get_service("effects") as EffectExecutor
 	if executor != null:
 		executor.execute_many(effects, context)
@@ -128,3 +153,61 @@ func _remove_stat_modifiers(instance: StatusEffectInstance) -> void:
 	var stats := owner.get_node_or_null("Components/StatsComponent") as StatsComponent
 	if stats != null:
 		stats.remove_modifiers_from_source(instance.instance_id)
+
+
+func _clear_statuses_for_load() -> void:
+	for status_id in active_statuses.keys():
+		var instance := active_statuses[status_id] as StatusEffectInstance
+		if instance != null:
+			_remove_stat_modifiers(instance)
+	active_statuses.clear()
+
+
+func _restore_status_entry(data: Dictionary) -> void:
+	var status_id := str(data.get("status_id", ""))
+	var definition := get_definition(status_id)
+	if definition == null:
+		return
+	var instance := StatusEffectInstance.new()
+	var source_id := str(data.get("source_id", ""))
+	instance.setup(definition, _resolve_source(source_id), owner, int(data.get("stacks", 1)), float(data.get("remaining_duration", definition.duration)))
+	instance.source_id = source_id
+	instance.remaining_duration = float(data.get("remaining_duration", instance.remaining_duration))
+	active_statuses[status_id] = instance
+	_apply_stat_modifiers(instance, definition)
+
+
+func _get_source_id(source: Node) -> String:
+	if source == null:
+		return ""
+	var identity := source.get_node_or_null("EntityIdentity") as EntityIdentity
+	if identity != null:
+		return identity.entity_id
+	return str(source.name)
+
+
+func _resolve_source(source_id: String) -> Node:
+	if source_id.strip_edges() == "":
+		return null
+	var root := owner
+	if root == null:
+		return null
+	if root.get_tree() != null:
+		root = root.get_tree().root
+	else:
+		while root.get_parent() != null:
+			root = root.get_parent()
+	return _find_entity_by_id(root, source_id)
+
+
+func _find_entity_by_id(node: Node, entity_id: String) -> Node:
+	if node == null:
+		return null
+	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
+	if identity != null and identity.entity_id == entity_id:
+		return node
+	for child in node.get_children():
+		var found := _find_entity_by_id(child, entity_id)
+		if found != null:
+			return found
+	return null

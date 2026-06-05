@@ -23,7 +23,7 @@ AbilityController 是实体释放技能的控制器。它管理技能实例、�
 
 ```gdscript
 class_name AbilityController
-extends Node
+extends SaveableComponent
 signal ability_registered(ability_id: String)
 signal ability_cast_started(ability_id: String)
 signal ability_cast_finished(ability_id: String)
@@ -41,6 +41,8 @@ func cast(ability_id: String, context: GameplayContext) -> bool
 func is_cooldown_ready(ability_id: String) -> bool
 func get_cooldown_remaining(ability_id: String) -> float
 func get_definition(ability_id: String) -> AbilityDefinition
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景
@@ -53,6 +55,7 @@ func get_definition(ability_id: String) -> AbilityDefinition
 - **`is_cooldown_ready(ability_id)`**：快速查询冷却状态，供 CooldownReadyCondition 调用。
 - **`get_cooldown_remaining(ability_id)`**：返回剩余冷却秒数，供 HUD 冷却条显示。
 - **`get_definition(ability_id)`**：从 ContentRegistry 读取 AbilityDefinition，内部各子方法调用，外部也可读取技能描述信息。
+- **`to_save_data()` / `from_save_data(data)`**：作为 SaveableComponent 序列化 `{ learned, cooldowns, charges, recharge_durations }`。`learned` 保存已注册 ability id，`cooldowns` 保存仍有剩余时间的 cooldown，`charges` 保存当前可用充能数，`recharge_durations` 保存多充能技能继续恢复所需的完整 recharge 时长。
 
 ## 使用示例
 

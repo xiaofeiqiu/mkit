@@ -1,5 +1,5 @@
 class_name EquipmentController
-extends Node
+extends SaveableComponent
 signal equipment_changed(slot_id: String, item: ItemInstance)
 @export var allowed_slots: Array[String] = ["weapon", "helmet", "armor", "ring", "amulet"]
 var equipped: Dictionary = {}
@@ -48,8 +48,38 @@ func get_equipped(slot_id: String) -> ItemInstance:
 
 func get_item_definition(item_id: String) -> ItemDefinition:
 	if content == null:
-		content = ServiceRegistry.get_service("content") as ContentRegistry
+		if ServiceRegistry.has_service("content"):
+			content = ServiceRegistry.get_service("content") as ContentRegistry
+	if content == null:
+		return null
 	return content.get_resource(item_id) as ItemDefinition
+
+
+func to_save_data() -> Dictionary:
+	var slots: Dictionary = {}
+	for slot_id in equipped.keys():
+		var item := equipped[slot_id] as ItemInstance
+		if item != null:
+			slots[str(slot_id)] = item.to_save_data()
+	return {"slots": slots}
+
+
+func from_save_data(data: Dictionary) -> void:
+	for item in equipped.values():
+		if item is ItemInstance:
+			_remove_item_modifiers(item)
+	equipped.clear()
+	var slots: Dictionary = data.get("slots", {})
+	for slot_id in slots.keys():
+		var key := str(slot_id)
+		if not allowed_slots.has(key):
+			continue
+		var raw: Variant = slots[slot_id]
+		if raw is Dictionary:
+			var item := ItemInstance.from_save_data(raw)
+			equipped[key] = item
+			_apply_item_modifiers(item)
+			equipment_changed.emit(key, item)
 
 
 func _apply_item_modifiers(item: ItemInstance) -> void:

@@ -1,5 +1,5 @@
 class_name InventoryController
-extends Node
+extends SaveableComponent
 signal inventory_changed
 signal item_added(item: ItemInstance)
 signal item_removed(item: ItemInstance)

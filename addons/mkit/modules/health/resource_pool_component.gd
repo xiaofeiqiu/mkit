@@ -1,5 +1,5 @@
 class_name ResourcePoolComponent
-extends Node
+extends SaveableComponent
 signal resource_changed(resource_id: String, current: float, max_value: float)
 signal resource_spent(resource_id: String, amount: float)
 signal resource_restored(resource_id: String, amount: float)

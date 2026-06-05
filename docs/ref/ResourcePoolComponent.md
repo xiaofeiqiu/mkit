@@ -22,7 +22,7 @@ ResourcePoolComponent 是实体的可消耗资源池，例如 mana、stamina、e
 
 ```gdscript
 class_name ResourcePoolComponent
-extends Node
+extends SaveableComponent
 signal resource_changed(resource_id: String, current: float, max_value: float)
 signal resource_spent(resource_id: String, amount: float)
 signal resource_restored(resource_id: String, amount: float)
@@ -47,7 +47,7 @@ func from_save_data(data: Dictionary) -> void
 - **`spend(resource_id, amount)`**：消耗指定量资源，若不足则返回 false 且不消耗。释放技能、使用冲刺等操作通过此方法扣除资源。
 - **`restore(resource_id, amount)`**：恢复资源，常见于药水恢复 mana、拾取能量球恢复 stamina。
 - **`set_current(resource_id, value)`**：直接设置当前值（会 clamp 到 [0, max]），用于读档恢复或调试工具。
-- **`to_save_data()` / `from_save_data(data)`**：序列化和反序列化当前资源值，供 SaveManager 保存和恢复玩家资源状态。
+- **`to_save_data()` / `from_save_data(data)`**：作为 SaveableComponent 序列化和反序列化当前资源值，供实体快照保存和恢复玩家资源状态。
 
 ## 使用示例
 

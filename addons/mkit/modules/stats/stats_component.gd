@@ -1,5 +1,5 @@
 class_name StatsComponent
-extends Node
+extends SaveableComponent
 signal stat_changed(stat_id: String, old_value: float, new_value: float)
 @export var base_stats: Dictionary = {
 	"max_hp": 100.0,
@@ -19,9 +19,11 @@ signal stat_changed(stat_id: String, old_value: float, new_value: float)
 var modifiers_by_stat: Dictionary = {}
 var cached_values: Dictionary = {}
 var dirty_stats: Dictionary = {}
+var _initial_base_stats: Dictionary = {}
 
 
 func _ready() -> void:
+	mark_save_baseline()
 	mark_all_dirty()
 
 
@@ -113,6 +115,32 @@ func mark_all_dirty() -> void:
 		dirty_stats[stat_id] = true
 
 
+func mark_save_baseline() -> void:
+	_initial_base_stats = base_stats.duplicate(true)
+
+
+func to_save_data() -> Dictionary:
+	return {
+		"base_overrides": _get_base_overrides(),
+		"persistent_modifiers": _get_persistent_modifiers()
+	}
+
+
+func from_save_data(data: Dictionary) -> void:
+	var base_overrides: Dictionary = data.get("base_overrides", {})
+	for stat_id in base_overrides.keys():
+		base_stats[str(stat_id)] = float(base_overrides[stat_id])
+	for stat_id in modifiers_by_stat.keys():
+		var list: Array = modifiers_by_stat[stat_id]
+		for modifier in list.duplicate():
+			if modifier is StatModifier and modifier.remaining_duration <= 0.0:
+				list.erase(modifier)
+	for raw in data.get("persistent_modifiers", []):
+		if raw is Dictionary:
+			add_modifier(StatModifier.from_save_data(raw))
+	mark_all_dirty()
+
+
 func _calculate_stat(stat_id: String) -> float:
 	var base_value := float(base_stats.get(stat_id, 0.0))
 	var value := base_value
@@ -167,3 +195,27 @@ func _apply_stacking_rule(list: Array, modifier: StatModifier) -> void:
 func _emit_stat_changed(stat_id: String, old_value: float) -> void:
 	var new_value := get_stat_value(stat_id)
 	stat_changed.emit(stat_id, old_value, new_value)
+
+
+func _get_base_overrides() -> Dictionary:
+	var overrides: Dictionary = {}
+	for stat_id in base_stats.keys():
+		var stat_key := str(stat_id)
+		var value := float(base_stats[stat_id])
+		if _initial_base_stats.is_empty():
+			overrides[stat_key] = value
+		elif not _initial_base_stats.has(stat_id):
+			overrides[stat_key] = value
+		elif not is_equal_approx(float(_initial_base_stats[stat_id]), value):
+			overrides[stat_key] = value
+	return overrides
+
+
+func _get_persistent_modifiers() -> Array:
+	var result: Array = []
+	for stat_id in modifiers_by_stat.keys():
+		var list: Array = modifiers_by_stat[stat_id]
+		for modifier in list:
+			if modifier is StatModifier and modifier.remaining_duration <= 0.0:
+				result.append(modifier.to_save_data())
+	return result

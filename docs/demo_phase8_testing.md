@@ -11,10 +11,12 @@ Bootstrap content
   -> World zone routing
   -> Elder dialogue
   -> Quest accept
+  -> Ability cast / burn status tick
   -> Field combat
   -> Quest objective / reward
   -> Loot pickup
   -> XP / level up
+  -> Elder blessing / stat modifier
   -> Shop buy / sell
   -> HUD and event log
 ```
@@ -42,6 +44,8 @@ make phase8-test
 - 进程退出码为 `0`。
 - 输出或 `/tmp/mkit_phase8_auto.log` 里出现 `[AUTO] phase8 RPG loop complete`。
 - 不出现 `[AUTO] phase8 RPG loop incomplete`。
+- complete 只有在 firebolt 扣 mana、burn status tick 触发、`LogEffect` 发出 `phase8_burn_tick` 后才应出现。
+- complete 还要求 field beast 被 command -> HFSM -> `TimedAttackAction` melee path 击败；不能依赖 `[COMBAT] command chain stalled; using scripted strike` fallback。
 - 不出现 `missing service`、`could not enter`、`not found`、`transaction failed` 这类 phase8 失败日志。
 - macOS headless 可能打印一次系统证书相关的 Godot error；如果除此之外 auto-run 完成，可以把它视为环境噪声。
 
@@ -53,10 +57,13 @@ make phase8-test
 [QUEST] accepted quest.phase8.field_report
 [WORLD] zone.phase8.village_room -> zone.phase8.village
 [WORLD] zone.phase8.village -> zone.phase8.field
+[ABILITY] firebolt burned the beast (mana 50 -> 40)
+[STATUS] Phase8 burn tick
 [QUEST] quest.phase8.field_report obj.phase8.kill_field_beast 1/1
 [QUEST] turned in quest.phase8.field_report
 [LOOT] picked up item.phase8.beast_claw x1
 [XP] level 1 -> 2
+[STAT] elder blessing attack_power 10 -> 15
 [SHOP] bought item.phase8.herb_potion x1 for 10 gold
 [SHOP] sold item.phase8.beast_claw x1 for 4 gold
 [AUTO] phase8 RPG loop complete
@@ -119,12 +126,14 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 
 再按一次 `T` 结束对话，日志出现 `[DIALOGUE] ended dialogue.phase8.elder`。
 
-### 4. Combat, quest reward, loot, XP
+### 4. Ability, status, combat, quest reward, loot, XP
 
-回到村庄后按 `G` 进入 field，再按 `K` 击败 field beast。
+回到村庄后按 `G` 进入 field，先按 `F` 施放 firebolt，再按 `K` 击败 field beast。
 
 预期结果：
 
+- firebolt 扣除 10 mana，并给 field beast 施加 `status.phase8.burn`
+- burn tick 触发一次伤害和 LogEffect，日志包含 `[STATUS] Phase8 burn tick`
 - 玩家受到一次反击，HP 从 `100/100` 变为 `88/100`
 - field beast 被击败，日志包含 `[COMBAT] defeated enemy.phase8.field_beast`
 - quest 目标推进到 `1/1`
@@ -136,7 +145,19 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 
 击败后继续按 `K` 不应该重复发奖励、loot 或 XP；如果重复获得 `beast_claw`、`village_charm` 或再次升级，就是幂等性回归。
 
-### 5. Shop buy and sell
+### 5. Elder blessing
+
+回村后按 `R` 进入 elder room，再按 `Y` 选择 blessing 路径。
+
+预期结果：
+
+- 日志出现 `[STAT] elder blessing attack_power 10 -> 15`
+- blessing 来自 `dialogue.phase8.elder` 的第二项 choice
+- 效果通过 `ApplyStatModifierEffect` 给 player 的 `StatsComponent` 添加永久 `attack_power +5` modifier
+
+再按 `R` 回到村庄。
+
+### 6. Shop buy and sell
 
 回到村庄后按 `B`：
 
@@ -154,7 +175,7 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 
 离开村庄时 shop UI 应关闭，`Shop` HUD 应回到 `closed`。
 
-### 6. Potion use
+### 7. Potion use
 
 `H` 是额外的 consumable 检查，不属于 auto-run 的完成条件。建议在完成买药后单独测一次：
 
@@ -171,6 +192,7 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 - 在村庄外按 `B` 或 `V`，应提示 `[SHOP] return to the village supply stall`。
 - 没有 `beast_claw` 时按 `V`，应提示 `[SHOP] no beast claw to sell`。
 - 不在 elder room 按 `T`，应提示 `[DIALOGUE] enter the elder room first`。
+- 不在 elder room 按 `Y`，应提示 `[DIALOGUE] enter the elder room first`。
 - 不在 field 按 `K`，应提示 `[COMBAT] go to the field first`。
 - 未买 potion 时按 `H`，应提示 `[ITEM] no herb potion in inventory`。
 - 重复击败 field beast 不应重复发放 quest reward、loot 或 XP。
@@ -225,6 +247,9 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/integration/test_
 - portal 的 `target_zone_id` 和 `target_spawn_id` 能匹配对应 zone 和 `SpawnPoint.spawn_id`
 - elder room scene 内存在 `Elder/Controllers/DialogueInteractable`
 - dialogue `dialogue.phase8.elder` 的第一项 choice 执行 `AcceptQuestEffect`
+- dialogue `dialogue.phase8.elder` 的第二项 choice 执行 `ApplyStatModifierEffect`
+- `max_hp`、`attack_power`、`defense` 三个 `StatDefinition` 注册进 content registry
+- `status.phase8.burn` 包含 tick damage、`LogEffect` 和 defense debuff `StatModifierDefinition`
 - quest objective 监听 `enemy_killed`，并匹配 tag `field_beast`
 - field beast 的 `EntityIdentity.tags` 包含 `field_beast`
 - field beast 有 `Components/HealthComponent`，死亡不销毁节点也不能重复 loot
@@ -244,6 +269,8 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/integration/test_
 `[DIALOGUE] elder not found` 或 `elder has no DialogueInteractable`：检查 `village_room.tscn` 的 `Elder` 节点名和 entity layout。
 
 `[COMBAT] field beast not found`：检查 `field.tscn` 的 `FieldBeast` 节点名。
+
+`[STATUS] firebolt did not apply burn` 或 `burn tick was not observed`：检查 `ability.phase8.firebolt` 的 effects、`status.phase8.burn.tick_interval` 和 tick 上的 `LogEffect.event_type = "phase8_burn_tick"`。
 
 `[QUEST]` 没有推进到 `1/1`：检查 field beast tag、quest objective 的 `event_type`、`match_key`、`match_value`，以及 death event 是否发出。
 

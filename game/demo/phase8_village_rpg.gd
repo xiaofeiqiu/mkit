@@ -11,6 +11,11 @@ const ITEM_POTION := "item.phase8.herb_potion"
 const ITEM_CLAW := "item.phase8.beast_claw"
 const ITEM_CHARM := "item.phase8.village_charm"
 const LOOT_FIELD_BEAST := "loot.phase8.field_beast"
+const ABILITY_FIREBOLT := "ability.phase8.firebolt"
+const STATUS_BURN := "status.phase8.burn"
+const PLAYER_ID := "player_001"
+const MELEE_RANGE := 30.0
+const FIREBOLT_RANGE := 100.0
 
 
 class EmbeddedSceneRouter:
@@ -65,6 +70,10 @@ var _shop_purchase_completed: bool = false
 var _shop_sale_completed: bool = false
 var _auto_run_enabled: bool = false
 var _auto_run_started: bool = false
+var _firebolt_cast_succeeded: bool = false
+var _burn_tick_observed: bool = false
+var _elder_blessing_received: bool = false
+var _command_combat_succeeded: bool = false
 
 
 func _ready() -> void:
@@ -96,6 +105,10 @@ func _input(event: InputEvent) -> void:
 				_toggle_field_portal()
 			KEY_T:
 				_talk_or_advance_dialogue()
+			KEY_Y:
+				_request_elder_blessing()
+			KEY_F:
+				_cast_firebolt_command()
 			KEY_K:
 				_defeat_field_beast()
 			KEY_B:
@@ -161,6 +174,10 @@ func _reset_demo_state() -> void:
 	_field_beast_looted = false
 	_shop_purchase_completed = false
 	_shop_sale_completed = false
+	_firebolt_cast_succeeded = false
+	_burn_tick_observed = false
+	_elder_blessing_received = false
+	_command_combat_succeeded = false
 
 
 func _configure_audio() -> void:
@@ -221,6 +238,7 @@ func _connect_signals() -> void:
 	if _world != null:
 		_world.zone_changed.connect(_on_zone_changed)
 	if _events != null:
+		_events.domain_event_emitted.connect(_on_domain_event)
 		_events.entity_died.connect(_on_entity_died)
 		_events.damage_applied.connect(_on_damage_applied)
 	var experience := _experience()
@@ -240,7 +258,7 @@ func _grant_starter_currency() -> void:
 func _set_instructions() -> void:
 	_instructions_label.text = (
 		"Phase 8 RPG loop: R room portal, T talk/choice/advance, R back, G field portal, "
-		+ "K defeat beast, G return, B buy potion, V sell claw, H use potion"
+		+ "F cast firebolt, K defeat beast, Y elder blessing, B buy potion, V sell claw, H use potion"
 	)
 
 
@@ -319,6 +337,51 @@ func _talk_or_advance_dialogue() -> void:
 		_log("[DIALOGUE] elder dialogue did not start")
 
 
+func _request_elder_blessing() -> void:
+	if _dialogue == null:
+		return
+	if _world == null or _world.current_zone_id != ZONE_ROOM:
+		_log("[DIALOGUE] enter the elder room first")
+		return
+	if _dialogue.is_active():
+		_choose_elder_blessing()
+		return
+	var root := _current_zone_root()
+	if root == null:
+		return
+	var elder := root.get_node_or_null("Elder")
+	if elder == null:
+		_log("[DIALOGUE] elder not found")
+		return
+	var interactable := elder.get_node_or_null("Controllers/DialogueInteractable") as DialogueInteractable
+	if interactable == null:
+		_log("[DIALOGUE] elder has no DialogueInteractable")
+		return
+	var ctx := GameplayContext.new().with_source(_player).with_target(elder)
+	if not interactable.interact(ctx):
+		_log("[DIALOGUE] elder dialogue did not start")
+		return
+	_choose_elder_blessing()
+
+
+func _choose_elder_blessing() -> void:
+	if _dialogue == null or not _dialogue.is_active():
+		return
+	var choices := _dialogue.get_available_choices()
+	if choices.size() < 2:
+		_log("[DIALOGUE] elder blessing choice is unavailable")
+		return
+	var stats := _player_stats()
+	var before := stats.get_stat_value("attack_power", 0.0) if stats != null else 0.0
+	_dialogue.choose(1)
+	if _dialogue.is_active():
+		_dialogue.advance()
+	var after := stats.get_stat_value("attack_power", 0.0) if stats != null else before
+	if after > before:
+		_elder_blessing_received = true
+		_log("[STAT] elder blessing attack_power %.0f -> %.0f" % [before, after])
+
+
 func _defeat_field_beast() -> void:
 	if _world == null or _world.current_zone_id != ZONE_FIELD:
 		_log("[COMBAT] go to the field first")
@@ -354,6 +417,115 @@ func _damage_player_from_beast(beast: Node) -> void:
 	damage.base_amount = 12.0
 	damage.can_crit = false
 	_effects.execute(damage, GameplayContext.new().with_source(beast).with_target(_player))
+
+
+func _engage_field_beast_via_commands() -> void:
+	if _world == null or _world.current_zone_id != ZONE_FIELD:
+		_log("[COMBAT] go to the field first")
+		return
+	var beast := _field_beast() as Node2D
+	if beast == null:
+		_log("[COMBAT] field beast not found")
+		return
+	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	if health == null or health.dead:
+		_log("[COMBAT] field beast already defeated")
+		return
+	await _approach(beast, MELEE_RANGE)
+	await _attack_field_beast(health)
+	if health.dead:
+		_command_combat_succeeded = true
+	else:
+		_log("[COMBAT] command chain stalled; using scripted strike")
+		_defeat_field_beast()
+
+
+func _attack_field_beast(health: HealthComponent) -> void:
+	var state_machine := _player.get_node_or_null("StateMachine") as StateMachine
+	if state_machine == null:
+		return
+	var attacks := 0
+	while attacks < 8 and not health.dead:
+		_dispatch_player_command(BuiltinCommands.ATTACK, {})
+		var guard := 0
+		while (
+			guard < 600
+			and not health.dead
+			and state_machine.get_current_path() == "Player/Attack"
+		):
+			await get_tree().physics_frame
+			guard += 1
+		attacks += 1
+
+
+func _dispatch_player_command(command_type: String, payload: Dictionary) -> void:
+	var router := ServiceRegistry.get_service("commands") as CommandRouter
+	if router == null:
+		return
+	router.dispatch(GameCommand.create(command_type, PLAYER_ID, PLAYER_ID, payload))
+
+
+func _cast_firebolt_command() -> void:
+	_dispatch_player_command(BuiltinCommands.CAST_ABILITY, {"ability_id": ABILITY_FIREBOLT})
+
+
+func _cast_firebolt_at_beast() -> void:
+	if _world == null or _world.current_zone_id != ZONE_FIELD:
+		_log("[ABILITY] go to the field first")
+		return
+	var beast := _field_beast() as Node2D
+	if beast == null:
+		_log("[ABILITY] field beast not found")
+		return
+	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	if health == null or health.dead:
+		return
+	var ability := _ability_controller()
+	if ability == null or not ability.has_ability(ABILITY_FIREBOLT):
+		_log("[ABILITY] firebolt is not available")
+		return
+	await _approach(beast, FIREBOLT_RANGE)
+	var mana_before := _player_mana()
+	_cast_firebolt_command()
+	var guard := 0
+	while guard < 240 and not ability.active_cast_actions.is_empty():
+		await get_tree().process_frame
+		guard += 1
+	_firebolt_cast_succeeded = _player_mana() < mana_before
+	if _firebolt_cast_succeeded:
+		_log("[ABILITY] firebolt burned the beast (mana %.0f -> %.0f)" % [mana_before, _player_mana()])
+		await _wait_for_beast_burn_tick(beast)
+	else:
+		_log("[ABILITY] firebolt cast did not resolve")
+
+
+func _wait_for_beast_burn_tick(beast: Node2D) -> void:
+	var status := beast.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+	if status == null:
+		_log("[STATUS] field beast status controller not found")
+		return
+	if not status.has_status(STATUS_BURN):
+		_log("[STATUS] firebolt did not apply burn")
+		return
+	var elapsed := 0.0
+	while elapsed < 1.5 and not _burn_tick_observed and status.has_status(STATUS_BURN):
+		await get_tree().process_frame
+		elapsed += get_process_delta_time()
+	if not _burn_tick_observed:
+		_log("[STATUS] burn tick was not observed")
+
+
+func _approach(target: Node2D, stop_distance: float) -> void:
+	var steps := 0
+	while steps < 400:
+		var offset := target.global_position - _player.global_position
+		if offset.length() <= stop_distance:
+			break
+		_dispatch_player_command(BuiltinCommands.MOVE, {"direction": offset.normalized()})
+		await get_tree().physics_frame
+		steps += 1
+	_dispatch_player_command(BuiltinCommands.STOP_MOVE, {})
+	await get_tree().physics_frame
 
 
 func _buy_potion() -> void:
@@ -481,6 +653,13 @@ func _on_damage_applied(result) -> void:
 		"[COMBAT] %.0f damage to %s"
 		% [result.final_amount, _entity_id(result.target)]
 	)
+
+
+func _on_domain_event(event: DomainEvent) -> void:
+	if event == null or event.event_type != "phase8_burn_tick":
+		return
+	_burn_tick_observed = true
+	_log("[STATUS] %s" % str(event.payload.get("message", "burn tick")))
 
 
 func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
@@ -611,6 +790,19 @@ func _player_health() -> HealthComponent:
 	return _player.get_node_or_null("Components/HealthComponent") as HealthComponent
 
 
+func _ability_controller() -> AbilityController:
+	return _player.get_node_or_null("Controllers/AbilityController") as AbilityController
+
+
+func _player_stats() -> StatsComponent:
+	return _player.get_node_or_null("Components/StatsComponent") as StatsComponent
+
+
+func _player_mana() -> float:
+	var pool := _player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+	return pool.get_current("mana") if pool != null else 0.0
+
+
 func _experience() -> ExperienceComponent:
 	return _player.get_node_or_null("Components/ExperienceComponent") as ExperienceComponent
 
@@ -671,9 +863,17 @@ func _run_auto_loop() -> void:
 	await _settle_world()
 	_toggle_field_portal()
 	await _settle_world()
-	_defeat_field_beast()
+	await _cast_firebolt_at_beast()
+	await _settle_world()
+	await _engage_field_beast_via_commands()
 	await _settle_world()
 	_toggle_field_portal()
+	await _settle_world()
+	_toggle_room_portal()
+	await _settle_world()
+	_request_elder_blessing()
+	await _settle_world()
+	_toggle_room_portal()
 	await _settle_world()
 	_buy_potion()
 	await get_tree().process_frame
@@ -712,6 +912,17 @@ func _phase8_loop_complete() -> bool:
 		return false
 	var experience := _experience()
 	if experience == null or experience.current_level < 2:
+		return false
+	if not _firebolt_cast_succeeded:
+		return false
+	if not _burn_tick_observed:
+		return false
+	if not _elder_blessing_received:
+		return false
+	if not _command_combat_succeeded:
+		return false
+	var stats := _player_stats()
+	if stats == null or stats.get_stat_value("attack_power", 0.0) < 15.0:
 		return false
 	if not _shop_purchase_completed or not _shop_sale_completed:
 		return false

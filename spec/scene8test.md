@@ -4,9 +4,9 @@
 
 > 完成一个 slice 就把对应项从 `[ ]` 改成 `[x]`。每项须满足"实例化 + 触发 + 集成测试断言 + `make ut` 绿"。
 
-- [ ] **S0** — command→HFSM→action 链接入自动化并断言(命令 / 状态机 / 动作 / hitbox-hurtbox,11 类)
-- [ ] **S1** — 技能管线:消耗 / 冷却 / 条件 / 命中施加状态(abilities + conditions + ResourcePool,10 类)
-- [ ] **S2** — 状态效果 + 属性修饰(status / stat-modifier + LogEffect,8 类)
+- [x] **S0** — command→HFSM→action 链接入自动化并断言(命令 / 状态机 / 动作 / hitbox-hurtbox,11 类)
+- [x] **S1** — 技能管线:消耗 / 冷却 / 条件 / 命中施加状态(abilities + conditions + ResourcePool,10 类)
+- [x] **S2** — 状态效果 + 属性修饰(status / stat-modifier + LogEffect,8 类)
 - [ ] **S3** — 装备(`EquipmentController` + 可装备 item + StatModifier,1 类)
 - [ ] **S4** — 数据驱动生成实体(`EntityDefinition` / `EntitySpawner`,2 类)
 - [ ] **S5** — 敌人 AI(`Brain` / `SimpleAIEnemyBrain` / `Blackboard`,3 类)
@@ -17,7 +17,7 @@
 - [ ] **S10** — 收尾:就近交互 / 手动任务 effect / 冲刺(`InteractionComponent` / `AdvanceObjectiveEffect` / `CompleteQuestEffect` / `DashAction`,4 类)
 - [ ] **S11** — 退役 phase0–7,demo 收敛到唯一入口(`bootstrap_phase8` / `project.godot` 主场景)
 
-覆盖账:当前 ✅ 57 类;S0–S10 接入剩余 75 类(其中 `RandomService` / `ActionContext` / `StatsComponent` 3 个随宿主 slice 顺带断言);全部完成后 = **132 / 132**,零豁免。详见 §2 矩阵与附录映射表。
+覆盖账:当前 ✅ 65 类;S0–S10 接入剩余 67 类(其中 `RandomService` / `ActionContext` / `StatsComponent` 3 个随宿主 slice 顺带断言);全部完成后 = **132 / 132**,零豁免。详见 §2 矩阵与附录映射表。
 
 ---
 
@@ -67,27 +67,27 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 |--------|-----------|----------------|---------|
 | services | `SceneRouter` | `RandomService`(loot/combat 内部用) | `TimeService` `ObjectPool` `AnalyticsService(+Mock)` `AdService(+Mock)` `IAPService(+Mock)` `CloudSaveService(+Mock)` |
 | debug | — | — | `DebugOverlay` |
-| effects | `EffectExecutor` `GameEffect` `EffectResult` `DealDamageEffect` `HealEffect` `GrantItemEffect` | — | `SpawnSceneEffect` `ApplyStatusEffect` `ApplyStatModifierEffect` `LogEffect` |
+| effects | `EffectExecutor` `GameEffect` `EffectResult` `DealDamageEffect` `HealEffect` `GrantItemEffect` `ApplyStatusEffect` `ApplyStatModifierEffect` `LogEffect` | — | `SpawnSceneEffect` |
 | save | — | `SaveManager` `Saveable` `SaveableComponent` | `SaveMigration` |
 | bootstrap | `GameBootstrap` | — | — |
-| context | `GameplayContext` | `ActionContext` | `Blackboard` |
-| commands | — | `CommandRouter` `CommandReceiver` `GameCommand` `BuiltinCommands` | — |
-| conditions | — | — | `Condition` `ConditionEvaluator` `CooldownReadyCondition` `TargetInRangeCondition` |
+| context | `GameplayContext` `ActionContext` | — | `Blackboard` |
+| commands | `CommandRouter` `CommandReceiver` `GameCommand` `BuiltinCommands` | — | — |
+| conditions | `Condition` `ConditionEvaluator` `CooldownReadyCondition` `TargetInRangeCondition` | — | — |
 | events | `EventRouter` `DomainEvent` | — | — |
 | registry | `ResourceDatabase` `ContentRegistry` `ContentValidationResult` | — | — |
-| state_machine | — | `StateMachine` `State` | — |
-| actions | — | `ActionRunner` `GameAction` `TimedAttackAction` | `CastAction` `DashAction` |
+| state_machine | `StateMachine` `State` | — | — |
+| actions | `ActionRunner` `GameAction` `TimedAttackAction` `CastAction` | — | `DashAction` |
 
 ### Modules(81)
 
 | 模块 | ✅ 已覆盖 | 🟡 可达未断言 | ❌ 缺失 |
 |------|-----------|----------------|---------|
 | entity | `EntityIdentity` `EntityRoot` | — | `EntityDefinition` `EntitySpawner` |
-| stats | — | `StatsComponent` | `StatDefinition` `StatModifier` `StatModifierDefinition` |
-| health | `HealthComponent` | `ResourcePoolComponent` | — |
-| combat | `CombatResolver` `DamageRequest` `DamageResult` | `HitboxComponent` `HurtboxComponent` | — |
-| abilities | — | `AbilityController` | `AbilityDefinition` `AbilityInstance` |
-| status_effects | — | `StatusEffectController` | `StatusEffectInstance` `StatusEffectDefinition` |
+| stats | `StatsComponent` `StatDefinition` `StatModifier` `StatModifierDefinition` | — | — |
+| health | `HealthComponent` `ResourcePoolComponent` | — | — |
+| combat | `CombatResolver` `DamageRequest` `DamageResult` `HitboxComponent` `HurtboxComponent` | — | — |
+| abilities | `AbilityController` `AbilityDefinition` `AbilityInstance` | — | — |
+| status_effects | `StatusEffectController` `StatusEffectInstance` `StatusEffectDefinition` | — | — |
 | inventory | `InventoryController` `InventoryModel` `InventorySlot` `ItemDefinition` `ItemInstance` | `EquipmentController` | — |
 | loot | `LootSystem` `LootTableDefinition` `LootEntry` `LootRollResult` | — | `RewardSystem` `RewardDefinition` `RewardOption` |
 | room | — | — | `RoomDefinition` `RoomRuntime` `RoomController` `RoomGraph` `RoomNode` `RunDirector` `RunState` `DungeonGenerator` |
@@ -145,7 +145,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
   与 `field_beast` 的 `HurtboxComponent` overlap → `CombatResolver` → beast 掉血 → `entity_died`。
 - **测试:** `assert` player 收到 MOVE 后位置变化(Move state 生效)、ATTACK 后 hitbox 命中使
   `beast_health.current_hp` 下降、最终 `entity_died`。需 `await get_tree().physics_frame`(碰撞结算)。
-- **保留** 现有 `K` 直接 `DealDamageEffect` 作为"脚本伤害"对照路径(已被现有测试覆盖)。
+- **保留** 现有 `K` 直接 `DealDamageEffect` 作为"脚本伤害"对照路径(已被现有测试覆盖),但 auto-run completion gate 不能靠该 fallback 通过。
 
 ### S1 — 技能管线(主动技 + 资源消耗 + 冷却 + 条件 + 命中施加状态)
 
@@ -157,8 +157,10 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
   `cost_type="mana"` `cost_amount>0`、`cast_time>0`(走 `CastAction`)、`range>0`、
   `conditions=[CooldownReadyCondition, TargetInRangeCondition]`、
   `effects=[DealDamageEffect, ApplyStatusEffect(status.phase8.burn)]`。
-- **player.tscn:** `AbilityController.starting_ability_ids = ["ability.phase8.firebolt"]`;
-  把 `player_input_reader.gd` 里 `CAST_ABILITY` 的占位 id `ability.fireball_basic` 对齐成该真实技能。
+- **player.tscn:** 保持 generic,不默认学习具体 phase ability;`player_input_reader.gd`
+  的 `cast_ability_id` 默认为空,由具体 phase scene override。
+- **phase8_village_rpg.tscn:** 通过 `Player/Controllers/AbilityController.starting_ability_ids`
+  与 `Player/InputReader.cast_ability_id` override 绑定 `ability.phase8.firebolt`。
 - **场景:** 新增按键 `F` / auto-run cast 朝 beast;`ResourcePoolComponent.starting_values.mana` 已有。
 - **测试:** cast 成功扣 mana、`cooldown_started` 触发、再次 cast 因 `on_cooldown` 失败;
   beast 进/出 `range` 时 `TargetInRangeCondition` 放行/拦截;命中后 beast 持有 `burn` status。
@@ -338,7 +340,7 @@ $GODOT game/demo/bootstrap_phase8.tscn -- --phase8-auto-run
 
 - §2 覆盖矩阵的 🟡 / ❌ 清零;无法/不值得纳入 phase8 的类进入"显式豁免"表并写明理由。
 - `make ut` 全绿;贴真实结果(脚本数 / 测试数 / 断言数)。
-- `--phase8-auto-run` headless 跑通并 `quit(0)`,`_phase8_loop_complete()` 通过。
+- `--phase8-auto-run` headless 跑通并 `quit(0)`,`_phase8_loop_complete()` 通过;completion gate 必须覆盖 command combat kill、firebolt cast、burn tick 和 `phase8_burn_tick` LogEffect。
 - 新建 `.gd` 都生成并提交 `.uid`(跑一次 `make ut` 让 Godot 写入,勿手写 UID)。
 - 改了公共接口的类同步更新 `docs/ref/<ClassName>.md` 及相关 layer/pipeline 文档(中文概念段保持中文)。
 - 无 `game → addon` 反向依赖;无具体内容硬编码进 `addons/mkit/`(新机制缺口在 addon 补通用实现,

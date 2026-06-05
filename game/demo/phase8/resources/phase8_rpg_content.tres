@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=26 format=3]
+[gd_resource type="Resource" load_steps=60 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/kernel/registry/resource_database.gd" id="1_db"]
 [ext_resource type="Script" path="res://addons/mkit/modules/inventory/item_definition.gd" id="2_item"]
@@ -16,6 +16,16 @@
 [ext_resource type="Script" path="res://addons/mkit/modules/shop/shop_entry.gd" id="14_shop_entry"]
 [ext_resource type="Script" path="res://addons/mkit/modules/shop/shop_definition.gd" id="15_shop"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/zone_definition.gd" id="16_zone"]
+[ext_resource type="Script" path="res://addons/mkit/modules/abilities/ability_definition.gd" id="17_ability"]
+[ext_resource type="Script" path="res://addons/mkit/modules/status_effects/status_effect_definition.gd" id="18_status"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/deal_damage_effect.gd" id="19_damage"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/apply_status_effect.gd" id="20_apply_status"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/conditions/builtin/cooldown_ready_condition.gd" id="21_cd_cond"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/conditions/builtin/target_in_range_condition.gd" id="22_range_cond"]
+[ext_resource type="Script" path="res://addons/mkit/modules/stats/stat_definition.gd" id="23_stat"]
+[ext_resource type="Script" path="res://addons/mkit/modules/stats/stat_modifier_definition.gd" id="24_stat_mod"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/apply_stat_modifier_effect.gd" id="25_apply_stat"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/log_effect.gd" id="26_log"]
 
 [sub_resource type="Resource" id="Resource_heal_potion_effect"]
 script = ExtResource("3_heal")
@@ -96,6 +106,25 @@ effect_id = "effect.phase8.reward_gold"
 currency_id = "gold"
 amount = 30
 
+[sub_resource type="Resource" id="Resource_stat_max_hp"]
+script = ExtResource("23_stat")
+stat_id = "max_hp"
+display_name = "Max HP"
+default_value = 100.0
+min_value = 1.0
+
+[sub_resource type="Resource" id="Resource_stat_attack_power"]
+script = ExtResource("23_stat")
+stat_id = "attack_power"
+display_name = "Attack Power"
+default_value = 10.0
+
+[sub_resource type="Resource" id="Resource_stat_defense"]
+script = ExtResource("23_stat")
+stat_id = "defense"
+display_name = "Defense"
+default_value = 0.0
+
 [sub_resource type="Resource" id="Resource_quest_field_report"]
 script = ExtResource("7_quest")
 quest_id = "quest.phase8.field_report"
@@ -113,18 +142,32 @@ script = ExtResource("10_accept")
 effect_id = "effect.phase8.accept_field_report"
 quest_id = "quest.phase8.field_report"
 
+[sub_resource type="Resource" id="Resource_elder_blessing_attack"]
+script = ExtResource("25_apply_stat")
+effect_id = "effect.phase8.elder_blessing_attack"
+stat_id = "attack_power"
+value = 5.0
+duration = -1.0
+stacking_rule = 4
+
 [sub_resource type="Resource" id="Resource_dialogue_choice_accept"]
 script = ExtResource("11_choice")
 text = "I'll check the field."
 next_node_id = "n.accepted"
 effects = Array[GameEffect]([SubResource("Resource_accept_quest")])
 
+[sub_resource type="Resource" id="Resource_dialogue_choice_blessing"]
+script = ExtResource("11_choice")
+text = "Share a battle blessing."
+next_node_id = "n.accepted"
+effects = Array[GameEffect]([SubResource("Resource_elder_blessing_attack")])
+
 [sub_resource type="Resource" id="Resource_dialogue_node_offer"]
 script = ExtResource("12_dialogue_node")
 node_id = "n.offer"
 speaker_id = "npc.phase8.elder"
 text = "The road beyond the village is restless. Bring back proof from one field beast."
-choices = Array[DialogueChoice]([SubResource("Resource_dialogue_choice_accept")])
+choices = Array[DialogueChoice]([SubResource("Resource_dialogue_choice_accept"), SubResource("Resource_dialogue_choice_blessing")])
 
 [sub_resource type="Resource" id="Resource_dialogue_node_accepted"]
 script = ExtResource("12_dialogue_node")
@@ -181,7 +224,79 @@ bgm_id = "bgm.phase8.field"
 default_spawn_id = "field_entry"
 tags = Array[String](["field", "combat"])
 
+[sub_resource type="Resource" id="Resource_burn_tick_damage"]
+script = ExtResource("19_damage")
+effect_id = "effect.phase8.burn_tick_damage"
+base_amount = 4.0
+damage_type = "magical"
+element_type = "fire"
+can_crit = false
+
+[sub_resource type="Resource" id="Resource_burn_tick_log"]
+script = ExtResource("26_log")
+effect_id = "effect.phase8.burn_tick_log"
+message = "Phase8 burn tick"
+event_type = "phase8_burn_tick"
+
+[sub_resource type="Resource" id="Resource_burn_defense_modifier"]
+script = ExtResource("24_stat_mod")
+modifier_id = "mod.phase8.burn_defense_down"
+stat_id = "defense"
+value = -2.0
+stacking_rule = 1
+
+[sub_resource type="Resource" id="Resource_status_burn"]
+script = ExtResource("18_status")
+status_id = "status.phase8.burn"
+display_name = "Burn"
+duration = 4.0
+tick_interval = 1.0
+max_stacks = 1
+tags = Array[String](["burn", "fire", "debuff"])
+effects_on_tick = Array[GameEffect]([SubResource("Resource_burn_tick_damage"), SubResource("Resource_burn_tick_log")])
+stat_modifiers = Array[StatModifierDefinition]([SubResource("Resource_burn_defense_modifier")])
+
+[sub_resource type="Resource" id="Resource_firebolt_damage"]
+script = ExtResource("19_damage")
+effect_id = "effect.phase8.firebolt_damage"
+base_amount = 8.0
+damage_type = "magical"
+element_type = "fire"
+can_crit = false
+
+[sub_resource type="Resource" id="Resource_firebolt_burn"]
+script = ExtResource("20_apply_status")
+effect_id = "effect.phase8.firebolt_burn"
+status_id = "status.phase8.burn"
+stacks = 1
+duration_override = -1.0
+
+[sub_resource type="Resource" id="Resource_firebolt_cooldown_cond"]
+script = ExtResource("21_cd_cond")
+condition_id = "cond.phase8.firebolt_ready"
+ability_id = "ability.phase8.firebolt"
+
+[sub_resource type="Resource" id="Resource_firebolt_range_cond"]
+script = ExtResource("22_range_cond")
+condition_id = "cond.phase8.firebolt_range"
+range = 120.0
+
+[sub_resource type="Resource" id="Resource_ability_firebolt"]
+script = ExtResource("17_ability")
+ability_id = "ability.phase8.firebolt"
+display_name = "Firebolt"
+description = "Hurls a bolt of fire that burns the target."
+cooldown = 2.0
+charges = 1
+cost_type = "mana"
+cost_amount = 10.0
+cast_time = 0.4
+range = 120.0
+tags = Array[String](["fire", "spell"])
+conditions = Array[Condition]([SubResource("Resource_firebolt_range_cond"), SubResource("Resource_firebolt_cooldown_cond")])
+effects = Array[GameEffect]([SubResource("Resource_firebolt_damage"), SubResource("Resource_firebolt_burn")])
+
 [resource]
 script = ExtResource("1_db")
 database_id = "phase8_rpg_content"
-resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_loot_field_beast"), SubResource("Resource_quest_field_report"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field")])
+resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_stat_max_hp"), SubResource("Resource_stat_attack_power"), SubResource("Resource_stat_defense"), SubResource("Resource_loot_field_beast"), SubResource("Resource_quest_field_report"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field"), SubResource("Resource_ability_firebolt"), SubResource("Resource_status_burn")])

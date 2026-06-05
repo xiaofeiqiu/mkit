@@ -11,6 +11,9 @@ script = ExtResource("1_slice")
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(300, 300)
 
+[node name="InputReader" parent="Player"]
+cast_ability_id = "ability.fireball_basic"
+
 [node name="Enemy" parent="." instance=ExtResource("3_enemy")]
 position = Vector2(480, 300)
 

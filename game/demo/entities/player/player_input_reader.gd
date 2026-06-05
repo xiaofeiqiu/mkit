@@ -10,6 +10,7 @@ extends Node
 #   Attack: Space / J
 
 @export var target_id: String = "player_001"
+@export var cast_ability_id: String = ""
 
 var _router: CommandRouter = null
 var _was_moving: bool = false
@@ -52,13 +53,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			_router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, target_id, target_id, {}))
 		elif event.keycode == KEY_Q:
-			if _router == null:
+			var ability_id := cast_ability_id.strip_edges()
+			if _router == null or ability_id == "":
 				return
 			_router.dispatch(
 				GameCommand.create(
 					BuiltinCommands.CAST_ABILITY,
 					target_id,
 					target_id,
-					{"ability_id": "ability.fireball_basic"}
+					{"ability_id": ability_id}
 				)
 			)

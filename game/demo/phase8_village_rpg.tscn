@@ -22,6 +22,12 @@ script = ExtResource("1_slice")
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(160, 260)
 
+[node name="AbilityController" parent="Player/Controllers"]
+starting_ability_ids = Array[String](["ability.phase8.firebolt"])
+
+[node name="InputReader" parent="Player"]
+cast_ability_id = "ability.phase8.firebolt"
+
 [node name="ExperienceComponent" type="Node" parent="Player/Components"]
 script = ExtResource("3_experience")
 save_id = "player_experience"

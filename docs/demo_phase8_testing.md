@@ -46,6 +46,7 @@ make phase8-test
 - 不出现 `[AUTO] phase8 RPG loop incomplete`。
 - complete 只有在 firebolt 扣 mana、burn status tick 触发、`LogEffect` 发出 `phase8_burn_tick` 后才应出现。
 - complete 还要求 field beast 被 command -> HFSM -> `TimedAttackAction` melee path 击败；不能依赖 `[COMBAT] command chain stalled; using scripted strike` fallback。
+- complete 还要求 `item.phase8.field_blade` 已装进 `EquipmentController` 的 `weapon` slot，且 player 的 `attack_power` 达到 `21`(base 10 + 祝福 5 + 装备 6)。
 - 不出现 `missing service`、`could not enter`、`not found`、`transaction failed` 这类 phase8 失败日志。
 - macOS headless 可能打印一次系统证书相关的 Godot error；如果除此之外 auto-run 完成，可以把它视为环境噪声。
 
@@ -62,8 +63,10 @@ make phase8-test
 [QUEST] quest.phase8.field_report obj.phase8.kill_field_beast 1/1
 [QUEST] turned in quest.phase8.field_report
 [LOOT] picked up item.phase8.beast_claw x1
+[LOOT] picked up item.phase8.field_blade x1
 [XP] level 1 -> 2
 [STAT] elder blessing attack_power 10 -> 15
+[EQUIP] equipped field blade attack_power 15 -> 21
 [SHOP] bought item.phase8.herb_potion x1 for 10 gold
 [SHOP] sold item.phase8.beast_claw x1 for 4 gold
 [AUTO] phase8 RPG loop complete
@@ -140,10 +143,11 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 - quest 自动 turn in，日志包含 `[QUEST] turned in quest.phase8.field_report`
 - 背包获得 `village_charm x1`
 - 背包获得 `beast_claw x1`
+- 背包获得 `field_blade x1`(来自 `loot.phase8.field_blade` 保证掉落)
 - XP 增加 `65`，等级从 `1` 升到 `2`
 - 金币从 `10` 变为 `40`
 
-击败后继续按 `K` 不应该重复发奖励、loot 或 XP；如果重复获得 `beast_claw`、`village_charm` 或再次升级，就是幂等性回归。
+击败后继续按 `K` 不应该重复发奖励、loot 或 XP；如果重复获得 `beast_claw`、`field_blade`、`village_charm` 或再次升级，就是幂等性回归。
 
 ### 5. Elder blessing
 
@@ -157,7 +161,18 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 
 再按 `R` 回到村庄。
 
-### 6. Shop buy and sell
+### 6. Equip the field blade
+
+回村后按 `E` 把 field 掉落的 `field_blade` 装进 `weapon` slot：
+
+- 日志出现 `[EQUIP] equipped field blade attack_power 15 -> 21`
+- `EquipmentController` 通过 `StatModifier` 给 `StatsComponent` 加 `attack_power +6`
+- blade 仍保留在背包里,装备槽只引用同一个 `ItemInstance`(`EquipmentController` 与 `InventoryController` 解耦,equip 不改动背包条目)
+- 再按一次 `E` 卸下,`attack_power` 还原到 `15`(日志 `[EQUIP] unequipped ...`),blade 仍在背包,可再次装备
+
+equip 后的 `attack_power` 会被 `CombatResolver` 读到,提高后续战斗伤害。auto-run 会走一遍 equip → unequip → 再 equip,验证 toggle 不会丢失 blade,并在结束时保持装备状态。
+
+### 7. Shop buy and sell
 
 回到村庄后按 `B`：
 
@@ -175,7 +190,7 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 
 离开村庄时 shop UI 应关闭，`Shop` HUD 应回到 `closed`。
 
-### 7. Potion use
+### 8. Potion use
 
 `H` 是额外的 consumable 检查，不属于 auto-run 的完成条件。建议在完成买药后单独测一次：
 
@@ -195,6 +210,7 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 - 不在 elder room 按 `Y`，应提示 `[DIALOGUE] enter the elder room first`。
 - 不在 field 按 `K`，应提示 `[COMBAT] go to the field first`。
 - 未买 potion 时按 `H`，应提示 `[ITEM] no herb potion in inventory`。
+- 没有 `field_blade`(还没击败 beast)时按 `E`，应提示 `[EQUIP] no field blade to equip`。
 - 重复击败 field beast 不应重复发放 quest reward、loot 或 XP。
 
 ## 需要一起保护的底层测试
@@ -254,6 +270,8 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/integration/test_
 - field beast 的 `EntityIdentity.tags` 包含 `field_beast`
 - field beast 有 `Components/HealthComponent`，死亡不销毁节点也不能重复 loot
 - `loot.phase8.field_beast` 至少能产出 `item.phase8.beast_claw`
+- `loot.phase8.field_blade` 保证产出 `item.phase8.field_blade`(`rolls=1`、`allow_empty=false`、单 entry)
+- `item.phase8.field_blade` 是 `equipment_slot="weapon"`、不可堆叠,且带 `attack_power +6` 的 `StatModifierDefinition`
 - `shop.phase8.village_supply` 能买 `item.phase8.herb_potion`，且允许卖出 `item.phase8.beast_claw`
 - `item.phase8.herb_potion` 的 `use_effects` 包含 heal effect
 - quest reward 发 `item.phase8.village_charm` 和 `gold`

@@ -10,7 +10,10 @@ const SHOP_ID := "shop.phase8.village_supply"
 const ITEM_POTION := "item.phase8.herb_potion"
 const ITEM_CLAW := "item.phase8.beast_claw"
 const ITEM_CHARM := "item.phase8.village_charm"
+const ITEM_FIELD_BLADE := "item.phase8.field_blade"
+const WEAPON_SLOT := "weapon"
 const LOOT_FIELD_BEAST := "loot.phase8.field_beast"
+const LOOT_FIELD_BLADE := "loot.phase8.field_blade"
 const ABILITY_FIREBOLT := "ability.phase8.firebolt"
 const STATUS_BURN := "status.phase8.burn"
 const PLAYER_ID := "player_001"
@@ -74,6 +77,7 @@ var _firebolt_cast_succeeded: bool = false
 var _burn_tick_observed: bool = false
 var _elder_blessing_received: bool = false
 var _command_combat_succeeded: bool = false
+var _field_blade_equipped: bool = false
 
 
 func _ready() -> void:
@@ -109,6 +113,8 @@ func _input(event: InputEvent) -> void:
 				_request_elder_blessing()
 			KEY_F:
 				_cast_firebolt_command()
+			KEY_E:
+				_toggle_field_blade()
 			KEY_K:
 				_defeat_field_beast()
 			KEY_B:
@@ -171,6 +177,11 @@ func _reset_demo_state() -> void:
 	if health != null:
 		health.dead = false
 		health.current_hp = health.get_max_hp()
+	var equipment := _equipment_controller()
+	if equipment != null:
+		for slot_id in equipment.equipped.keys().duplicate():
+			equipment.unequip(slot_id)
+	_field_blade_equipped = false
 	_field_beast_looted = false
 	_shop_purchase_completed = false
 	_shop_sale_completed = false
@@ -258,7 +269,8 @@ func _grant_starter_currency() -> void:
 func _set_instructions() -> void:
 	_instructions_label.text = (
 		"Phase 8 RPG loop: R room portal, T talk/choice/advance, R back, G field portal, "
-		+ "F cast firebolt, K defeat beast, Y elder blessing, B buy potion, V sell claw, H use potion"
+		+ "F cast firebolt, K defeat beast, E equip/unequip blade, Y elder blessing, "
+		+ "B buy potion, V sell claw, H use potion"
 	)
 
 
@@ -678,13 +690,47 @@ func _grant_field_loot(entity_ref: Node) -> void:
 	var inventory := _inventory()
 	if inventory == null:
 		return
+	_roll_loot_into_bag(LOOT_FIELD_BEAST, entity_ref, inventory)
+	_roll_loot_into_bag(LOOT_FIELD_BLADE, entity_ref, inventory)
+	_play_sfx("sfx.phase8.loot")
+
+
+func _roll_loot_into_bag(
+	table_id: String, entity_ref: Node, inventory: InventoryController
+) -> void:
 	var result := _loot_system.roll_table(
-		LOOT_FIELD_BEAST, GameplayContext.new().with_source(entity_ref).with_target(_player)
+		table_id, GameplayContext.new().with_source(entity_ref).with_target(_player)
 	)
 	for item in result.item_instances:
 		if inventory.add_item(item):
 			_log("[LOOT] picked up %s x%d" % [item.definition_id, item.quantity])
-	_play_sfx("sfx.phase8.loot")
+
+
+func _toggle_field_blade() -> void:
+	var equipment := _equipment_controller()
+	var inventory := _inventory()
+	if equipment == null or inventory == null:
+		_log("[EQUIP] equipment/inventory controller missing")
+		return
+	var stats := _player_stats()
+	var before := stats.get_stat_value("attack_power", 0.0) if stats != null else 0.0
+	if equipment.get_equipped(WEAPON_SLOT) != null:
+		equipment.unequip(WEAPON_SLOT)
+		_field_blade_equipped = false
+		var restored := stats.get_stat_value("attack_power", 0.0) if stats != null else before
+		_log("[EQUIP] unequipped field blade attack_power %.0f -> %.0f" % [before, restored])
+		return
+	var blade := inventory.find_item_by_definition(ITEM_FIELD_BLADE)
+	if blade == null:
+		_log("[EQUIP] no field blade to equip")
+		return
+	if not equipment.equip(blade, WEAPON_SLOT):
+		_log("[EQUIP] field blade equip failed")
+		return
+	var after := stats.get_stat_value("attack_power", 0.0) if stats != null else before
+	if after > before:
+		_field_blade_equipped = true
+	_log("[EQUIP] equipped field blade attack_power %.0f -> %.0f" % [before, after])
 
 
 func _grant_field_xp() -> void:
@@ -786,6 +832,10 @@ func _inventory() -> InventoryController:
 	return _player.get_node_or_null("Controllers/InventoryController") as InventoryController
 
 
+func _equipment_controller() -> EquipmentController:
+	return _player.get_node_or_null("Controllers/EquipmentController") as EquipmentController
+
+
 func _player_health() -> HealthComponent:
 	return _player.get_node_or_null("Components/HealthComponent") as HealthComponent
 
@@ -875,6 +925,12 @@ func _run_auto_loop() -> void:
 	await _settle_world()
 	_toggle_room_portal()
 	await _settle_world()
+	_toggle_field_blade()
+	await _settle_world()
+	_toggle_field_blade()
+	await _settle_world()
+	_toggle_field_blade()
+	await _settle_world()
 	_buy_potion()
 	await get_tree().process_frame
 	_sell_claw()
@@ -921,8 +977,13 @@ func _phase8_loop_complete() -> bool:
 		return false
 	if not _command_combat_succeeded:
 		return false
+	if not _field_blade_equipped:
+		return false
+	var equipment := _equipment_controller()
+	if equipment == null or equipment.get_equipped(WEAPON_SLOT) == null:
+		return false
 	var stats := _player_stats()
-	if stats == null or stats.get_stat_value("attack_power", 0.0) < 15.0:
+	if stats == null or stats.get_stat_value("attack_power", 0.0) < 21.0:
 		return false
 	if not _shop_purchase_completed or not _shop_sale_completed:
 		return false

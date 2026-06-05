@@ -7,7 +7,7 @@
 - [x] **S0** — command→HFSM→action 链接入自动化并断言(命令 / 状态机 / 动作 / hitbox-hurtbox,11 类)
 - [x] **S1** — 技能管线:消耗 / 冷却 / 条件 / 命中施加状态(abilities + conditions + ResourcePool,10 类)
 - [x] **S2** — 状态效果 + 属性修饰(status / stat-modifier + LogEffect,8 类)
-- [ ] **S3** — 装备(`EquipmentController` + 可装备 item + StatModifier,1 类)
+- [x] **S3** — 装备(`EquipmentController` + 可装备 item + StatModifier,1 类)
 - [ ] **S4** — 数据驱动生成实体(`EntityDefinition` / `EntitySpawner`,2 类)
 - [ ] **S5** — 敌人 AI(`Brain` / `SimpleAIEnemyBrain` / `Blackboard`,3 类)
 - [ ] **S6** — 试炼洞窟:Roguelike 单局(Room / Run / Dungeon / Reward,13 类,方案 A)
@@ -17,7 +17,7 @@
 - [ ] **S10** — 收尾:就近交互 / 手动任务 effect / 冲刺(`InteractionComponent` / `AdvanceObjectiveEffect` / `CompleteQuestEffect` / `DashAction`,4 类)
 - [ ] **S11** — 退役 phase0–7,demo 收敛到唯一入口(`bootstrap_phase8` / `project.godot` 主场景)
 
-覆盖账:当前 ✅ 65 类;S0–S10 接入剩余 67 类(其中 `RandomService` / `ActionContext` / `StatsComponent` 3 个随宿主 slice 顺带断言);全部完成后 = **132 / 132**,零豁免。详见 §2 矩阵与附录映射表。
+覆盖账:当前 ✅ 66 类;S0–S10 接入剩余 66 类(其中 `RandomService` / `ActionContext` / `StatsComponent` 3 个随宿主 slice 顺带断言);全部完成后 = **132 / 132**,零豁免。详见 §2 矩阵与附录映射表。
 
 ---
 
@@ -88,7 +88,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 | combat | `CombatResolver` `DamageRequest` `DamageResult` `HitboxComponent` `HurtboxComponent` | — | — |
 | abilities | `AbilityController` `AbilityDefinition` `AbilityInstance` | — | — |
 | status_effects | `StatusEffectController` `StatusEffectInstance` `StatusEffectDefinition` | — | — |
-| inventory | `InventoryController` `InventoryModel` `InventorySlot` `ItemDefinition` `ItemInstance` | `EquipmentController` | — |
+| inventory | `InventoryController` `InventoryModel` `InventorySlot` `ItemDefinition` `ItemInstance` `EquipmentController` | — | — |
 | loot | `LootSystem` `LootTableDefinition` `LootEntry` `LootRollResult` | — | `RewardSystem` `RewardDefinition` `RewardOption` |
 | room | — | — | `RoomDefinition` `RoomRuntime` `RoomController` `RoomGraph` `RoomNode` `RunDirector` `RunState` `DungeonGenerator` |
 | world | `WorldRouter` `ZoneDefinition` `Portal` `SpawnPoint` | — | — |

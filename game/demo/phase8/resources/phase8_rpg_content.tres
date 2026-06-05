@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=60 format=3]
+[gd_resource type="Resource" load_steps=64 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/kernel/registry/resource_database.gd" id="1_db"]
 [ext_resource type="Script" path="res://addons/mkit/modules/inventory/item_definition.gd" id="2_item"]
@@ -69,6 +69,26 @@ stackable = true
 max_stack = 1
 tags = Array[String](["quest_reward"])
 
+[sub_resource type="Resource" id="Resource_field_blade_attack"]
+script = ExtResource("24_stat_mod")
+modifier_id = "mod.phase8.field_blade_attack"
+stat_id = "attack_power"
+value = 6.0
+
+[sub_resource type="Resource" id="Resource_item_field_blade"]
+script = ExtResource("2_item")
+item_id = "item.phase8.field_blade"
+display_name = "Field Blade"
+description = "A blade salvaged from a field beast. Grants +6 attack power while equipped."
+item_type = "equipment"
+rarity = "uncommon"
+value = 12
+stackable = false
+max_stack = 1
+equipment_slot = "weapon"
+tags = Array[String](["weapon", "equipment", "field_beast"])
+stat_modifiers = Array[StatModifierDefinition]([SubResource("Resource_field_blade_attack")])
+
 [sub_resource type="Resource" id="Resource_loot_claw_entry"]
 script = ExtResource("4_loot_entry")
 content_id = "item.phase8.beast_claw"
@@ -81,6 +101,21 @@ script = ExtResource("5_loot_table")
 loot_table_id = "loot.phase8.field_beast"
 rolls = 1
 entries = Array[LootEntry]([SubResource("Resource_loot_claw_entry")])
+allow_empty = false
+empty_weight = 0.0
+
+[sub_resource type="Resource" id="Resource_loot_blade_entry"]
+script = ExtResource("4_loot_entry")
+content_id = "item.phase8.field_blade"
+weight = 1.0
+min_quantity = 1
+max_quantity = 1
+
+[sub_resource type="Resource" id="Resource_loot_field_blade"]
+script = ExtResource("5_loot_table")
+loot_table_id = "loot.phase8.field_blade"
+rolls = 1
+entries = Array[LootEntry]([SubResource("Resource_loot_blade_entry")])
 allow_empty = false
 empty_weight = 0.0
 
@@ -299,4 +334,4 @@ effects = Array[GameEffect]([SubResource("Resource_firebolt_damage"), SubResourc
 [resource]
 script = ExtResource("1_db")
 database_id = "phase8_rpg_content"
-resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_stat_max_hp"), SubResource("Resource_stat_attack_power"), SubResource("Resource_stat_defense"), SubResource("Resource_loot_field_beast"), SubResource("Resource_quest_field_report"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field"), SubResource("Resource_ability_firebolt"), SubResource("Resource_status_burn")])
+resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_item_field_blade"), SubResource("Resource_stat_max_hp"), SubResource("Resource_stat_attack_power"), SubResource("Resource_stat_defense"), SubResource("Resource_loot_field_beast"), SubResource("Resource_loot_field_blade"), SubResource("Resource_quest_field_report"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field"), SubResource("Resource_ability_firebolt"), SubResource("Resource_status_burn")])

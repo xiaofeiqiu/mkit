@@ -8,6 +8,7 @@ const PLAYER_ID := "player_001"
 const BEAST_ID := "enemy.phase8.field_beast"
 const FIREBOLT := "ability.phase8.firebolt"
 const BURN := "status.phase8.burn"
+const FIELD_BLADE := "item.phase8.field_blade"
 
 
 func after_each() -> void:
@@ -294,6 +295,96 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	request.can_crit = false
 	var damage := CombatResolver.get_default().resolve(request)
 	assert_eq(damage.final_amount, 15.0)
+
+
+# S3: the field blade is a weapon-slot equippable that the EquipmentController applies through
+# the StatModifier path. Equipping it raises attack_power and the extra power flows straight into
+# CombatResolver damage; unequipping restores both; and a Saveable round-trip on the controller
+# re-applies the equipped item and its modifier.
+func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_round_trips() -> void:
+	var bootstrap := GameBootstrap.new()
+	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	add_child_autofree(bootstrap)
+
+	var content := ServiceRegistry.get_service("content") as ContentRegistry
+	assert_not_null(content)
+
+	# the blade content: a weapon-slot item carrying a +attack_power StatModifierDefinition
+	var blade_def := content.get_resource(FIELD_BLADE) as ItemDefinition
+	assert_not_null(blade_def)
+	assert_eq(blade_def.equipment_slot, "weapon")
+	assert_false(blade_def.stackable)
+	assert_eq(blade_def.stat_modifiers.size(), 1)
+	assert_eq(blade_def.stat_modifiers[0].stat_id, "attack_power")
+	assert_eq(blade_def.stat_modifiers[0].value, 6.0)
+
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	add_child_autofree(player)
+	var equipment := player.get_node("Controllers/EquipmentController") as EquipmentController
+	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
+	var stats := player.get_node("Components/StatsComponent") as StatsComponent
+	stats.set_base_stat("crit_chance", 0.0)
+
+	# a defenseless target to read combat damage off CombatResolver
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	add_child_autofree(beast)
+	var beast_stats := beast.get_node("Components/StatsComponent") as StatsComponent
+	beast_stats.set_base_stat("defense", 0.0)
+
+	var attack_before := stats.get_stat_value("attack_power")
+	var damage_before := _resolve_damage(player, beast)
+	assert_eq(damage_before, attack_before + 10.0)
+
+	# pick the blade up like field loot, then equip it into the weapon slot
+	var blade := ItemInstance.create(FIELD_BLADE)
+	assert_true(inventory.add_item(blade))
+	watch_signals(equipment)
+	watch_signals(stats)
+	assert_true(equipment.can_equip(blade, "weapon"))
+	assert_true(equipment.equip(blade, "weapon"))
+	assert_signal_emitted_with_parameters(equipment, "equipment_changed", ["weapon", blade])
+	assert_signal_emitted(stats, "stat_changed")
+
+	# +6 attack_power from the weapon, and the extra power lands in resolved damage
+	assert_eq(stats.get_stat_value("attack_power"), attack_before + 6.0)
+	assert_eq(_resolve_damage(player, beast), damage_before + 6.0)
+	assert_eq(equipment.get_equipped("weapon"), blade)
+
+	# unequip restores both the stat and the damage
+	assert_eq(equipment.unequip("weapon"), blade)
+	assert_eq(stats.get_stat_value("attack_power"), attack_before)
+	assert_eq(_resolve_damage(player, beast), damage_before)
+	assert_null(equipment.get_equipped("weapon"))
+
+	# equip/unequip is decoupled from the bag: the source ItemInstance survives the cycle at
+	# quantity 1 and re-equips (guards the demo against mutating the equipped instance via the bag)
+	var bag_blade := inventory.find_item_by_definition(FIELD_BLADE)
+	assert_not_null(bag_blade)
+	assert_eq(bag_blade.quantity, 1)
+	assert_true(equipment.equip(bag_blade, "weapon"))
+	assert_eq(stats.get_stat_value("attack_power"), attack_before + 6.0)
+	assert_eq(equipment.unequip("weapon"), bag_blade)
+
+	# Saveable round-trip: re-equip, snapshot, clear, restore -> item + modifier come back
+	assert_true(equipment.equip(blade, "weapon"))
+	var snapshot := equipment.to_save_data()
+	equipment.unequip("weapon")
+	assert_null(equipment.get_equipped("weapon"))
+	assert_eq(stats.get_stat_value("attack_power"), attack_before)
+	equipment.from_save_data(snapshot)
+	var restored := equipment.get_equipped("weapon")
+	assert_not_null(restored)
+	assert_eq(restored.definition_id, FIELD_BLADE)
+	assert_eq(stats.get_stat_value("attack_power"), attack_before + 6.0)
+
+
+func _resolve_damage(source: Node, target: Node) -> float:
+	var request := DamageRequest.new()
+	request.source = source
+	request.target = target
+	request.base_amount = 10.0
+	request.can_crit = false
+	return CombatResolver.get_default().resolve(request).final_amount
 
 
 func _modifier_count(stats: StatsComponent, stat_id: String) -> int:

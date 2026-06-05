@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
-[ext_resource type="PackedScene" path="res://game/demo/phase8/entities/field_beast.tscn" id="3_beast"]
 
 [node name="Field" type="Node2D"]
 
@@ -33,7 +32,7 @@ offset_bottom = 340.0
 text = "Village Gate (G)"
 horizontal_alignment = 1
 
-[node name="FieldBeast" parent="." instance=ExtResource("3_beast")]
+[node name="FieldBeastSpawn" type="Marker2D" parent="."]
 position = Vector2(470, 240)
 
 [node name="FightLabel" type="Label" parent="."]

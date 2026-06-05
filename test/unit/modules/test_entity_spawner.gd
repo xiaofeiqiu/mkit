@@ -2,6 +2,7 @@ extends GutTest
 
 
 const STATS_SCENE_PATH := "res://test/unit/modules/tmp_entity_spawner_stats_probe.tscn"
+const COMMAND_SCENE_PATH := "res://test/unit/modules/tmp_entity_spawner_command_probe.tscn"
 
 
 class StubContent:
@@ -42,6 +43,8 @@ func before_each() -> void:
 func after_each() -> void:
 	_remove_file(STATS_SCENE_PATH)
 	_remove_file("%s.uid" % STATS_SCENE_PATH)
+	_remove_file(COMMAND_SCENE_PATH)
+	_remove_file("%s.uid" % COMMAND_SCENE_PATH)
 	ServiceRegistry.clear()
 
 
@@ -108,6 +111,23 @@ func test_tc_es_06_spawned_definition_base_stats_are_save_baseline() -> void:
 	assert_true((data["base_overrides"] as Dictionary).is_empty())
 
 
+func test_tc_es_07_spawned_command_receiver_tracks_runtime_identity() -> void:
+	_save_command_scene()
+	var router := CommandRouter.new()
+	add_child_autofree(router)
+	ServiceRegistry.register_service("commands", router)
+	var definition := _make_def("command_entity", COMMAND_SCENE_PATH)
+	content._defs["command_entity"] = definition
+	var entity := spawner.spawn_entity("command_entity", parent_node, Vector2.ZERO, "runtime.command.001")
+	assert_not_null(entity)
+	var identity := entity.get_node("EntityIdentity") as EntityIdentity
+	var receiver := entity.get_node("CommandReceiver") as CommandReceiver
+	assert_eq(identity.entity_id, "runtime.command.001")
+	assert_eq(receiver.receiver_id, identity.entity_id)
+	assert_true(router._receivers.has(identity.entity_id))
+	assert_false(router._receivers.has("scene.command.static"))
+
+
 func _save_stats_scene() -> void:
 	var entity := Node.new()
 	entity.name = "StatsEntity"
@@ -124,6 +144,24 @@ func _save_stats_scene() -> void:
 	var scene := PackedScene.new()
 	assert_eq(scene.pack(entity), OK)
 	assert_eq(ResourceSaver.save(scene, STATS_SCENE_PATH), OK)
+	entity.free()
+
+
+func _save_command_scene() -> void:
+	var entity := Node.new()
+	entity.name = "CommandEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = "scene.command.static"
+	entity.add_child(identity)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	receiver.receiver_id = "scene.command.static"
+	entity.add_child(receiver)
+	_assign_owner(entity, entity)
+	var scene := PackedScene.new()
+	assert_eq(scene.pack(entity), OK)
+	assert_eq(ResourceSaver.save(scene, COMMAND_SCENE_PATH), OK)
 	entity.free()
 
 

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=64 format=3]
+[gd_resource type="Resource" load_steps=66 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/kernel/registry/resource_database.gd" id="1_db"]
 [ext_resource type="Script" path="res://addons/mkit/modules/inventory/item_definition.gd" id="2_item"]
@@ -26,6 +26,7 @@
 [ext_resource type="Script" path="res://addons/mkit/modules/stats/stat_modifier_definition.gd" id="24_stat_mod"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/apply_stat_modifier_effect.gd" id="25_apply_stat"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/log_effect.gd" id="26_log"]
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_definition.gd" id="27_entity"]
 
 [sub_resource type="Resource" id="Resource_heal_potion_effect"]
 script = ExtResource("3_heal")
@@ -259,6 +260,21 @@ bgm_id = "bgm.phase8.field"
 default_spawn_id = "field_entry"
 tags = Array[String](["field", "combat"])
 
+[sub_resource type="Resource" id="Resource_entity_field_beast"]
+script = ExtResource("27_entity")
+entity_definition_id = "entity.phase8.field_beast"
+display_name = "Field Beast"
+scene_path = "res://game/demo/phase8/entities/field_beast.tscn"
+default_faction = "enemy"
+tags = Array[String](["enemy", "living", "field_beast"])
+base_stats = {
+"attack_power": 0.0,
+"defense": 0.0,
+"max_hp": 35.0
+}
+starting_ability_ids = Array[String]([])
+loot_table_id = "loot.phase8.field_beast"
+
 [sub_resource type="Resource" id="Resource_burn_tick_damage"]
 script = ExtResource("19_damage")
 effect_id = "effect.phase8.burn_tick_damage"
@@ -334,4 +350,4 @@ effects = Array[GameEffect]([SubResource("Resource_firebolt_damage"), SubResourc
 [resource]
 script = ExtResource("1_db")
 database_id = "phase8_rpg_content"
-resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_item_field_blade"), SubResource("Resource_stat_max_hp"), SubResource("Resource_stat_attack_power"), SubResource("Resource_stat_defense"), SubResource("Resource_loot_field_beast"), SubResource("Resource_loot_field_blade"), SubResource("Resource_quest_field_report"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field"), SubResource("Resource_ability_firebolt"), SubResource("Resource_status_burn")])
+resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_item_field_blade"), SubResource("Resource_stat_max_hp"), SubResource("Resource_stat_attack_power"), SubResource("Resource_stat_defense"), SubResource("Resource_loot_field_beast"), SubResource("Resource_loot_field_blade"), SubResource("Resource_quest_field_report"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field"), SubResource("Resource_entity_field_beast"), SubResource("Resource_ability_firebolt"), SubResource("Resource_status_burn")])

@@ -2,7 +2,7 @@
 
 ## 概念说明
 
-EntitySpawner 是通过 EntityDefinition 创建实体节点的统一入口。它负责加载实体场景、挂到指定父节点、初始化 EntityIdentity、基础属性和初始技能。房间刷怪、召唤物、陷阱和读档恢复都需要生成实体；统一入口可以保证 ID、阵营、属性和事件链一致。
+EntitySpawner 是通过 EntityDefinition 创建实体节点的统一入口。它负责加载实体场景、初始化 EntityIdentity、同步 CommandReceiver、挂到指定父节点、初始化基础属性和初始技能。房间刷怪、召唤物、陷阱和读档恢复都需要生成实体；统一入口可以保证 ID、阵营、属性、命令路由和事件链一致。
 
 ## 设计目的
 
@@ -29,9 +29,10 @@ func spawn_entity( definition_id: String, parent: Node, position: Vector2 = Vect
 
 ## 函数使用场景
 
-- **`spawn_entity(definition_id, parent, position, runtime_id)`**：主要公开接口，通过 ContentRegistry 查找 EntityDefinition，实例化场景，挂到 parent 节点，并依次初始化 identity、stats 和 abilities。成功后发出 `entity_spawned` 信号，失败时发出 `entity_spawn_failed`。例如 RoomController 进入房间时对每个 enemy_spawn_id 调用此方法。
+- **`spawn_entity(definition_id, parent, position, runtime_id)`**：主要公开接口，通过 ContentRegistry 查找 EntityDefinition，实例化场景，先初始化 identity 并让 CommandReceiver 使用同一个运行时 entity_id，再挂到 parent 节点并初始化 stats 和 abilities。成功后发出 `entity_spawned` 信号，失败时发出 `entity_spawn_failed`。例如 RoomController 进入房间时对每个 enemy_spawn_id 调用此方法。
 - **`_get_definition(definition_id)`**：内部辅助，从 ContentRegistry 读取 EntityDefinition；若 ContentRegistry 未缓存则重新获取。
 - **`_initialize_identity(entity, definition, runtime_id)`**：把 definition 的 definition_id、display_name、faction、tags 写入实体的 EntityIdentity；若传入 runtime_id 则覆盖自动生成的 entity_id。
+- **`_initialize_command_receiver(entity)`**：内部辅助，把实体 CommandReceiver.receiver_id 同步到 EntityIdentity.entity_id，保证生成实体进入场景树时按运行时 ID 注册到 CommandRouter。
 - **`_initialize_stats(entity, definition)`**：把 definition.base_stats 中每个 stat_id/value 写入实体的 StatsComponent.set_base_stat，并调用 StatsComponent.mark_save_baseline，使 definition 静态属性不会被后续存档误判为 runtime override。
 - **`_initialize_abilities(entity, definition)`**：对 definition.starting_ability_ids 逐个调用实体 AbilityController.register_ability。
 

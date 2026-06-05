@@ -3,12 +3,16 @@ extends GutTest
 
 const PLAYER_SCENE := "res://game/demo/entities/player/player.tscn"
 const BEAST_SCENE := "res://game/demo/phase8/entities/field_beast.tscn"
+const PHASE8_SCENE := "res://game/demo/phase8_village_rpg.tscn"
+const FIELD_SCENE := "res://game/demo/phase8/scenes/field.tscn"
 const CONTENT_DB := "res://game/demo/phase8/resources/phase8_rpg_content.tres"
 const PLAYER_ID := "player_001"
 const BEAST_ID := "enemy.phase8.field_beast"
+const ENTITY_FIELD_BEAST := "entity.phase8.field_beast"
 const FIREBOLT := "ability.phase8.firebolt"
 const BURN := "status.phase8.burn"
 const FIELD_BLADE := "item.phase8.field_blade"
+const ZONE_FIELD := "zone.phase8.field"
 
 
 func after_each() -> void:
@@ -378,6 +382,69 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	assert_eq(stats.get_stat_value("attack_power"), attack_before + 6.0)
 
 
+# S4: field beast is no longer a static child of field.tscn. Phase8 registers an
+# EntityDefinition in live content, enters the field, and creates the beast through
+# EntitySpawner so identity, tags and base stats all come from data.
+func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
+	var bootstrap := GameBootstrap.new()
+	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	add_child_autofree(bootstrap)
+
+	var content := ServiceRegistry.get_service("content") as ContentRegistry
+	assert_not_null(content)
+	var definition := content.get_resource(ENTITY_FIELD_BEAST) as EntityDefinition
+	assert_not_null(definition)
+	assert_eq(definition.entity_definition_id, ENTITY_FIELD_BEAST)
+	assert_eq(definition.scene_path, BEAST_SCENE)
+	assert_eq(definition.default_faction, "enemy")
+	assert_true(definition.tags.has("field_beast"))
+	assert_true(definition.starting_ability_ids.is_empty())
+	assert_eq(float(definition.base_stats.get("max_hp", 0.0)), 35.0)
+	assert_eq(float(definition.base_stats.get("defense", -1.0)), 0.0)
+	assert_eq(float(definition.base_stats.get("attack_power", -1.0)), 0.0)
+
+	var field := (load(FIELD_SCENE) as PackedScene).instantiate()
+	assert_not_null(field.get_node_or_null("FieldBeastSpawn"))
+	assert_null(field.get_node_or_null("FieldBeast"))
+	field.free()
+
+	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	add_child_autofree(demo)
+	await _settle_scene8_world()
+	demo.call("_toggle_field_portal")
+	await _settle_scene8_world()
+
+	var world := ServiceRegistry.get_service("world") as WorldRouter
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+	var root := demo.call("_current_zone_root") as Node
+	assert_not_null(root)
+	var marker := root.get_node_or_null("FieldBeastSpawn") as Node2D
+	assert_not_null(marker)
+	var beast := root.get_node_or_null("FieldBeast") as Node2D
+	assert_not_null(beast)
+	assert_eq(beast.global_position, marker.global_position)
+
+	var identity := beast.get_node("EntityIdentity") as EntityIdentity
+	assert_eq(identity.definition_id, ENTITY_FIELD_BEAST)
+	assert_eq(identity.display_name, "Field Beast")
+	assert_eq(identity.faction, "enemy")
+	assert_true(identity.tags.has("enemy"))
+	assert_true(identity.tags.has("living"))
+	assert_true(identity.tags.has("field_beast"))
+	var receiver := beast.get_node("CommandReceiver") as CommandReceiver
+	assert_eq(receiver.receiver_id, identity.entity_id)
+	var commands := ServiceRegistry.get_service("commands") as CommandRouter
+	assert_true(commands._receivers.has(identity.entity_id))
+	assert_false(commands._receivers.has(BEAST_ID))
+
+	var stats := beast.get_node("Components/StatsComponent") as StatsComponent
+	assert_eq(stats.get_stat_value("max_hp"), 35.0)
+	assert_eq(stats.get_stat_value("defense"), 0.0)
+	assert_eq(stats.get_stat_value("attack_power"), 0.0)
+	var save_data := stats.to_save_data()
+	assert_true((save_data["base_overrides"] as Dictionary).is_empty())
+
+
 func _resolve_damage(source: Node, target: Node) -> float:
 	var request := DamageRequest.new()
 	request.source = source
@@ -390,3 +457,9 @@ func _resolve_damage(source: Node, target: Node) -> float:
 func _modifier_count(stats: StatsComponent, stat_id: String) -> int:
 	var modifiers: Array = stats.modifiers_by_stat.get(stat_id, [])
 	return modifiers.size()
+
+
+func _settle_scene8_world() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame

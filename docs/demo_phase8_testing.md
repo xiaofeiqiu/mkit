@@ -108,7 +108,7 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 
 - `Zone` 变为 `Field`
 - 当前 `WorldHost` 内容应切到 `Field`
-- field 内能看到 `FieldBeast`
+- field 内能看到由 `entity.phase8.field_beast` 数据生成的 `FieldBeast`
 
 在 field 再按 `G` 应回到村庄，并显示 `zone.phase8.field -> zone.phase8.village`。
 
@@ -138,7 +138,7 @@ $GODOT --path . res://game/demo/bootstrap_phase8.tscn
 - firebolt 扣除 10 mana，并给 field beast 施加 `status.phase8.burn`
 - burn tick 触发一次伤害和 LogEffect，日志包含 `[STATUS] Phase8 burn tick`
 - 玩家受到一次反击，HP 从 `100/100` 变为 `88/100`
-- field beast 被击败，日志包含 `[COMBAT] defeated enemy.phase8.field_beast`
+- field beast 被击败，日志包含 `[COMBAT] defeated entity_phase8_field_beast_`
 - quest 目标推进到 `1/1`
 - quest 自动 turn in，日志包含 `[QUEST] turned in quest.phase8.field_report`
 - 背包获得 `village_charm x1`
@@ -267,6 +267,7 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/integration/test_
 - `max_hp`、`attack_power`、`defense` 三个 `StatDefinition` 注册进 content registry
 - `status.phase8.burn` 包含 tick damage、`LogEffect` 和 defense debuff `StatModifierDefinition`
 - quest objective 监听 `enemy_killed`，并匹配 tag `field_beast`
+- `entity.phase8.field_beast` 注册进 content registry，`scene_path` 指向 `field_beast.tscn`
 - field beast 的 `EntityIdentity.tags` 包含 `field_beast`
 - field beast 有 `Components/HealthComponent`，死亡不销毁节点也不能重复 loot
 - `loot.phase8.field_beast` 至少能产出 `item.phase8.beast_claw`
@@ -286,7 +287,7 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/integration/test_
 
 `[DIALOGUE] elder not found` 或 `elder has no DialogueInteractable`：检查 `village_room.tscn` 的 `Elder` 节点名和 entity layout。
 
-`[COMBAT] field beast not found`：检查 `field.tscn` 的 `FieldBeast` 节点名。
+`[COMBAT] field beast not found`：检查 `field.tscn` 的 `FieldBeastSpawn` marker、`phase8_rpg_content.tres` 里的 `entity.phase8.field_beast`，以及生成后的 `FieldBeast` 节点名。
 
 `[STATUS] firebolt did not apply burn` 或 `burn tick was not observed`：检查 `ability.phase8.firebolt` 的 effects、`status.phase8.burn.tick_interval` 和 tick 上的 `LogEffect.event_type = "phase8_burn_tick"`。
 

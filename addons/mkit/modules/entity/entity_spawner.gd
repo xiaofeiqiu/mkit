@@ -34,11 +34,12 @@ func spawn_entity(
 	if entity == null:
 		entity_spawn_failed.emit(definition_id, "cannot_instantiate_scene")
 		return null
+	_initialize_identity(entity, definition, runtime_id)
+	_initialize_command_receiver(entity)
+	_initialize_stats(entity, definition)
 	parent.add_child(entity)
 	if entity is Node2D:
 		(entity as Node2D).global_position = position
-	_initialize_identity(entity, definition, runtime_id)
-	_initialize_stats(entity, definition)
 	_initialize_abilities(entity, definition)
 	entity_spawned.emit(entity, definition_id)
 	return entity
@@ -71,6 +72,18 @@ func _initialize_identity(entity: Node, definition: EntityDefinition, runtime_id
 		identity.entity_id = (
 			"%s_%d" % [definition.entity_definition_id.replace(".", "_"), Time.get_ticks_usec()]
 		)
+
+
+func _initialize_command_receiver(entity: Node) -> void:
+	if entity == null:
+		return
+	var identity := entity.get_node_or_null("EntityIdentity") as EntityIdentity
+	if identity == null or identity.entity_id == "":
+		return
+	var receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+	if receiver == null:
+		return
+	receiver.receiver_id = identity.entity_id
 
 
 func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:

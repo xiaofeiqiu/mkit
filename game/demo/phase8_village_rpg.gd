@@ -14,6 +14,7 @@ const ITEM_FIELD_BLADE := "item.phase8.field_blade"
 const WEAPON_SLOT := "weapon"
 const LOOT_FIELD_BEAST := "loot.phase8.field_beast"
 const LOOT_FIELD_BLADE := "loot.phase8.field_blade"
+const ENTITY_FIELD_BEAST := "entity.phase8.field_beast"
 const ABILITY_FIREBOLT := "ability.phase8.firebolt"
 const STATUS_BURN := "status.phase8.burn"
 const PLAYER_ID := "player_001"
@@ -64,6 +65,7 @@ var _events: EventRouter = null
 var _effects: EffectExecutor = null
 var _progression: ProgressionSystem = null
 var _audio: AudioManager = null
+var _entity_spawner: EntitySpawner = null
 var _loot_system := LootSystem.new()
 var _scene_router := EmbeddedSceneRouter.new()
 var _previous_scene_router: SceneRouter = null
@@ -83,6 +85,7 @@ var _field_blade_equipped: bool = false
 func _ready() -> void:
 	_auto_run_enabled = OS.get_cmdline_args().has("--phase8-auto-run")
 	_resolve_services()
+	_configure_entity_spawner()
 	_configure_embedded_router()
 	_reset_demo_state()
 	_configure_audio()
@@ -146,6 +149,14 @@ func _resolve_services() -> void:
 	_effects = ServiceRegistry.get_service("effects") as EffectExecutor
 	_progression = ServiceRegistry.get_service("progression") as ProgressionSystem
 	_audio = ServiceRegistry.get_service("audio") as AudioManager
+
+
+func _configure_entity_spawner() -> void:
+	_entity_spawner = EntitySpawner.new()
+	_entity_spawner.name = "Phase8EntitySpawner"
+	if ServiceRegistry.has_service("content"):
+		_entity_spawner.content = ServiceRegistry.get_service("content") as ContentRegistry
+	add_child(_entity_spawner)
 
 
 func _configure_embedded_router() -> void:
@@ -655,6 +666,8 @@ func _on_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
 		_shop.close_shop()
 	if _shop_ui != null:
 		_shop_ui.visible = false
+	if to_zone_id == ZONE_FIELD:
+		_spawn_field_beast()
 	_log("[WORLD] %s -> %s" % [from_zone_id if from_zone_id != "" else "start", to_zone_id])
 
 
@@ -819,6 +832,24 @@ func _current_zone_root() -> Node:
 	if _world_host.get_child_count() == 0:
 		return null
 	return _world_host.get_child(0)
+
+
+func _spawn_field_beast() -> void:
+	var root := _current_zone_root()
+	if root == null:
+		return
+	if root.get_node_or_null("FieldBeast") != null:
+		return
+	var marker := root.get_node_or_null("FieldBeastSpawn") as Node2D
+	if marker == null:
+		_log("[ENTITY] field beast spawn marker missing")
+		return
+	if _entity_spawner == null:
+		_log("[ENTITY] entity spawner missing")
+		return
+	var beast := _entity_spawner.spawn_entity(ENTITY_FIELD_BEAST, root, marker.global_position)
+	if beast == null:
+		_log("[ENTITY] field beast spawn failed")
 
 
 func _field_beast() -> Node:

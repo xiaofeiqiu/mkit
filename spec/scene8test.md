@@ -9,7 +9,7 @@
 - [x] **S2** — 状态效果 + 属性修饰(status / stat-modifier + LogEffect,8 类)
 - [x] **S3** — 装备(`EquipmentController` + 可装备 item + StatModifier,1 类)
 - [x] **S4** — 数据驱动生成实体(`EntityDefinition` / `EntitySpawner`,2 类)
-- [ ] **S5** — 敌人 AI(`Brain` / `SimpleAIEnemyBrain` / `Blackboard`,3 类)
+- [x] **S5** — 敌人 AI(`Brain` / `SimpleAIEnemyBrain` / `Blackboard`,3 类)
 - [ ] **S6** — 试炼洞窟:Roguelike 单局(Room / Run / Dungeon / Reward,13 类,方案 A)
 - [ ] **S7** — 存档协调(`SaveManager` / `Saveable` / `SaveableComponent` / `SaveMigration`,4 类)
 - [ ] **S8** — 平台服务钩子(Analytics / Ads / IAP / CloudSave,8 类)
@@ -206,6 +206,9 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
   靠近并攻击 player,走 S0 的 hurtbox/combat 链使 **player 掉血**。
 - **测试:** player 进入范围后 brain 产生 approach/attack 意图;player `HealthComponent.current_hp`
   因 AI 攻击而下降。
+- **状态:** ✅ `test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player`
+  覆盖 field beast 的 `SimpleAIEnemyBrain`、`Brain.blackboard` target/intent、enemy HFSM MOVE/ATTACK、
+  enemy `HitboxComponent` → player `HurtboxComponent` → `CombatResolver` → `HealthComponent` 掉血链路。
 
 ### S6 — 试炼洞窟:Roguelike 单局(见 §3 方案 A)
 

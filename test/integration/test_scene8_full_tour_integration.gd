@@ -70,6 +70,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	# place the beast where the rightward swing hitbox (player + facing * 28) overlaps its hurtbox
 	player.global_position = Vector2.ZERO
 	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	_disable_beast_ai(beast)
 	beast.global_position = Vector2(28.0, 0.0)
 	add_child_autofree(beast)
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
@@ -145,6 +146,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	assert_eq(pool.get_current("mana"), 50.0)
 
 	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
 	var beast_status := beast.get_node("Controllers/StatusEffectController") as StatusEffectController
@@ -237,6 +239,7 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	player_stats.set_base_stat("crit_chance", 0.0)
 
 	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_stats := beast.get_node("Components/StatsComponent") as StatsComponent
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
@@ -331,6 +334,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 
 	# a defenseless target to read combat damage off CombatResolver
 	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_stats := beast.get_node("Components/StatsComponent") as StatsComponent
 	beast_stats.set_base_stat("defense", 0.0)
@@ -402,6 +406,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_eq(float(definition.base_stats.get("max_hp", 0.0)), 35.0)
 	assert_eq(float(definition.base_stats.get("defense", -1.0)), 0.0)
 	assert_eq(float(definition.base_stats.get("attack_power", -1.0)), 0.0)
+	assert_eq(float(definition.base_stats.get("move_speed", 0.0)), 120.0)
 
 	var field := (load(FIELD_SCENE) as PackedScene).instantiate()
 	assert_not_null(field.get_node_or_null("FieldBeastSpawn"))
@@ -441,8 +446,81 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_eq(stats.get_stat_value("max_hp"), 35.0)
 	assert_eq(stats.get_stat_value("defense"), 0.0)
 	assert_eq(stats.get_stat_value("attack_power"), 0.0)
+	assert_eq(stats.get_stat_value("move_speed"), 120.0)
 	var save_data := stats.to_save_data()
 	assert_true((save_data["base_overrides"] as Dictionary).is_empty())
+
+
+func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> void:
+	var bootstrap := GameBootstrap.new()
+	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	add_child_autofree(bootstrap)
+
+	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	add_child_autofree(demo)
+	await _settle_scene8_world()
+	demo.call("_toggle_field_portal")
+	await _settle_scene8_world()
+
+	var world := ServiceRegistry.get_service("world") as WorldRouter
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+
+	var player := demo.get_node("Player") as CharacterBody2D
+	var player_health := player.get_node("Components/HealthComponent") as HealthComponent
+	var player_hurtbox := player.get_node_or_null("Components/HurtboxComponent") as HurtboxComponent
+	assert_not_null(player_hurtbox)
+	player.global_position = Vector2.ZERO
+	player_health.current_hp = player_health.get_max_hp()
+
+	var beast := demo.call("_field_beast") as CharacterBody2D
+	assert_not_null(beast)
+	beast.global_position = Vector2(110.0, 0.0)
+	var brain := beast.get_node("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
+	var receiver := beast.get_node("CommandReceiver") as CommandReceiver
+	var state_machine := beast.get_node("StateMachine") as StateMachine
+	var hitbox := beast.get_node("Components/HitboxComponent") as HitboxComponent
+	assert_not_null(brain)
+	assert_not_null(hitbox)
+	assert_eq(hitbox.target_factions, ["player"])
+	assert_true(brain is Brain)
+	assert_true(brain.blackboard is Blackboard)
+	assert_eq(brain.blackboard.get_value("target", null), player)
+
+	# _ready already cached the target autonomously (asserted above); from here drive think()
+	# explicitly so the assertions don't race the brain's own _process tick.
+	brain.enabled = false
+
+	var start_pos := beast.global_position
+	brain.think()
+	assert_eq(brain.blackboard.get_value("intent", ""), "approach")
+	assert_eq(receiver.command_history[-1].command_type, BuiltinCommands.MOVE)
+	assert_eq(state_machine.get_current_path(), "Enemy/Move")
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	assert_lt(beast.global_position.x, start_pos.x)
+
+	beast.global_position = Vector2(28.0, 0.0)
+	watch_signals(player_health)
+	var events := ServiceRegistry.get_service("events") as EventRouter
+	watch_signals(events)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var hp_before := player_health.current_hp
+	brain.think()
+	assert_eq(brain.blackboard.get_value("intent", ""), "attack")
+	assert_eq(receiver.command_history[-1].command_type, BuiltinCommands.ATTACK)
+	assert_eq(state_machine.get_current_path(), "Enemy/Attack")
+
+	var actions := ServiceRegistry.get_service("actions") as ActionRunner
+	assert_eq(actions.active_actions.size(), 1)
+	assert_true(actions.active_actions[0] is TimedAttackAction)
+	actions._process(0.08)
+	assert_lt(player_health.current_hp, hp_before)
+	assert_eq(player_health.current_hp, hp_before - 8.0)
+	assert_signal_emitted(player_health, "damaged")
+	assert_signal_emitted(events, "damage_applied")
+	actions._process(0.25)
+	assert_eq(state_machine.get_current_path(), "Enemy/Idle")
 
 
 func _resolve_damage(source: Node, target: Node) -> float:
@@ -452,6 +530,12 @@ func _resolve_damage(source: Node, target: Node) -> float:
 	request.base_amount = 10.0
 	request.can_crit = false
 	return CombatResolver.get_default().resolve(request).final_amount
+
+
+func _disable_beast_ai(beast: Node) -> void:
+	var brain := beast.get_node_or_null("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
+	if brain != null:
+		brain.enabled = false
 
 
 func _modifier_count(stats: StatsComponent, stat_id: String) -> int:

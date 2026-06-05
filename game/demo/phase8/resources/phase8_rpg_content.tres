@@ -270,7 +270,8 @@ tags = Array[String](["enemy", "living", "field_beast"])
 base_stats = {
 "attack_power": 0.0,
 "defense": 0.0,
-"max_hp": 35.0
+"max_hp": 35.0,
+"move_speed": 120.0
 }
 starting_ability_ids = Array[String]([])
 loot_table_id = "loot.phase8.field_beast"

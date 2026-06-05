@@ -31,11 +31,11 @@ func think() -> void
 
 ## 函数使用场景
 
-- **`_ready()`**：调用父类 `_ready()` 后，立即从 `target_group` 中查找第一个目标节点（通常是玩家）并缓存。
+- **`_ready()`**：调用父类 `_ready()` 后，立即从 `target_group` 中查找第一个目标节点（通常是玩家）并写入 `blackboard["target"]`。
 - **`think()`**：每 `think_interval` 秒执行一次决策：
-  - 目标在 `attack_range` 内：发出 ATTACK 命令
-  - 目标在 `detection_range` 内但超出攻击范围：计算方向后发出 MOVE 命令
-  - 目标在检测范围外：发出 STOP_MOVE 命令
+  - 目标在 `attack_range` 内：记录 `intent="attack"` 并发出 ATTACK 命令
+  - 目标在 `detection_range` 内但超出攻击范围：记录 `intent="approach"` / `move_direction` 并发出 MOVE 命令
+  - 目标在检测范围外：记录 `intent="idle"` 并发出 STOP_MOVE 命令
 
 ## 使用示例
 

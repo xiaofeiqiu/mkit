@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="2_identity"]
@@ -18,9 +18,13 @@
 [ext_resource type="Script" path="res://game/demo/entities/player/player_input_reader.gd" id="16_input"]
 [ext_resource type="Script" path="res://addons/mkit/modules/inventory/inventory_controller.gd" id="17_inv"]
 [ext_resource type="Script" path="res://addons/mkit/modules/inventory/equipment_controller.gd" id="18_equip"]
+[ext_resource type="Script" path="res://addons/mkit/modules/combat/hurtbox_component.gd" id="19_hurtbox"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_hit"]
 size = Vector2(36, 36)
+
+[sub_resource type="RectangleShape2D" id="RectShape_hurt"]
+size = Vector2(32, 32)
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_root")
@@ -85,6 +89,12 @@ base_damage = 12.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Components/HitboxComponent"]
 shape = SubResource("RectShape_hit")
+
+[node name="HurtboxComponent" type="Area2D" parent="Components"]
+script = ExtResource("19_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Components/HurtboxComponent"]
+shape = SubResource("RectShape_hurt")
 
 [node name="ResourcePoolComponent" type="Node" parent="Components"]
 script = ExtResource("13_pool")

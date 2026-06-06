@@ -1,42 +1,44 @@
-[gd_resource type="Resource" load_steps=88 format=3]
+[gd_resource type="Resource" script_class="ResourceDatabase" format=3 uid="uid://byxb2abrmeqlq"]
 
-[ext_resource type="Script" path="res://addons/mkit/kernel/registry/resource_database.gd" id="1_db"]
-[ext_resource type="Script" path="res://addons/mkit/modules/inventory/item_definition.gd" id="2_item"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/heal_effect.gd" id="3_heal"]
-[ext_resource type="Script" path="res://addons/mkit/modules/loot/loot_entry.gd" id="4_loot_entry"]
-[ext_resource type="Script" path="res://addons/mkit/modules/loot/loot_table_definition.gd" id="5_loot_table"]
-[ext_resource type="Script" path="res://addons/mkit/modules/quest/quest_objective_definition.gd" id="6_quest_obj"]
-[ext_resource type="Script" path="res://addons/mkit/modules/quest/quest_definition.gd" id="7_quest"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/grant_item_effect.gd" id="8_grant_item"]
-[ext_resource type="Script" path="res://game/demo/village_rpg/grant_currency_effect.gd" id="9_grant_gold"]
-[ext_resource type="Script" path="res://addons/mkit/modules/quest/accept_quest_effect.gd" id="10_accept"]
-[ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_choice.gd" id="11_choice"]
-[ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_node.gd" id="12_dialogue_node"]
-[ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_definition.gd" id="13_dialogue"]
-[ext_resource type="Script" path="res://addons/mkit/modules/shop/shop_entry.gd" id="14_shop_entry"]
-[ext_resource type="Script" path="res://addons/mkit/modules/shop/shop_definition.gd" id="15_shop"]
-[ext_resource type="Script" path="res://addons/mkit/modules/world/zone_definition.gd" id="16_zone"]
-[ext_resource type="Script" path="res://addons/mkit/modules/abilities/ability_definition.gd" id="17_ability"]
-[ext_resource type="Script" path="res://addons/mkit/modules/status_effects/status_effect_definition.gd" id="18_status"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/deal_damage_effect.gd" id="19_damage"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/apply_status_effect.gd" id="20_apply_status"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/conditions/builtin/cooldown_ready_condition.gd" id="21_cd_cond"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/conditions/builtin/target_in_range_condition.gd" id="22_range_cond"]
-[ext_resource type="Script" path="res://addons/mkit/modules/stats/stat_definition.gd" id="23_stat"]
-[ext_resource type="Script" path="res://addons/mkit/modules/stats/stat_modifier_definition.gd" id="24_stat_mod"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/apply_stat_modifier_effect.gd" id="25_apply_stat"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/effects/builtin/log_effect.gd" id="26_log"]
-[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_definition.gd" id="27_entity"]
-[ext_resource type="Script" path="res://addons/mkit/modules/room/room_definition.gd" id="28_room"]
-[ext_resource type="Script" path="res://addons/mkit/modules/loot/reward_definition.gd" id="29_reward"]
-[ext_resource type="Script" path="res://addons/mkit/modules/progression/upgrade_definition.gd" id="30_upgrade"]
-[ext_resource type="Script" path="res://addons/mkit/modules/quest/advance_objective_effect.gd" id="31_advance"]
-[ext_resource type="Script" path="res://addons/mkit/modules/quest/complete_quest_effect.gd" id="32_complete"]
+[ext_resource type="Script" uid="uid://dkmi6wokyk8n0" path="res://addons/mkit/kernel/registry/resource_database.gd" id="1_db"]
+[ext_resource type="Script" uid="uid://dtfl1p7o2isj4" path="res://addons/mkit/modules/inventory/item_definition.gd" id="2_item"]
+[ext_resource type="Script" uid="uid://co025wbb00p2b" path="res://addons/mkit/kernel/conditions/condition.gd" id="3_5kn3j"]
+[ext_resource type="Script" uid="uid://drmust8yp2urr" path="res://addons/mkit/kernel/effects/builtin/heal_effect.gd" id="3_heal"]
+[ext_resource type="Script" uid="uid://c1iaaxficqs04" path="res://addons/mkit/kernel/effects/game_effect.gd" id="4_aj5jo"]
+[ext_resource type="Script" uid="uid://ciydh6oqv2to5" path="res://addons/mkit/modules/loot/loot_entry.gd" id="4_loot_entry"]
+[ext_resource type="Script" uid="uid://bkpth5a1mbgm4" path="res://addons/mkit/modules/loot/loot_table_definition.gd" id="5_loot_table"]
+[ext_resource type="Script" uid="uid://dj85j55ynb2le" path="res://addons/mkit/modules/quest/quest_objective_definition.gd" id="6_quest_obj"]
+[ext_resource type="Script" uid="uid://demq2tqsuru31" path="res://addons/mkit/modules/quest/quest_definition.gd" id="7_quest"]
+[ext_resource type="Script" uid="uid://c3knvvuxs54m6" path="res://addons/mkit/kernel/effects/builtin/grant_item_effect.gd" id="8_grant_item"]
+[ext_resource type="Script" uid="uid://cmf66r8eiq0rd" path="res://game/demo/village_rpg/grant_currency_effect.gd" id="9_grant_gold"]
+[ext_resource type="Script" uid="uid://k1mjmly75fw2" path="res://addons/mkit/modules/quest/accept_quest_effect.gd" id="10_accept"]
+[ext_resource type="Script" uid="uid://c0ssyt7sk84yu" path="res://addons/mkit/modules/dialogue/dialogue_choice.gd" id="11_choice"]
+[ext_resource type="Script" uid="uid://bjs0ar5ujt476" path="res://addons/mkit/modules/dialogue/dialogue_node.gd" id="12_dialogue_node"]
+[ext_resource type="Script" uid="uid://baan87timiaf3" path="res://addons/mkit/modules/dialogue/dialogue_definition.gd" id="13_dialogue"]
+[ext_resource type="Script" uid="uid://lryq7lsd3w32" path="res://addons/mkit/modules/shop/shop_entry.gd" id="14_shop_entry"]
+[ext_resource type="Script" uid="uid://dsgakv2yls6dy" path="res://addons/mkit/modules/shop/shop_definition.gd" id="15_shop"]
+[ext_resource type="Script" uid="uid://mu27j1sa6xqm" path="res://addons/mkit/modules/world/zone_definition.gd" id="16_zone"]
+[ext_resource type="Script" uid="uid://bdsirxjen57xq" path="res://addons/mkit/modules/abilities/ability_definition.gd" id="17_ability"]
+[ext_resource type="Script" uid="uid://bx2coswb0xs2" path="res://addons/mkit/modules/status_effects/status_effect_definition.gd" id="18_status"]
+[ext_resource type="Script" uid="uid://cv7mvn7bv6t3v" path="res://addons/mkit/kernel/effects/builtin/deal_damage_effect.gd" id="19_damage"]
+[ext_resource type="Script" uid="uid://ff05ngvaxd3p" path="res://addons/mkit/kernel/effects/builtin/apply_status_effect.gd" id="20_apply_status"]
+[ext_resource type="Script" uid="uid://ca58veffc2744" path="res://addons/mkit/kernel/conditions/builtin/cooldown_ready_condition.gd" id="21_cd_cond"]
+[ext_resource type="Script" uid="uid://ba3t80jdrajft" path="res://addons/mkit/kernel/conditions/builtin/target_in_range_condition.gd" id="22_range_cond"]
+[ext_resource type="Script" uid="uid://dhxewmt65khbu" path="res://addons/mkit/modules/stats/stat_definition.gd" id="23_stat"]
+[ext_resource type="Script" uid="uid://cdpomvll7wn3n" path="res://addons/mkit/modules/stats/stat_modifier_definition.gd" id="24_stat_mod"]
+[ext_resource type="Script" uid="uid://wnkenalgntfg" path="res://addons/mkit/kernel/effects/builtin/apply_stat_modifier_effect.gd" id="25_apply_stat"]
+[ext_resource type="Script" uid="uid://potkwesyis2g" path="res://addons/mkit/kernel/effects/builtin/log_effect.gd" id="26_log"]
+[ext_resource type="Script" uid="uid://cmhyiptrmkihp" path="res://addons/mkit/modules/entity/entity_definition.gd" id="27_entity"]
+[ext_resource type="Script" uid="uid://bpmp46iio14m0" path="res://addons/mkit/modules/room/room_definition.gd" id="28_room"]
+[ext_resource type="Script" uid="uid://b5gjs6eecl00v" path="res://addons/mkit/modules/loot/reward_definition.gd" id="29_reward"]
+[ext_resource type="Script" uid="uid://ch20kmyopdq6o" path="res://addons/mkit/modules/progression/upgrade_definition.gd" id="30_upgrade"]
+[ext_resource type="Script" uid="uid://cqvxlidri7hpe" path="res://addons/mkit/modules/quest/advance_objective_effect.gd" id="31_advance"]
+[ext_resource type="Script" uid="uid://crr0gatus60l6" path="res://addons/mkit/modules/quest/complete_quest_effect.gd" id="32_complete"]
 
 [sub_resource type="Resource" id="Resource_heal_potion_effect"]
 script = ExtResource("3_heal")
-effect_id = "effect.demo.herb_potion_heal"
 base_amount = 35.0
+effect_id = "effect.demo.herb_potion_heal"
 
 [sub_resource type="Resource" id="Resource_item_potion"]
 script = ExtResource("2_item")
@@ -44,22 +46,17 @@ item_id = "item.demo.herb_potion"
 display_name = "Herb Potion"
 description = "Restores 35 HP."
 item_type = "consumable"
-rarity = "common"
 value = 10
-stackable = true
 max_stack = 8
 tags = Array[String](["potion", "healing", "shop"])
-use_effects = Array[GameEffect]([SubResource("Resource_heal_potion_effect")])
+use_effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_heal_potion_effect")])
 
 [sub_resource type="Resource" id="Resource_item_claw"]
 script = ExtResource("2_item")
 item_id = "item.demo.beast_claw"
 display_name = "Beast Claw"
 description = "A field beast trophy that the village shop will buy."
-item_type = "material"
-rarity = "common"
 value = 8
-stackable = true
 max_stack = 20
 tags = Array[String](["trophy", "field_beast"])
 
@@ -70,8 +67,6 @@ display_name = "Village Charm"
 description = "Quest reward from the elder."
 item_type = "quest_reward"
 rarity = "rare"
-value = 0
-stackable = true
 max_stack = 1
 tags = Array[String](["quest_reward"])
 
@@ -93,59 +88,7 @@ stackable = false
 max_stack = 1
 equipment_slot = "weapon"
 tags = Array[String](["weapon", "equipment", "field_beast"])
-stat_modifiers = Array[StatModifierDefinition]([SubResource("Resource_field_blade_attack")])
-
-[sub_resource type="Resource" id="Resource_loot_claw_entry"]
-script = ExtResource("4_loot_entry")
-content_id = "item.demo.beast_claw"
-weight = 1.0
-min_quantity = 1
-max_quantity = 1
-
-[sub_resource type="Resource" id="Resource_loot_field_beast"]
-script = ExtResource("5_loot_table")
-loot_table_id = "loot.demo.field_beast"
-rolls = 1
-entries = Array[LootEntry]([SubResource("Resource_loot_claw_entry")])
-allow_empty = false
-empty_weight = 0.0
-
-[sub_resource type="Resource" id="Resource_loot_blade_entry"]
-script = ExtResource("4_loot_entry")
-content_id = "item.demo.field_blade"
-weight = 1.0
-min_quantity = 1
-max_quantity = 1
-
-[sub_resource type="Resource" id="Resource_loot_field_blade"]
-script = ExtResource("5_loot_table")
-loot_table_id = "loot.demo.field_blade"
-rolls = 1
-entries = Array[LootEntry]([SubResource("Resource_loot_blade_entry")])
-allow_empty = false
-empty_weight = 0.0
-
-[sub_resource type="Resource" id="Resource_quest_objective_kill"]
-script = ExtResource("6_quest_obj")
-objective_id = "obj.demo.kill_field_beast"
-description = "Defeat a field beast"
-event_type = "enemy_killed"
-match_key = "tags"
-match_value = "field_beast"
-required_count = 1
-
-[sub_resource type="Resource" id="Resource_reward_charm"]
-script = ExtResource("8_grant_item")
-effect_id = "effect.demo.reward_charm"
-item_id = "item.demo.village_charm"
-quantity = 1
-give_to_source = true
-
-[sub_resource type="Resource" id="Resource_reward_gold"]
-script = ExtResource("9_grant_gold")
-effect_id = "effect.demo.reward_gold"
-currency_id = "gold"
-amount = 30
+stat_modifiers = Array[ExtResource("24_stat_mod")]([SubResource("Resource_field_blade_attack")])
 
 [sub_resource type="Resource" id="Resource_stat_max_hp"]
 script = ExtResource("23_stat")
@@ -164,92 +107,120 @@ default_value = 10.0
 script = ExtResource("23_stat")
 stat_id = "defense"
 display_name = "Defense"
-default_value = 0.0
+
+[sub_resource type="Resource" id="Resource_loot_claw_entry"]
+script = ExtResource("4_loot_entry")
+content_id = "item.demo.beast_claw"
+
+[sub_resource type="Resource" id="Resource_loot_field_beast"]
+script = ExtResource("5_loot_table")
+loot_table_id = "loot.demo.field_beast"
+entries = Array[ExtResource("4_loot_entry")]([SubResource("Resource_loot_claw_entry")])
+allow_empty = false
+
+[sub_resource type="Resource" id="Resource_loot_blade_entry"]
+script = ExtResource("4_loot_entry")
+content_id = "item.demo.field_blade"
+
+[sub_resource type="Resource" id="Resource_loot_field_blade"]
+script = ExtResource("5_loot_table")
+loot_table_id = "loot.demo.field_blade"
+entries = Array[ExtResource("4_loot_entry")]([SubResource("Resource_loot_blade_entry")])
+allow_empty = false
+
+[sub_resource type="Resource" id="Resource_quest_objective_kill"]
+script = ExtResource("6_quest_obj")
+objective_id = "obj.demo.kill_field_beast"
+description = "Defeat a field beast"
+event_type = "enemy_killed"
+match_key = "tags"
+match_value = "field_beast"
+
+[sub_resource type="Resource" id="Resource_reward_charm"]
+script = ExtResource("8_grant_item")
+item_id = "item.demo.village_charm"
+effect_id = "effect.demo.reward_charm"
+
+[sub_resource type="Resource" id="Resource_reward_gold"]
+script = ExtResource("9_grant_gold")
+amount = 30
+effect_id = "effect.demo.reward_gold"
 
 [sub_resource type="Resource" id="Resource_quest_field_report"]
 script = ExtResource("7_quest")
 quest_id = "quest.demo.field_report"
 display_name = "Field Report"
 description = "Help the village elder confirm that the field path is safe."
-quest_type = "side"
-objectives = Array[QuestObjectiveDefinition]([SubResource("Resource_quest_objective_kill")])
-reward_effects = Array[GameEffect]([SubResource("Resource_reward_charm"), SubResource("Resource_reward_gold")])
+objectives = Array[ExtResource("6_quest_obj")]([SubResource("Resource_quest_objective_kill")])
+reward_effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_reward_charm"), SubResource("Resource_reward_gold")])
 auto_complete = true
-repeatable = false
 tags = Array[String](["demo", "rpg_loop"])
-
-[sub_resource type="Resource" id="Resource_accept_quest"]
-script = ExtResource("10_accept")
-effect_id = "effect.demo.accept_field_report"
-quest_id = "quest.demo.field_report"
 
 [sub_resource type="Resource" id="Resource_quest_objective_manual"]
 script = ExtResource("6_quest_obj")
 objective_id = "obj.demo.receive_supply_note"
 description = "Receive the elder's supply note"
-event_type = ""
-required_count = 1
 
 [sub_resource type="Resource" id="Resource_quest_manual"]
 script = ExtResource("7_quest")
 quest_id = "quest.demo.supply_request"
 display_name = "Supply Request"
 description = "A short elder task advanced and completed by explicit quest effects."
-quest_type = "side"
-objectives = Array[QuestObjectiveDefinition]([SubResource("Resource_quest_objective_manual")])
-auto_complete = false
-repeatable = false
+objectives = Array[ExtResource("6_quest_obj")]([SubResource("Resource_quest_objective_manual")])
 tags = Array[String](["demo", "manual_effect"])
 
-[sub_resource type="Resource" id="Resource_accept_manual_quest"]
+[sub_resource type="Resource" id="Resource_accept_quest"]
 script = ExtResource("10_accept")
-effect_id = "effect.demo.accept_supply_request"
-quest_id = "quest.demo.supply_request"
-
-[sub_resource type="Resource" id="Resource_advance_manual_quest"]
-script = ExtResource("31_advance")
-effect_id = "effect.demo.advance_supply_request"
-quest_id = "quest.demo.supply_request"
-objective_id = "obj.demo.receive_supply_note"
-amount = 1
-
-[sub_resource type="Resource" id="Resource_complete_manual_quest"]
-script = ExtResource("32_complete")
-effect_id = "effect.demo.complete_supply_request"
-quest_id = "quest.demo.supply_request"
-
-[sub_resource type="Resource" id="Resource_elder_blessing_attack"]
-script = ExtResource("25_apply_stat")
-effect_id = "effect.demo.elder_blessing_attack"
-stat_id = "attack_power"
-value = 5.0
-duration = -1.0
-stacking_rule = 4
+quest_id = "quest.demo.field_report"
+effect_id = "effect.demo.accept_field_report"
 
 [sub_resource type="Resource" id="Resource_dialogue_choice_accept"]
 script = ExtResource("11_choice")
 text = "I'll check the field."
 next_node_id = "n.accepted"
-effects = Array[GameEffect]([SubResource("Resource_accept_quest")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_accept_quest")])
+
+[sub_resource type="Resource" id="Resource_elder_blessing_attack"]
+script = ExtResource("25_apply_stat")
+stat_id = "attack_power"
+value = 5.0
+stacking_rule = 4
+effect_id = "effect.demo.elder_blessing_attack"
 
 [sub_resource type="Resource" id="Resource_dialogue_choice_blessing"]
 script = ExtResource("11_choice")
 text = "Share a battle blessing."
 next_node_id = "n.accepted"
-effects = Array[GameEffect]([SubResource("Resource_elder_blessing_attack")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_elder_blessing_attack")])
+
+[sub_resource type="Resource" id="Resource_accept_manual_quest"]
+script = ExtResource("10_accept")
+quest_id = "quest.demo.supply_request"
+effect_id = "effect.demo.accept_supply_request"
+
+[sub_resource type="Resource" id="Resource_advance_manual_quest"]
+script = ExtResource("31_advance")
+quest_id = "quest.demo.supply_request"
+objective_id = "obj.demo.receive_supply_note"
+effect_id = "effect.demo.advance_supply_request"
+
+[sub_resource type="Resource" id="Resource_complete_manual_quest"]
+script = ExtResource("32_complete")
+quest_id = "quest.demo.supply_request"
+effect_id = "effect.demo.complete_supply_request"
 
 [sub_resource type="Resource" id="Resource_dialogue_choice_manual"]
 script = ExtResource("11_choice")
 text = "Mark the supply request complete."
 next_node_id = "n.accepted"
-effects = Array[GameEffect]([SubResource("Resource_accept_manual_quest"), SubResource("Resource_advance_manual_quest"), SubResource("Resource_complete_manual_quest")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_accept_manual_quest"), SubResource("Resource_advance_manual_quest"), SubResource("Resource_complete_manual_quest")])
 
 [sub_resource type="Resource" id="Resource_dialogue_node_offer"]
 script = ExtResource("12_dialogue_node")
 node_id = "n.offer"
 speaker_id = "npc.demo.elder"
 text = "The road beyond the village is restless. Bring back proof from one field beast."
-choices = Array[DialogueChoice]([SubResource("Resource_dialogue_choice_accept"), SubResource("Resource_dialogue_choice_blessing"), SubResource("Resource_dialogue_choice_manual")])
+choices = Array[ExtResource("11_choice")]([SubResource("Resource_dialogue_choice_accept"), SubResource("Resource_dialogue_choice_blessing"), SubResource("Resource_dialogue_choice_manual")])
 
 [sub_resource type="Resource" id="Resource_dialogue_node_accepted"]
 script = ExtResource("12_dialogue_node")
@@ -261,7 +232,7 @@ text = "Return after the field is clear. The shopkeeper will restock you for the
 script = ExtResource("13_dialogue")
 dialogue_id = "dialogue.demo.elder"
 start_node_id = "n.offer"
-nodes = Array[DialogueNode]([SubResource("Resource_dialogue_node_offer"), SubResource("Resource_dialogue_node_accepted")])
+nodes = Array[ExtResource("12_dialogue_node")]([SubResource("Resource_dialogue_node_offer"), SubResource("Resource_dialogue_node_accepted")])
 
 [sub_resource type="Resource" id="Resource_shop_entry_potion"]
 script = ExtResource("14_shop_entry")
@@ -273,11 +244,7 @@ stock = 5
 script = ExtResource("15_shop")
 shop_id = "shop.demo.village_supply"
 display_name = "Village Supply"
-currency_id = "gold"
-entries = Array[ShopEntry]([SubResource("Resource_shop_entry_potion")])
-buy_price_multiplier = 1.0
-sell_price_multiplier = 0.5
-allow_sell = true
+entries = Array[ExtResource("14_shop_entry")]([SubResource("Resource_shop_entry_potion")])
 
 [sub_resource type="Resource" id="Resource_zone_village"]
 script = ExtResource("16_zone")
@@ -319,7 +286,6 @@ base_stats = {
 "max_hp": 35.0,
 "move_speed": 120.0
 }
-starting_ability_ids = Array[String]([])
 loot_table_id = "loot.demo.field_beast"
 
 [sub_resource type="Resource" id="Resource_entity_trial_beast"]
@@ -335,15 +301,11 @@ base_stats = {
 "max_hp": 24.0,
 "move_speed": 90.0
 }
-starting_ability_ids = Array[String]([])
 
 [sub_resource type="Resource" id="Resource_trial_room_01"]
 script = ExtResource("28_room")
 room_id = "room.demo.trial_01"
 scene_path = "res://game/demo/village_rpg/scenes/trial_room_01.tscn"
-room_type = "combat"
-difficulty_rating = 1
-size = Vector2i(1, 1)
 tags = Array[String](["demo", "trial", "combat"])
 enemy_spawn_ids = Array[String](["entity.demo.trial_beast"])
 reward_pool_ids = Array[String](["reward.demo.trial_attack", "reward.demo.trial_vitality", "reward.demo.trial_gold"])
@@ -352,9 +314,7 @@ reward_pool_ids = Array[String](["reward.demo.trial_attack", "reward.demo.trial_
 script = ExtResource("28_room")
 room_id = "room.demo.trial_02"
 scene_path = "res://game/demo/village_rpg/scenes/trial_room_02.tscn"
-room_type = "combat"
 difficulty_rating = 2
-size = Vector2i(1, 1)
 tags = Array[String](["demo", "trial", "combat"])
 enemy_spawn_ids = Array[String](["entity.demo.trial_beast", "entity.demo.trial_beast"])
 reward_pool_ids = Array[String](["reward.demo.trial_attack", "reward.demo.trial_vitality", "reward.demo.trial_gold"])
@@ -363,26 +323,61 @@ reward_pool_ids = Array[String](["reward.demo.trial_attack", "reward.demo.trial_
 script = ExtResource("28_room")
 room_id = "room.demo.trial_03"
 scene_path = "res://game/demo/village_rpg/scenes/trial_room_03.tscn"
-room_type = "combat"
 difficulty_rating = 3
-size = Vector2i(1, 1)
 tags = Array[String](["demo", "trial", "combat", "boss"])
 enemy_spawn_ids = Array[String](["entity.demo.trial_beast", "entity.demo.trial_beast", "entity.demo.trial_beast"])
 reward_pool_ids = Array[String](["reward.demo.trial_attack", "reward.demo.trial_vitality", "reward.demo.trial_gold"])
 
+[sub_resource type="Resource" id="Resource_firebolt_range_cond"]
+script = ExtResource("22_range_cond")
+range = 120.0
+condition_id = "cond.demo.firebolt_range"
+
+[sub_resource type="Resource" id="Resource_firebolt_cooldown_cond"]
+script = ExtResource("21_cd_cond")
+ability_id = "ability.demo.firebolt"
+condition_id = "cond.demo.firebolt_ready"
+
+[sub_resource type="Resource" id="Resource_firebolt_damage"]
+script = ExtResource("19_damage")
+base_amount = 8.0
+damage_type = "magical"
+element_type = "fire"
+can_crit = false
+effect_id = "effect.demo.firebolt_damage"
+
+[sub_resource type="Resource" id="Resource_firebolt_burn"]
+script = ExtResource("20_apply_status")
+status_id = "status.demo.burn"
+effect_id = "effect.demo.firebolt_burn"
+
+[sub_resource type="Resource" id="Resource_ability_firebolt"]
+script = ExtResource("17_ability")
+ability_id = "ability.demo.firebolt"
+display_name = "Firebolt"
+description = "Hurls a bolt of fire that burns the target."
+cooldown = 2.0
+cost_type = "mana"
+cost_amount = 10.0
+cast_time = 0.4
+range = 120.0
+tags = Array[String](["fire", "spell"])
+conditions = Array[ExtResource("3_5kn3j")]([SubResource("Resource_firebolt_range_cond"), SubResource("Resource_firebolt_cooldown_cond")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_firebolt_damage"), SubResource("Resource_firebolt_burn")])
+
 [sub_resource type="Resource" id="Resource_burn_tick_damage"]
 script = ExtResource("19_damage")
-effect_id = "effect.demo.burn_tick_damage"
 base_amount = 4.0
 damage_type = "magical"
 element_type = "fire"
 can_crit = false
+effect_id = "effect.demo.burn_tick_damage"
 
 [sub_resource type="Resource" id="Resource_burn_tick_log"]
 script = ExtResource("26_log")
-effect_id = "effect.demo.burn_tick_log"
 message = "Demo burn tick"
 event_type = "demo_burn_tick"
+effect_id = "effect.demo.burn_tick_log"
 
 [sub_resource type="Resource" id="Resource_burn_defense_modifier"]
 script = ExtResource("24_stat_mod")
@@ -396,111 +391,60 @@ script = ExtResource("18_status")
 status_id = "status.demo.burn"
 display_name = "Burn"
 duration = 4.0
-tick_interval = 1.0
-max_stacks = 1
 tags = Array[String](["burn", "fire", "debuff"])
-effects_on_tick = Array[GameEffect]([SubResource("Resource_burn_tick_damage"), SubResource("Resource_burn_tick_log")])
-stat_modifiers = Array[StatModifierDefinition]([SubResource("Resource_burn_defense_modifier")])
-
-[sub_resource type="Resource" id="Resource_firebolt_damage"]
-script = ExtResource("19_damage")
-effect_id = "effect.demo.firebolt_damage"
-base_amount = 8.0
-damage_type = "magical"
-element_type = "fire"
-can_crit = false
-
-[sub_resource type="Resource" id="Resource_firebolt_burn"]
-script = ExtResource("20_apply_status")
-effect_id = "effect.demo.firebolt_burn"
-status_id = "status.demo.burn"
-stacks = 1
-duration_override = -1.0
-
-[sub_resource type="Resource" id="Resource_firebolt_cooldown_cond"]
-script = ExtResource("21_cd_cond")
-condition_id = "cond.demo.firebolt_ready"
-ability_id = "ability.demo.firebolt"
-
-[sub_resource type="Resource" id="Resource_firebolt_range_cond"]
-script = ExtResource("22_range_cond")
-condition_id = "cond.demo.firebolt_range"
-range = 120.0
-
-[sub_resource type="Resource" id="Resource_ability_firebolt"]
-script = ExtResource("17_ability")
-ability_id = "ability.demo.firebolt"
-display_name = "Firebolt"
-description = "Hurls a bolt of fire that burns the target."
-cooldown = 2.0
-charges = 1
-cost_type = "mana"
-cost_amount = 10.0
-cast_time = 0.4
-range = 120.0
-tags = Array[String](["fire", "spell"])
-conditions = Array[Condition]([SubResource("Resource_firebolt_range_cond"), SubResource("Resource_firebolt_cooldown_cond")])
-effects = Array[GameEffect]([SubResource("Resource_firebolt_damage"), SubResource("Resource_firebolt_burn")])
+effects_on_tick = Array[ExtResource("4_aj5jo")]([SubResource("Resource_burn_tick_damage"), SubResource("Resource_burn_tick_log")])
+stat_modifiers = Array[ExtResource("24_stat_mod")]([SubResource("Resource_burn_defense_modifier")])
 
 [sub_resource type="Resource" id="Resource_trial_attack_effect"]
 script = ExtResource("25_apply_stat")
-effect_id = "effect.demo.trial_attack_upgrade"
 stat_id = "attack_power"
 value = 3.0
-duration = -1.0
-stacking_rule = 0
+effect_id = "effect.demo.trial_attack_upgrade"
 
 [sub_resource type="Resource" id="Resource_reward_trial_attack"]
 script = ExtResource("29_reward")
 reward_id = "reward.demo.trial_attack"
 display_name = "Cave Edge"
 description = "+3 attack power for this run."
-rarity = "common"
 weight = 10.0
-effects = Array[GameEffect]([SubResource("Resource_trial_attack_effect")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_trial_attack_effect")])
 
 [sub_resource type="Resource" id="Resource_trial_vitality_effect"]
 script = ExtResource("25_apply_stat")
-effect_id = "effect.demo.trial_vitality"
 stat_id = "max_hp"
 value = 8.0
-duration = -1.0
-stacking_rule = 0
+effect_id = "effect.demo.trial_vitality"
 
 [sub_resource type="Resource" id="Resource_reward_trial_vitality"]
 script = ExtResource("29_reward")
 reward_id = "reward.demo.trial_vitality"
 display_name = "Stone Heart"
 description = "+8 max HP for this run."
-rarity = "common"
 weight = 8.0
-effects = Array[GameEffect]([SubResource("Resource_trial_vitality_effect")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_trial_vitality_effect")])
 
 [sub_resource type="Resource" id="Resource_trial_gold_effect"]
 script = ExtResource("9_grant_gold")
-effect_id = "effect.demo.trial_gold"
-currency_id = "gold"
 amount = 5
+effect_id = "effect.demo.trial_gold"
 
 [sub_resource type="Resource" id="Resource_reward_trial_gold"]
 script = ExtResource("29_reward")
 reward_id = "reward.demo.trial_gold"
 display_name = "Buried Coin"
 description = "+5 gold from the cave cache."
-rarity = "common"
 weight = 6.0
-effects = Array[GameEffect]([SubResource("Resource_trial_gold_effect")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_trial_gold_effect")])
 
 [sub_resource type="Resource" id="Resource_upgrade_trial_attack"]
 script = ExtResource("30_upgrade")
 upgrade_id = "upgrade.demo.trial_attack"
 display_name = "Trial Edge"
 description = "The trial reward definition for Cave Edge."
-max_level = 1
 currency_id = "trial_token"
 cost_by_level = Array[int]([0])
 unlock_content_ids = Array[String](["reward.demo.trial_attack"])
-effects = Array[GameEffect]([SubResource("Resource_trial_attack_effect")])
+effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_trial_attack_effect")])
 tags = Array[String](["demo", "trial", "run_reward"])
 
 [resource]

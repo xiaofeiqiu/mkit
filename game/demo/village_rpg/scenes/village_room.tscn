@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
-[ext_resource type="PackedScene" path="res://game/demo/phase8/entities/npc_elder.tscn" id="3_elder"]
+[ext_resource type="PackedScene" path="res://game/demo/village_rpg/entities/npc_elder.tscn" id="3_elder"]
 
 [sub_resource type="CircleShape2D" id="CircleShape_room_exit"]
 radius = 48.0
@@ -31,9 +31,9 @@ shape = SubResource("CircleShape_room_exit")
 
 [node name="Interactable" type="Node" parent="ToVillage"]
 script = ExtResource("2_portal")
-interaction_id = "portal.phase8.room_to_village"
+interaction_id = "portal.demo.room_to_village"
 display_text = "Exit room"
-target_zone_id = "zone.phase8.village"
+target_zone_id = "zone.demo.village"
 target_spawn_id = "from_room"
 
 [node name="Door" type="ColorRect" parent="."]

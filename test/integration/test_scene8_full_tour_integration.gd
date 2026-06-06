@@ -2,37 +2,37 @@ extends GutTest
 
 
 const PLAYER_SCENE := "res://game/demo/entities/player/player.tscn"
-const BEAST_SCENE := "res://game/demo/phase8/entities/field_beast.tscn"
-const PHASE8_SCENE := "res://game/demo/phase8/phase8_village_rpg.tscn"
-const FIELD_SCENE := "res://game/demo/phase8/scenes/field.tscn"
-const CONTENT_DB := "res://game/demo/phase8/resources/phase8_rpg_content.tres"
+const BEAST_SCENE := "res://game/demo/village_rpg/entities/field_beast.tscn"
+const DEMO_SCENE := "res://game/demo/village_rpg/village_rpg_demo.tscn"
+const FIELD_SCENE := "res://game/demo/village_rpg/scenes/field.tscn"
+const CONTENT_DB := "res://game/demo/village_rpg/resources/village_rpg_content.tres"
 const PLAYER_ID := "player_001"
-const BEAST_ID := "enemy.phase8.field_beast"
-const ENTITY_FIELD_BEAST := "entity.phase8.field_beast"
-const ENTITY_TRIAL_BEAST := "entity.phase8.trial_beast"
-const FIREBOLT := "ability.phase8.firebolt"
-const BURN := "status.phase8.burn"
-const FIELD_BLADE := "item.phase8.field_blade"
-const QUEST_ID := "quest.phase8.field_report"
-const QUEST_MANUAL_ID := "quest.phase8.supply_request"
-const QUEST_MANUAL_OBJECTIVE_ID := "obj.phase8.receive_supply_note"
-const ZONE_VILLAGE := "zone.phase8.village"
-const ZONE_ROOM := "zone.phase8.village_room"
-const ZONE_FIELD := "zone.phase8.field"
-const ROOM_TRIAL_01 := "room.phase8.trial_01"
-const ROOM_TRIAL_02 := "room.phase8.trial_02"
-const ROOM_TRIAL_03 := "room.phase8.trial_03"
-const REWARD_TRIAL_ATTACK := "reward.phase8.trial_attack"
-const UPGRADE_TRIAL_ATTACK := "upgrade.phase8.trial_attack"
+const BEAST_ID := "enemy.demo.field_beast"
+const ENTITY_FIELD_BEAST := "entity.demo.field_beast"
+const ENTITY_TRIAL_BEAST := "entity.demo.trial_beast"
+const FIREBOLT := "ability.demo.firebolt"
+const BURN := "status.demo.burn"
+const FIELD_BLADE := "item.demo.field_blade"
+const QUEST_ID := "quest.demo.field_report"
+const QUEST_MANUAL_ID := "quest.demo.supply_request"
+const QUEST_MANUAL_OBJECTIVE_ID := "obj.demo.receive_supply_note"
+const ZONE_VILLAGE := "zone.demo.village"
+const ZONE_ROOM := "zone.demo.village_room"
+const ZONE_FIELD := "zone.demo.field"
+const ROOM_TRIAL_01 := "room.demo.trial_01"
+const ROOM_TRIAL_02 := "room.demo.trial_02"
+const ROOM_TRIAL_03 := "room.demo.trial_03"
+const REWARD_TRIAL_ATTACK := "reward.demo.trial_attack"
+const UPGRADE_TRIAL_ATTACK := "upgrade.demo.trial_attack"
 const PLATFORM_REVIVE_PLACEMENT := "revive"
-const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.phase8.gold_pack"
-const PLATFORM_CLOUD_SLOT := "phase8_profile"
+const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.demo.gold_pack"
+const PLATFORM_CLOUD_SLOT := "demo_profile"
 const GOLD_PACK_AMOUNT := 25
 const SCENE8_S7_SAVE_PATH := "/tmp/mkit_scene8_s7_save.json"
 const SCENE8_PLATFORM_SAVE_PATH := "/tmp/mkit_scene8_platform_save.json"
-const DAMAGE_NUMBER_SCENE := "res://game/demo/phase8/ui/phase8_damage_number.tscn"
-const HIT_VFX_SCENE := "res://game/demo/phase8/ui/phase8_hit_vfx.tscn"
-const TOAST_SCREEN_ID := "phase8.toast"
+const DAMAGE_NUMBER_SCENE := "res://game/demo/village_rpg/ui/damage_number.tscn"
+const HIT_VFX_SCENE := "res://game/demo/village_rpg/ui/hit_vfx.tscn"
+const TOAST_SCREEN_ID := "demo.toast"
 
 var _previous_current_scene: Node = null
 var _current_scene_override: Node = null
@@ -206,7 +206,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	assert_eq(state_machine.get_current_path(), "Player/Idle")
 
 
-# S1: the firebolt skill pipeline. The player scene registers ability.phase8.firebolt from
+# S1: the firebolt skill pipeline. The player scene registers ability.demo.firebolt from
 # the live content database; casting it spends mana, channels through a CastAction (cast_time
 # > 0) before its effects fire, then DealDamage + ApplyStatus burn the field beast and a
 # cooldown starts. TargetInRangeCondition gates an out-of-range cast and CooldownReadyCondition
@@ -283,7 +283,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	assert_false(cd_cond.evaluate(ctx_cd))
 
 
-# S2: phase8 burn is now a full StatusEffectDefinition, not just an applied tag.
+# S2: demo burn is now a full StatusEffectDefinition, not just an applied tag.
 # It creates a StatusEffectInstance, applies a StatModifierDefinition-driven defense
 # modifier while active, executes DealDamage + LogEffect on tick, removes the modifier
 # when duration expires, and the elder dialogue exposes an ApplyStatModifierEffect
@@ -318,7 +318,7 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	assert_true(burn_def.effects_on_tick[0] is DealDamageEffect)
 	assert_true(burn_def.effects_on_tick[1] is LogEffect)
 	assert_eq(burn_def.stat_modifiers.size(), 1)
-	assert_eq(burn_def.stat_modifiers[0].modifier_id, "mod.phase8.burn_defense_down")
+	assert_eq(burn_def.stat_modifiers[0].modifier_id, "mod.demo.burn_defense_down")
 
 	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
 	add_child_autofree(player)
@@ -360,9 +360,9 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	assert_eq(beast_health.current_hp, 78.0)
 	assert_signal_emitted_with_parameters(beast_status, "status_ticked", [BURN])
 	assert_signal_emitted(beast_health, "damaged")
-	assert_eq((effects.recent_results[-1] as EffectResult).effect_id, "effect.phase8.burn_tick_log")
-	assert_eq((events.recent_events[-1] as DomainEvent).event_type, "phase8_burn_tick")
-	assert_eq(str((events.recent_events[-1] as DomainEvent).payload.get("message", "")), "Phase8 burn tick")
+	assert_eq((effects.recent_results[-1] as EffectResult).effect_id, "effect.demo.burn_tick_log")
+	assert_eq((events.recent_events[-1] as DomainEvent).event_type, "demo_burn_tick")
+	assert_eq(str((events.recent_events[-1] as DomainEvent).payload.get("message", "")), "Demo burn tick")
 
 	beast_status._process(3.1)
 
@@ -371,16 +371,16 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	assert_eq(_modifier_count(beast_stats, "defense"), 0)
 	assert_signal_emitted_with_parameters(beast_status, "status_removed", [BURN])
 
-	var elder_dialogue := content.get_resource("dialogue.phase8.elder") as DialogueDefinition
+	var elder_dialogue := content.get_resource("dialogue.demo.elder") as DialogueDefinition
 	var offer := elder_dialogue.get_node("n.offer")
 	assert_eq(offer.choices.size(), 3)
 	assert_true(offer.choices[1].effects[0] is ApplyStatModifierEffect)
 
 	var attack_before := player_stats.get_stat_value("attack_power")
-	assert_true(dialogue.start("dialogue.phase8.elder", GameplayContext.new().with_source(player)))
+	assert_true(dialogue.start("dialogue.demo.elder", GameplayContext.new().with_source(player)))
 	dialogue.choose(1)
 	assert_eq(player_stats.get_stat_value("attack_power"), attack_before + 5.0)
-	assert_eq((effects.recent_results[-1] as EffectResult).effect_id, "effect.phase8.elder_blessing_attack")
+	assert_eq((effects.recent_results[-1] as EffectResult).effect_id, "effect.demo.elder_blessing_attack")
 
 	beast_stats.set_base_stat("defense", 0.0)
 	var request := DamageRequest.new()
@@ -474,7 +474,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	assert_eq(stats.get_stat_value("attack_power"), attack_before + 6.0)
 
 
-# S4: field beast is no longer a static child of field.tscn. Phase8 registers an
+# S4: field beast is no longer a static child of field.tscn. Demo registers an
 # EntityDefinition in live content, enters the field, and creates the beast through
 # EntitySpawner so identity, tags and base stats all come from data.
 func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
@@ -501,7 +501,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_null(field.get_node_or_null("FieldBeast"))
 	field.free()
 
-	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 	await _focus_demo_interactable(demo, "ToField/Interactable")
@@ -545,7 +545,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 	await _focus_demo_interactable(demo, "ToField/Interactable")
@@ -648,7 +648,7 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	assert_eq(upgrade.effects.size(), 1)
 	assert_true(upgrade.effects[0] is ApplyStatModifierEffect)
 
-	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 	await _focus_demo_interactable(demo, "ToField/Interactable")
@@ -748,7 +748,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	assert_not_null(save)
 	save.save_path = SCENE8_S7_SAVE_PATH
 
-	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 	assert_eq(save.save_version, 2)
@@ -773,7 +773,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	ability_instance.current_charges = 0
 	ability_instance.cooldown_remaining = 1.25
 	ability_instance._recharge_duration = 2.0
-	assert_true(inventory.add_item(ItemInstance.create("item.phase8.herb_potion", 2)))
+	assert_true(inventory.add_item(ItemInstance.create("item.demo.herb_potion", 2)))
 	var blade := ItemInstance.create(FIELD_BLADE)
 	blade.instance_id = "scene8_save_blade"
 	assert_true(inventory.add_item(blade))
@@ -786,8 +786,8 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	var saved := _read_json(SCENE8_S7_SAVE_PATH)
 	assert_eq(int(saved.get("save_version", 0)), 2)
 	var saved_payload: Dictionary = saved.get("payload", {})
-	assert_true(saved_payload.has("phase8_player"))
-	var saved_player: Dictionary = saved_payload["phase8_player"]
+	assert_true(saved_payload.has("demo_player"))
+	var saved_player: Dictionary = saved_payload["demo_player"]
 	var saved_components: Dictionary = saved_player.get("components", {})
 	assert_true(saved_components.has("HealthComponent"))
 	assert_true(saved_components.has("StatsComponent"))
@@ -818,7 +818,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	assert_true(ability.has_ability(FIREBOLT))
 	assert_almost_eq(ability.get_cooldown_remaining(FIREBOLT), 1.25, 0.001)
 	assert_eq((ability.abilities[FIREBOLT] as AbilityInstance).current_charges, 0)
-	assert_eq(inventory.find_item_by_definition("item.phase8.herb_potion").quantity, 2)
+	assert_eq(inventory.find_item_by_definition("item.demo.herb_potion").quantity, 2)
 	assert_eq(inventory.find_item_by_definition(FIELD_BLADE).instance_id, "scene8_save_blade")
 	assert_eq(equipment.get_equipped("weapon").definition_id, FIELD_BLADE)
 	assert_eq(stats.get_stat_value("attack_power"), 20.0)
@@ -829,9 +829,9 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 			"save_version": 1,
 			"game_version": "0.1.0",
 			"timestamp": "",
-			"profile_id": "legacy_phase8",
+			"profile_id": "legacy_demo",
 			"payload": {
-				"phase8_player": {
+				"demo_player": {
 					"position_x": 444.0,
 					"position_y": 222.0,
 					"current_hp": 34.0,
@@ -882,7 +882,7 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 	_replace_service("iap", iap)
 	_replace_service("cloud_save", cloud)
 
-	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 
@@ -924,7 +924,7 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 	assert_eq(progression.get_currency("gold"), gold_before + GOLD_PACK_AMOUNT)
 
 	var saved_gold := progression.get_currency("gold")
-	demo.call("_save_phase8_to_cloud")
+	demo.call("_save_demo_to_cloud")
 	assert_true(await wait_for_signal(cloud.cloud_save_completed, 1.0, "cloud save"))
 	assert_eq(cloud.saved_slots[-1], PLATFORM_CLOUD_SLOT)
 	assert_true(cloud.last_saved_data.has("payload"))
@@ -932,7 +932,7 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 
 	progression.state = ProgressionState.new()
 	assert_eq(progression.get_currency("gold"), 0)
-	demo.call("_load_phase8_from_cloud")
+	demo.call("_load_demo_from_cloud")
 	assert_true(await wait_for_signal(cloud.cloud_load_completed, 1.0, "cloud load"))
 	assert_eq(cloud.loaded_slots[-1], PLATFORM_CLOUD_SLOT)
 	await get_tree().process_frame
@@ -945,7 +945,7 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	add_child_autofree(bootstrap)
 
 	var scene_root := _make_current_scene_root("Scene8S9World")
-	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	scene_root.add_child(demo)
 	await _settle_scene8_world()
 
@@ -965,7 +965,7 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	assert_true(damage_numbers.use_pool)
 	assert_true(vfx.use_pool)
 	assert_eq(feedback.toast_screen_id, TOAST_SCREEN_ID)
-	assert_eq(ui.screen_scene_map[TOAST_SCREEN_ID], "res://game/demo/phase8/ui/phase8_toast_screen.tscn")
+	assert_eq(ui.screen_scene_map[TOAST_SCREEN_ID], "res://game/demo/village_rpg/ui/toast_screen.tscn")
 
 	var time_before := time.elapsed_gameplay_time
 	await get_tree().process_frame
@@ -1003,7 +1003,7 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	assert_eq(first_vfx.global_position, beast.global_position)
 	assert_true(bool(demo.get("_feedback_shake_observed")))
 	assert_true(bool(demo.get("_spawn_scene_effect_succeeded")))
-	var spawned_hit := scene_root.get_node_or_null("Phase8HitVFX") as Node2D
+	var spawned_hit := scene_root.get_node_or_null("DemoHitVFX") as Node2D
 	assert_not_null(spawned_hit)
 	assert_eq(spawned_hit.global_position, beast.global_position)
 
@@ -1048,7 +1048,7 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var demo := (load(PHASE8_SCENE) as PackedScene).instantiate()
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 
@@ -1097,7 +1097,7 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	assert_eq(state.status, "turned_in")
 	assert_eq(state.get_progress(QUEST_MANUAL_OBJECTIVE_ID), 1)
 	assert_true(bool(demo.get("_manual_quest_completed")))
-	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", ["dialogue.phase8.elder"])
+	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", ["dialogue.demo.elder"])
 	assert_signal_emitted_with_parameters(
 		quest, "objective_advanced", [QUEST_MANUAL_ID, QUEST_MANUAL_OBJECTIVE_ID, 1, 1]
 	)
@@ -1107,8 +1107,8 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	var result_ids: Array[String] = []
 	for result in effects.recent_results:
 		result_ids.append(result.effect_id)
-	assert_true(result_ids.has("effect.phase8.advance_supply_request"))
-	assert_true(result_ids.has("effect.phase8.complete_supply_request"))
+	assert_true(result_ids.has("effect.demo.advance_supply_request"))
+	assert_true(result_ids.has("effect.demo.complete_supply_request"))
 
 	var start := player.global_position
 	assert_true(

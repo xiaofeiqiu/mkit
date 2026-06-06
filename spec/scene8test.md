@@ -15,27 +15,27 @@
 - [x] **S8** — 平台服务钩子(Analytics / Ads / IAP / CloudSave,8 类)
 - [x] **S9** — 表现层 + 运行时工具(DamageNumber / VFX / SpawnScene / Feedback / UIManager / Debug / Pool / Time,8 类)
 - [x] **S10** — 收尾:就近交互 / 手动任务 effect / 冲刺(`InteractionComponent` / `AdvanceObjectiveEffect` / `CompleteQuestEffect` / `DashAction`,4 类)
-- [x] **S11** — 退役 phase0–7,demo 收敛到唯一入口(`bootstrap_phase8` / `project.godot` 主场景)
+- [x] **S11** — 退役 phase0–7,demo 收敛到唯一入口(`bootstrap` / `project.godot` 主场景)
 
-覆盖账:当前 ✅ **132 / 132** 类;S0–S11 已全部接入并断言,零豁免。phase8 已收敛为唯一 demo 入口。
+覆盖账:当前 ✅ **132 / 132** 类;S0–S11 已全部接入并断言,零豁免。demo 已收敛为唯一 demo 入口。
 
 ---
 
-> 把 `game/demo/phase8` 这套村庄 RPG loop demo 扩展成 mkit 的"全类覆盖活体场景":
-> 让 `addons/mkit/` 下每一个 `class_name` 都至少被 phase8 **场景 + 内容 + 配套集成测试**
+> 把 `game/demo/village_rpg` 这套村庄 RPG loop demo 扩展成 mkit 的"全类覆盖活体场景":
+> 让 `addons/mkit/` 下每一个 `class_name` 都至少被 demo **场景 + 内容 + 配套集成测试**
 > 真实地实例化并触发一次有意义的行为(不是仅把节点挂在 scene 树里),并由 GUT 集成测试断言、
-> 由 `--phase8-auto-run` headless 跑通。
+> 由 `--demo-auto-run` headless 跑通。
 >
-> **最终目标:phase8 成为唯一保留的 demo 场景,删除 phase0–phase7。** 因此 phase8 必须先是
+> **最终目标:demo 成为唯一保留的 demo 场景,删除 phase0–phase7。** 因此 demo 必须先是
 > phase0–7 全部演示能力的**超集**(每个旧 phase 都能对应到本计划的某个 slice),覆盖确认无丢失后,
-> 才在收尾里程碑 **S11** 删除旧场景、并把 demo 入口收敛到 phase8。
+> 才在收尾里程碑 **S11** 删除旧场景、并把 demo 入口收敛到 demo。
 
 相关文件:
 
-- 场景:`game/demo/phase8/phase8_village_rpg.tscn` + `.gd`,子场景 `game/demo/phase8/scenes/{village,village_room,field}.tscn`
-- 实体:`game/demo/phase8/entities/{npc_elder,field_beast}.tscn`、`game/demo/entities/player/player.tscn`
-- 内容:`game/demo/phase8/resources/phase8_rpg_content.tres`(单一 `ResourceDatabase`)
-- 引导:`game/demo/bootstrap_phase8.tscn`(`GameBootstrap` + 上面这份内容库)
+- 场景:`game/demo/village_rpg/village_rpg_demo.tscn` + `.gd`,子场景 `game/demo/village_rpg/scenes/{village,village_room,field}.tscn`
+- 实体:`game/demo/village_rpg/entities/{npc_elder,field_beast}.tscn`、`game/demo/entities/player/player.tscn`
+- 内容:`game/demo/village_rpg/resources/village_rpg_content.tres`(单一 `ResourceDatabase`)
+- 引导:`game/demo/bootstrap.tscn`(`GameBootstrap` + 上面这份内容库)
 - 现有集成测试:`test/integration/test_village_rpg_loop_integration.gd`
 - 助手:`test/integration/int_test_helpers.gd`(已有 `make_*` / `add_*` 工厂)
 
@@ -43,18 +43,18 @@
 
 ## 1. 结论速览
 
-addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前状态分三档:
+addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 demo 当前状态分三档:
 
 | 档位 | 含义 | 数量 |
 |------|------|------|
-| ✅ 已覆盖 | phase8 当前(交互或 auto-run)会真实触发,且已被集成/单元测试断言 | **132** |
+| ✅ 已覆盖 | demo 当前(交互或 auto-run)会真实触发,且已被集成/单元测试断言 | **132** |
 | 🟡 已挂载/可达但未断言 | 节点已在 player/beast/elder scene 里,或 player input 路径可触发,但 auto-run + 集成测试没驱动/没断言(部分还缺内容) | **0** |
-| ❌ 完全缺失 | addon 有该类,但 phase8(场景+内容+测试)完全没用到 | **0** |
+| ❌ 完全缺失 | addon 有该类,但 demo(场景+内容+测试)完全没用到 | **0** |
 
-> 关键发现:`player.tscn` 现在已经由 phase8 内容 override 接入完整 **command → HFSM → action**
+> 关键发现:`player.tscn` 现在已经由 demo 内容 override 接入完整 **command → HFSM → action**
 > 输入链(`MOVE` / `ATTACK` / `CAST_ABILITY` / `DASH`),auto-run 与
-> `test_scene8_full_tour_integration.gd` 会真实驱动并断言这些路径。S0–S10 已清零所有 🟡 / ❌,
-> 剩余工作只是不改变覆盖面的 demo 入口收敛(S11)。
+> `test_scene8_full_tour_integration.gd` 会真实驱动并断言这些路径。S0–S11 已清零所有 🟡 / ❌,
+> demo 入口与文件命名已完成收敛。
 
 ---
 
@@ -104,7 +104,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 ## 3. 设计原则与取舍
 
 1. **不在 addon 里硬编码内容。** 所有新机制如有缺口,在 addon 补**通用**实现;具体技能 / 状态 / 装备 /
-   房间 / 奖励 / 实体定义都放 `game/demo/phase8/`(内容 `.tres` 或子场景)。出现 `Goblin` / `Fireball`
+   房间 / 奖励 / 实体定义都放 `game/demo/village_rpg/`(内容 `.tres` 或子场景)。出现 `Goblin` / `Fireball`
    这种专有名词就该在 `game/`。
 2. **"用进去"= 真实触发 + 断言。** 仅把节点挂进 scene 不算覆盖。每个 slice 必须:
    (a) 场景/内容接好;(b) `_run_auto_loop` 扩展驱动它;(c) 集成测试断言可观察结果(信号 / 状态 / HP / 货币)。
@@ -114,17 +114,17 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
    `ContentValidationResult` `RunState` `RoomNode` `RoomGraph` `RewardOption` 这类只在别的类内部出现,
    覆盖其宿主即视为覆盖,不单独"塞进场景"。
 5. **两套宏观流程并存的取舍(已定方案 A):**
-   phase8 是 **World 流派**(`WorldRouter` + `ZoneDefinition` + `Portal`);
+   demo 是 **World 流派**(`WorldRouter` + `ZoneDefinition` + `Portal`);
    而 `room/` 一整套(`RunDirector` / `Room*` / `Dungeon*`)+ `loot` 的 `Reward*` + `RewardSelectionUI`
-   + `UpgradeDefinition` 属于 **Roguelike 单局流派**。把它塞进村庄叙事并不自然,但已确定**纳入 phase8**:
+   + `UpgradeDefinition` 属于 **Roguelike 单局流派**。把它塞进村庄叙事并不自然,但已确定**纳入 demo**:
    - **方案 A(采用):** 在 `field` zone 加一个"试炼洞窟"入口,进入后由 `RunDirector`
      驱动一段 3 房间小 run(复用同一 player + 同一 embedded SceneRouter host 概念),run 结束回 field。
-     这样 Roguelike 一组(13 个类)在 phase8 内**自然**覆盖。见 **S6**。
-   - ~~方案 B(未采用):从 phase8 豁免、仅靠 `test_run_director` + `test_content_spawn_room_run_integration`
+     这样 Roguelike 一组(13 个类)在 demo 内**自然**覆盖。见 **S6**。
+   - ~~方案 B(未采用):从 demo 豁免、仅靠 `test_run_director` + `test_content_spawn_room_run_integration`
      覆盖~~ —— 已放弃,Roguelike 一组不再豁免,统一在 S6 中真实接入并断言。
-6. **终局:phase8 是唯一保留场景。** 每个 slice 不只是"凑覆盖",还要把对应旧 phase 的演示价值接进来
+6. **终局:demo 是唯一保留场景。** 每个 slice 不只是"凑覆盖",还要把对应旧 phase 的演示价值接进来
    (见 §4 S11 的 phaseN→slice 对照),这样 S11 删除 phase0–7 时不丢任何演示能力。
-   共享资产(`game/demo/entities/`、`game/demo/rooms/`、`game/demo/actions/`)保留复用,不随旧场景删除。
+   未被 demo 继续引用的旧共享资产已随收尾删除,只保留当前 demo 实际使用的 player 与 `village_rpg/` 内容。
 
 ---
 
@@ -152,14 +152,14 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 `ResourcePoolComponent`(spend)`Condition` `ConditionEvaluator` `CooldownReadyCondition`
 `TargetInRangeCondition` `ApplyStatusEffect`(+ 巩固 `ActionContext`)。
 
-- **内容(`game/demo/phase8/`):** `ability.phase8.firebolt` —
+- **内容(`game/demo/village_rpg/`):** `ability.demo.firebolt` —
   `cost_type="mana"` `cost_amount>0`、`cast_time>0`(走 `CastAction`)、`range>0`、
   `conditions=[CooldownReadyCondition, TargetInRangeCondition]`、
-  `effects=[DealDamageEffect, ApplyStatusEffect(status.phase8.burn)]`。
-- **player.tscn:** 保持 generic,不默认学习具体 phase ability;`player_input_reader.gd`
-  的 `cast_ability_id` 默认为空,由具体 phase scene override。
-- **phase8/phase8_village_rpg.tscn:** 通过 `Player/Controllers/AbilityController.starting_ability_ids`
-  与 `Player/InputReader.cast_ability_id` override 绑定 `ability.phase8.firebolt`。
+  `effects=[DealDamageEffect, ApplyStatusEffect(status.demo.burn)]`。
+- **player.tscn:** 保持 generic,不默认学习具体 demo ability;`player_input_reader.gd`
+  的 `cast_ability_id` 默认为空,由具体 demo scene override。
+- **village_rpg/village_rpg_demo.tscn:** 通过 `Player/Controllers/AbilityController.starting_ability_ids`
+  与 `Player/InputReader.cast_ability_id` override 绑定 `ability.demo.firebolt`。
 - **场景:** 新增按键 `F` / auto-run cast 朝 beast;`ResourcePoolComponent.starting_values.mana` 已有。
 - **测试:** cast 成功扣 mana、`cooldown_started` 触发、再次 cast 因 `on_cooldown` 失败;
   beast 进/出 `range` 时 `TargetInRangeCondition` 放行/拦截;命中后 beast 持有 `burn` status。
@@ -169,7 +169,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 **新覆盖(8):** `StatusEffectDefinition` `StatusEffectInstance` `StatusEffectController`(driven)
 `StatModifier` `StatModifierDefinition` `StatDefinition` `ApplyStatModifierEffect` `LogEffect`。
 
-- **内容:** `status.phase8.burn` — `duration` / `tick_interval`,
+- **内容:** `status.demo.burn` — `duration` / `tick_interval`,
   `effects_on_tick=[DealDamageEffect, LogEffect]`,`stat_modifiers=[-defense]`(`StatModifierDefinition`)。
   `StatDefinition` 为 `max_hp/defense/attack_power` 等登记显式定义(供校验/UI)。
 - **村庄祝福:** 与 elder 对话新增一条 choice,挂 `ApplyStatModifierEffect`(+attack_power,永久),
@@ -181,7 +181,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 **新覆盖(1,巩固 `EquipmentController` + `StatModifier`/`ItemInstance` 装备路径):** `EquipmentController`(driven)。
 
-- **内容:** `item.phase8.field_blade`(`equipment_slot="weapon"`,`stat_modifiers=[+attack_power]`),
+- **内容:** `item.demo.field_blade`(`equipment_slot="weapon"`,`stat_modifiers=[+attack_power]`),
   由 beast loot 或 shop 提供。
 - **场景:** 新增 `E` 装备 / 卸下。
 - **测试:** equip 后 `attack_power` 提升并改变战斗伤害;unequip 还原;存档 round-trip(配合 S7)。
@@ -190,10 +190,10 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 **新覆盖(2):** `EntityDefinition` `EntitySpawner`。
 
-- **内容:** `entity.phase8.field_beast`(`scene_path` 指向现有 `field_beast.tscn`,
+- **内容:** `entity.demo.field_beast`(`scene_path` 指向现有 `field_beast.tscn`,
   `base_stats` / `starting_ability_ids` / `tags`)。
 - **场景:** `field.tscn` 移除静态 `FieldBeast` 实例,改放一个 spawn marker;
-  进入 field 时 phase8 用 `EntitySpawner.spawn_entity("entity.phase8.field_beast", root, pos)` 生成。
+  进入 field 时 demo 用 `EntitySpawner.spawn_entity("entity.demo.field_beast", root, pos)` 生成。
 - **测试:** spawn 出的 beast 具有 definition 的 stats/tags;**`base_overrides` 为空**
   (对齐 `spec/coreview.md` 里 `mark_save_baseline()` 的修复)。
 
@@ -217,7 +217,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 - **内容:** 2–3 个 `RoomDefinition` + 对应 room 子场景(各含 `RoomController`);若干 `RewardDefinition`
   (其一对应 `UpgradeDefinition`,奖励与 upgrade 共享永久属性效果)。
-- **场景:** 在 `field` 加 "TrialCave" 交互入口;phase8 持有 `RunDirector` + `RoomRoot` host;
+- **场景:** 在 `field` 加 "TrialCave" 交互入口;demo 持有 `RunDirector` + `RoomRoot` host;
   入口触发 `RunDirector.start_run(seed)` →(`DungeonGenerator` 生成 `RoomGraph`/`RoomNode`,
   `RunState` 跟踪)→ 每间清怪 `on_room_cleared` → `choosing_reward` → `RewardSelectionUI` 选项
   → `RewardSystem.apply_selected` → 下一间;`run_finished("completed")` 回 field。
@@ -246,8 +246,8 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 - **analytics:** `quest_turned_in` / `level_up` 时 `track_event(...)`。
 - **ads:** player 死亡 → `ads.show_rewarded_ad("revive")` → `rewarded_ad_completed` 回调里 heal 复活。
-- **iap:** shop 内"金币包"项 → `iap.purchase("com.mkit.phase8.gold_pack")` → 完成回调 `add_currency`。
-- **cloud_save:** 存档后 `cloud_save.save_to_cloud("phase8_profile", data)` / `load_from_cloud(...)`。
+- **iap:** shop 内"金币包"项 → `iap.purchase("com.mkit.demo.gold_pack")` → 完成回调 `add_currency`。
+- **cloud_save:** 存档后 `cloud_save.save_to_cloud("demo_profile", data)` / `load_from_cloud(...)`。
 - **状态:** ✅ `test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_save`
   覆盖 analytics 事件、rewarded revive、IAP 金币包、cloud save/load round-trip。
 - **测试:** 用 `*ServiceMock` 断言收到调用并触发回调(mock 是异步延时,需 `await`)。
@@ -278,22 +278,22 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 - **DashAction:** `Shift` 冲刺 command → dash state/action。
 - **测试:** 就近交互成功开对话/传送;手动 effect 推进/完成任务;dash 产生位移。
 - **状态:** ✅ `test_tc_int_scene8_10_interaction_manual_quest_and_dash`
-  覆盖 portal/elder 通过 `InteractionComponent.try_interact()` 聚焦并触发、`quest.phase8.supply_request`
+  覆盖 portal/elder 通过 `InteractionComponent.try_interact()` 聚焦并触发、`quest.demo.supply_request`
   通过 `AdvanceObjectiveEffect` + `CompleteQuestEffect` 手动完成、`DashAction` 产生位移并回到 idle。
 
 > S0–S10 已全部落地,§2 矩阵中 🟡 与 ❌ 清零(Roguelike 一组按 §3 方案 A 在 S6 覆盖,零豁免)。
 
 ### S11 — 退役旧 demo 场景,收敛到唯一入口
 
-**前置:** S0–S10 已落地且覆盖确认。下表证明 phase0–7 的演示能力已被 phase8 **superset**,删除不丢演示价值。
+**前置:** S0–S10 已落地且覆盖确认。下表证明 phase0–7 的演示能力已被 demo **superset**,删除不丢演示价值。
 
-| 旧场景 | 演示主题 | phase8 中的归属 |
+| 旧场景 | 演示主题 | demo 中的归属 |
 |--------|----------|------------------|
 | `phase0_kernel_demo` | kernel 服务 / 引导 | `GameBootstrap`(✅)+ S9(`TimeService`/`ObjectPool`/`DebugOverlay`) |
 | `phase1_combat_arena` | 战斗 | S0(command→HFSM→action→hitbox/hurtbox→CombatResolver) |
 | `phase2_ability_slice` | 技能 | S1 |
 | `phase3_inventory_slice` | 背包 | 现有 ✅(inventory)+ S3(装备) |
-| `phase4_run_slice` | roguelike 单局 | S6(复用 `game/demo/rooms/combat_room_*`) |
+| `phase4_run_slice` | roguelike 单局 | S6(`game/demo/village_rpg/scenes/trial_room_*`) |
 | `phase5_save_slice` | 存档 | S7 |
 | `phase6_experience_slice` | 经验 / 升级 | 现有 ✅(`ExperienceComponent`/`ExperienceCurve`)+ S6(`UpgradeDefinition`) |
 | `phase7_platform_slice` | 平台服务(analytics/ads/iap/cloud) | S8 |
@@ -305,21 +305,21 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 **入口收敛(已完成):**
 
-- demo 入口统一为 `game/demo/bootstrap_phase8.tscn`。
-- `game/demo/bootstrap.tscn` 已删除,避免保留第二个 legacy 入口。
-- `project.godot` 已设置 `run/main_scene = res://game/demo/bootstrap_phase8.tscn`。
-- `game/demo/` 顶层仅保留 `bootstrap_phase8.tscn` 这一个 scene 入口;RPG 主场景移入
-  `game/demo/phase8/phase8_village_rpg.tscn`。
-- (可选打磨)把 `phase8_village_rpg.*` 改名去掉 "phase8" 语义(如 `village_rpg_demo.*`)作为 demo 主场景;
-  改名要同步 `.uid` 与 `Makefile` 的 `phase8-test` 目标 + `--phase8-auto-run` 参数名。
+- demo 入口统一为 `game/demo/bootstrap.tscn`。
+- 旧 legacy `game/demo/bootstrap.tscn` 已被替换为当前唯一入口 `game/demo/bootstrap.tscn`。
+- `project.godot` 已设置 `run/main_scene = res://game/demo/bootstrap.tscn`。
+- `game/demo/` 顶层仅保留 `bootstrap.tscn` 这一个 scene 入口;RPG 主场景移入
+  `game/demo/village_rpg/village_rpg_demo.tscn`。
+- 旧 RPG 主场景已重命名为 `village_rpg_demo.*`,并同步 `.uid`、`Makefile` 的
+  `demo-test` 目标与 `--demo-auto-run` 参数名。
 
-**保留(共享资产,phase8 / S6 复用,勿删):**
+**保留 / 删除(已完成):**
 
-- `game/demo/entities/`(`player` 必留;`enemy` / `dummy` 供 S0 / S5 / S6 复用)
-- `game/demo/rooms/combat_room_0{1,2}.tscn`(S6 试炼洞窟复用)
-- `game/demo/actions/demo_wait_action.gd`(若 S6 房间用到则留;否则审计后单独删)
+- 保留 `game/demo/entities/player/`,供当前 demo player 复用。
+- 删除未被当前 demo 引用的 `game/demo/actions/`、`game/demo/rooms/`、
+  `game/demo/entities/dummy/`、`game/demo/entities/enemy/`。
 
-**收尾:** 删除后 grep 残留引用(`docs/`、`spec/`、其余 `.tscn`)并更新;`make ut` + `make phase8-test` 全绿。
+**收尾:** 删除后 grep 残留引用(`docs/`、`spec/`、其余 `.tscn`)并更新;`make ut` + `make demo-test` 全绿。
 
 ---
 
@@ -328,8 +328,8 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 - **主集成测试:** 扩展 `test/integration/test_village_rpg_loop_integration.gd`,或新建
   `test/integration/test_scene8_full_tour_integration.gd`,逐 slice 断言;
   命名沿用 `test_tc_int_scene8_<nn>_<desc>`。优先复用 `int_test_helpers.gd` 的 `make_*`/`add_*` 工厂。
-- **headless auto-run:** 扩展 `phase8_village_rpg.gd::_run_auto_loop`,把每个新 slice 编进自动序列,
-  `--phase8-auto-run` 跑通后 `_phase8_loop_complete()` 校验并 `quit(0)`。
+- **headless auto-run:** 扩展 `village_rpg_demo.gd::_run_auto_loop`,把每个新 slice 编进自动序列,
+  `--demo-auto-run` 跑通后 `_demo_loop_complete()` 校验并 `quit(0)`。
 - **单元测试:** 每个 slice 复用 / 补对应单元测试(已有 `test_ability_controller`、`test_run_director`、
   `test_reward_system`、`test_saveable_components` 等);新机制若在 addon 补了通用实现,必须配单元测试。
 - **物理帧:** 涉及 `Hitbox/Hurtbox` 的断言要 `await get_tree().physics_frame`(碰撞在物理帧结算)。
@@ -344,22 +344,22 @@ make ut-modules
 $GODOT --headless -s addons/gut/gut_cmdln.gd \
   -gtest=res://test/integration/test_scene8_full_tour_integration.gd -gexit
 # 交互/headless 跑 demo 本体:
-$GODOT game/demo/bootstrap_phase8.tscn -- --phase8-auto-run
+$GODOT game/demo/bootstrap.tscn -- --demo-auto-run
 ```
 
 ---
 
 ## 6. 完成定义(Definition of Done)
 
-- §2 覆盖矩阵的 🟡 / ❌ 清零;无法/不值得纳入 phase8 的类进入"显式豁免"表并写明理由。
+- §2 覆盖矩阵的 🟡 / ❌ 清零;无法/不值得纳入 demo 的类进入"显式豁免"表并写明理由。
 - `make ut` 全绿;贴真实结果(脚本数 / 测试数 / 断言数)。
-- `--phase8-auto-run` headless 跑通并 `quit(0)`,`_phase8_loop_complete()` 通过;completion gate 必须覆盖 command combat kill、firebolt cast、burn tick、`phase8_burn_tick` LogEffect 和 save/load round-trip。
+- `--demo-auto-run` headless 跑通并 `quit(0)`,`_demo_loop_complete()` 通过;completion gate 必须覆盖 command combat kill、firebolt cast、burn tick、`demo_burn_tick` LogEffect 和 save/load round-trip。
 - 新建 `.gd` 都生成并提交 `.uid`(跑一次 `make ut` 让 Godot 写入,勿手写 UID)。
 - 改了公共接口的类同步更新 `docs/ref/<ClassName>.md` 及相关 layer/pipeline 文档(中文概念段保持中文)。
 - 无 `game → addon` 反向依赖;无具体内容硬编码进 `addons/mkit/`(新机制缺口在 addon 补通用实现,
-  内容放 `game/demo/phase8/`)。
-- **S11 后:** `game/demo/` 顶层仅剩 `bootstrap_phase8.tscn` 一个 scene 入口;phase0–7 及其
-  `bootstrap_phaseN` 已删除;`project.godot` 主场景指向 phase8;全仓库无指向已删场景的悬挂引用。
+  内容放 `game/demo/village_rpg/`)。
+- **S11 后:** `game/demo/` 顶层仅剩 `bootstrap.tscn` 一个 scene 入口;phase0–7 及其
+  `bootstrap_phaseN` 已删除;`project.godot` 主场景指向 demo;全仓库无指向已删场景的悬挂引用。
 
 ---
 
@@ -373,7 +373,7 @@ $GODOT game/demo/bootstrap_phase8.tscn -- --phase8-auto-run
 - **体量:** S0–S10 是一条较长的路。建议按 slice 分多次提交;若只想先拿到"绝大多数类覆盖",
   优先级 **S0 → S1 → S2 → S3 → S7 → S8**(纯 RPG 主线 + 存档 + 平台),把 **S4/S5/S6/S9/S10**
   作为第二批。
-- **显式豁免:** 无。已决定不豁免任何模块类——Roguelike 一组在 S6 真实接入 phase8 并断言。
+- **显式豁免:** 无。已决定不豁免任何模块类——Roguelike 一组在 S6 真实接入 demo 并断言。
 
 ---
 

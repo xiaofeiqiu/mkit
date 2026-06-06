@@ -1,4 +1,4 @@
-class_name Phase8GrantCurrencyEffect
+class_name DemoGrantCurrencyEffect
 extends GameEffect
 
 @export var currency_id: String = "gold"

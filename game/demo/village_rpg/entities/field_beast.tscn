@@ -9,9 +9,9 @@
 [ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="7_receiver"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="8_state_machine"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state.gd" id="9_state"]
-[ext_resource type="Script" path="res://game/demo/phase8/entities/states/enemy_idle_state.gd" id="10_idle"]
-[ext_resource type="Script" path="res://game/demo/phase8/entities/states/enemy_move_state.gd" id="11_move"]
-[ext_resource type="Script" path="res://game/demo/phase8/entities/states/enemy_attack_state.gd" id="12_attack"]
+[ext_resource type="Script" path="res://game/demo/village_rpg/entities/states/enemy_idle_state.gd" id="10_idle"]
+[ext_resource type="Script" path="res://game/demo/village_rpg/entities/states/enemy_move_state.gd" id="11_move"]
+[ext_resource type="Script" path="res://game/demo/village_rpg/entities/states/enemy_attack_state.gd" id="12_attack"]
 [ext_resource type="Script" path="res://addons/mkit/modules/combat/hitbox_component.gd" id="13_hitbox"]
 [ext_resource type="Script" path="res://addons/mkit/modules/ai/simple_ai_enemy_brain.gd" id="14_brain"]
 
@@ -26,14 +26,14 @@ script = ExtResource("6_root")
 
 [node name="EntityIdentity" type="Node" parent="."]
 script = ExtResource("1_identity")
-entity_id = "enemy.phase8.field_beast"
+entity_id = "enemy.demo.field_beast"
 display_name = "Field Beast"
 faction = "enemy"
 tags = Array[String](["enemy", "living", "field_beast"])
 
 [node name="CommandReceiver" type="Node" parent="."]
 script = ExtResource("7_receiver")
-receiver_id = "enemy.phase8.field_beast"
+receiver_id = "enemy.demo.field_beast"
 
 [node name="StateMachine" type="Node" parent="."]
 script = ExtResource("8_state_machine")

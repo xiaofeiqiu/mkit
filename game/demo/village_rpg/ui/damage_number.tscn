@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://game/demo/phase8/ui/phase8_damage_number.gd" id="1_damage"]
+[ext_resource type="Script" path="res://game/demo/village_rpg/ui/damage_number.gd" id="1_damage"]
 
-[node name="Phase8DamageNumber" type="Node2D"]
+[node name="DemoDamageNumber" type="Node2D"]
 script = ExtResource("1_damage")
 
 [node name="Label" type="Label" parent="."]

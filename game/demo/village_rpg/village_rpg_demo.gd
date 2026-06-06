@@ -1,41 +1,41 @@
 extends Node2D
 
 
-const ZONE_VILLAGE := "zone.phase8.village"
-const ZONE_ROOM := "zone.phase8.village_room"
-const ZONE_FIELD := "zone.phase8.field"
-const QUEST_ID := "quest.phase8.field_report"
-const QUEST_OBJECTIVE_ID := "obj.phase8.kill_field_beast"
-const QUEST_MANUAL_ID := "quest.phase8.supply_request"
-const QUEST_MANUAL_OBJECTIVE_ID := "obj.phase8.receive_supply_note"
-const SHOP_ID := "shop.phase8.village_supply"
-const ITEM_POTION := "item.phase8.herb_potion"
-const ITEM_CLAW := "item.phase8.beast_claw"
-const ITEM_CHARM := "item.phase8.village_charm"
-const ITEM_FIELD_BLADE := "item.phase8.field_blade"
+const ZONE_VILLAGE := "zone.demo.village"
+const ZONE_ROOM := "zone.demo.village_room"
+const ZONE_FIELD := "zone.demo.field"
+const QUEST_ID := "quest.demo.field_report"
+const QUEST_OBJECTIVE_ID := "obj.demo.kill_field_beast"
+const QUEST_MANUAL_ID := "quest.demo.supply_request"
+const QUEST_MANUAL_OBJECTIVE_ID := "obj.demo.receive_supply_note"
+const SHOP_ID := "shop.demo.village_supply"
+const ITEM_POTION := "item.demo.herb_potion"
+const ITEM_CLAW := "item.demo.beast_claw"
+const ITEM_CHARM := "item.demo.village_charm"
+const ITEM_FIELD_BLADE := "item.demo.field_blade"
 const WEAPON_SLOT := "weapon"
-const LOOT_FIELD_BEAST := "loot.phase8.field_beast"
-const LOOT_FIELD_BLADE := "loot.phase8.field_blade"
-const ENTITY_FIELD_BEAST := "entity.phase8.field_beast"
-const ENTITY_TRIAL_BEAST := "entity.phase8.trial_beast"
-const ABILITY_FIREBOLT := "ability.phase8.firebolt"
-const STATUS_BURN := "status.phase8.burn"
-const ROOM_TRIAL_01 := "room.phase8.trial_01"
-const ROOM_TRIAL_02 := "room.phase8.trial_02"
-const ROOM_TRIAL_03 := "room.phase8.trial_03"
-const REWARD_TRIAL_ATTACK := "reward.phase8.trial_attack"
-const UPGRADE_TRIAL_ATTACK := "upgrade.phase8.trial_attack"
+const LOOT_FIELD_BEAST := "loot.demo.field_beast"
+const LOOT_FIELD_BLADE := "loot.demo.field_blade"
+const ENTITY_FIELD_BEAST := "entity.demo.field_beast"
+const ENTITY_TRIAL_BEAST := "entity.demo.trial_beast"
+const ABILITY_FIREBOLT := "ability.demo.firebolt"
+const STATUS_BURN := "status.demo.burn"
+const ROOM_TRIAL_01 := "room.demo.trial_01"
+const ROOM_TRIAL_02 := "room.demo.trial_02"
+const ROOM_TRIAL_03 := "room.demo.trial_03"
+const REWARD_TRIAL_ATTACK := "reward.demo.trial_attack"
+const UPGRADE_TRIAL_ATTACK := "upgrade.demo.trial_attack"
 const PLAYER_ID := "player_001"
 const PLATFORM_REVIVE_PLACEMENT := "revive"
-const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.phase8.gold_pack"
-const PLATFORM_CLOUD_SLOT := "phase8_profile"
+const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.demo.gold_pack"
+const PLATFORM_CLOUD_SLOT := "demo_profile"
 const GOLD_PACK_AMOUNT := 25
 const MELEE_RANGE := 30.0
 const FIREBOLT_RANGE := 100.0
 const TRIAL_SEED := 8606
-const TRIAL_REWARD_UI_SCENE := preload("res://game/demo/phase8/scenes/trial_reward_selection.tscn")
-const PHASE8_SAVE_MIGRATION := preload("res://game/demo/phase8/phase8_save_migration_v1_to_v2.gd")
-const HIT_VFX_SCENE := "res://game/demo/phase8/ui/phase8_hit_vfx.tscn"
+const TRIAL_REWARD_UI_SCENE := preload("res://game/demo/village_rpg/scenes/trial_reward_selection.tscn")
+const DEMO_SAVE_MIGRATION := preload("res://game/demo/village_rpg/save_migration_v1_to_v2.gd")
+const HIT_VFX_SCENE := "res://game/demo/village_rpg/ui/hit_vfx.tscn"
 
 
 class EmbeddedSceneRouter:
@@ -124,7 +124,7 @@ var _trial_rooms_cleared: int = 0
 var _trial_run_finished_result: String = ""
 var _trial_upgrade_reward_selected: bool = false
 var _reward_screen: RewardSelectionUI = null
-var _phase8_save_roundtrip_succeeded: bool = false
+var _demo_save_roundtrip_succeeded: bool = false
 var _runtime_seconds: float = 0.0
 var _feedback_toast_observed: bool = false
 var _feedback_shake_observed: bool = false
@@ -136,7 +136,7 @@ var _dash_succeeded: bool = false
 
 
 func _ready() -> void:
-	_auto_run_enabled = OS.get_cmdline_args().has("--phase8-auto-run")
+	_auto_run_enabled = OS.get_cmdline_args().has("--demo-auto-run")
 	_resolve_services()
 	_configure_save()
 	_configure_entity_spawner()
@@ -147,7 +147,7 @@ func _ready() -> void:
 	_connect_signals()
 	_grant_starter_currency()
 	_set_instructions()
-	_log("[PHASE8] RPG loop demo ready")
+	_log("[DEMO] RPG loop demo ready")
 	_go_to_zone(ZONE_VILLAGE, "village_square")
 	if _auto_run_enabled:
 		_run_auto_loop.call_deferred()
@@ -185,13 +185,13 @@ func _input(event: InputEvent) -> void:
 			KEY_P:
 				_purchase_gold_pack()
 			KEY_S:
-				_save_phase8_state()
+				_save_demo_state()
 			KEY_O:
-				_save_phase8_to_cloud()
+				_save_demo_to_cloud()
 			KEY_L:
-				_load_phase8_state()
+				_load_demo_state()
 			KEY_U:
-				_load_phase8_from_cloud()
+				_load_demo_from_cloud()
 			KEY_1:
 				_select_trial_reward(0)
 			KEY_2:
@@ -241,9 +241,9 @@ func _configure_save() -> void:
 	if _save_manager == null:
 		return
 	if _auto_run_enabled:
-		_save_manager.save_path = "/tmp/mkit_phase8_auto_save.json"
+		_save_manager.save_path = "/tmp/mkit_demo_auto_save.json"
 	_save_manager.save_version = max(_save_manager.save_version, 2)
-	var migration := PHASE8_SAVE_MIGRATION.new() as SaveMigration
+	var migration := DEMO_SAVE_MIGRATION.new() as SaveMigration
 	if _has_save_migration(migration.from_version, migration.to_version):
 		return
 	var migrations: Array[SaveMigration] = []
@@ -264,14 +264,14 @@ func _has_save_migration(from_version: int, to_version: int) -> bool:
 
 func _configure_entity_spawner() -> void:
 	_entity_spawner = EntitySpawner.new()
-	_entity_spawner.name = "Phase8EntitySpawner"
+	_entity_spawner.name = "DemoEntitySpawner"
 	if ServiceRegistry.has_service("content"):
 		_entity_spawner.content = ServiceRegistry.get_service("content") as ContentRegistry
 	add_child(_entity_spawner)
 
 
 func _configure_embedded_router() -> void:
-	_scene_router.name = "Phase8EmbeddedSceneRouter"
+	_scene_router.name = "DemoEmbeddedSceneRouter"
 	_scene_router.host = _world_host
 	add_child(_scene_router)
 	_previous_scene_router = null
@@ -330,7 +330,7 @@ func _reset_demo_state() -> void:
 	_manual_quest_completed = false
 	_dash_succeeded = false
 	_reset_trial_state()
-	_phase8_save_roundtrip_succeeded = false
+	_demo_save_roundtrip_succeeded = false
 
 
 func _configure_audio() -> void:
@@ -341,15 +341,15 @@ func _configure_audio() -> void:
 	if _auto_run_enabled:
 		return
 	_audio.music_map = {
-		"bgm.phase8.village": _make_audio_stream(),
-		"bgm.phase8.room": _make_audio_stream(),
-		"bgm.phase8.field": _make_audio_stream()
+		"bgm.demo.village": _make_audio_stream(),
+		"bgm.demo.room": _make_audio_stream(),
+		"bgm.demo.field": _make_audio_stream()
 	}
 	_audio.sfx_map = {
-		"sfx.phase8.dialogue": _make_audio_stream(),
-		"sfx.phase8.quest": _make_audio_stream(),
-		"sfx.phase8.loot": _make_audio_stream(),
-		"sfx.phase8.shop": _make_audio_stream()
+		"sfx.demo.dialogue": _make_audio_stream(),
+		"sfx.demo.quest": _make_audio_stream(),
+		"sfx.demo.loot": _make_audio_stream(),
+		"sfx.demo.shop": _make_audio_stream()
 	}
 
 
@@ -436,7 +436,7 @@ func _grant_starter_currency() -> void:
 
 func _set_instructions() -> void:
 	_instructions_label.text = (
-		"Phase 8 RPG loop: stand near portals/NPC, R room/back, G field/back, "
+		"Demo RPG loop: stand near portals/NPC, R room/back, G field/back, "
 		+ "T talk/choice/advance, M manual task, Shift dash, F cast firebolt, "
 		+ "K defeat beast, E equip/unequip blade, Y elder blessing, "
 		+ "C trial cave, 1/2/3 reward, B buy potion, V sell claw, H use potion, "
@@ -606,7 +606,7 @@ func _defeat_field_beast() -> void:
 		return
 	_damage_player_from_beast(beast)
 	var damage := DealDamageEffect.new()
-	damage.effect_id = "effect.phase8.manual_strike"
+	damage.effect_id = "effect.demo.manual_strike"
 	damage.base_amount = 50.0
 	damage.can_crit = false
 	var result := _effects.execute(damage, GameplayContext.new().with_source(_player).with_target(beast))
@@ -623,7 +623,7 @@ func _damage_player_from_beast(beast: Node) -> void:
 	if health == null or health.dead:
 		return
 	var damage := DealDamageEffect.new()
-	damage.effect_id = "effect.phase8.beast_counter"
+	damage.effect_id = "effect.demo.beast_counter"
 	damage.base_amount = 12.0
 	damage.can_crit = false
 	_effects.execute(damage, GameplayContext.new().with_source(beast).with_target(_player))
@@ -796,7 +796,7 @@ func _defeat_trial_room_enemies() -> void:
 		if brain != null:
 			brain.enabled = false
 		var damage := DealDamageEffect.new()
-		damage.effect_id = "effect.phase8.trial_strike"
+		damage.effect_id = "effect.demo.trial_strike"
 		damage.base_amount = 999.0
 		damage.can_crit = false
 		_effects.execute(damage, GameplayContext.new().with_source(_player).with_target(enemy))
@@ -883,7 +883,7 @@ func _buy_potion() -> void:
 	if not _ensure_shop_open():
 		return
 	if _shop.buy(ITEM_POTION, 1, _player):
-		_play_sfx("sfx.phase8.shop")
+		_play_sfx("sfx.demo.shop")
 
 
 func _sell_claw() -> void:
@@ -897,7 +897,7 @@ func _sell_claw() -> void:
 		_log("[SHOP] no beast claw to sell")
 		return
 	if _shop.sell(claw.instance_id, 1, _player):
-		_play_sfx("sfx.phase8.shop")
+		_play_sfx("sfx.demo.shop")
 
 
 func _ensure_shop_open() -> bool:
@@ -940,24 +940,24 @@ func _use_potion() -> void:
 	_log("[ITEM] used herb potion HP %.0f -> %.0f" % [before, after])
 
 
-func _save_phase8_state() -> bool:
+func _save_demo_state() -> bool:
 	if _save_manager == null:
 		_log("[SAVE] service missing")
 		return false
 	if _save_manager.save_game(get_tree().root):
-		_log("[SAVE] saved phase8 state")
+		_log("[SAVE] saved demo state")
 		return true
 	_log("[SAVE] save failed")
 	return false
 
 
-func _load_phase8_state() -> bool:
+func _load_demo_state() -> bool:
 	if _save_manager == null:
 		_log("[SAVE] service missing")
 		return false
 	if _save_manager.load_game(get_tree().root):
 		_sync_loaded_state_flags()
-		_log("[SAVE] loaded phase8 state")
+		_log("[SAVE] loaded demo state")
 		return true
 	_log("[SAVE] load failed")
 	return false
@@ -1015,7 +1015,7 @@ func _purchase_gold_pack() -> void:
 	_iap.purchase(PLATFORM_GOLD_PACK_PRODUCT)
 
 
-func _save_phase8_to_cloud() -> void:
+func _save_demo_to_cloud() -> void:
 	if _save_manager == null:
 		_log("[CloudSave] save service missing")
 		return
@@ -1028,10 +1028,10 @@ func _save_phase8_to_cloud() -> void:
 	if _cloud_busy:
 		_log("[CloudSave] busy")
 		return
-	if not _save_phase8_state():
+	if not _save_demo_state():
 		_log("[CloudSave] local save failed")
 		return
-	var data := _read_phase8_save_data()
+	var data := _read_demo_save_data()
 	if data.is_empty():
 		_log("[CloudSave] local save data missing")
 		return
@@ -1040,7 +1040,7 @@ func _save_phase8_to_cloud() -> void:
 	_cloud_save.save_to_cloud(PLATFORM_CLOUD_SLOT, data)
 
 
-func _load_phase8_from_cloud() -> void:
+func _load_demo_from_cloud() -> void:
 	if _cloud_save == null:
 		_log("[CloudSave] service missing")
 		return
@@ -1055,7 +1055,7 @@ func _load_phase8_from_cloud() -> void:
 	_cloud_save.load_from_cloud(PLATFORM_CLOUD_SLOT)
 
 
-func _read_phase8_save_data() -> Dictionary:
+func _read_demo_save_data() -> Dictionary:
 	if _save_manager == null:
 		return {}
 	var file := FileAccess.open(_save_manager.save_path, FileAccess.READ)
@@ -1070,7 +1070,7 @@ func _read_phase8_save_data() -> Dictionary:
 	return data
 
 
-func _write_phase8_save_data(data: Dictionary) -> bool:
+func _write_demo_save_data(data: Dictionary) -> bool:
 	if _save_manager == null:
 		return false
 	var file := FileAccess.open(_save_manager.save_path, FileAccess.WRITE)
@@ -1090,7 +1090,7 @@ func _track_analytics_event(event_name: String, properties: Dictionary = {}) -> 
 func _on_dialogue_started(dialogue_id: String) -> void:
 	if _dialogue_ui != null:
 		_dialogue_ui.visible = true
-	_play_sfx("sfx.phase8.dialogue")
+	_play_sfx("sfx.demo.dialogue")
 	_log("[DIALOGUE] started %s" % dialogue_id)
 
 
@@ -1099,7 +1099,7 @@ func _on_dialogue_ended(dialogue_id: String) -> void:
 
 
 func _on_quest_accepted(quest_id: String) -> void:
-	_play_sfx("sfx.phase8.quest")
+	_play_sfx("sfx.demo.quest")
 	_log("[QUEST] accepted %s" % quest_id)
 
 
@@ -1110,7 +1110,7 @@ func _on_objective_advanced(
 
 
 func _on_quest_turned_in(quest_id: String) -> void:
-	_play_sfx("sfx.phase8.quest")
+	_play_sfx("sfx.demo.quest")
 	_track_analytics_event(
 		"quest_turned_in",
 		{
@@ -1171,7 +1171,7 @@ func _spawn_hit_effect(target: Node) -> void:
 	if _effects == null or target == null:
 		return
 	var effect := SpawnSceneEffect.new()
-	effect.effect_id = "effect.phase8.spawn_hit_vfx"
+	effect.effect_id = "effect.demo.spawn_hit_vfx"
 	effect.scene_path = HIT_VFX_SCENE
 	effect.spawn_at_target = true
 	effect.use_pool = true
@@ -1200,7 +1200,7 @@ func _on_interactable_focused(interactable: Interactable) -> void:
 
 
 func _on_domain_event(event: DomainEvent) -> void:
-	if event == null or event.event_type != "phase8_burn_tick":
+	if event == null or event.event_type != "demo_burn_tick":
 		return
 	_burn_tick_observed = true
 	_log("[STATUS] %s" % str(event.payload.get("message", "burn tick")))
@@ -1277,7 +1277,7 @@ func _grant_field_loot(entity_ref: Node) -> void:
 		return
 	_roll_loot_into_bag(LOOT_FIELD_BEAST, entity_ref, inventory)
 	_roll_loot_into_bag(LOOT_FIELD_BLADE, entity_ref, inventory)
-	_play_sfx("sfx.phase8.loot")
+	_play_sfx("sfx.demo.loot")
 
 
 func _roll_loot_into_bag(
@@ -1399,7 +1399,7 @@ func _on_cloud_load_completed(slot: String, data: Dictionary) -> void:
 		return
 	_cloud_busy = false
 	_cloud_last_loaded_data = data.duplicate(true)
-	if _write_phase8_save_data(data) and _load_phase8_state():
+	if _write_demo_save_data(data) and _load_demo_state():
 		_cloud_load_completed = true
 		_log("[CloudSave] loaded %s" % slot)
 	else:
@@ -1470,7 +1470,7 @@ func _update_inventory_hud() -> void:
 		return
 	var parts: Array[String] = []
 	for item in inventory.model.get_items():
-		parts.append("%s x%d" % [item.definition_id.replace("item.phase8.", ""), item.quantity])
+		parts.append("%s x%d" % [item.definition_id.replace("item.demo.", ""), item.quantity])
 	_inventory_label.text = "Bag: %s" % (", ".join(parts) if not parts.is_empty() else "empty")
 
 
@@ -1679,16 +1679,16 @@ func _run_auto_loop() -> void:
 	await _wait_for_rewarded_revive()
 	_purchase_gold_pack()
 	await _wait_for_gold_pack_purchase()
-	await _roundtrip_phase8_save_for_auto_run()
-	_save_phase8_to_cloud()
+	await _roundtrip_demo_save_for_auto_run()
+	_save_demo_to_cloud()
 	await _wait_for_cloud_save()
-	_load_phase8_from_cloud()
+	_load_demo_from_cloud()
 	await _wait_for_cloud_load()
-	if _phase8_loop_complete():
-		_log("[AUTO] phase8 RPG loop complete")
+	if _demo_loop_complete():
+		_log("[AUTO] demo RPG loop complete")
 	else:
-		_log("[AUTO] missing: %s" % ", ".join(_phase8_missing_requirements()))
-		_log("[AUTO] phase8 RPG loop incomplete")
+		_log("[AUTO] missing: %s" % ", ".join(_demo_missing_requirements()))
+		_log("[AUTO] demo RPG loop incomplete")
 	_cleanup_audio_players()
 	await get_tree().process_frame
 	get_tree().quit()
@@ -1729,21 +1729,21 @@ func _wait_for_cloud_load() -> void:
 		elapsed += get_process_delta_time()
 
 
-func _roundtrip_phase8_save_for_auto_run() -> void:
-	_phase8_save_roundtrip_succeeded = false
-	if not _save_phase8_state():
+func _roundtrip_demo_save_for_auto_run() -> void:
+	_demo_save_roundtrip_succeeded = false
+	if not _save_demo_state():
 		return
-	_scramble_phase8_saved_state()
+	_scramble_demo_saved_state()
 	await get_tree().process_frame
-	if _load_phase8_state():
-		_phase8_save_roundtrip_succeeded = _phase8_save_roundtrip_restored()
-		if _phase8_save_roundtrip_succeeded:
-			_log("[SAVE] round-trip restored phase8 state")
+	if _load_demo_state():
+		_demo_save_roundtrip_succeeded = _demo_save_roundtrip_restored()
+		if _demo_save_roundtrip_succeeded:
+			_log("[SAVE] round-trip restored demo state")
 		else:
 			_log("[SAVE] round-trip restore check failed")
 
 
-func _scramble_phase8_saved_state() -> void:
+func _scramble_demo_saved_state() -> void:
 	var equipment := _equipment_controller()
 	if equipment != null:
 		equipment.unequip(WEAPON_SLOT)
@@ -1753,11 +1753,11 @@ func _scramble_phase8_saved_state() -> void:
 	var stats := _player_stats()
 	if stats != null:
 		var modifier_definition := StatModifierDefinition.new()
-		modifier_definition.modifier_id = "mod.phase8.save_scramble_attack"
+		modifier_definition.modifier_id = "mod.demo.save_scramble_attack"
 		modifier_definition.stat_id = "attack_power"
 		modifier_definition.value = -999.0
 		modifier_definition.stacking_rule = StatModifierDefinition.StackingRule.REPLACE_SAME_SOURCE
-		stats.add_modifier(StatModifier.from_definition(modifier_definition, "phase8_save_scramble"))
+		stats.add_modifier(StatModifier.from_definition(modifier_definition, "demo_save_scramble"))
 	var health := _player_health()
 	if health != null:
 		health.current_hp = 1.0
@@ -1770,7 +1770,7 @@ func _scramble_phase8_saved_state() -> void:
 	_field_blade_equipped = false
 
 
-func _phase8_save_roundtrip_restored() -> bool:
+func _demo_save_roundtrip_restored() -> bool:
 	var equipment := _equipment_controller()
 	if equipment == null or equipment.get_equipped(WEAPON_SLOT) == null:
 		_log("[SAVE] round-trip missing equipped weapon")
@@ -1794,11 +1794,11 @@ func _phase8_save_roundtrip_restored() -> bool:
 	return true
 
 
-func _phase8_loop_complete() -> bool:
-	return _phase8_missing_requirements().is_empty()
+func _demo_loop_complete() -> bool:
+	return _demo_missing_requirements().is_empty()
 
 
-func _phase8_missing_requirements() -> Array[String]:
+func _demo_missing_requirements() -> Array[String]:
 	var missing: Array[String] = []
 	if _world == null or _world.current_zone_id != ZONE_VILLAGE:
 		missing.append("zone_village")
@@ -1840,7 +1840,7 @@ func _phase8_missing_requirements() -> Array[String]:
 		missing.append("dash")
 	if not _field_blade_equipped:
 		missing.append("field_blade")
-	if not _phase8_save_roundtrip_succeeded:
+	if not _demo_save_roundtrip_succeeded:
 		missing.append("save_roundtrip")
 	if not _is_trial_completed():
 		missing.append("trial_completed")

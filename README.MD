@@ -17,7 +17,7 @@ the addon and depend on Mkit through its public APIs.
   progression, AI, interaction, and UI feedback.
 - Platform-facing service interfaces and mocks for analytics, ads, IAP, and
   cloud save.
-- The phase8 demo in `game/demo/` showing how concrete content can use the
+- The village RPG demo in `game/demo/` showing how concrete content can use the
   addon.
 - Unit and integration tests using GUT.
 - Class reference docs under `docs/ref/` plus layer and pipeline docs.
@@ -81,7 +81,7 @@ Makefile              Test and docs helper commands
 2. Open `project.godot` in Godot.
 3. Confirm the `Mkit` and `GUT` plugins are enabled in
    **Project > Project Settings > Plugins**.
-4. Use the phase8 demo in `game/demo/` to inspect example content.
+4. Use the village RPG demo in `game/demo/` to inspect example content.
 5. Add a `GameBootstrap` node to a game entry scene when building on top of the
    addon. `GameBootstrap` registers runtime services into the single
    `ServiceRegistry` autoload, loads resource databases, validates content, and
@@ -100,7 +100,7 @@ make ut            # run all unit tests
 make ut-kernel     # run kernel unit tests
 make ut-modules    # run module unit tests
 make int           # run integration tests
-make phase8-test   # run the Phase 8 RPG loop auto-run smoke test
+make demo-test     # run the demo RPG loop auto-run smoke test
 make docs-server   # serve docs/ at http://localhost:8060
 ```
 
@@ -148,5 +148,5 @@ EntityRoot
 ## Status
 
 The project currently includes the kernel, implemented gameplay modules, the
-phase8 demo, unit tests, integration tests, and reference docs. Treat `docs/` as
-the source of truth for current architecture and public interfaces.
+village RPG demo, unit tests, integration tests, and reference docs. Treat
+`docs/` as the source of truth for current architecture and public interfaces.

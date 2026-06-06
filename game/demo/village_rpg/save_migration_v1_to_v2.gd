@@ -8,7 +8,7 @@ func _init() -> void:
 
 func _migrate_impl(data: Dictionary) -> Dictionary:
 	var payload: Dictionary = data.get("payload", {})
-	var player: Dictionary = payload.get("phase8_player", {})
+	var player: Dictionary = payload.get("demo_player", {})
 	if player.is_empty():
 		data["payload"] = payload
 		return data
@@ -17,7 +17,7 @@ func _migrate_impl(data: Dictionary) -> Dictionary:
 	_migrate_health(player, components)
 	_migrate_mana(player, components)
 	player["components"] = components
-	payload["phase8_player"] = player
+	payload["demo_player"] = player
 	data["payload"] = payload
 	return data
 

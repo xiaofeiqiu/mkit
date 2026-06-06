@@ -30,9 +30,9 @@ shape = SubResource("CircleShape_field_exit")
 
 [node name="Interactable" type="Node" parent="ToVillage"]
 script = ExtResource("2_portal")
-interaction_id = "portal.phase8.field_to_village"
+interaction_id = "portal.demo.field_to_village"
 display_text = "Return to village"
-target_zone_id = "zone.phase8.village"
+target_zone_id = "zone.demo.village"
 target_spawn_id = "from_field"
 
 [node name="GateLabel" type="Label" parent="."]

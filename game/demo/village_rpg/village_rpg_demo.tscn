@@ -1,6 +1,6 @@
 [gd_scene load_steps=15 format=3]
 
-[ext_resource type="Script" path="res://game/demo/phase8/phase8_village_rpg.gd" id="1_slice"]
+[ext_resource type="Script" path="res://game/demo/village_rpg/village_rpg_demo.gd" id="1_slice"]
 [ext_resource type="PackedScene" path="res://game/demo/entities/player/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_component.gd" id="3_experience"]
 [ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_curve.gd" id="4_curve"]
@@ -13,15 +13,15 @@
 [ext_resource type="Script" path="res://addons/mkit/modules/ui/damage_number_system.gd" id="11_damage_numbers"]
 [ext_resource type="Script" path="res://addons/mkit/modules/ui/vfx_spawner.gd" id="12_vfx"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/debug/debug_overlay.gd" id="13_debug"]
-[ext_resource type="Script" path="res://game/demo/phase8/phase8_player_saveable.gd" id="14_player_saveable"]
+[ext_resource type="Script" path="res://game/demo/village_rpg/player_saveable.gd" id="14_player_saveable"]
 
-[sub_resource type="Resource" id="Resource_phase8_curve"]
+[sub_resource type="Resource" id="Resource_demo_curve"]
 script = ExtResource("4_curve")
 base_xp = 40
 growth_factor = 1.4
 max_level = 8
 
-[node name="Phase8VillageRpg" type="Node2D"]
+[node name="VillageRpgDemo" type="Node2D"]
 script = ExtResource("1_slice")
 
 [node name="WorldHost" type="Node2D" parent="."]
@@ -31,7 +31,7 @@ visible = false
 
 [node name="RunDirector" type="Node" parent="."]
 script = ExtResource("8_run")
-first_floor_room_pool = Array[String](["room.phase8.trial_01", "room.phase8.trial_02", "room.phase8.trial_03"])
+first_floor_room_pool = Array[String](["room.demo.trial_01", "room.demo.trial_02", "room.demo.trial_03"])
 room_scene_container_path = NodePath("../RoomRoot")
 player_entity_id = "player_001"
 run_length = 3
@@ -40,19 +40,19 @@ run_length = 3
 position = Vector2(160, 260)
 
 [node name="AbilityController" parent="Player/Controllers"]
-starting_ability_ids = Array[String](["ability.phase8.firebolt"])
+starting_ability_ids = Array[String](["ability.demo.firebolt"])
 
 [node name="InputReader" parent="Player"]
-cast_ability_id = "ability.phase8.firebolt"
+cast_ability_id = "ability.demo.firebolt"
 
 [node name="ExperienceComponent" type="Node" parent="Player/Components"]
 script = ExtResource("3_experience")
 save_id = "player_experience"
-curve = SubResource("Resource_phase8_curve")
+curve = SubResource("Resource_demo_curve")
 
 [node name="PlayerSaveable" type="Node" parent="."]
 script = ExtResource("14_player_saveable")
-save_id = "phase8_player"
+save_id = "demo_player"
 target_path = NodePath("../Player")
 
 [node name="FeedbackSystem" type="Node" parent="."]
@@ -60,19 +60,19 @@ script = ExtResource("10_feedback")
 damage_number_system_path = NodePath("DamageNumbers")
 vfx_spawner_path = NodePath("VFX")
 ui_manager_path = NodePath("../HUD/UIManager")
-toast_screen_id = "phase8.toast"
+toast_screen_id = "demo.toast"
 damage_screen_shake_strength = 0.25
 death_toast_template = "Defeated %s"
 
 [node name="DamageNumbers" type="Node" parent="FeedbackSystem"]
 script = ExtResource("11_damage_numbers")
-damage_number_scene_path = "res://game/demo/phase8/ui/phase8_damage_number.tscn"
+damage_number_scene_path = "res://game/demo/village_rpg/ui/damage_number.tscn"
 use_pool = true
 auto_release_seconds = 0.15
 
 [node name="VFX" type="Node" parent="FeedbackSystem"]
 script = ExtResource("12_vfx")
-vfx_scene_map = {"death": "res://game/demo/phase8/ui/phase8_hit_vfx.tscn", "hit": "res://game/demo/phase8/ui/phase8_hit_vfx.tscn"}
+vfx_scene_map = {"death": "res://game/demo/village_rpg/ui/hit_vfx.tscn", "hit": "res://game/demo/village_rpg/ui/hit_vfx.tscn"}
 auto_free_seconds = 0.15
 use_pool = true
 
@@ -123,7 +123,7 @@ text = ""
 [node name="UIManager" type="Node" parent="HUD"]
 script = ExtResource("9_ui_manager")
 screen_root_path = NodePath("ScreenRoot")
-screen_scene_map = {"phase8.toast": "res://game/demo/phase8/ui/phase8_toast_screen.tscn"}
+screen_scene_map = {"demo.toast": "res://game/demo/village_rpg/ui/toast_screen.tscn"}
 
 [node name="ScreenRoot" type="Node" parent="HUD/UIManager"]
 

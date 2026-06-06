@@ -43,9 +43,9 @@ shape = SubResource("CircleShape_room_portal")
 
 [node name="Interactable" type="Node" parent="ToRoom"]
 script = ExtResource("2_portal")
-interaction_id = "portal.phase8.village_to_room"
+interaction_id = "portal.demo.village_to_room"
 display_text = "Enter elder room"
-target_zone_id = "zone.phase8.village_room"
+target_zone_id = "zone.demo.village_room"
 target_spawn_id = "room_entry"
 
 [node name="ToField" type="Area2D" parent="."]
@@ -58,9 +58,9 @@ shape = SubResource("CircleShape_field_portal")
 
 [node name="Interactable" type="Node" parent="ToField"]
 script = ExtResource("2_portal")
-interaction_id = "portal.phase8.village_to_field"
+interaction_id = "portal.demo.village_to_field"
 display_text = "Leave for field"
-target_zone_id = "zone.phase8.field"
+target_zone_id = "zone.demo.field"
 target_spawn_id = "field_entry"
 
 [node name="RoomDoor" type="ColorRect" parent="."]

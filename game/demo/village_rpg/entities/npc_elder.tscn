@@ -14,14 +14,14 @@ script = ExtResource("1_root")
 
 [node name="EntityIdentity" type="Node" parent="."]
 script = ExtResource("2_identity")
-entity_id = "npc.phase8.elder"
+entity_id = "npc.demo.elder"
 display_name = "Village Elder"
 faction = "npc"
 tags = Array[String](["npc", "quest_giver", "elder"])
 
 [node name="CommandReceiver" type="Node" parent="."]
 script = ExtResource("3_receiver")
-receiver_id = "npc.phase8.elder"
+receiver_id = "npc.demo.elder"
 
 [node name="StateMachine" type="Node" parent="."]
 script = ExtResource("4_state_machine")
@@ -33,10 +33,10 @@ auto_start = false
 
 [node name="DialogueInteractable" type="Node" parent="Controllers"]
 script = ExtResource("5_dialogue")
-interaction_id = "interaction.phase8.elder"
+interaction_id = "interaction.demo.elder"
 display_text = "Talk"
-dialogue_id = "dialogue.phase8.elder"
-npc_id = "npc.phase8.elder"
+dialogue_id = "dialogue.demo.elder"
+npc_id = "npc.demo.elder"
 
 [node name="InteractionArea" type="Area2D" parent="."]
 collision_layer = 2
@@ -47,10 +47,10 @@ shape = SubResource("CircleShape_interaction")
 
 [node name="Interactable" type="Node" parent="InteractionArea"]
 script = ExtResource("5_dialogue")
-interaction_id = "interaction.phase8.elder"
+interaction_id = "interaction.demo.elder"
 display_text = "Talk"
-dialogue_id = "dialogue.phase8.elder"
-npc_id = "npc.phase8.elder"
+dialogue_id = "dialogue.demo.elder"
+npc_id = "npc.demo.elder"
 
 [node name="Presentation" type="Node2D" parent="."]
 

@@ -1,0 +1,86 @@
+Split: 12 train, 8 test (holdout=0.4)
+
+============================================================
+Iteration 1/5
+Description: Engineering playbook for developing and maintaining the mkit Godot 4.7 / GDScript 2.0 game framework (a layered kernel + reusable gameplay modules for 2D RPG / roguelike games). Use this whenever working inside the mkit repo: adding or changing a gameplay system, module, action, effect, command, condition, entity, or service; writing or running GUT unit tests; updating docs/ref or specs; or reviewing a change for architecture / layering violations. Trigger even when the request never says "mkit" but it touches addons/mkit/, game/, GDScript (.gd / .tscn) files, the command -> action -> effect pipeline, ServiceRegistry, the Definition -> Instance -> Controller data model, or the "no hardcoded game content in the addon" rule. When in doubt while editing this repo, consult this skill rather than guessing the conventions.
+============================================================
+Train: 21/36 correct, precision=100% recall=17% accuracy=58% (95.3s)
+  [FAIL] rate=1/3 expected=True: scaffold a new dash action with startup / active / recovery 
+  [FAIL] rate=0/3 expected=True: how do I register a new service in game_bootstrap so other s
+  [FAIL] rate=0/3 expected=True: I changed AbilityController.cast() to take a GameplayContext
+  [FAIL] rate=1/3 expected=True: i've got a new boss with 500 hp and a fireball attack. where
+  [FAIL] rate=0/3 expected=True: i want to add a knockback effect that shoves the target back
+  [FAIL] rate=1/3 expected=True: add a unit test for the loot system that checks weighted rol
+  [PASS] rate=0/3 expected=False: help me set up a github actions CI workflow that runs the te
+  [PASS] rate=0/3 expected=False: i want to create a new skill that helps me organize and sear
+  [PASS] rate=0/3 expected=False: i'm starting a brand new Godot 4 platformer from scratch, ca
+  [PASS] rate=0/3 expected=False: how do I write unit tests in Unity with NUnit for my invento
+  [PASS] rate=0/3 expected=False: what's a good loot table drop-rate design for a mobile gacha
+  [PASS] rate=0/3 expected=False: i'm reading some GDScript someone wrote and i don't get what
+Test : 12/24 correct, precision=100% recall=0% accuracy=50% (0.0s)
+  [FAIL] rate=0/3 expected=True: can you review my dev branch? i'm paranoid i accidentally ad
+  [FAIL] rate=0/3 expected=True: i'm building a roguelite and want a poison status that ticks
+  [FAIL] rate=0/3 expected=True: crits in combat_resolver.gd are being applied before attack_
+  [FAIL] rate=0/3 expected=True: add a command for the player to interact with objects in the
+  [PASS] rate=0/3 expected=False: i have a python script that calls the anthropic API in a loo
+  [PASS] rate=0/3 expected=False: my Unreal Engine RPG needs a damage formula with crit chance
+  [PASS] rate=0/3 expected=False: explain how Godot's autoload singletons work in general and 
+  [PASS] rate=0/3 expected=False: write me a python script that walks a directory and strips a
+
+Improving description...
+Proposed (45.8s): Use for any development task inside the mkit codebase — a reusable Godot 4.7 / GDScript framework (layered kernel + gameplay modules) for 2D RPG/roguelike games, with the addon in addons/mkit/ and concrete games in game/. Trigger on "how do I add this / where does this go / how is it done here" questions touching: a new action, effect, condition, command, entity, or system; registering a service via ServiceRegistry or game_bootstrap; placing a boss/item/loot table without hardcoding content into the addon; the command→action→effect pipeline or Definition→Instance→Controller model; writing GUT unit tests for a module; or syncing docs/ref pages and specs after a code change. Applies even when the query never says "mkit" but clearly references its files, classes (e.g. AbilityController), or conventions. Do NOT use for generic Godot/GDScript syntax help, other engines, or game-design questions unrelated to this repo.
+
+============================================================
+Iteration 2/5
+Description: Use for any development task inside the mkit codebase — a reusable Godot 4.7 / GDScript framework (layered kernel + gameplay modules) for 2D RPG/roguelike games, with the addon in addons/mkit/ and concrete games in game/. Trigger on "how do I add this / where does this go / how is it done here" questions touching: a new action, effect, condition, command, entity, or system; registering a service via ServiceRegistry or game_bootstrap; placing a boss/item/loot table without hardcoding content into the addon; the command→action→effect pipeline or Definition→Instance→Controller model; writing GUT unit tests for a module; or syncing docs/ref pages and specs after a code change. Applies even when the query never says "mkit" but clearly references its files, classes (e.g. AbilityController), or conventions. Do NOT use for generic Godot/GDScript syntax help, other engines, or game-design questions unrelated to this repo.
+============================================================
+Train: 20/36 correct, precision=100% recall=11% accuracy=56% (83.9s)
+  [FAIL] rate=1/3 expected=True: how do I register a new service in game_bootstrap so other s
+  [FAIL] rate=0/3 expected=True: i've got a new boss with 500 hp and a fireball attack. where
+  [FAIL] rate=0/3 expected=True: scaffold a new dash action with startup / active / recovery 
+  [FAIL] rate=0/3 expected=True: I changed AbilityController.cast() to take a GameplayContext
+  [FAIL] rate=0/3 expected=True: i want to add a knockback effect that shoves the target back
+  [FAIL] rate=1/3 expected=True: add a unit test for the loot system that checks weighted rol
+  [PASS] rate=0/3 expected=False: help me set up a github actions CI workflow that runs the te
+  [PASS] rate=0/3 expected=False: i want to create a new skill that helps me organize and sear
+  [PASS] rate=0/3 expected=False: i'm starting a brand new Godot 4 platformer from scratch, ca
+  [PASS] rate=0/3 expected=False: how do I write unit tests in Unity with NUnit for my invento
+  [PASS] rate=0/3 expected=False: what's a good loot table drop-rate design for a mobile gacha
+  [PASS] rate=0/3 expected=False: i'm reading some GDScript someone wrote and i don't get what
+Test : 12/24 correct, precision=100% recall=0% accuracy=50% (0.0s)
+  [FAIL] rate=0/3 expected=True: crits in combat_resolver.gd are being applied before attack_
+  [FAIL] rate=0/3 expected=True: i'm building a roguelite and want a poison status that ticks
+  [FAIL] rate=0/3 expected=True: add a command for the player to interact with objects in the
+  [FAIL] rate=0/3 expected=True: can you review my dev branch? i'm paranoid i accidentally ad
+  [PASS] rate=0/3 expected=False: my Unreal Engine RPG needs a damage formula with crit chance
+  [PASS] rate=0/3 expected=False: i have a python script that calls the anthropic API in a loo
+  [PASS] rate=0/3 expected=False: explain how Godot's autoload singletons work in general and 
+  [PASS] rate=0/3 expected=False: write me a python script that walks a directory and strips a
+
+Improving description...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/dev/.agents/skills/skill-creator/scripts/run_loop.py", line 328, in <module>
+    main()
+    ~~~~^^
+  File "/Users/dev/.agents/skills/skill-creator/scripts/run_loop.py", line 293, in main
+    output = run_loop(
+        eval_set=eval_set,
+    ...<11 lines>...
+        log_dir=log_dir,
+    )
+  File "/Users/dev/.agents/skills/skill-creator/scripts/run_loop.py", line 199, in run_loop
+    new_description = improve_description(
+        skill_name=name,
+    ...<6 lines>...
+        iteration=iteration,
+    )
+  File "/Users/dev/.agents/skills/skill-creator/scripts/improve_description.py", line 144, in improve_description
+    text = _call_claude(prompt, model)
+  File "/Users/dev/.agents/skills/skill-creator/scripts/improve_description.py", line 44, in _call_claude
+    raise RuntimeError(
+        f"claude -p exited {result.returncode}\nstderr: {result.stderr}"
+    )
+RuntimeError: claude -p exited 1
+stderr: 

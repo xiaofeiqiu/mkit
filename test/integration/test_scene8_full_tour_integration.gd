@@ -105,7 +105,6 @@ func after_each() -> void:
 	IntTestHelpers.remove_file(SCENE8_S7_SAVE_PATH)
 	IntTestHelpers.remove_file(SCENE8_PLATFORM_SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
-	CombatResolver._default = null
 
 
 # S0: the real player scene already carries a command -> HFSM -> action -> hitbox
@@ -388,7 +387,7 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	request.target = beast
 	request.base_amount = 10.0
 	request.can_crit = false
-	var damage := CombatResolver.get_default().resolve(request)
+	var damage := (ServiceRegistry.get_service("combat") as CombatResolver).resolve(request)
 	assert_eq(damage.final_amount, 15.0)
 
 
@@ -1134,7 +1133,7 @@ func _resolve_damage(source: Node, target: Node) -> float:
 	request.target = target
 	request.base_amount = 10.0
 	request.can_crit = false
-	return CombatResolver.get_default().resolve(request).final_amount
+	return (ServiceRegistry.get_service("combat") as CombatResolver).resolve(request).final_amount
 
 
 func _disable_beast_ai(beast: Node) -> void:

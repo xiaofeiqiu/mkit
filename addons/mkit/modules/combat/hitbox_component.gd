@@ -61,10 +61,19 @@ func _try_hit(hurtbox: HurtboxComponent) -> void:
 	request.tags = hit_tags.duplicate()
 	request.tags.append_array(hurtbox.damage_tags)
 	request.on_hit_statuses = on_hit_statuses.duplicate()
-	var result := CombatResolver.get_default().resolve(request)
+	var result := _resolve_combat(request)
 	var health := target.get_node_or_null("Components/HealthComponent") as HealthComponent
 	if health != null:
 		health.apply_damage(result)
+
+
+func _resolve_combat(request: DamageRequest) -> DamageResult:
+	var resolver: CombatResolver = null
+	if ServiceRegistry.has_service("combat"):
+		resolver = ServiceRegistry.get_service("combat") as CombatResolver
+	if resolver == null:
+		resolver = CombatResolver.new()
+	return resolver.resolve(request)
 
 
 func _is_valid_target(target: Node) -> bool:

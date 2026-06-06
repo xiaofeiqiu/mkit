@@ -60,7 +60,6 @@ const STATUS_ID := "status.int.defense_down"
 
 func after_each() -> void:
 	IntTestHelpers.cleanup_service_registry()
-	CombatResolver._default = null
 
 
 func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:

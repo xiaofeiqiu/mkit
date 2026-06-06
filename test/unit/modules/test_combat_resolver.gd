@@ -287,13 +287,13 @@ func test_tc_cmbt_14_resolve_populates_trace() -> void:
 	assert_true(result.trace.has("after_defense"))
 
 
-# --- get_default singleton ---
+# --- combat service registration ---
 
 
-func test_tc_cmbt_15_get_default_returns_same_instance() -> void:
-	var r1 := CombatResolver.get_default()
-	var r2 := CombatResolver.get_default()
-	assert_eq(r1, r2)
+func test_tc_cmbt_15_combat_service_returns_registered_instance() -> void:
+	var registered := CombatResolver.new()
+	ServiceRegistry.register_service("combat", registered)
+	assert_eq(ServiceRegistry.get_service("combat") as CombatResolver, registered)
 
 
 # --- evade ---

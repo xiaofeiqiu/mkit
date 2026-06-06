@@ -1,12 +1,5 @@
 class_name CombatResolver
 extends RefCounted
-static var _default: CombatResolver = null
-
-
-static func get_default() -> CombatResolver:
-	if _default == null:
-		_default = CombatResolver.new()
-	return _default
 
 
 func resolve(request: DamageRequest) -> DamageResult:

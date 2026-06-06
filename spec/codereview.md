@@ -5,7 +5,7 @@
 | 编号 | 问题 | 优先级 | 状态 |
 |------|------|--------|------|
 | B1 | EffectExecutor/RandomService/TimeService 生命周期不一致 | P1 | ✅ 已完成 |
-| B2 | CombatResolver 静态单例绕过 ServiceRegistry | P1 | ☐ |
+| B2 | CombatResolver 静态单例绕过 ServiceRegistry | P1 | ✅ 已完成 |
 | B3 | AbilityController 越界访问 _recharge_duration | P2 | ☐ |
 | B4 | HealthComponent 鸭子类型 has_method | P2 | ☐ |
 | B5 | get_typed_resource 静默返回错误类型 | P0 | ☐ |

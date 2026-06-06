@@ -17,13 +17,13 @@ CombatResolver 是伤害结算规则引擎。它读取攻击者的攻击力、�
 ```gdscript
 class_name CombatResolver
 extends RefCounted
-static func get_default() -> CombatResolver
 func resolve(request: DamageRequest) -> DamageResult
 ```
 
+CombatResolver 是无生命周期的 RefCounted 服务，由 `GameBootstrap` 以服务 id `combat` 注册（与 `random`、`time`、`effects` 同属注册但不挂入节点树的服务）。调用方通过 `ServiceRegistry.get_service("combat")` 获取，统一走服务注册表，便于测试时 mock 或替换；在没有注册表的轻量上下文里可回退到 `CombatResolver.new()`。
+
 ## 函数使用场景
 
-- **`get_default()`**：获取全局默认 CombatResolver 单例，避免每次创建新实例。Hitbox、DealDamageEffect、测试代码都通过此方法获取 resolver。
 - **`resolve(request)`**：核心公开接口。按顺序：读取攻防属性、叠加 attack_power 和 damage_multiplier、掷暴击、扣防御，产出 final_amount，再调用 `_roll_on_hit_statuses` 掷状态附加概率。结算 trace 记录每个阶段的中间值，供 DebugOverlay 展示。
 - **`_roll_on_hit_statuses(request, result)`**：对 `request.on_hit_statuses` 中每项用 RandomService 掷概率；命中的状态写入 `result.applied_status_effects` 和 `result.status_applications`。闪避或格挡时跳过。
 
@@ -36,7 +36,8 @@ func deal_direct_damage(source: Node, target: Node, amount: float) -> void:
     request.target = target
     request.base_amount = amount
 
-    var result := CombatResolver.get_default().resolve(request)
+    var resolver := ServiceRegistry.get_service("combat") as CombatResolver
+    var result := resolver.resolve(request)
     var health := target.get_node("Components/HealthComponent") as HealthComponent
     health.apply_damage(result)
 ```

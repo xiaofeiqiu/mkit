@@ -24,8 +24,17 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	request.can_crit = can_crit
 	request.tags = hit_tags.duplicate()
 	request.on_hit_statuses = on_hit_statuses.duplicate()
-	var result := CombatResolver.get_default().resolve(request)
+	var result := _resolve_combat(request)
 	health.apply_damage(result)
 	return EffectResult.ok(
 		effect_id, {"final_amount": result.final_amount, "was_critical": result.was_critical}
 	)
+
+
+func _resolve_combat(request: DamageRequest) -> DamageResult:
+	var resolver: CombatResolver = null
+	if ServiceRegistry.has_service("combat"):
+		resolver = ServiceRegistry.get_service("combat") as CombatResolver
+	if resolver == null:
+		resolver = CombatResolver.new()
+	return resolver.resolve(request)

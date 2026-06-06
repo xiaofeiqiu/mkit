@@ -6,7 +6,7 @@ ObjectPool 是可复用场景实例池。负责预热、取出、归还投射物
 
 ## 设计目的
 
-通过复用节点实例减少高频 instantiate/queue_free 带来的性能开销。与 Godot 的 process_mode 配合实现节点激活和停用，并通过可选的 `on_pool_acquired` / `on_pool_released` 回调支持节点自定义重置逻辑。
+通过复用节点实例减少高频 instantiate/queue_free 带来的性能开销。与 Godot 的 process_mode 配合实现节点激活和停用；CanvasItem 节点 release 时会隐藏、acquire 时会显示，并通过可选的 `on_pool_acquired` / `on_pool_released` 回调支持节点自定义重置逻辑。
 
 ## 文件
 
@@ -26,8 +26,8 @@ func clear_pool(scene_path: String) -> void
 ## 函数使用场景
 
 - **warmup()**：预热对象池。例：进入战斗房前调用 `warmup("res://game/vfx/hit.tscn", 20)` 预创建 VFX 节点，避免战斗中第一次生成时的卡顿。
-- **acquire()**：取出实例。例：SpawnSceneEffect 从池中获取一个 fireball 场景实例，优先复用已有节点。
-- **release()**：归还实例。例：投射物命中目标或超出边界后调用 `release` 回到池中，不 queue_free。
+- **acquire()**：取出实例。例：SpawnSceneEffect 从池中获取一个 fireball 场景实例，优先复用已有节点；若节点是 CanvasItem，会恢复 visible。
+- **release()**：归还实例。例：投射物命中目标或超出边界后调用 `release` 回到池中，不 queue_free；若节点是 CanvasItem，会设置为不可见。
 - **clear_pool()**：清理特定场景的整个池。例：退出 run 时释放该 run 的临时 VFX 和 projectile 节点。
 
 ## 使用示例

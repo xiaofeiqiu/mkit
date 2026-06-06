@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/modules/room/room_controller.gd" id="1_room_controller"]
+[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_spawner.gd" id="2_entity_spawner"]
+
+[node name="TrialRoom03" type="Node2D"]
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = -80.0
+offset_top = -60.0
+offset_right = 760.0
+offset_bottom = 500.0
+color = Color(0.2, 0.16, 0.18, 1)
+
+[node name="RoomController" type="Node" parent="."]
+script = ExtResource("1_room_controller")
+enemy_container_path = NodePath("../Enemies")
+entity_spawner_path = NodePath("../EntitySpawner")
+reward_count = 3
+spawn_positions = Array[Vector2]([Vector2(300, 245), Vector2(440, 305), Vector2(560, 245)])
+
+[node name="EntitySpawner" type="Node" parent="."]
+script = ExtResource("2_entity_spawner")
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="RoomLabel" type="Label" parent="."]
+offset_left = 260.0
+offset_top = 90.0
+offset_right = 500.0
+offset_bottom = 116.0
+text = "Trial Chamber III"
+horizontal_alignment = 1

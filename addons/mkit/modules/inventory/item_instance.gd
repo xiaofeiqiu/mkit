@@ -18,13 +18,18 @@ static func create(def_id: String, qty: int = 1) -> ItemInstance:
 
 
 func to_save_data() -> Dictionary:
+	var affixes: Array = []
+	for modifier in rolled_affixes:
+		if modifier != null:
+			affixes.append(modifier.to_save_data())
 	return {
 		"instance_id": instance_id,
 		"definition_id": definition_id,
 		"quantity": quantity,
 		"durability": durability,
 		"upgrade_level": upgrade_level,
-		"metadata": metadata
+		"metadata": metadata,
+		"rolled_affixes": affixes
 	}
 
 
@@ -36,4 +41,8 @@ static func from_save_data(data: Dictionary) -> ItemInstance:
 	item.durability = float(data.get("durability", 1.0))
 	item.upgrade_level = int(data.get("upgrade_level", 0))
 	item.metadata = data.get("metadata", {})
+	item.rolled_affixes = []
+	for raw in data.get("rolled_affixes", []):
+		if raw is Dictionary:
+			item.rolled_affixes.append(StatModifier.from_save_data(raw))
 	return item

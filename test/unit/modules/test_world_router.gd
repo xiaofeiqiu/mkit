@@ -41,6 +41,7 @@ var events: EventRouter
 
 func before_each() -> void:
 	content = StubContent.new()
+	add_child_autofree(content)
 	scenes = StubSceneRouter.new()
 	add_child_autofree(scenes)
 	events = EventRouter.new()

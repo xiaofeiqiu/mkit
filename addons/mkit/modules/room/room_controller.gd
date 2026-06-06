@@ -21,7 +21,7 @@ func _ready() -> void:
 	var events: EventRouter = null
 	if ServiceRegistry.has_service("events"):
 		events = ServiceRegistry.get_service("events") as EventRouter
-	if events != null:
+	if events != null and not events.entity_died.is_connected(_on_entity_died):
 		events.entity_died.connect(_on_entity_died)
 
 

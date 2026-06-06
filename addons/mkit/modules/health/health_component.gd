@@ -1,5 +1,5 @@
 class_name HealthComponent
-extends Node
+extends SaveableComponent
 signal health_changed(current: float, max_value: float)
 signal damaged(result: DamageResult)
 signal healed(amount: float, source: Node)
@@ -86,6 +86,18 @@ func die(killer: Node = null) -> void:
 func revive(percent: float = 1.0) -> void:
 	dead = false
 	current_hp = get_max_hp() * clamp(percent, 0.0, 1.0)
+	health_changed.emit(current_hp, get_max_hp())
+
+
+func to_save_data() -> Dictionary:
+	return {"current_hp": current_hp, "dead": dead}
+
+
+func from_save_data(data: Dictionary) -> void:
+	dead = bool(data.get("dead", dead))
+	current_hp = clamp(float(data.get("current_hp", current_hp)), 0.0, get_max_hp())
+	if dead:
+		current_hp = 0.0
 	health_changed.emit(current_hp, get_max_hp())
 
 

@@ -2,6 +2,7 @@ class_name StatusEffectInstance
 extends RefCounted
 var instance_id: String = ""
 var definition_id: String = ""
+var source_id: String = ""
 var source: Node = null
 var target: Node = null
 var remaining_duration: float = 0.0
@@ -19,6 +20,7 @@ func setup(
 ) -> void:
 	instance_id = "%s_%d" % [definition.status_id, Time.get_ticks_usec()]
 	definition_id = definition.status_id
+	source_id = ""
 	source = source_entity
 	target = target_entity
 	stacks = initial_stacks

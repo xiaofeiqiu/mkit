@@ -5,6 +5,7 @@ extends Node
 var _timer: float = 0.0
 var command_router: CommandRouter = null
 var target: Node = null
+var blackboard: Blackboard = Blackboard.new()
 
 
 func _ready() -> void:

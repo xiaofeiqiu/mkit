@@ -114,3 +114,13 @@ func test_tc_sr_13_get_typed_returns_object_on_mismatch_with_warning() -> void:
 	var result: Object = reg.get_typed("thing", "EventRouter")
 	assert_eq(result, obj)
 	obj.free()
+
+
+func test_tc_sr_14_registered_service_ids_are_sorted() -> void:
+	var z := Node.new()
+	var a := Node.new()
+	reg.register_service("zeta", z)
+	reg.register_service("alpha", a)
+	assert_eq(reg.get_registered_service_ids(), ["alpha", "zeta"])
+	z.free()
+	a.free()

@@ -42,8 +42,8 @@ static func from_save_data(data: Dictionary) -> ItemInstance
 ## 函数使用场景
 
 - **`create(definition_id, quantity)`**：工厂方法，生成一个新的 ItemInstance，自动生成唯一 instance_id（基于微秒时间戳）。LootSystem 生成掉落、GrantItemEffect 创建物品时调用。
-- **`to_save_data()`**：将实例序列化为 Dictionary，包含 instance_id、definition_id、quantity、durability、upgrade_level 和 metadata，供 InventoryController.to_save_data() 调用。
-- **`from_save_data(data)`**：静态反序列化方法，从存档 Dictionary 恢复 ItemInstance，供 InventoryController.from_save_data() 调用。
+- **`to_save_data()`**：将实例序列化为 Dictionary，包含 instance_id、definition_id、quantity、durability、upgrade_level、metadata 和 rolled_affixes，供 InventoryController 与 EquipmentController 调用。
+- **`from_save_data(data)`**：静态反序列化方法，从存档 Dictionary 恢复 ItemInstance 和 rolled_affixes，供 InventoryController.from_save_data() 与 EquipmentController.from_save_data() 调用。
 
 ## 使用示例
 

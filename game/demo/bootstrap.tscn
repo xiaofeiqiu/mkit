@@ -1,7 +1,9 @@
-[gd_scene format=3 uid="uid://cyd166evfm55j"]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" uid="uid://emtv51pykxsy" path="res://addons/mkit/kernel/bootstrap/game_bootstrap.gd" id="1_boot"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/bootstrap/game_bootstrap.gd" id="1_boot"]
+[ext_resource type="Resource" path="res://game/demo/village_rpg/resources/village_rpg_content.tres" id="2_content"]
 
-[node name="Bootstrap" type="Node" unique_id=735270380]
+[node name="Bootstrap" type="Node"]
 script = ExtResource("1_boot")
-initial_scene_path = "res://game/demo/phase7_platform_slice.tscn"
+resource_databases = Array[Resource]([ExtResource("2_content")])
+initial_scene_path = "res://game/demo/village_rpg/village_rpg_demo.tscn"

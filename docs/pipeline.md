@@ -717,7 +717,3 @@ DebugOverlay watches target entity
   -> read EventRouter recent events
   -> render runtime debug text
 ```
-
-## Integration Coverage
-
-Integration coverage ownership is tracked in `spec/int-test.md` under `Full coverage verification ledger`. Any change that adds, removes, renames, or splits a `## ... Pipeline` section in this document must update that ledger and the affected suggested integration test file section in the same change.

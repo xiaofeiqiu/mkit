@@ -23,7 +23,7 @@ StatsComponent 是实体属性的计算组件。它保存基础属性、运行�
 
 ```gdscript
 class_name StatsComponent
-extends Node
+extends SaveableComponent
 signal stat_changed(stat_id: String, old_value: float, new_value: float)
 @export var base_stats: Dictionary = {
 var modifiers_by_stat: Dictionary = {}
@@ -37,6 +37,9 @@ func remove_modifiers_from_source(source_id: String) -> void
 func tick_modifiers(delta: float) -> void
 func mark_dirty(stat_id: String) -> void
 func mark_all_dirty() -> void
+func mark_save_baseline() -> void
+func to_save_data() -> Dictionary
+func from_save_data(data: Dictionary) -> void
 ```
 
 ## 函数使用场景
@@ -48,6 +51,8 @@ func mark_all_dirty() -> void
 - **`remove_modifiers_from_source(source_id)`**：移除所有来源为 source_id 的 modifier，适用于装备卸下（按 instance_id）或状态效果过期（按 instance_id）。
 - **`tick_modifiers(delta)`**：每帧推进有时限 modifier 的剩余时间，过期的 modifier 自动移除并触发 stat_changed。通常在实体的 `_process` 或状态的 `update` 中调用。
 - **`mark_dirty(stat_id)` / `mark_all_dirty()`**：标记属性需要重新计算，在外部直接修改 base_stats 后手动调用。
+- **`mark_save_baseline()`**：记录当前 base_stats 作为存档基线。EntitySpawner 将 EntityDefinition.base_stats 写入后调用它，避免静态定义属性被误存为运行时 override。
+- **`to_save_data()` / `from_save_data(data)`**：作为 SaveableComponent 序列化 `{ base_overrides, persistent_modifiers }`。读档时先恢复 `mark_save_baseline()` 记录的基础属性基线，再应用 saved override，并用存档中的永久 modifier 替换当前 modifier；状态效果产生的临时 modifier 不写入 Stats payload，读档时由 StatusEffectController 重新挂载，避免重复叠加。
 
 ## 使用示例
 

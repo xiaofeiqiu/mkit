@@ -22,7 +22,7 @@ InventoryController 是实体背包操作的场景控制器。它连接拾取、
 
 ```gdscript
 class_name InventoryController
-extends Node
+extends SaveableComponent
 signal inventory_changed
 signal item_added(item: ItemInstance)
 signal item_removed(item: ItemInstance)
@@ -45,7 +45,7 @@ func from_save_data(data: Dictionary) -> void
 - **`add_item(item)`**：执行添加，先确认整批数量能放下，放不下则原子失败返回 false 且不改动任何槽位；能放下时优先堆叠到已有槽位，超过 max_stack 则开新格子，全部放入后返回 true，并发出 `item_added` 和 `inventory_changed` 信号（以及携带 item_id、quantity、change_type 的 EventRouter.inventory_changed）。
 - **`remove_item_by_instance_id(instance_id, quantity)`**：按 instance_id 查找并减少数量，归零时清空槽位并发出 `item_removed`。使用消耗品、丢弃物品时调用，并发出携带移除物品信息的 EventRouter.inventory_changed。
 - **`find_item(instance_id)`**：按 instance_id 在所有槽位中查找 ItemInstance，供装备系统或任务系统检查特定物品是否在背包中。
-- **`to_save_data()` / `from_save_data(data)`**：序列化和反序列化所有槽位的物品数据，供 Saveable 接口或 SaveManager 使用。
+- **`to_save_data()` / `from_save_data(data)`**：作为 SaveableComponent 序列化和反序列化所有槽位的物品数据，供实体快照使用。
 
 ## 使用示例
 

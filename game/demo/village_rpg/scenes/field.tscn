@@ -1,0 +1,73 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
+[ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
+
+[sub_resource type="CircleShape2D" id="CircleShape_field_exit"]
+radius = 52.0
+
+[node name="Field" type="Node2D"]
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = -80.0
+offset_top = -60.0
+offset_right = 760.0
+offset_bottom = 500.0
+color = Color(0.19, 0.36, 0.36, 1)
+
+[node name="FieldEntry" type="Marker2D" parent="."]
+position = Vector2(160, 280)
+script = ExtResource("1_spawn")
+spawn_id = "field_entry"
+
+[node name="ToVillage" type="Area2D" parent="."]
+position = Vector2(160, 280)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToVillage"]
+shape = SubResource("CircleShape_field_exit")
+
+[node name="Interactable" type="Node" parent="ToVillage"]
+script = ExtResource("2_portal")
+interaction_id = "portal.demo.field_to_village"
+display_text = "Return to village"
+target_zone_id = "zone.demo.village"
+target_spawn_id = "from_field"
+
+[node name="GateLabel" type="Label" parent="."]
+offset_left = 92.0
+offset_top = 316.0
+offset_right = 228.0
+offset_bottom = 340.0
+text = "Village Gate (G)"
+horizontal_alignment = 1
+
+[node name="FieldBeastSpawn" type="Marker2D" parent="."]
+position = Vector2(470, 240)
+
+[node name="FightLabel" type="Label" parent="."]
+offset_left = 390.0
+offset_top = 168.0
+offset_right = 550.0
+offset_bottom = 192.0
+text = "Defeat beast (K)"
+horizontal_alignment = 1
+
+[node name="TrialCave" type="Marker2D" parent="."]
+position = Vector2(650, 135)
+
+[node name="CaveMouth" type="ColorRect" parent="."]
+offset_left = 610.0
+offset_top = 88.0
+offset_right = 700.0
+offset_bottom = 160.0
+color = Color(0.12, 0.1, 0.16, 1)
+
+[node name="TrialLabel" type="Label" parent="."]
+offset_left = 570.0
+offset_top = 166.0
+offset_right = 740.0
+offset_bottom = 190.0
+text = "Trial Cave (C)"
+horizontal_alignment = 1

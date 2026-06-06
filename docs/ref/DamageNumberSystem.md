@@ -16,6 +16,8 @@ DamageNumberSystem 是伤害数字显示系统。它生成伤害数字 UI/Node2D
 
 - **damage_number_scene_path**：伤害数字场景路径。例：指向 FloatingDamageNumber.tscn。
 - **default_offset**：显示偏移。例：数字从敌人头顶上方弹出。
+- **use_pool**：是否通过 `"pool"` 服务复用伤害数字实例。默认 false，保持直接实例化行为。
+- **auto_release_seconds**：启用对象池时自动归还实例的时间；为 0 时由外部手动管理生命周期。
 
 ## 接口
 
@@ -24,12 +26,14 @@ class_name DamageNumberSystem
 extends Node
 @export var damage_number_scene_path: String = ""
 @export var default_offset: Vector2 = Vector2(0, -24)
+@export var use_pool: bool = false
+@export var auto_release_seconds: float = 0.0
 func show_number(position: Vector2, amount: float, critical: bool = false) -> Node
 ```
 
 ## 函数使用场景
 
-- **`show_number(position, amount, critical)`**：加载 `damage_number_scene_path` 的 PackedScene，实例化后设置 global_position（含 default_offset），若节点有 `setup(amount, critical)` 方法则调用传入数值和暴击标志。FeedbackSystem 在收到 DamageResult 后调用此方法。damage_number_scene_path 为空或场景不存在时返回 null，不影响战斗结算。
+- **`show_number(position, amount, critical)`**：加载 `damage_number_scene_path` 的 PackedScene，实例化后设置 global_position（含 default_offset），若节点有 `setup(amount, critical)` 方法则调用传入数值和暴击标志。`use_pool=true` 且 `"pool"` 服务存在时会通过 ObjectPool acquire，并在 `auto_release_seconds` 后 release。damage_number_scene_path 为空或场景不存在时返回 null，不影响战斗结算。
 
 ## 使用示例
 

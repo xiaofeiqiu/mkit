@@ -1,5 +1,5 @@
 class_name AbilityController
-extends Node
+extends SaveableComponent
 signal ability_registered(ability_id: String)
 signal ability_cast_started(ability_id: String)
 signal ability_cast_finished(ability_id: String)
@@ -132,6 +132,50 @@ func get_definition(ability_id: String) -> AbilityDefinition:
 	return content.get_resource(ability_id) as AbilityDefinition
 
 
+func to_save_data() -> Dictionary:
+	var learned: Array[String] = []
+	var cooldowns: Dictionary = {}
+	var charges: Dictionary = {}
+	var recharge_durations: Dictionary = {}
+	for ability_id in abilities.keys():
+		var key := str(ability_id)
+		learned.append(key)
+		var instance := abilities[key] as AbilityInstance
+		if instance != null and instance.cooldown_remaining > 0.0:
+			cooldowns[key] = instance.cooldown_remaining
+		if instance != null:
+			charges[key] = instance.current_charges
+			if instance._recharge_duration > 0.0:
+				recharge_durations[key] = instance._recharge_duration
+	learned.sort()
+	return {"learned": learned, "cooldowns": cooldowns, "charges": charges, "recharge_durations": recharge_durations}
+
+
+func from_save_data(data: Dictionary) -> void:
+	abilities.clear()
+	for ability_id in data.get("learned", []):
+		register_ability(str(ability_id))
+	var cooldowns: Dictionary = data.get("cooldowns", {})
+	for ability_id in cooldowns.keys():
+		var key := str(ability_id)
+		if abilities.has(key):
+			var instance := abilities[key] as AbilityInstance
+			if instance != null:
+				var remaining := max(0.0, float(cooldowns[ability_id]))
+				instance.cooldown_remaining = remaining
+				instance._recharge_duration = _restore_recharge_duration(key, data, remaining)
+				if remaining > 0.0:
+					instance.current_charges = 0
+	var charges: Dictionary = data.get("charges", {})
+	for ability_id in charges.keys():
+		var key := str(ability_id)
+		if abilities.has(key):
+			var instance := abilities[key] as AbilityInstance
+			var definition := get_definition(key)
+			if instance != null and definition != null:
+				instance.current_charges = clampi(int(charges[ability_id]), 0, max(1, definition.charges))
+
+
 func _execute_ability_effects(definition: AbilityDefinition, context: GameplayContext) -> void:
 	if definition == null:
 		push_error("AbilityController._execute_ability_effects: definition is null")
@@ -145,6 +189,18 @@ func _execute_ability_effects(definition: AbilityDefinition, context: GameplayCo
 	if executor == null:
 		executor = EffectExecutor.new()
 	executor.execute_many(definition.effects, context)
+
+
+func _restore_recharge_duration(
+	ability_id: String, data: Dictionary, fallback_remaining: float
+) -> float:
+	var recharge_durations: Dictionary = data.get("recharge_durations", {})
+	if recharge_durations.has(ability_id):
+		return max(0.0, float(recharge_durations[ability_id]))
+	var definition := get_definition(ability_id)
+	if definition != null and fallback_remaining > 0.0:
+		return max(0.0, definition.cooldown)
+	return 0.0
 
 
 func _start_cooldown(instance: AbilityInstance, definition: AbilityDefinition) -> void:

@@ -1,6 +1,10 @@
 extends GutTest
 
 
+const STATS_SCENE_PATH := "res://test/unit/modules/tmp_entity_spawner_stats_probe.tscn"
+const COMMAND_SCENE_PATH := "res://test/unit/modules/tmp_entity_spawner_command_probe.tscn"
+
+
 class StubContent:
 	extends ContentRegistry
 	var _defs: Dictionary = {}
@@ -27,6 +31,7 @@ var parent_node: Node
 
 func before_each() -> void:
 	content = StubContent.new()
+	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
 	spawner = EntitySpawner.new()
 	add_child_autofree(spawner)
@@ -36,6 +41,10 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	_remove_file(STATS_SCENE_PATH)
+	_remove_file("%s.uid" % STATS_SCENE_PATH)
+	_remove_file(COMMAND_SCENE_PATH)
+	_remove_file("%s.uid" % COMMAND_SCENE_PATH)
 	ServiceRegistry.clear()
 
 
@@ -87,4 +96,82 @@ func test_tc_es_05_missing_content_service_emits_spawn_failed() -> void:
 	assert_null(result)
 	assert_signal_emitted(spawner, "entity_spawn_failed")
 
-# TC-ES-06 through TC-ES-10 require a real PackedScene on disk — integration only, skipped here.
+
+func test_tc_es_06_spawned_definition_base_stats_are_save_baseline() -> void:
+	_save_stats_scene()
+	var definition := _make_def("stat_entity", STATS_SCENE_PATH)
+	definition.base_stats = {"max_hp": 44.0, "attack_power": 12.0}
+	content._defs["stat_entity"] = definition
+	var entity := spawner.spawn_entity("stat_entity", parent_node)
+	assert_not_null(entity)
+	var stats := entity.get_node("Components/StatsComponent") as StatsComponent
+	assert_eq(stats.get_stat_value("max_hp"), 44.0)
+	assert_eq(stats.get_stat_value("attack_power"), 12.0)
+	var data := stats.to_save_data()
+	assert_true((data["base_overrides"] as Dictionary).is_empty())
+
+
+func test_tc_es_07_spawned_command_receiver_tracks_runtime_identity() -> void:
+	_save_command_scene()
+	var router := CommandRouter.new()
+	add_child_autofree(router)
+	ServiceRegistry.register_service("commands", router)
+	var definition := _make_def("command_entity", COMMAND_SCENE_PATH)
+	content._defs["command_entity"] = definition
+	var entity := spawner.spawn_entity("command_entity", parent_node, Vector2.ZERO, "runtime.command.001")
+	assert_not_null(entity)
+	var identity := entity.get_node("EntityIdentity") as EntityIdentity
+	var receiver := entity.get_node("CommandReceiver") as CommandReceiver
+	assert_eq(identity.entity_id, "runtime.command.001")
+	assert_eq(receiver.receiver_id, identity.entity_id)
+	assert_true(router._receivers.has(identity.entity_id))
+	assert_false(router._receivers.has("scene.command.static"))
+
+
+func _save_stats_scene() -> void:
+	var entity := Node.new()
+	entity.name = "StatsEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	entity.add_child(identity)
+	var components := Node.new()
+	components.name = "Components"
+	entity.add_child(components)
+	var stats := StatsComponent.new()
+	stats.name = "StatsComponent"
+	components.add_child(stats)
+	_assign_owner(entity, entity)
+	var scene := PackedScene.new()
+	assert_eq(scene.pack(entity), OK)
+	assert_eq(ResourceSaver.save(scene, STATS_SCENE_PATH), OK)
+	entity.free()
+
+
+func _save_command_scene() -> void:
+	var entity := Node.new()
+	entity.name = "CommandEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = "scene.command.static"
+	entity.add_child(identity)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	receiver.receiver_id = "scene.command.static"
+	entity.add_child(receiver)
+	_assign_owner(entity, entity)
+	var scene := PackedScene.new()
+	assert_eq(scene.pack(entity), OK)
+	assert_eq(ResourceSaver.save(scene, COMMAND_SCENE_PATH), OK)
+	entity.free()
+
+
+func _assign_owner(node: Node, owner_node: Node) -> void:
+	for child in node.get_children():
+		child.owner = owner_node
+		_assign_owner(child, owner_node)
+
+
+func _remove_file(path: String) -> void:
+	if not FileAccess.file_exists(path):
+		return
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))

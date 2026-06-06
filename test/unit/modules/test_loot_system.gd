@@ -60,6 +60,7 @@ var ctx: GameplayContext
 func before_each() -> void:
 	loot = LootSystem.new()
 	content = StubContent.new()
+	add_child_autofree(content)
 	rng = FixedRandom.new()
 	ctx = GameplayContext.new()
 	ServiceRegistry.register_service("content", content)

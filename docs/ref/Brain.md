@@ -18,6 +18,7 @@ Brain 是 AI 决策组件的基类。它观察局势并发出命令，而不是�
 - **think_interval**：时间相关字段。例：控制持续时间、tick 间隔或动作阶段，便于暂停、调试和调参。
 - **command_router**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **target**：玩法目标节点。例：HealEffect 的 target 是玩家，DealDamageEffect 的 target 是被命中的敌人。
+- **blackboard**：短期行为记忆。例：SimpleAIEnemyBrain 记录当前 target、intent、distance 和 move_direction，测试或 DebugOverlay 可读取 AI 决策。
 
 ## 接口
 
@@ -28,6 +29,7 @@ extends Node
 @export var think_interval: float = 0.2
 var command_router: CommandRouter = null
 var target: Node = null
+var blackboard: Blackboard = Blackboard.new()
 func think() -> void
 func issue_command(command_type: String, payload: Dictionary = {}) -> bool
 ```

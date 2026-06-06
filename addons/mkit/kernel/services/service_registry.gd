@@ -50,6 +50,14 @@ func get_typed(service_id: String, expected_class_name: String) -> Object:
 	return service
 
 
+func get_registered_service_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for service_id in _services.keys():
+		ids.append(str(service_id))
+	ids.sort()
+	return ids
+
+
 func unregister_service(service_id: String) -> void:
 	if service_id.strip_edges() == "":
 		push_warning("ServiceRegistry.unregister_service: service_id is empty")

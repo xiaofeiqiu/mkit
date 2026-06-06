@@ -24,6 +24,7 @@ var progression: ProgressionSystem
 
 func before_each() -> void:
 	content = StubContent.new()
+	add_child_autofree(content)
 	events = EventRouter.new()
 	add_child_autofree(events)
 	progression = ProgressionSystem.new()

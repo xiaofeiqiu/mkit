@@ -382,10 +382,12 @@
       "AbilityController",
       "AbilityDefinition",
       "AbilityInstance",
+      "AcceptQuestEffect",
       "ActionContext",
       "ActionRunner",
       "AdService",
       "AdServiceMock",
+      "AdvanceObjectiveEffect",
       "AnalyticsService",
       "AnalyticsServiceMock",
       "ApplyStatModifierEffect",
@@ -400,6 +402,7 @@
       "CombatResolver",
       "CommandReceiver",
       "CommandRouter",
+      "CompleteQuestEffect",
       "Condition",
       "ConditionEvaluator",
       "ContentRegistry",
@@ -411,6 +414,13 @@
       "DashAction",
       "DealDamageEffect",
       "DebugOverlay",
+      "DialogueChoice",
+      "DialogueController",
+      "DialogueDefinition",
+      "DialogueInteractable",
+      "DialogueNode",
+      "DialogueRuntime",
+      "DialogueUI",
       "DomainEvent",
       "DungeonGenerator",
       "EffectExecutor",
@@ -449,8 +459,15 @@
       "LootSystem",
       "LootTableDefinition",
       "ObjectPool",
+      "Portal",
       "ProgressionState",
       "ProgressionSystem",
+      "QuestDefinition",
+      "QuestLog",
+      "QuestLogUI",
+      "QuestObjectiveDefinition",
+      "QuestState",
+      "QuestSystem",
       "RandomService",
       "ResourceDatabase",
       "ResourcePoolComponent",
@@ -468,9 +485,15 @@
       "SaveManager",
       "SaveMigration",
       "Saveable",
+      "SaveableComponent",
       "SceneRouter",
       "ServiceRegistry",
+      "ShopController",
+      "ShopDefinition",
+      "ShopEntry",
+      "ShopUI",
       "SimpleAIEnemyBrain",
+      "SpawnPoint",
       "SpawnSceneEffect",
       "StatDefinition",
       "StatModifier",
@@ -486,7 +509,9 @@
       "TimedAttackAction",
       "UIManager",
       "UpgradeDefinition",
-      "VFXSpawner"
+      "VFXSpawner",
+      "WorldRouter",
+      "ZoneDefinition"
     ];
 
     const navGroups = [
@@ -494,7 +519,8 @@
         title: "Overview",
         items: [
           { title: "Mkit Documentation", path: "readme.md" },
-          { title: "Pipeline", path: "pipeline.md" }
+          { title: "Pipeline", path: "pipeline.md" },
+          { title: "Demo Testing Guide", path: "demo_testing.md" }
         ]
       },
       {

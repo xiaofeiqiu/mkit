@@ -73,6 +73,11 @@ var router := ServiceRegistry.get_service("commands") as CommandRouter
 
 Service ids include: `events`, `content`, `random`, `time`, `actions`, `effects`, `commands`, `scenes`, `pool`, `save`, `progression`, `analytics`, `ads`, `iap`, `cloud_save`. The platform services (`analytics`, `ads`, `iap`, `cloud_save`) are currently **mock implementations** (`*_service_mock.gd`) behind real interfaces — wire real SDKs by swapping the implementation, not the interface.
 
+Services come in two deliberate flavors — pick by behavior, not by habit:
+
+- **Node services** are `extends Node`, added to the `ServiceRegistry` tree with `add_child` in `game_bootstrap.gd`, and registered. Use this when the service needs scene-tree lifecycle — `_process`/`_physics_process`, signals, or timers (e.g. `EventRouter`, `ActionRunner`, `CommandRouter`, `SceneRouter`, `SaveManager`).
+- **RefCounted services** are `extends RefCounted`, registered but *not* added to the tree. Use this for lightweight, lifecycle-free state or pure logic with no per-frame tick — `RandomService` (RNG state), `TimeService` (time scale/pause), `EffectExecutor` (stateless executor + a bounded trace buffer). These may be freely `new()`'d as an on-demand fallback or a test fixture without a tree (e.g. `AbilityController` / `RewardSystem` fall back to `EffectExecutor.new()` when no `effects` service is registered) — do **not** convert them to `Node`, as that would orphan those call sites. Any retained buffer must stay bounded and offer a reset (e.g. `EffectExecutor.clear_recent_results()`).
+
 ### Entity node-layout convention
 
 Entities are scene trees with a fixed child layout, and modules locate their siblings via hardcoded relative paths from `owner`. When building or modifying an entity, preserve this layout:

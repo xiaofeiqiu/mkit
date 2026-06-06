@@ -25,6 +25,10 @@ func execute_many(
 	return results
 
 
+func clear_recent_results() -> void:
+	recent_results.clear()
+
+
 func _record_result(result: EffectResult) -> void:
 	if not trace_enabled:
 		return

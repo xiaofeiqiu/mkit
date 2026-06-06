@@ -18,7 +18,16 @@ the real result before claiming success.
 make ut            # full suite: kernel + modules
 make ut-kernel     # kernel only  (test/unit/kernel)
 make ut-modules    # modules only (test/unit/modules)
+make int           # integration  (test/integration)
+make reimport      # rebuild Godot's import / global-class cache (rarely needed by hand)
 ```
+
+`ut`, `ut-kernel`, `ut-modules`, and `int` each depend on `reimport`, which runs
+`$GODOT --headless --import` (and clears `test/integration/tmp_mkit_int_*.tscn`
+debris) **before** the suite. That guarantees every `make` run starts from a fresh
+`.godot` cache, so a previously crashed run can't leave a stale cache that breaks
+the next one (see Debugging). The **direct `-gtest` form below skips this** — if it
+hits cache cascades, run `make reimport` first.
 
 The engine binary comes from the `GODOT` env var (the Makefile defaults to the
 macOS app path). This is a **Godot 4.7-dev** project — point `GODOT` at a matching
@@ -130,10 +139,26 @@ rely on.
 ## Debugging a failing test
 
 1. Re-run just that test with `-gunit_test_name=` to tighten the loop.
-2. A `Parse Error` / "class not found" usually means a wrong type name or a
-   missing `.uid` — run `make ut` once to let Godot reimport and generate `.uid`
-   files (see `references/conventions.md`).
+2. A `Parse Error` / "class not found" for **one** type usually means a wrong type
+   name or a missing `.uid` — run `make ut` once to let Godot reimport and generate
+   `.uid` files (see `references/conventions.md`).
 3. If GUT itself won't start, the `GODOT` binary likely isn't a 4.7 build.
 4. Flaky output across runs almost always means an un-stubbed `RandomService` or
    leaked global state — confirm `after_each()` clears the registry and that
    rolls are stubbed.
+5. **Cascading `Parse Error: Could not parse global class "StatsComponent"/
+   "HealthComponent"/…` across many module classes, and/or `Nonexistent function
+   '…' in base 'GDScript'` for `IntTestHelpers` calls = a corrupted `.godot`
+   import / global-class cache, not a code bug.** Tells: git is clean and the same
+   files passed minutes earlier; it follows a crashed/interrupted run (leaked
+   ObjectDB/RID + `Error 1`); `IntTestHelpers` references those classes, so when
+   they fail to resolve the whole helper fails to compile and all its `static
+   func`s "vanish". The `make` targets now fix this automatically (they run
+   `reimport` first); for a direct `-gtest` run, do `make reimport` — or
+   `$GODOT --headless --import` — and re-run. A plain re-run of GUT may NOT clear
+   it; the explicit `--import` does.
+6. **Trust the count, not just the color.** A *stale* cache can make GUT print
+   "All tests passed" with **fewer scripts than normal** — degraded scripts fail to
+   *load* and are silently skipped instead of failing. Baselines: kernel ~7 scripts
+   / ~104 tests, modules ~16 / ~216, integration 12 / 46. A dropped count is a
+   failure; rebuild the cache (step 5) and re-run.

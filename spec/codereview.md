@@ -1,5 +1,28 @@
 # mkit 全面代码审核
 
+## 进度追踪
+
+| 编号 | 问题 | 优先级 | 状态 |
+|------|------|--------|------|
+| B1 | EffectExecutor/RandomService/TimeService 生命周期不一致 | P1 | ✅ 已完成 |
+| B2 | CombatResolver 静态单例绕过 ServiceRegistry | P1 | ☐ |
+| B3 | AbilityController 越界访问 _recharge_duration | P2 | ☐ |
+| B4 | HealthComponent 鸭子类型 has_method | P2 | ☐ |
+| B5 | get_typed_resource 静默返回错误类型 | P0 | ☐ |
+| R1 | ActionRunner 每帧重查 TimeService | P3 | ☐ |
+| R2 | EventRouter damage_applied 无类型参数 | P2 | ☐ |
+| R3 | StatsComponent 核心集合无类型标注 | P2 | ☐ |
+| R4 | RunDirector 内联实例化工具类（明确约定即可） | P3 | ☐ |
+| R5 | `_initialize_runtime_systems` 空方法 | P4 | ☐ |
+| S1 | ContentRegistry _extract_content_id OCP 违反 | P1 | ☐ |
+| S2 | RunDirector 职责过多 | P3 | ☐ |
+| S3 | ProgressionSystem 继承链不一致 | P3 | ☐ |
+| S4 | HIGHEST_ONLY/LOWEST_ONLY 枚举有名无实 | P0 | ☐ |
+
+---
+
+
+
 **范围：** `addons/mkit/` 全量 addon 代码（kernel + modules）  
 **版本：** main 分支（2026-06-06）  
 **关注点：** 功能边界清晰度 · 代码简洁性 · SOLID 原则合规性

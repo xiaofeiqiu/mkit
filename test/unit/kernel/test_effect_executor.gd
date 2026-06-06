@@ -64,6 +64,15 @@ func test_tc_ee_06_recent_results_capped_at_max() -> void:
 	assert_eq(executor.recent_results.size(), 3)
 
 
+func test_tc_ee_06b_clear_recent_results_empties_buffer() -> void:
+	executor.trace_enabled = true
+	for i in 3:
+		executor.execute(OkEffect.new(), ctx)
+	assert_eq(executor.recent_results.size(), 3)
+	executor.clear_recent_results()
+	assert_eq(executor.recent_results.size(), 0)
+
+
 # --- execute_many ---
 
 

@@ -6,4 +6,4 @@
 [node name="Bootstrap" type="Node"]
 script = ExtResource("1_boot")
 resource_databases = Array[Resource]([ExtResource("2_content")])
-initial_scene_path = "res://game/demo/phase8_village_rpg.tscn"
+initial_scene_path = "res://game/demo/phase8/phase8_village_rpg.tscn"

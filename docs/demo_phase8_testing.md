@@ -2,7 +2,7 @@
 
 ## 测试目标
 
-`res://game/demo/bootstrap_phase8.tscn` 启动 `res://game/demo/phase8_village_rpg.tscn`，用于验证一个完整但很小的 RPG loop 是否能通过 Mkit runtime 串起来。它不是 addon 的可复用接口测试，而是 concrete game content 和多条 module pipeline 的集成冒烟测试。
+`res://game/demo/bootstrap_phase8.tscn` 启动 `res://game/demo/phase8/phase8_village_rpg.tscn`，用于验证一个完整但很小的 RPG loop 是否能通过 Mkit runtime 串起来。它不是 addon 的可复用接口测试，而是 concrete game content 和多条 module pipeline 的集成冒烟测试。
 
 这个 scene 需要覆盖的主路径：
 
@@ -25,7 +25,7 @@ Bootstrap content
   -> HUD and event log
 ```
 
-测试时始终从 `bootstrap_phase8.tscn` 进入。直接打开 `phase8_village_rpg.tscn` 只适合看布局，因为核心服务和 `phase8_rpg_content.tres` 是由 `GameBootstrap` 注册的。
+测试时始终从 `bootstrap_phase8.tscn` 进入。直接打开 `phase8/phase8_village_rpg.tscn` 只适合看布局，因为核心服务和 `phase8_rpg_content.tres` 是由 `GameBootstrap` 注册的。
 
 ## 自动冒烟
 
@@ -361,7 +361,7 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=res://test/integration/test_
 
 ## 常见失败定位
 
-`[WORLD] service missing` 或多个 service missing：通常是直接跑了 `phase8_village_rpg.tscn`，改用 `bootstrap_phase8.tscn`。
+`[WORLD] service missing` 或多个 service missing：通常是直接跑了 `phase8/phase8_village_rpg.tscn`，改用 `bootstrap_phase8.tscn`。
 
 `[WORLD] could not enter zone.phase8.*`：检查 zone 是否注册进 `phase8_rpg_content.tres`，以及 `scene_path` 是否存在。
 

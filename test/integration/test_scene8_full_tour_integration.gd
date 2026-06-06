@@ -3,7 +3,7 @@ extends GutTest
 
 const PLAYER_SCENE := "res://game/demo/entities/player/player.tscn"
 const BEAST_SCENE := "res://game/demo/phase8/entities/field_beast.tscn"
-const PHASE8_SCENE := "res://game/demo/phase8_village_rpg.tscn"
+const PHASE8_SCENE := "res://game/demo/phase8/phase8_village_rpg.tscn"
 const FIELD_SCENE := "res://game/demo/phase8/scenes/field.tscn"
 const CONTENT_DB := "res://game/demo/phase8/resources/phase8_rpg_content.tres"
 const PLAYER_ID := "player_001"

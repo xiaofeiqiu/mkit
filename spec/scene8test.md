@@ -15,9 +15,9 @@
 - [x] **S8** — 平台服务钩子(Analytics / Ads / IAP / CloudSave,8 类)
 - [x] **S9** — 表现层 + 运行时工具(DamageNumber / VFX / SpawnScene / Feedback / UIManager / Debug / Pool / Time,8 类)
 - [x] **S10** — 收尾:就近交互 / 手动任务 effect / 冲刺(`InteractionComponent` / `AdvanceObjectiveEffect` / `CompleteQuestEffect` / `DashAction`,4 类)
-- [ ] **S11** — 退役 phase0–7,demo 收敛到唯一入口(`bootstrap_phase8` / `project.godot` 主场景)
+- [x] **S11** — 退役 phase0–7,demo 收敛到唯一入口(`bootstrap_phase8` / `project.godot` 主场景)
 
-覆盖账:当前 ✅ **132 / 132** 类;S0–S10 已全部接入并断言,零豁免。下一步仅剩 S11 demo 入口收敛与旧 phase 退役。
+覆盖账:当前 ✅ **132 / 132** 类;S0–S11 已全部接入并断言,零豁免。phase8 已收敛为唯一 demo 入口。
 
 ---
 
@@ -32,7 +32,7 @@
 
 相关文件:
 
-- 场景:`game/demo/phase8_village_rpg.tscn` + `.gd`,子场景 `game/demo/phase8/scenes/{village,village_room,field}.tscn`
+- 场景:`game/demo/phase8/phase8_village_rpg.tscn` + `.gd`,子场景 `game/demo/phase8/scenes/{village,village_room,field}.tscn`
 - 实体:`game/demo/phase8/entities/{npc_elder,field_beast}.tscn`、`game/demo/entities/player/player.tscn`
 - 内容:`game/demo/phase8/resources/phase8_rpg_content.tres`(单一 `ResourceDatabase`)
 - 引导:`game/demo/bootstrap_phase8.tscn`(`GameBootstrap` + 上面这份内容库)
@@ -158,7 +158,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
   `effects=[DealDamageEffect, ApplyStatusEffect(status.phase8.burn)]`。
 - **player.tscn:** 保持 generic,不默认学习具体 phase ability;`player_input_reader.gd`
   的 `cast_ability_id` 默认为空,由具体 phase scene override。
-- **phase8_village_rpg.tscn:** 通过 `Player/Controllers/AbilityController.starting_ability_ids`
+- **phase8/phase8_village_rpg.tscn:** 通过 `Player/Controllers/AbilityController.starting_ability_ids`
   与 `Player/InputReader.cast_ability_id` override 绑定 `ability.phase8.firebolt`。
 - **场景:** 新增按键 `F` / auto-run cast 朝 beast;`ResourcePoolComponent.starting_values.mana` 已有。
 - **测试:** cast 成功扣 mana、`cooldown_started` 触发、再次 cast 因 `on_cooldown` 失败;
@@ -240,7 +240,7 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 - **测试:** 存→改状态→读后,技能 cooldown/charges、burn status、装备、背包、stats、mana 全部恢复;
   migration 把旧版本字段补齐。已由 `test_scene8_full_tour_integration` 的 S7 用例覆盖组件级 round-trip。
 
-### S8 — 平台服务钩子(参考 `phase7_platform_slice.gd`)
+### S8 — 平台服务钩子
 
 **新覆盖(8):** `AnalyticsService(+Mock)` `AdService(+Mock)` `IAPService(+Mock)` `CloudSaveService(+Mock)`。
 
@@ -298,17 +298,18 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 | `phase6_experience_slice` | 经验 / 升级 | 现有 ✅(`ExperienceComponent`/`ExperienceCurve`)+ S6(`UpgradeDefinition`) |
 | `phase7_platform_slice` | 平台服务(analytics/ads/iap/cloud) | S8 |
 
-**删除清单**(每项含 `.gd` + `.gd.uid` + `.tscn`;`phase7` 另有 `.tscn.uid`):
+**删除清单(已完成)**(每项含 `.gd` + `.gd.uid` + `.tscn`;`phase7` 另有 `.tscn.uid`):
 
 - `game/demo/phase0_kernel_demo.*` … `game/demo/phase7_platform_slice.*`(0–7 共 8 套)
 - `game/demo/bootstrap_phase1.tscn` … `game/demo/bootstrap_phase7.tscn`(7 个引导场景)
 
-**入口收敛:**
+**入口收敛(已完成):**
 
 - demo 入口统一为 `game/demo/bootstrap_phase8.tscn`。
-- `game/demo/bootstrap.tscn` 现 `initial_scene_path` 指向 `phase7_platform_slice.tscn` → **必须**改指
-  `phase8_village_rpg.tscn`,或直接删除 `bootstrap.tscn` 改用 `bootstrap_phase8.tscn`。
-- 在 `project.godot` 设 `run/main_scene = res://game/demo/bootstrap_phase8.tscn`(当前未设主场景)。
+- `game/demo/bootstrap.tscn` 已删除,避免保留第二个 legacy 入口。
+- `project.godot` 已设置 `run/main_scene = res://game/demo/bootstrap_phase8.tscn`。
+- `game/demo/` 顶层仅保留 `bootstrap_phase8.tscn` 这一个 scene 入口;RPG 主场景移入
+  `game/demo/phase8/phase8_village_rpg.tscn`。
 - (可选打磨)把 `phase8_village_rpg.*` 改名去掉 "phase8" 语义(如 `village_rpg_demo.*`)作为 demo 主场景;
   改名要同步 `.uid` 与 `Makefile` 的 `phase8-test` 目标 + `--phase8-auto-run` 参数名。
 
@@ -357,8 +358,8 @@ $GODOT game/demo/bootstrap_phase8.tscn -- --phase8-auto-run
 - 改了公共接口的类同步更新 `docs/ref/<ClassName>.md` 及相关 layer/pipeline 文档(中文概念段保持中文)。
 - 无 `game → addon` 反向依赖;无具体内容硬编码进 `addons/mkit/`(新机制缺口在 addon 补通用实现,
   内容放 `game/demo/phase8/`)。
-- **S11 后:** `game/demo/` 下仅剩 phase8 一个 demo 场景 + 单一入口;phase0–7 及其 `bootstrap_phaseN`
-  已删除;`bootstrap.tscn` / `project.godot` 主场景指向 phase8;全仓库无指向已删场景的悬挂引用。
+- **S11 后:** `game/demo/` 顶层仅剩 `bootstrap_phase8.tscn` 一个 scene 入口;phase0–7 及其
+  `bootstrap_phaseN` 已删除;`project.godot` 主场景指向 phase8;全仓库无指向已删场景的悬挂引用。
 
 ---
 

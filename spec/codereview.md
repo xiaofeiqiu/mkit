@@ -10,7 +10,7 @@
     "file": "game/demo/entities/player/player_input_reader.gd",
     "line": 57,
     "summary": "Q-key ability cast silently broken in all pre-phase8 scenes after hardcoded ability_id was replaced with an unset @export",
-    "failure_scenario": "cast_ability_id defaults to '' so the early-return guard fires on every Q press in phase1/phase4/phase5 scenes — those scenes never override the export. Players lose the ability to cast from the keyboard in all phases except phase8 where the override was wired."
+    "failure_scenario": "Resolved by S11: the pre-phase8 demo scenes were retired, and phase8 remains the only demo entry that overrides cast_ability_id."
   },
   {
     "file": "game/demo/phase8/entities/states/enemy_attack_state.gd",
@@ -19,13 +19,13 @@
     "failure_scenario": "If ServiceRegistry.get_service('actions') returns null, the TimedAttackAction is created and connected to _on_action_completed but never started via runner.start_action(). The completed signal never fires, so _on_action_completed never calls request_transition('Enemy/Idle'). The enemy has no other exit path from this state and is locked forever."
   },
   {
-    "file": "game/demo/phase8_village_rpg.gd",
+    "file": "game/demo/phase8/phase8_village_rpg.gd",
     "line": 649,
     "summary": "_command_combat_succeeded never set when the scripted fallback strike kills the beast",
     "failure_scenario": "_engage_field_beast_via_commands() sets _command_combat_succeeded = true only when health.dead is true immediately after _attack_field_beast(). When the command chain stalls, it calls _defeat_field_beast() (which may kill the beast) and then returns — _command_combat_succeeded stays false. The auto-loop milestone check at line 1829 then reports 'command_combat' as missing even though combat was completed."
   },
   {
-    "file": "game/demo/phase8_village_rpg.gd",
+    "file": "game/demo/phase8/phase8_village_rpg.gd",
     "line": 1527,
     "summary": "_field_beast() relies on the implicit node name 'FieldBeast' that EntitySpawner does not guarantee",
     "failure_scenario": "EntitySpawner.spawn_entity() calls scene.instantiate() and parent.add_child(entity). Godot deduplicates names on add_child, so a second spawn (e.g., after the beast is freed but before the zone refreshes the dedup table) produces 'FieldBeast2'. root.get_node_or_null('FieldBeast') returns null and all subsequent combat checks (_defeat_field_beast, _engage_field_beast_via_commands) silently bail with 'field beast not found'."

@@ -23,7 +23,7 @@ EventRouter 是玩法事件发布和订阅的路由层。负责发布 damage_app
 class_name EventRouter
 extends Node
 signal domain_event_emitted(event: DomainEvent)
-signal damage_applied(result)
+signal damage_applied(result: DamageResult)
 signal entity_died(entity_id: String, entity_ref: Node)
 signal inventory_changed(owner_id: String)
 signal room_cleared(room_id: String)
@@ -43,7 +43,7 @@ signal item_sold(shop_id: String, item_id: String, quantity: int)
 var recent_events: Array[DomainEvent] = []
 var max_recent_events: int = 100
 func emit_domain_event(event: DomainEvent) -> void
-func emit_damage_applied(result) -> void
+func emit_damage_applied(result: DamageResult) -> void
 func emit_entity_died(entity_id: String, entity_ref: Node) -> void
 func emit_inventory_changed(owner_id: String, item_id: String = "", quantity: int = 0, change_type: String = "") -> void
 func emit_room_cleared(room_id: String) -> void

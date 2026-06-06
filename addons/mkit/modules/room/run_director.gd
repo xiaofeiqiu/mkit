@@ -104,14 +104,9 @@ func select_reward(option: RewardOption) -> void:
 	if option == null:
 		push_warning("RunDirector.select_reward: option is null")
 		return
-	var reward_system := RewardSystem.new()
-	var ctx := GameplayContext.new()
-	ctx.run_id = run_state.run_id
-	var tree := get_tree()
-	var player := tree.get_first_node_in_group(player_group) if tree != null else null
-	ctx.source = player
-	ctx.target = player
-	var applied := reward_system.apply_selected(option, ctx)
+	var coordinator := RewardCoordinator.new()
+	coordinator.player_group = player_group
+	var applied := coordinator.apply_reward(option, run_state.run_id, get_tree())
 	if applied:
 		run_state.reward_history.append(option.reward_id)
 		run_state.current_room_index += 1
@@ -148,39 +143,16 @@ func fail_run(reason: String) -> void:
 
 
 func _load_room(room_definition_id: String) -> void:
-	if room_definition_id.strip_edges() == "":
-		fail_run("empty_room_definition_id")
-		return
-	var content: ContentRegistry = null
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentRegistry
-	if content == null:
-		fail_run("missing_content_registry")
-		return
-	var def := content.get_resource(room_definition_id) as RoomDefinition
-	if def == null:
-		fail_run("missing_room_definition:%s" % room_definition_id)
-		return
-	var scene := load(def.scene_path) as PackedScene
-	if scene == null:
-		fail_run("missing_room_scene:%s" % def.scene_path)
-		return
 	var container := get_node_or_null(room_scene_container_path)
 	if container == null:
 		fail_run("missing_room_container")
 		return
-	for child in container.get_children():
-		child.queue_free()
-	var room := scene.instantiate()
-	if room == null:
-		fail_run("cannot_instantiate_room_scene:%s" % def.scene_path)
+	var loader := RoomLoader.new()
+	var controller := loader.load_room(room_definition_id, container)
+	if controller == null:
+		fail_run(loader.last_error)
 		return
-	container.add_child(room)
-	current_room_controller = room.get_node_or_null("RoomController") as RoomController
-	if current_room_controller == null:
-		fail_run("room_missing_controller")
-		return
-	current_room_controller.setup(room_definition_id)
+	current_room_controller = controller
 	current_room_controller.room_cleared.connect(
 		func(_id): on_room_cleared(current_room_controller)
 	)

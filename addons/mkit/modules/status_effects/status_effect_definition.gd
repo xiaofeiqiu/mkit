@@ -1,5 +1,5 @@
 class_name StatusEffectDefinition
-extends Resource
+extends ContentDefinition
 enum StackRule { REFRESH_DURATION, ADD_STACK, REPLACE, IGNORE, EXTEND_DURATION, INDEPENDENT_STACKS }
 @export var status_id: String = ""
 @export var display_name: String = ""
@@ -12,3 +12,7 @@ enum StackRule { REFRESH_DURATION, ADD_STACK, REPLACE, IGNORE, EXTEND_DURATION, 
 @export var effects_on_tick: Array[GameEffect] = []
 @export var effects_on_remove: Array[GameEffect] = []
 @export var stat_modifiers: Array[StatModifierDefinition] = []
+
+
+func get_content_id() -> String:
+	return status_id

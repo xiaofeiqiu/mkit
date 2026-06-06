@@ -1,5 +1,5 @@
 class_name ZoneDefinition
-extends Resource
+extends ContentDefinition
 @export var zone_id: String = ""
 @export var display_name: String = ""
 @export var scene_path: String = ""
@@ -8,5 +8,5 @@ extends Resource
 @export var tags: Array[String] = []
 
 
-func get_resource_id() -> String:
+func get_content_id() -> String:
 	return zone_id

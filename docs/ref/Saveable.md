@@ -4,6 +4,8 @@
 
 Saveable 是节点可存档的契约基类。它提供 save_id、to_save_data 和 from_save_data 接口。SaveManager 不应该知道每个模块内部字段，由对象自己贡献可持久化数据。
 
+Saveable 用于**顶层全局存档单元**——在 `game_bootstrap.gd` 中构建、按 save_id 被 SaveManager 直接遍历收集的独立系统，例如 `ProgressionSystem`（`"progression"`）、`QuestSystem`（`"quest"`）、`AudioManager`（`"audio"`）。它与 [SaveableComponent](SaveableComponent.md) 是两条**有意分离**的存档契约（都 `extends Node`，互不继承）：实体内部挂在 `Components/` / `Controllers/` 下的 per-entity 子状态用 SaveableComponent（按 `get_save_key()` 聚合，避免同名组件跨实体覆盖），不要因为类名里带 "Component" 就归错类——`ProgressionSystem` 是全局系统，所以是 Saveable 而非 SaveableComponent。
+
 ## 设计目的
 
 通过统一的接口约定，使 SaveManager 可以无差别地遍历场景树中所有 Saveable 节点，收集或分发存档数据，而不需要了解每个模块的具体字段结构。

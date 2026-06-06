@@ -45,8 +45,8 @@ func apply_damage(result: DamageResult) -> void:
 func _apply_on_hit_statuses(result: DamageResult) -> void:
 	if result.status_applications.is_empty():
 		return
-	var controller = owner.get_node_or_null("Controllers/StatusEffectController")
-	if controller == null or not controller.has_method("apply_status"):
+	var controller := owner.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+	if controller == null:
 		return
 	for entry in result.status_applications:
 		controller.apply_status(

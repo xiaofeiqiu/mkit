@@ -104,7 +104,7 @@ func test_tc_er_11_emit_reward_selected_fires() -> void:
 
 
 func test_tc_er_12_emit_damage_applied_fires_and_creates_domain_event() -> void:
-	var result := _FakeDamageResult.new()
+	var result := DamageResult.new()
 	watch_signals(events)
 	events.emit_damage_applied(result)
 	assert_signal_emitted(events, "damage_applied")
@@ -194,11 +194,3 @@ func test_tc_er_22_emit_item_sold_carries_quantity() -> void:
 	events.emit_item_sold("shop.village", "item.pelt", 3)
 	assert_signal_emitted_with_parameters(events, "item_sold", ["shop.village", "item.pelt", 3])
 	assert_eq(events.recent_events.back().payload.get("quantity"), 3)
-
-
-class _FakeDamageResult:
-	var source: Node = null
-	var target: Node = null
-
-	func to_debug_dict() -> Dictionary:
-		return {"final": 10.0}

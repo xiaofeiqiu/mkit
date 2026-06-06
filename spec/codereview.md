@@ -6,18 +6,18 @@
 |------|------|--------|------|
 | B1 | EffectExecutor/RandomService/TimeService 生命周期不一致 | P1 | ✅ 已完成 |
 | B2 | CombatResolver 静态单例绕过 ServiceRegistry | P1 | ✅ 已完成 |
-| B3 | AbilityController 越界访问 _recharge_duration | P2 | ☐ |
-| B4 | HealthComponent 鸭子类型 has_method | P2 | ☐ |
-| B5 | get_typed_resource 静默返回错误类型 | P0 | ☐ |
+| B3 | AbilityController 越界访问 _recharge_duration | P2 | ✅ 已完成 |
+| B4 | HealthComponent 鸭子类型 has_method | P2 | ✅ 已完成 |
+| B5 | get_typed_resource 静默返回错误类型 | P0 | ✅ 已完成 |
 | R1 | ActionRunner 每帧重查 TimeService | P3 | ☐ |
-| R2 | EventRouter damage_applied 无类型参数 | P2 | ☐ |
-| R3 | StatsComponent 核心集合无类型标注 | P2 | ☐ |
-| R4 | RunDirector 内联实例化工具类（明确约定即可） | P3 | ☐ |
-| R5 | `_initialize_runtime_systems` 空方法 | P4 | ☐ |
-| S1 | ContentRegistry _extract_content_id OCP 违反 | P1 | ☐ |
-| S2 | RunDirector 职责过多 | P3 | ☐ |
-| S3 | ProgressionSystem 继承链不一致 | P3 | ☐ |
-| S4 | HIGHEST_ONLY/LOWEST_ONLY 枚举有名无实 | P0 | ☐ |
+| R2 | EventRouter damage_applied 无类型参数 | P2 | ✅ 已完成 |
+| R3 | StatsComponent 核心集合无类型标注 | P2 | ✅ 已完成 |
+| R4 | RunDirector 内联实例化工具类（明确约定即可） | P3 | ✅ 已完成 |
+| R5 | `_initialize_runtime_systems` 空方法 | P4 | ✅ 已完成 |
+| S1 | ContentRegistry _extract_content_id OCP 违反 | P1 | ✅ 已完成 |
+| S2 | RunDirector 职责过多 | P3 | ✅ 已完成 |
+| S3 | ProgressionSystem 继承链不一致 | P3 | ✅ 已完成 |
+| S4 | HIGHEST_ONLY/LOWEST_ONLY 枚举有名无实 | P0 | ✅ 已完成 |
 
 ---
 
@@ -319,6 +319,8 @@ extends Saveable  # ← 其他所有可存档模块都 extends SaveableComponent
 `HealthComponent`、`StatsComponent`、`AbilityController`、`StatusEffectController`、`InventoryController` 均继承 `SaveableComponent`，而 `ProgressionSystem` 继承 `Saveable`（基类）。`SaveManager` 按 `SaveableComponent` 查找子节点时行为可能不一致。
 
 **建议：** 统一改为 `extends SaveableComponent`，或在文档中明确说明两种 Saveable 基类的适用场景。
+
+**解决（已完成）：** 采用建议的第二方案——`ProgressionSystem` 保持 `extends Saveable`，不改基类。复核确认这两个基类是**有意分离**的两条契约：`Saveable` 是顶层全局存档单元（在 `game_bootstrap.gd` 构建、`add_child` 进 `ServiceRegistry`、带稳定 `save_id`，由 `SaveManager` 整树遍历收集），`SaveableComponent` 是实体内 `Components/` / `Controllers/` 子状态（按 `get_save_key()` 按实体聚合，避免同名跨实体覆盖）。`ProgressionSystem` 与 `QuestSystem`、`AudioManager` 同属前者，已与真正的同类一致；它**不是**实体组件。原建议的第一方案（改 `SaveableComponent`）反而会破坏存档——`SaveManager` 只遍历 `is Saveable` 的节点，全局系统改成组件后将永远不被收集。修复内容：在 `CLAUDE.md` 与 `docs/ref/Saveable.md` 明确两类基类的选择规则；并新增 `test_tc_svc_17_global_systems_use_saveable_base` 锁定「全局系统是 `Saveable` 而非 `SaveableComponent`」，同时强化 `test_tc_svc_01` 断言实体组件「是 `SaveableComponent` 而非 `Saveable`」，从两侧锁死该约定。
 
 ---
 

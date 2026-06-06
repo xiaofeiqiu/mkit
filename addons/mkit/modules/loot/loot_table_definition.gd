@@ -1,5 +1,5 @@
 class_name LootTableDefinition
-extends Resource
+extends ContentDefinition
 @export var loot_table_id: String = ""
 @export var rolls: int = 1
 @export var entries: Array[LootEntry] = []
@@ -7,5 +7,5 @@ extends Resource
 @export var empty_weight: float = 0.0
 
 
-func get_resource_id() -> String:
+func get_content_id() -> String:
 	return loot_table_id

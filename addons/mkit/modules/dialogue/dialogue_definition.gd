@@ -1,11 +1,11 @@
 class_name DialogueDefinition
-extends Resource
+extends ContentDefinition
 @export var dialogue_id: String = ""
 @export var start_node_id: String = ""
 @export var nodes: Array[DialogueNode] = []
 
 
-func get_resource_id() -> String:
+func get_content_id() -> String:
 	return dialogue_id
 
 

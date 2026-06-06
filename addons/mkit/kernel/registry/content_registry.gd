@@ -39,7 +39,8 @@ func get_typed_resource(content_id: String, expected_script: Script) -> Resource
 	if res == null:
 		return null
 	if expected_script != null and res.get_script() != expected_script:
-		pass
+		push_error("ContentRegistry: type mismatch for '%s'" % content_id)
+		return null
 	return res
 
 
@@ -66,27 +67,10 @@ func validate_all() -> ContentValidationResult:
 
 
 func _extract_content_id(res: Resource) -> String:
-	if res == null:
+	var def := res as ContentDefinition
+	if def == null:
 		return ""
-	for property_name in [
-		"item_id",
-		"ability_id",
-		"status_id",
-		"room_id",
-		"upgrade_id",
-		"entity_definition_id",
-		"enemy_id",
-		"loot_table_id",
-		"reward_id",
-		"stat_id",
-		"quest_id",
-		"dialogue_id",
-		"shop_id",
-		"zone_id"
-	]:
-		if property_name in res:
-			return str(res.get(property_name))
-	return ""
+	return def.get_content_id()
 
 
 func _get_resource_type_name(res: Resource) -> String:

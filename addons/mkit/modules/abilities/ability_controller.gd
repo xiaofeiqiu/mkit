@@ -145,8 +145,8 @@ func to_save_data() -> Dictionary:
 			cooldowns[key] = instance.cooldown_remaining
 		if instance != null:
 			charges[key] = instance.current_charges
-			if instance._recharge_duration > 0.0:
-				recharge_durations[key] = instance._recharge_duration
+			if instance.get_recharge_duration() > 0.0:
+				recharge_durations[key] = instance.get_recharge_duration()
 	learned.sort()
 	return {"learned": learned, "cooldowns": cooldowns, "charges": charges, "recharge_durations": recharge_durations}
 
@@ -163,7 +163,7 @@ func from_save_data(data: Dictionary) -> void:
 			if instance != null:
 				var remaining := max(0.0, float(cooldowns[ability_id]))
 				instance.cooldown_remaining = remaining
-				instance._recharge_duration = _restore_recharge_duration(key, data, remaining)
+				instance.set_recharge_duration(_restore_recharge_duration(key, data, remaining))
 				if remaining > 0.0:
 					instance.current_charges = 0
 	var charges: Dictionary = data.get("charges", {})

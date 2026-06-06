@@ -1,5 +1,5 @@
 class_name EntityDefinition
-extends Resource
+extends ContentDefinition
 @export var entity_definition_id: String = ""
 @export var display_name: String = ""
 @export var scene_path: String = ""
@@ -8,3 +8,7 @@ extends Resource
 @export var base_stats: Dictionary = {}
 @export var starting_ability_ids: Array[String] = []
 @export var loot_table_id: String = ""
+
+
+func get_content_id() -> String:
+	return entity_definition_id

@@ -1,5 +1,5 @@
 class_name RewardDefinition
-extends Resource
+extends ContentDefinition
 @export var reward_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
@@ -10,5 +10,5 @@ extends Resource
 @export var effects: Array[GameEffect] = []
 
 
-func get_resource_id() -> String:
+func get_content_id() -> String:
 	return reward_id

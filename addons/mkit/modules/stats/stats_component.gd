@@ -17,8 +17,8 @@ signal stat_changed(stat_id: String, old_value: float, new_value: float)
 	"healing_multiplier": 1.0
 }
 var modifiers_by_stat: Dictionary = {}
-var cached_values: Dictionary = {}
-var dirty_stats: Dictionary = {}
+var cached_values: Dictionary[String, float] = {}
+var dirty_stats: Dictionary[String, bool] = {}
 var _initial_base_stats: Dictionary = {}
 
 
@@ -49,17 +49,18 @@ func add_modifier(modifier: StatModifier) -> void:
 		return
 	var old_value := get_stat_value(modifier.stat_id)
 	if not modifiers_by_stat.has(modifier.stat_id):
-		modifiers_by_stat[modifier.stat_id] = []
-	var list: Array = modifiers_by_stat[modifier.stat_id]
-	_apply_stacking_rule(list, modifier)
-	list.append(modifier)
+		var new_list: Array[StatModifier] = []
+		modifiers_by_stat[modifier.stat_id] = new_list
+	var list: Array[StatModifier] = modifiers_by_stat[modifier.stat_id]
+	if _apply_stacking_rule(list, modifier):
+		list.append(modifier)
 	mark_dirty(modifier.stat_id)
 	_emit_stat_changed(modifier.stat_id, old_value)
 
 
 func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 	for stat_id in modifiers_by_stat.keys():
-		var list: Array = modifiers_by_stat[stat_id]
+		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
 		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
@@ -76,7 +77,7 @@ func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 
 func remove_modifiers_from_source(source_id: String) -> void:
 	for stat_id in modifiers_by_stat.keys():
-		var list: Array = modifiers_by_stat[stat_id]
+		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
 		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
@@ -90,7 +91,7 @@ func remove_modifiers_from_source(source_id: String) -> void:
 
 func tick_modifiers(delta: float) -> void:
 	for stat_id in modifiers_by_stat.keys():
-		var list: Array = modifiers_by_stat[stat_id]
+		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
 		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
@@ -145,7 +146,9 @@ func from_save_data(data: Dictionary) -> void:
 func _calculate_stat(stat_id: String) -> float:
 	var base_value := float(base_stats.get(stat_id, 0.0))
 	var value := base_value
-	var modifiers: Array = modifiers_by_stat.get(stat_id, [])
+	var modifiers: Array[StatModifier] = []
+	if modifiers_by_stat.has(stat_id):
+		modifiers = modifiers_by_stat[stat_id]
 	var flat_add := 0.0
 	var percent_add := 0.0
 	var percent_multiply := 1.0
@@ -176,7 +179,7 @@ func _calculate_stat(stat_id: String) -> float:
 	return value
 
 
-func _apply_stacking_rule(list: Array, modifier: StatModifier) -> void:
+func _apply_stacking_rule(list: Array[StatModifier], modifier: StatModifier) -> bool:
 	match modifier.stacking_rule:
 		StatModifierDefinition.StackingRule.REPLACE_SAME_SOURCE:
 			for existing in list.duplicate():
@@ -189,8 +192,19 @@ func _apply_stacking_rule(list: Array, modifier: StatModifier) -> void:
 			for existing in list.duplicate():
 				if existing.modifier_id == modifier.modifier_id:
 					list.erase(existing)
-		_:
-			pass
+		StatModifierDefinition.StackingRule.HIGHEST_ONLY:
+			for existing in list.duplicate():
+				if existing.modifier_id == modifier.modifier_id:
+					if existing.value >= modifier.value:
+						return false
+					list.erase(existing)
+		StatModifierDefinition.StackingRule.LOWEST_ONLY:
+			for existing in list.duplicate():
+				if existing.modifier_id == modifier.modifier_id:
+					if existing.value <= modifier.value:
+						return false
+					list.erase(existing)
+	return true
 
 
 func _emit_stat_changed(stat_id: String, old_value: float) -> void:
@@ -198,7 +212,7 @@ func _emit_stat_changed(stat_id: String, old_value: float) -> void:
 	stat_changed.emit(stat_id, old_value, new_value)
 
 
-func _get_base_overrides() -> Dictionary:
+func _get_base_overrides() -> Dictionary[String, float]:
 	var overrides: Dictionary = {}
 	for stat_id in base_stats.keys():
 		var stat_key := str(stat_id)
@@ -212,10 +226,10 @@ func _get_base_overrides() -> Dictionary:
 	return overrides
 
 
-func _get_persistent_modifiers() -> Array:
-	var result: Array = []
+func _get_persistent_modifiers() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
 	for stat_id in modifiers_by_stat.keys():
-		var list: Array = modifiers_by_stat[stat_id]
+		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
 		for modifier in list:
 			if modifier is StatModifier and modifier.remaining_duration <= 0.0:
 				result.append(modifier.to_save_data())

@@ -1,7 +1,7 @@
 class_name EventRouter
 extends Node
 signal domain_event_emitted(event: DomainEvent)
-signal damage_applied(result)
+signal damage_applied(result: DamageResult)
 signal entity_died(entity_id: String, entity_ref: Node)
 signal inventory_changed(owner_id: String)
 signal room_cleared(room_id: String)
@@ -29,10 +29,10 @@ func emit_domain_event(event: DomainEvent) -> void:
 	domain_event_emitted.emit(event)
 
 
-func emit_damage_applied(result) -> void:
+func emit_damage_applied(result: DamageResult) -> void:
 	damage_applied.emit(result)
 	var data: Dictionary = {}
-	if result != null and result.has_method("to_debug_dict"):
+	if result != null:
 		data = result.to_debug_dict()
 	var source_id := ""
 	var target_id := ""

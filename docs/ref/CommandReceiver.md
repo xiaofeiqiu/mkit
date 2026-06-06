@@ -32,12 +32,14 @@ var owner_entity: Node = null
 var state_machine: StateMachine = null
 var command_history: Array[GameCommand] = []
 var max_history: int = 20
+func configure_receiver_id(id: String) -> void
 func receive_command(command: GameCommand) -> bool
 func handle_unhandled_command(command: GameCommand) -> bool
 ```
 
 ## 函数使用场景
 
+- **configure_receiver_id(id)**：显式设置 `receiver_id`；忽略空字符串。在 `auto_register = false` 或 `_ready()` 之前需要确定 id 时调用，不会自动触发向 CommandRouter 的重新注册。
 - **receive_command()**：命令投递入口。例：CommandRouter 找到玩家的 receiver 后调用此方法，先记录历史，再让 StateMachine 处理，处理不了则调用 `handle_unhandled_command`；只要 StateMachine 或 fallback 返回 handled，就会把 `GameCommand.consumed` 标记为 true。
 - **handle_unhandled_command()**：未处理命令的 fallback 扩展点。例：子类可覆盖此方法，处理 StateMachine 不负责的命令，如打开背包 UI；返回 true 即表示命令已被接收端消费。
 

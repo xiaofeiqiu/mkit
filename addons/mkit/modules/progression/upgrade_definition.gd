@@ -1,5 +1,5 @@
 class_name UpgradeDefinition
-extends Resource
+extends ContentDefinition
 @export var upgrade_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
@@ -11,6 +11,10 @@ extends Resource
 @export var effects: Array[GameEffect] = []
 @export var tags: Array[String] = []
 @export var is_meta_upgrade: bool = true
+
+
+func get_content_id() -> String:
+	return upgrade_id
 
 
 func get_cost_for_level(next_level: int) -> int:

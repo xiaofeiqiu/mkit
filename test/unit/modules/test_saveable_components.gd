@@ -47,7 +47,20 @@ func test_tc_svc_01_p1a_components_use_saveable_component_base() -> void:
 	for node in nodes:
 		node.name = node.get_script().resource_path.get_file().get_basename().to_pascal_case()
 		assert_true(node is SaveableComponent)
+		assert_false(node is Saveable)
 		assert_eq((node as SaveableComponent).get_save_key(), node.name)
+		node.free()
+
+
+func test_tc_svc_17_global_systems_use_saveable_base() -> void:
+	var nodes: Array[Node] = [
+		ProgressionSystem.new(),
+		QuestSystem.new(),
+		AudioManager.new()
+	]
+	for node in nodes:
+		assert_true(node is Saveable)
+		assert_false(node is SaveableComponent)
 		node.free()
 
 
@@ -163,7 +176,7 @@ func test_tc_svc_06_ability_roundtrip_restores_learned_ids_and_cooldowns() -> vo
 	assert_true(ability.register_ability("ability.strike"))
 	(ability.abilities["ability.dash"] as AbilityInstance).cooldown_remaining = 1.25
 	(ability.abilities["ability.dash"] as AbilityInstance).current_charges = 2
-	(ability.abilities["ability.dash"] as AbilityInstance)._recharge_duration = 3.0
+	(ability.abilities["ability.dash"] as AbilityInstance).set_recharge_duration(3.0)
 	var data := ability.to_save_data()
 	assert_eq(data["learned"], ["ability.dash", "ability.strike"])
 	assert_eq(data["cooldowns"]["ability.dash"], 1.25)
@@ -189,7 +202,7 @@ func test_tc_svc_09_ability_roundtrip_continues_multi_charge_recharge() -> void:
 	var instance := ability.abilities["ability.blink"] as AbilityInstance
 	instance.current_charges = 1
 	instance.cooldown_remaining = 0.5
-	instance._recharge_duration = 4.0
+	instance.set_recharge_duration(4.0)
 	var data := ability.to_save_data()
 	var restored_entity := _make_entity("Restored", "player_002")
 	var restored := _add_ability(restored_entity)
@@ -265,6 +278,66 @@ func test_tc_svc_10_status_restore_rebinds_source_for_tick_effects() -> void:
 	restored_status._process(1.1)
 	assert_eq(probe.last_source, source)
 	assert_eq(probe.last_payload.get("source_id"), "caster_001")
+
+
+func test_tc_svc_13_stats_highest_only_rejects_lower_value() -> void:
+	var entity := _make_entity("Player", "player_001")
+	var stats := _add_stats(entity)
+	add_child_autofree(entity)
+	var high := _make_modifier("mod.boost", "attack_power", 20.0, -1.0)
+	high.stacking_rule = StatModifierDefinition.StackingRule.HIGHEST_ONLY
+	var low := _make_modifier("mod.boost", "attack_power", 5.0, -1.0)
+	low.stacking_rule = StatModifierDefinition.StackingRule.HIGHEST_ONLY
+	stats.add_modifier(high)
+	stats.add_modifier(low)
+	var list: Array = stats.modifiers_by_stat.get("attack_power", [])
+	assert_eq(list.size(), 1)
+	assert_eq((list[0] as StatModifier).value, 20.0)
+
+
+func test_tc_svc_14_stats_highest_only_replaces_lower_with_higher_value() -> void:
+	var entity := _make_entity("Player", "player_001")
+	var stats := _add_stats(entity)
+	add_child_autofree(entity)
+	var low := _make_modifier("mod.boost", "attack_power", 5.0, -1.0)
+	low.stacking_rule = StatModifierDefinition.StackingRule.HIGHEST_ONLY
+	var high := _make_modifier("mod.boost", "attack_power", 20.0, -1.0)
+	high.stacking_rule = StatModifierDefinition.StackingRule.HIGHEST_ONLY
+	stats.add_modifier(low)
+	stats.add_modifier(high)
+	var list: Array = stats.modifiers_by_stat.get("attack_power", [])
+	assert_eq(list.size(), 1)
+	assert_eq((list[0] as StatModifier).value, 20.0)
+
+
+func test_tc_svc_15_stats_lowest_only_rejects_higher_value() -> void:
+	var entity := _make_entity("Player", "player_001")
+	var stats := _add_stats(entity)
+	add_child_autofree(entity)
+	var low := _make_modifier("mod.debuff", "defense", -10.0, -1.0)
+	low.stacking_rule = StatModifierDefinition.StackingRule.LOWEST_ONLY
+	var high := _make_modifier("mod.debuff", "defense", -2.0, -1.0)
+	high.stacking_rule = StatModifierDefinition.StackingRule.LOWEST_ONLY
+	stats.add_modifier(low)
+	stats.add_modifier(high)
+	var list: Array = stats.modifiers_by_stat.get("defense", [])
+	assert_eq(list.size(), 1)
+	assert_eq((list[0] as StatModifier).value, -10.0)
+
+
+func test_tc_svc_16_stats_lowest_only_replaces_higher_with_lower_value() -> void:
+	var entity := _make_entity("Player", "player_001")
+	var stats := _add_stats(entity)
+	add_child_autofree(entity)
+	var high := _make_modifier("mod.debuff", "defense", -2.0, -1.0)
+	high.stacking_rule = StatModifierDefinition.StackingRule.LOWEST_ONLY
+	var low := _make_modifier("mod.debuff", "defense", -10.0, -1.0)
+	low.stacking_rule = StatModifierDefinition.StackingRule.LOWEST_ONLY
+	stats.add_modifier(high)
+	stats.add_modifier(low)
+	var list: Array = stats.modifiers_by_stat.get("defense", [])
+	assert_eq(list.size(), 1)
+	assert_eq((list[0] as StatModifier).value, -10.0)
 
 
 func _make_entity(entity_name: String, entity_id: String) -> Node:

@@ -771,7 +771,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	var ability_instance := ability.abilities[FIREBOLT] as AbilityInstance
 	ability_instance.current_charges = 0
 	ability_instance.cooldown_remaining = 1.25
-	ability_instance._recharge_duration = 2.0
+	ability_instance.set_recharge_duration(2.0)
 	assert_true(inventory.add_item(ItemInstance.create("item.demo.herb_potion", 2)))
 	var blade := ItemInstance.create(FIELD_BLADE)
 	blade.instance_id = "scene8_save_blade"

@@ -1,5 +1,5 @@
 class_name ItemDefinition
-extends Resource
+extends ContentDefinition
 @export var item_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
@@ -16,5 +16,5 @@ extends Resource
 @export var stat_modifiers: Array[StatModifierDefinition] = []
 
 
-func get_resource_id() -> String:
+func get_content_id() -> String:
 	return item_id

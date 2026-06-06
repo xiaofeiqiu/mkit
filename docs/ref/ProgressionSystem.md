@@ -28,6 +28,7 @@ signal content_unlocked(content_id: String)
 var state := ProgressionState.new()
 var content: ContentRegistry = null
 func add_currency(currency_id: String, amount: int) -> void
+func spend_currency(currency_id: String, amount: int) -> bool
 func get_currency(currency_id: String) -> int
 func can_unlock(upgrade_id: String) -> bool
 func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> bool
@@ -39,6 +40,7 @@ func from_save_data(data: Dictionary) -> void
 ## 函数使用场景
 
 - **`add_currency(currency_id, amount)`**：增加长期货币余额，发出 `currency_changed` 信号。run 结束结算时调用，例如 `progression.add_currency("meta_currency", 120)`。
+- **`spend_currency(currency_id, amount)`**：通用扣款入口。校验空 id 和非正数后委托 `ProgressionState.spend_currency()`，余额不足返回 `false`，成功后发出 `currency_changed`。与 `unlock_or_level_up()` 的区别：前者是通用扣款，后者是完整的升级购买事务（含前置校验、等级提升、效果执行）。Shop、IAP 结算等场景应调用此方法而非直接修改 `ProgressionState`。
 - **`can_unlock(upgrade_id)`**：检查升级的所有前提（前置升级已完成、未满级、货币足够），返回是否可购买。大厅 UI 据此决定按钮是否可点。
 - **`unlock_or_level_up(upgrade_id, context)`**：执行完整购买流程：再次验证条件、扣除货币、提升等级、解锁内容（`unlock_content_ids`）、通过 EffectExecutor 执行 `effects`，并发出对应信号。
 - **`get_definition(upgrade_id)`**：从 ContentRegistry 读取 UpgradeDefinition，内部 can_unlock 和 unlock_or_level_up 调用。

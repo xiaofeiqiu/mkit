@@ -26,10 +26,12 @@ func has(content_id: String) -> bool
 func validate_all() -> ContentValidationResult
 ```
 
+可注册资源必须继承 `ContentDefinition` 并实现 `get_content_id() -> String`。框架内置的所有 Definition 类均已实现（`AbilityDefinition`、`ItemDefinition`、`StatusEffectDefinition`、`RoomDefinition`、`UpgradeDefinition`、`EntityDefinition`、`LootTableDefinition`、`RewardDefinition`、`StatDefinition`、`QuestDefinition`、`DialogueDefinition`、`ShopDefinition`、`ZoneDefinition`）。新增自定义 Definition 时只需继承 `ContentDefinition` 并实现该方法，无需修改 ContentRegistry。
+
 ## 函数使用场景
 
 - **load_database()**：批量加载入口。例：GameBootstrap 启动时对每个 ResourceDatabase 调用此方法，注册所有物品、技能、房间定义。
-- **register_resource()**：单个注册入口。例：运行时动态注册临时内容。当前稳定 ID 字段包括 item_id、ability_id、status_id、room_id、upgrade_id、entity_definition_id、enemy_id、loot_table_id、reward_id、stat_id、quest_id、dialogue_id、shop_id、zone_id。
+- **register_resource()**：单个注册入口。例：运行时动态注册临时内容。资源必须是 `ContentDefinition` 子类，否则注册失败并报错。
 - **get_resource()**：按 ID 查找资源。例：LootSystem 掷出 `item.potion_small` 后通过此方法获取 ItemDefinition，再创建 ItemInstance。
 - **get_typed_resource()**：带类型过滤的查找。例：AbilityController 获取 AbilityDefinition 时验证类型。
 - **get_all_by_type()**：按类型获取所有资源。例：RewardSystem 获取所有 RewardDefinition 构建候选池。

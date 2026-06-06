@@ -1,5 +1,5 @@
 class_name ShopDefinition
-extends Resource
+extends ContentDefinition
 @export var shop_id: String = ""
 @export var display_name: String = ""
 @export var currency_id: String = "gold"
@@ -9,7 +9,7 @@ extends Resource
 @export var allow_sell: bool = true
 
 
-func get_resource_id() -> String:
+func get_content_id() -> String:
 	return shop_id
 
 

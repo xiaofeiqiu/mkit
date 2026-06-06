@@ -52,26 +52,48 @@ func test_tc_cr_06_unregistered_id_returns_null() -> void:
 	assert_false(registry.has("quest.missing"))
 
 
+func test_tc_cr_07_get_typed_resource_returns_resource_on_type_match() -> void:
+	var res := _ItemRes.new()
+	res.item_id = "item.sword"
+	registry.register_resource(res)
+	var result := registry.get_typed_resource("item.sword", _ItemRes as Script)
+	assert_eq(result, res)
+
+
+func test_tc_cr_08_get_typed_resource_returns_null_on_type_mismatch() -> void:
+	var res := _ItemRes.new()
+	res.item_id = "item.shield"
+	registry.register_resource(res)
+	var result := registry.get_typed_resource("item.shield", _QuestRes as Script)
+	assert_null(result)
+	assert_push_error("item.shield")
+
+
 class _QuestRes:
-	extends Resource
+	extends ContentDefinition
 	@export var quest_id: String = ""
+	func get_content_id() -> String: return quest_id
 
 
 class _DialogueRes:
-	extends Resource
+	extends ContentDefinition
 	@export var dialogue_id: String = ""
+	func get_content_id() -> String: return dialogue_id
 
 
 class _ShopRes:
-	extends Resource
+	extends ContentDefinition
 	@export var shop_id: String = ""
+	func get_content_id() -> String: return shop_id
 
 
 class _ZoneRes:
-	extends Resource
+	extends ContentDefinition
 	@export var zone_id: String = ""
+	func get_content_id() -> String: return zone_id
 
 
 class _ItemRes:
-	extends Resource
+	extends ContentDefinition
 	@export var item_id: String = ""
+	func get_content_id() -> String: return item_id

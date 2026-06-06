@@ -1,5 +1,5 @@
 class_name RoomDefinition
-extends Resource
+extends ContentDefinition
 @export var room_id: String = ""
 @export var scene_path: String = ""
 @export var room_type: String = "combat"
@@ -8,3 +8,7 @@ extends Resource
 @export var tags: Array[String] = []
 @export var enemy_spawn_ids: Array[String] = []
 @export var reward_pool_ids: Array[String] = []
+
+
+func get_content_id() -> String:
+	return room_id

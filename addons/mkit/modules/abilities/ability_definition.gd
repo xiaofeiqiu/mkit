@@ -1,5 +1,5 @@
 class_name AbilityDefinition
-extends Resource
+extends ContentDefinition
 @export var ability_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
@@ -13,3 +13,7 @@ extends Resource
 @export var tags: Array[String] = []
 @export var conditions: Array[Condition] = []
 @export var effects: Array[GameEffect] = []
+
+
+func get_content_id() -> String:
+	return ability_id

@@ -34,6 +34,7 @@ var abilities: Dictionary = {}
 var active_cast_actions: Array[GameAction] = []
 var content: ContentRegistry = null
 func register_ability(ability_id: String) -> bool
+func unregister_ability(ability_id: String) -> void
 func has_ability(ability_id: String) -> bool
 func can_cast(ability_id: String, context: GameplayContext) -> bool
 func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> String
@@ -48,6 +49,7 @@ func from_save_data(data: Dictionary) -> void
 ## 函数使用场景
 
 - **`register_ability(ability_id)`**：从 ContentRegistry 查找 AbilityDefinition，创建 AbilityInstance 并存入 `abilities` 字典。`starting_ability_ids` 在 `_ready()` 时自动注册，EntitySpawner 也可在运行时调用。
+- **`unregister_ability(ability_id)`**：从 `abilities` 字典移除该技能实例。不发出 `ability_registered` 的反向信号，也不处理正在执行的 CastAction；调用方在移除前应确保该技能没有活跃施法流程。适用于奖励回滚、临时技能移除或测试清理。
 - **`has_ability(ability_id)`**：检查是否已注册该技能，UI 和奖励系统据此决定是否显示或赠送技能。
 - **`can_cast(ability_id, context)`**：一键检查所有释放前提（已注册、已启用、冷却完成、资源足够、所有 Condition 通过）。UI 可调用此方法决定是否高亮技能按钮。
 - **`get_cast_failure_reason(ability_id, context)`**：返回第一个失败原因的字符串，供 UI 显示冷却提示、资源不足等信息，或 AI 决策跳过该技能。

@@ -33,6 +33,14 @@ func is_cooldown_ready() -> bool:
 	return current_charges > 0
 
 
+func get_recharge_duration() -> float:
+	return _recharge_duration
+
+
+func set_recharge_duration(value: float) -> void:
+	_recharge_duration = max(0.0, value)
+
+
 func start_cooldown(definition: AbilityDefinition, cooldown_reduction: float = 0.0) -> void:
 	var max_charges := _max_charges(definition)
 	var final_cd := max(0.0, definition.cooldown * (1.0 - cooldown_reduction))

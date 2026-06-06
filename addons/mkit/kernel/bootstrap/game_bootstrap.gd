@@ -12,7 +12,6 @@ func boot() -> void:
 	_register_kernel_services()
 	_load_content()
 	_validate_content()
-	_initialize_runtime_systems()
 	_load_profile()
 	_enter_initial_scene.call_deferred()
 
@@ -119,10 +118,6 @@ func _validate_content() -> void:
 	var result := registry.validate_all()
 	if not result.success:
 		push_error("Content validation failed: %s" % result.errors)
-
-
-func _initialize_runtime_systems() -> void:
-	pass
 
 
 func _load_profile() -> void:

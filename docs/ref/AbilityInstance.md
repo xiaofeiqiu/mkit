@@ -37,6 +37,8 @@ var temporary_modifiers: Dictionary = {}
 func setup(definition: AbilityDefinition, owner_entity: Node) -> void
 func tick(delta: float) -> void
 func is_cooldown_ready() -> bool
+func get_recharge_duration() -> float
+func set_recharge_duration(value: float) -> void
 func start_cooldown(definition: AbilityDefinition, cooldown_reduction: float = 0.0) -> void
 func restore_charge(definition: AbilityDefinition) -> void
 ```
@@ -46,6 +48,7 @@ func restore_charge(definition: AbilityDefinition) -> void
 - **`setup(definition, owner_entity)`**：初始化实例，绑定 definition_id、owner 和初始 charges。AbilityController.register_ability() 在注册技能时调用。
 - **`tick(delta)`**：减少 `cooldown_remaining`，由 AbilityController._process() 每帧调用。冷却完毕后 `is_cooldown_ready()` 返回 true。
 - **`is_cooldown_ready()`**：AbilityController 和 CooldownReadyCondition 调用此方法判断是否可以释放技能（冷却为零且还有 charges）。
+- **`get_recharge_duration()` / `set_recharge_duration(value)`**：多 charge 技能的单次充能时长访问器。AbilityController 存档时读取、读档时恢复，外部不再直接触碰 `_recharge_duration` 私有字段。setter 会将负值钳为 0。
 - **`start_cooldown(definition, cooldown_reduction)`**：技能成功释放后调用，将 cooldown_remaining 设为 `definition.cooldown * (1 - cdr)`，并消耗一个 charge。
 - **`restore_charge(definition)`**：特殊道具或奖励可恢复 charge，恢复量不超过 definition.charges 上限。
 

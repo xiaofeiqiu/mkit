@@ -73,10 +73,20 @@ var router := ServiceRegistry.get_service("commands") as CommandRouter
 
 Service ids include: `events`, `content`, `random`, `time`, `actions`, `effects`, `commands`, `combat`, `scenes`, `pool`, `save`, `progression`, `analytics`, `ads`, `iap`, `cloud_save`. The platform services (`analytics`, `ads`, `iap`, `cloud_save`) are currently **mock implementations** (`*_service_mock.gd`) behind real interfaces — wire real SDKs by swapping the implementation, not the interface.
 
-Services come in two deliberate flavors — pick by behavior, not by habit:
+Services and utilities come in three deliberate flavors — pick by behavior, not by habit:
 
 - **Node services** are `extends Node`, added to the `ServiceRegistry` tree with `add_child` in `game_bootstrap.gd`, and registered. Use this when the service needs scene-tree lifecycle — `_process`/`_physics_process`, signals, or timers (e.g. `EventRouter`, `ActionRunner`, `CommandRouter`, `SceneRouter`, `SaveManager`).
 - **RefCounted services** are `extends RefCounted`, registered but *not* added to the tree. Use this for lightweight, lifecycle-free state or pure logic with no per-frame tick — `RandomService` (RNG state), `TimeService` (time scale/pause), `EffectExecutor` (stateless executor + a bounded trace buffer), `CombatResolver` (stateless damage-resolution logic). These may be freely `new()`'d as an on-demand fallback or a test fixture without a tree (e.g. `AbilityController` / `RewardSystem` fall back to `EffectExecutor.new()` when no `effects` service is registered; `HitboxComponent` / `DealDamageEffect` fall back to `CombatResolver.new()` when no `combat` service is registered) — do **not** convert them to `Node`, as that would orphan those call sites. Any retained buffer must stay bounded and offer a reset (e.g. `EffectExecutor.clear_recent_results()`).
+- **Utility classes** are `extends RefCounted` helpers with no retained state — pure-function tools that callers `new()` directly and own entirely. They are never registered in `ServiceRegistry`. Examples: `DungeonGenerator` (generate a room graph, then discard), `RewardSystem` (resolve a reward pool in one call). The rule: if a class has no identity in the registry and no state that outlives a single call site, it is a utility class — `new()` it inline rather than routing it through the registry.
+
+### Save base classes: `Saveable` vs `SaveableComponent`
+
+Two parallel, deliberately disjoint save contracts (both `extends Node`; neither extends the other) — pick by *who collects the data*, not by the name:
+
+- **`Saveable`** is a top-level global save unit keyed by `save_id`; `SaveManager` tree-walks every `Saveable` and persists it under that id. Use it for standalone systems built in `game_bootstrap.gd` — e.g. `ProgressionSystem` (`"progression"`), `QuestSystem` (`"quest"`), `AudioManager` (`"audio"`).
+- **`SaveableComponent`** is entity-scoped sub-state keyed by `get_save_key()` (its node name), collected per-entity rather than tree-walked globally, so same-named components on different entities never collide. Use it for `Components/` and `Controllers/` children — `StatsComponent`, `HealthComponent`, `AbilityController`, `InventoryController`, …
+
+A global system must **not** be a `SaveableComponent` (nothing would ever collect it); an entity component must **not** be a `Saveable` (its node name would collide across entities). Don't pick by the word "Component" in a class name — `ProgressionSystem` is global so it is a `Saveable`, not a `SaveableComponent`.
 
 ### Entity node-layout convention
 

@@ -6,7 +6,7 @@ RunDirector 是一局 Roguelike Run 的导演。它负责开始 Run、进入房�
 
 ## 设计目的
 
-作为 Run 生命周期的单一协调者，把"开始 Run → 进入房间 → 清房间 → 选奖励 → 进入下一房间 → 完成/失败"的全部阶段转换集中管理，不负责伤害计算、UI 绘制或背包操作，只协调各系统之间的阶段推进。
+作为 Run 生命周期的单一协调者，管理状态机转移（starting → active → choosing_reward → completed/failed）并发布 EventRouter 事件。场景加载逻辑委托给 `RoomLoader`，奖励应用逻辑委托给 `RewardCoordinator`——两者均为无状态工具类，RunDirector 按需 `new()` 使用。RunDirector 本身不负责伤害计算、UI 绘制或背包操作。
 
 ## 文件
 

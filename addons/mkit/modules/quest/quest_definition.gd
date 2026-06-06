@@ -1,5 +1,5 @@
 class_name QuestDefinition
-extends Resource
+extends ContentDefinition
 @export var quest_id: String = ""
 @export var display_name: String = ""
 @export_multiline var description: String = ""
@@ -13,7 +13,7 @@ extends Resource
 @export var tags: Array[String] = []
 
 
-func get_resource_id() -> String:
+func get_content_id() -> String:
 	return quest_id
 
 

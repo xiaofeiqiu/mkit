@@ -29,6 +29,8 @@ func handle_command(command: GameCommand) -> bool:
 			return request_transition(
 				"Player/Attack", {"reason": "attack_command", "command": command}
 			)
+		BuiltinCommands.DASH:
+			return request_transition("Player/Dash", {"reason": "dash_command", "command": command})
 		BuiltinCommands.CAST_ABILITY:
 			return request_transition(
 				"Player/CastAbility", {"reason": "cast_command", "command": command}

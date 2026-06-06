@@ -30,7 +30,6 @@ func think() -> void:
 	elif distance <= detection_range:
 		var direction: Vector2 = (target_2d.global_position - owner_2d.global_position).normalized()
 		blackboard.set_value("intent", "approach")
-		blackboard.set_value("move_direction", direction)
 		issue_command(BuiltinCommands.MOVE, {"direction": direction})
 	else:
 		blackboard.set_value("intent", "idle")

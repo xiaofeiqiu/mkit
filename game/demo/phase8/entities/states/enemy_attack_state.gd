@@ -21,10 +21,12 @@ func enter(context: Dictionary = {}) -> void:
 	action.recovery_duration = 0.10
 	action.hitbox_path = NodePath("Components/HitboxComponent")
 	action.completed.connect(_on_action_completed)
-	current_action = action
 	var runner := ServiceRegistry.get_service("actions") as ActionRunner
-	if runner != null:
-		runner.start_action(action, ctx)
+	if runner == null:
+		request_transition("Enemy/Idle", {"reason": "no_action_runner"})
+		return
+	current_action = action
+	runner.start_action(action, ctx)
 
 
 func exit(context: Dictionary = {}) -> void:
@@ -35,13 +37,7 @@ func exit(context: Dictionary = {}) -> void:
 
 func handle_command(command: GameCommand) -> bool:
 	match command.command_type:
-		BuiltinCommands.MOVE:
-			blackboard.set_value("move_direction", command.get_vector2("direction"))
-			return true
-		BuiltinCommands.STOP_MOVE:
-			blackboard.set_value("move_direction", Vector2.ZERO)
-			return true
-		BuiltinCommands.ATTACK:
+		BuiltinCommands.MOVE, BuiltinCommands.STOP_MOVE, BuiltinCommands.ATTACK:
 			return true
 	return false
 

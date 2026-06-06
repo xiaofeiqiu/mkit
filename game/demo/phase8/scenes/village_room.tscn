@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
 [ext_resource type="PackedScene" path="res://game/demo/phase8/entities/npc_elder.tscn" id="3_elder"]
+
+[sub_resource type="CircleShape2D" id="CircleShape_room_exit"]
+radius = 48.0
 
 [node name="VillageRoom" type="Node2D"]
 
@@ -14,11 +17,19 @@ offset_bottom = 500.0
 color = Color(0.24, 0.22, 0.32, 1)
 
 [node name="RoomEntry" type="Marker2D" parent="."]
-position = Vector2(180, 320)
+position = Vector2(180, 250)
 script = ExtResource("1_spawn")
 spawn_id = "room_entry"
 
-[node name="ToVillage" type="Node" parent="."]
+[node name="ToVillage" type="Area2D" parent="."]
+position = Vector2(180, 364)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToVillage"]
+shape = SubResource("CircleShape_room_exit")
+
+[node name="Interactable" type="Node" parent="ToVillage"]
 script = ExtResource("2_portal")
 interaction_id = "portal.phase8.room_to_village"
 display_text = "Exit room"

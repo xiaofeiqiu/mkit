@@ -1,5 +1,12 @@
 extends State
 
+var _stats: StatsComponent = null
+
+
+func enter(context: Dictionary = {}) -> void:
+	if _stats == null and owner_entity != null:
+		_stats = owner_entity.get_node_or_null("Components/StatsComponent") as StatsComponent
+
 
 func physics_update(delta: float) -> void:
 	var body := owner_entity as CharacterBody2D
@@ -9,7 +16,7 @@ func physics_update(delta: float) -> void:
 	if dir == Vector2.ZERO:
 		request_transition("Enemy/Idle", {"reason": "no_input"})
 		return
-	body.velocity = dir.normalized() * _move_speed()
+	body.velocity = dir * _move_speed()
 	body.move_and_slide()
 
 
@@ -30,7 +37,6 @@ func handle_command(command: GameCommand) -> bool:
 
 
 func _move_speed() -> float:
-	var stats := owner_entity.get_node_or_null("Components/StatsComponent") as StatsComponent
-	if stats != null:
-		return stats.get_stat_value("move_speed", 120.0)
+	if _stats != null:
+		return _stats.get_stat_value("move_speed", 120.0)
 	return 120.0

@@ -28,6 +28,11 @@ func _ready() -> void:
 			router.register_receiver(receiver_id, self)
 
 
+func configure_receiver_id(id: String) -> void:
+	if id != "":
+		receiver_id = id
+
+
 func receive_command(command: GameCommand) -> bool:
 	if command == null:
 		push_warning("CommandReceiver.receive_command: command is null")

@@ -127,14 +127,15 @@ func to_save_data() -> Dictionary:
 
 
 func from_save_data(data: Dictionary) -> void:
+	if _initial_base_stats.is_empty():
+		mark_save_baseline()
+	base_stats = _initial_base_stats.duplicate(true)
+	modifiers_by_stat.clear()
+	cached_values.clear()
+	dirty_stats.clear()
 	var base_overrides: Dictionary = data.get("base_overrides", {})
 	for stat_id in base_overrides.keys():
 		base_stats[str(stat_id)] = float(base_overrides[stat_id])
-	for stat_id in modifiers_by_stat.keys():
-		var list: Array = modifiers_by_stat[stat_id]
-		for modifier in list.duplicate():
-			if modifier is StatModifier and modifier.remaining_duration <= 0.0:
-				list.erase(modifier)
 	for raw in data.get("persistent_modifiers", []):
 		if raw is Dictionary:
 			add_modifier(StatModifier.from_save_data(raw))

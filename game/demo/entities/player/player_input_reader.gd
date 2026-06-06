@@ -8,6 +8,7 @@ extends Node
 # project-level InputMap entries.
 #   Move:   WASD / Arrow keys
 #   Attack: Space / J
+#   Dash:   Shift
 
 @export var target_id: String = "player_001"
 @export var cast_ability_id: String = ""
@@ -26,15 +27,7 @@ func _physics_process(_delta: float) -> void:
 		if _router == null:
 			return
 
-	var dir := Vector2.ZERO
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
-		dir.x -= 1.0
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
-		dir.x += 1.0
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
-		dir.y -= 1.0
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
-		dir.y += 1.0
+	var dir := _read_direction()
 
 	if dir != Vector2.ZERO:
 		_router.dispatch(
@@ -64,3 +57,24 @@ func _unhandled_input(event: InputEvent) -> void:
 					{"ability_id": ability_id}
 				)
 			)
+		elif event.keycode == KEY_SHIFT:
+			if _router == null:
+				return
+			_router.dispatch(
+				GameCommand.create(
+					BuiltinCommands.DASH, target_id, target_id, {"direction": _read_direction()}
+				)
+			)
+
+
+func _read_direction() -> Vector2:
+	var dir := Vector2.ZERO
+	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		dir.x -= 1.0
+	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		dir.x += 1.0
+	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+		dir.y -= 1.0
+	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+		dir.y += 1.0
+	return dir

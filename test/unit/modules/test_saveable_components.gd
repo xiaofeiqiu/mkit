@@ -85,6 +85,35 @@ func test_tc_svc_03_stats_roundtrip_persists_base_overrides_and_permanent_modifi
 	assert_eq(restored_modifiers.size(), 1)
 
 
+func test_tc_svc_11_stats_load_resets_missing_base_overrides_to_baseline() -> void:
+	var entity := _make_entity("Player", "player_001")
+	var stats := _add_stats(entity, {"attack_power": 24.0})
+	add_child_autofree(entity)
+	var data := stats.to_save_data()
+	assert_true((data["base_overrides"] as Dictionary).is_empty())
+	stats.set_base_stat("attack_power", 1.0)
+	assert_eq(stats.get_stat_value("attack_power"), 1.0)
+	stats.from_save_data(data)
+	assert_eq(stats.get_stat_value("attack_power"), 24.0)
+
+
+func test_tc_svc_12_stats_load_replaces_persistent_modifiers() -> void:
+	var entity := _make_entity("Player", "player_001")
+	var stats := _add_stats(entity)
+	add_child_autofree(entity)
+	stats.add_modifier(_make_modifier("mod.permanent.attack", "attack_power", 5.0, -1.0))
+	var data := stats.to_save_data()
+
+	stats.add_modifier(_make_modifier("mod.stale.attack", "attack_power", 100.0, -1.0))
+	assert_gt(stats.get_stat_value("attack_power"), 100.0)
+	stats.from_save_data(data)
+
+	assert_eq(stats.get_stat_value("attack_power"), 15.0)
+	var restored_modifiers: Array = stats.modifiers_by_stat.get("attack_power", [])
+	assert_eq(restored_modifiers.size(), 1)
+	assert_eq((restored_modifiers[0] as StatModifier).modifier_id, "mod.permanent.attack")
+
+
 func test_tc_svc_04_resource_pool_roundtrip_preserves_current_values() -> void:
 	var entity := _make_entity("Player", "player_001")
 	_add_stats(entity, {"max_mana": 100.0})

@@ -10,14 +10,14 @@
 - [x] **S3** — 装备(`EquipmentController` + 可装备 item + StatModifier,1 类)
 - [x] **S4** — 数据驱动生成实体(`EntityDefinition` / `EntitySpawner`,2 类)
 - [x] **S5** — 敌人 AI(`Brain` / `SimpleAIEnemyBrain` / `Blackboard`,3 类)
-- [ ] **S6** — 试炼洞窟:Roguelike 单局(Room / Run / Dungeon / Reward,13 类,方案 A)
-- [ ] **S7** — 存档协调(`SaveManager` / `Saveable` / `SaveableComponent` / `SaveMigration`,4 类)
-- [ ] **S8** — 平台服务钩子(Analytics / Ads / IAP / CloudSave,8 类)
-- [ ] **S9** — 表现层 + 运行时工具(DamageNumber / VFX / SpawnScene / Feedback / UIManager / Debug / Pool / Time,8 类)
-- [ ] **S10** — 收尾:就近交互 / 手动任务 effect / 冲刺(`InteractionComponent` / `AdvanceObjectiveEffect` / `CompleteQuestEffect` / `DashAction`,4 类)
+- [x] **S6** — 试炼洞窟:Roguelike 单局(Room / Run / Dungeon / Reward,13 类,方案 A)
+- [x] **S7** — 存档协调(`SaveManager` / `Saveable` / `SaveableComponent` / `SaveMigration`,4 类)
+- [x] **S8** — 平台服务钩子(Analytics / Ads / IAP / CloudSave,8 类)
+- [x] **S9** — 表现层 + 运行时工具(DamageNumber / VFX / SpawnScene / Feedback / UIManager / Debug / Pool / Time,8 类)
+- [x] **S10** — 收尾:就近交互 / 手动任务 effect / 冲刺(`InteractionComponent` / `AdvanceObjectiveEffect` / `CompleteQuestEffect` / `DashAction`,4 类)
 - [ ] **S11** — 退役 phase0–7,demo 收敛到唯一入口(`bootstrap_phase8` / `project.godot` 主场景)
 
-覆盖账:当前 ✅ 68 类;S0–S10 接入剩余 64 类(其中 `RandomService` / `ActionContext` / `StatsComponent` 3 个随宿主 slice 顺带断言);全部完成后 = **132 / 132**,零豁免。详见 §2 矩阵与附录映射表。
+覆盖账:当前 ✅ **132 / 132** 类;S0–S10 已全部接入并断言,零豁免。下一步仅剩 S11 demo 入口收敛与旧 phase 退役。
 
 ---
 
@@ -47,15 +47,14 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 | 档位 | 含义 | 数量 |
 |------|------|------|
-| ✅ 已覆盖 | phase8 当前(交互或 auto-run)会真实触发,且已被集成/单元测试断言 | **57** |
-| 🟡 已挂载/可达但未断言 | 节点已在 player/beast/elder scene 里,或 player input 路径可触发,但 auto-run + 集成测试没驱动/没断言(部分还缺内容) | **21** |
-| ❌ 完全缺失 | addon 有该类,但 phase8(场景+内容+测试)完全没用到 | **54** |
+| ✅ 已覆盖 | phase8 当前(交互或 auto-run)会真实触发,且已被集成/单元测试断言 | **132** |
+| 🟡 已挂载/可达但未断言 | 节点已在 player/beast/elder scene 里,或 player input 路径可触发,但 auto-run + 集成测试没驱动/没断言(部分还缺内容) | **0** |
+| ❌ 完全缺失 | addon 有该类,但 phase8(场景+内容+测试)完全没用到 | **0** |
 
-> 关键发现:`player.tscn` 已经自带一整条 **command → HFSM → action** 输入链
-> (`player_input_reader.gd`:WASD 走 `MOVE`、Space/J 走 `ATTACK`、Q 走 `CAST_ABILITY`)。
-> 这些类在**交互运行**时其实可达,只是 `phase8_village_rpg.gd` 的 auto-run / 集成测试从不驱动它们,
-> 且 `Q` 引用的 `ability.fireball_basic` 在 phase8 内容里并不存在(cast 必失败)。
-> 所以"🟡"很多并非要新写系统,而是要 **让自动化路径真正驱动并断言这些已有链路** + 补内容。
+> 关键发现:`player.tscn` 现在已经由 phase8 内容 override 接入完整 **command → HFSM → action**
+> 输入链(`MOVE` / `ATTACK` / `CAST_ABILITY` / `DASH`),auto-run 与
+> `test_scene8_full_tour_integration.gd` 会真实驱动并断言这些路径。S0–S10 已清零所有 🟡 / ❌,
+> 剩余工作只是不改变覆盖面的 demo 入口收敛(S11)。
 
 ---
 
@@ -65,18 +64,18 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 | 文件夹 | ✅ 已覆盖 | 🟡 可达未断言 | ❌ 缺失 |
 |--------|-----------|----------------|---------|
-| services | `SceneRouter` | `RandomService`(loot/combat 内部用) | `TimeService` `ObjectPool` `AnalyticsService(+Mock)` `AdService(+Mock)` `IAPService(+Mock)` `CloudSaveService(+Mock)` |
-| debug | — | — | `DebugOverlay` |
-| effects | `EffectExecutor` `GameEffect` `EffectResult` `DealDamageEffect` `HealEffect` `GrantItemEffect` `ApplyStatusEffect` `ApplyStatModifierEffect` `LogEffect` | — | `SpawnSceneEffect` |
-| save | — | `SaveManager` `Saveable` `SaveableComponent` | `SaveMigration` |
+| services | `SceneRouter` `RandomService` `TimeService` `ObjectPool` `AnalyticsService(+Mock)` `AdService(+Mock)` `IAPService(+Mock)` `CloudSaveService(+Mock)` | — | — |
+| debug | `DebugOverlay` | — | — |
+| effects | `EffectExecutor` `GameEffect` `EffectResult` `DealDamageEffect` `HealEffect` `GrantItemEffect` `ApplyStatusEffect` `ApplyStatModifierEffect` `LogEffect` `SpawnSceneEffect` | — | — |
+| save | `SaveManager` `Saveable` `SaveableComponent` `SaveMigration` | — | — |
 | bootstrap | `GameBootstrap` | — | — |
-| context | `GameplayContext` `ActionContext` | — | `Blackboard` |
+| context | `GameplayContext` `ActionContext` `Blackboard` | — | — |
 | commands | `CommandRouter` `CommandReceiver` `GameCommand` `BuiltinCommands` | — | — |
 | conditions | `Condition` `ConditionEvaluator` `CooldownReadyCondition` `TargetInRangeCondition` | — | — |
 | events | `EventRouter` `DomainEvent` | — | — |
 | registry | `ResourceDatabase` `ContentRegistry` `ContentValidationResult` | — | — |
 | state_machine | `StateMachine` `State` | — | — |
-| actions | `ActionRunner` `GameAction` `TimedAttackAction` `CastAction` | — | `DashAction` |
+| actions | `ActionRunner` `GameAction` `TimedAttackAction` `CastAction` `DashAction` | — | — |
 
 ### Modules(81)
 
@@ -89,16 +88,16 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 | abilities | `AbilityController` `AbilityDefinition` `AbilityInstance` | — | — |
 | status_effects | `StatusEffectController` `StatusEffectInstance` `StatusEffectDefinition` | — | — |
 | inventory | `InventoryController` `InventoryModel` `InventorySlot` `ItemDefinition` `ItemInstance` `EquipmentController` | — | — |
-| loot | `LootSystem` `LootTableDefinition` `LootEntry` `LootRollResult` | — | `RewardSystem` `RewardDefinition` `RewardOption` |
-| room | — | — | `RoomDefinition` `RoomRuntime` `RoomController` `RoomGraph` `RoomNode` `RunDirector` `RunState` `DungeonGenerator` |
+| loot | `LootSystem` `LootTableDefinition` `LootEntry` `LootRollResult` `RewardSystem` `RewardDefinition` `RewardOption` | — | — |
+| room | `RoomDefinition` `RoomRuntime` `RoomController` `RoomGraph` `RoomNode` `RunDirector` `RunState` `DungeonGenerator` | — | — |
 | world | `WorldRouter` `ZoneDefinition` `Portal` `SpawnPoint` | — | — |
-| progression | `ProgressionSystem` `ProgressionState` `ExperienceComponent` `ExperienceCurve` | — | `UpgradeDefinition` |
+| progression | `ProgressionSystem` `ProgressionState` `ExperienceComponent` `ExperienceCurve` `UpgradeDefinition` | — | — |
 | shop | `ShopController` `ShopDefinition` `ShopEntry` | — | — |
-| quest | `QuestSystem` `QuestDefinition` `QuestObjectiveDefinition` `QuestState` `QuestLog` `AcceptQuestEffect` | — | `AdvanceObjectiveEffect` `CompleteQuestEffect` |
+| quest | `QuestSystem` `QuestDefinition` `QuestObjectiveDefinition` `QuestState` `QuestLog` `AcceptQuestEffect` `AdvanceObjectiveEffect` `CompleteQuestEffect` | — | — |
 | dialogue | `DialogueController` `DialogueDefinition` `DialogueNode` `DialogueChoice` `DialogueInteractable` `DialogueRuntime` | — | — |
-| interaction | `Interactable` | — | `InteractionComponent` |
-| ai | — | — | `Brain` `SimpleAIEnemyBrain` |
-| ui | `DialogueUI` `QuestLogUI` `ShopUI` `AudioManager` | — | `FeedbackSystem` `UIManager` `DamageNumberSystem` `VFXSpawner` `RewardSelectionUI` |
+| interaction | `Interactable` `InteractionComponent` | — | — |
+| ai | `Brain` `SimpleAIEnemyBrain` | — | — |
+| ui | `DialogueUI` `QuestLogUI` `ShopUI` `AudioManager` `FeedbackSystem` `UIManager` `DamageNumberSystem` `VFXSpawner` `RewardSelectionUI` | — | — |
 
 ---
 
@@ -109,8 +108,8 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
    这种专有名词就该在 `game/`。
 2. **"用进去"= 真实触发 + 断言。** 仅把节点挂进 scene 不算覆盖。每个 slice 必须:
    (a) 场景/内容接好;(b) `_run_auto_loop` 扩展驱动它;(c) 集成测试断言可观察结果(信号 / 状态 / HP / 货币)。
-3. **优先复用既有链路,而不是新造机制。** 大量 🟡 类只是没被自动化驱动——先把 `player_input_reader`
-   的 command→HFSM→action 链接进 auto-run/集成断言,再补真正缺的内容。
+3. **优先复用既有链路,而不是新造机制。** 已有 `player_input_reader`
+   的 command→HFSM→action 链已接进 auto-run/集成断言,新增内容只补真实缺口。
 4. **内部数据类随宿主覆盖。** `DomainEvent` `InventorySlot` `DamageRequest` `DialogueRuntime`
    `ContentValidationResult` `RunState` `RoomNode` `RoomGraph` `RewardOption` 这类只在别的类内部出现,
    覆盖其宿主即视为覆盖,不单独"塞进场景"。
@@ -212,12 +211,12 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 
 ### S6 — 试炼洞窟:Roguelike 单局(见 §3 方案 A)
 
-**新覆盖(11):** `RoomDefinition` `RoomRuntime` `RoomController` `RoomGraph` `RoomNode`
+**新覆盖(13):** `RoomDefinition` `RoomRuntime` `RoomController` `RoomGraph` `RoomNode`
 `RunDirector` `RunState` `DungeonGenerator` `RewardSystem` `RewardDefinition` `RewardOption`
 `RewardSelectionUI` `UpgradeDefinition`。
 
 - **内容:** 2–3 个 `RoomDefinition` + 对应 room 子场景(各含 `RoomController`);若干 `RewardDefinition`
-  (其一携带 `UpgradeDefinition` 永久升级)。
+  (其一对应 `UpgradeDefinition`,奖励与 upgrade 共享永久属性效果)。
 - **场景:** 在 `field` 加 "TrialCave" 交互入口;phase8 持有 `RunDirector` + `RoomRoot` host;
   入口触发 `RunDirector.start_run(seed)` →(`DungeonGenerator` 生成 `RoomGraph`/`RoomNode`,
   `RunState` 跟踪)→ 每间清怪 `on_room_cleared` → `choosing_reward` → `RewardSelectionUI` 选项
@@ -225,18 +224,21 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 - **测试:** 跑通 3 房间 run;选 reward 后效果生效(如 upgrade 永久加成);`run_finished` 为 completed。
 - **生命周期注意:** 复用同一 player;run 期间 SceneRouter host 与 World host 的切换要参考现有
   `EmbeddedSceneRouter`,避免双重 host 抢占 `scenes` 服务。这是 S6 的主要工程难点,需要专门处理而非回避。
+- **状态:** ✅ `test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade`
+  覆盖 3 房间 run、`DungeonGenerator`/`RoomGraph`/`RoomNode`、`RewardSelectionUI` 选择、
+  `RewardSystem` 应用 trial reward 效果、`RunState` 记录 `UpgradeDefinition`、`run_finished("completed")`。
 
 ### S7 — 存档协调(场景级 save/load + 组件 round-trip + migration)
 
 **新覆盖(4 抬到 ✅):** `SaveManager`(scene-level)`Saveable` `SaveableComponent`(组件 round-trip)
 `SaveMigration`。
 
-- **场景:** 新增 `S`/`L` 存读档,调用 `save.save_game(ServiceRegistry)` / `load_game(...)`;
+- **场景:** 新增 `S`/`L` 存读档,调用 `save.save_game(get_tree().root)` / `load_game(...)`;
   覆盖 player 全部 `SaveableComponent`(`HealthComponent` `StatsComponent` `ResourcePoolComponent`
   `StatusEffectController` `AbilityController` `InventoryController` `EquipmentController`)round-trip。
 - **migration:** 加一个 `SaveMigration`(version bump 示例)演示旧 payload 升级。
 - **测试:** 存→改状态→读后,技能 cooldown/charges、burn status、装备、背包、stats、mana 全部恢复;
-  migration 把旧版本字段补齐。可在现有 `test_village_rpg_loop_integration` 的 save 段扩展到组件级。
+  migration 把旧版本字段补齐。已由 `test_scene8_full_tour_integration` 的 S7 用例覆盖组件级 round-trip。
 
 ### S8 — 平台服务钩子(参考 `phase7_platform_slice.gd`)
 
@@ -246,6 +248,8 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 - **ads:** player 死亡 → `ads.show_rewarded_ad("revive")` → `rewarded_ad_completed` 回调里 heal 复活。
 - **iap:** shop 内"金币包"项 → `iap.purchase("com.mkit.phase8.gold_pack")` → 完成回调 `add_currency`。
 - **cloud_save:** 存档后 `cloud_save.save_to_cloud("phase8_profile", data)` / `load_from_cloud(...)`。
+- **状态:** ✅ `test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_save`
+  覆盖 analytics 事件、rewarded revive、IAP 金币包、cloud save/load round-trip。
 - **测试:** 用 `*ServiceMock` 断言收到调用并触发回调(mock 是异步延时,需 `await`)。
 
 ### S9 — 表现层 + 运行时工具
@@ -259,6 +263,8 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
 - **DebugOverlay:** 调试覆盖层显示已注册服务 / 当前 zone / run 状态。
 - **TimeService:** 在 demo 层用 `time` 服务驱动计时(替代裸 `delta`),验证其可用。
 - **测试:** 命中产生 damage number 节点、pool 复用计数、overlay 列出服务。
+- **状态:** ✅ `test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debug_runtime`
+  覆盖 damage number、VFX、`SpawnSceneEffect`、feedback、UI 面板开关、debug overlay、pool 复用与 time 服务。
 
 ### S10 — 收尾:剩余 effect / 交互 / 冲刺
 
@@ -271,8 +277,11 @@ addon 共 **132** 个 `class_name`(kernel 51 + modules 81)。按 phase8 当前�
   (区别于现有"敌死事件自动推进"),覆盖这两个 effect。
 - **DashAction:** `Shift` 冲刺 command → dash state/action。
 - **测试:** 就近交互成功开对话/传送;手动 effect 推进/完成任务;dash 产生位移。
+- **状态:** ✅ `test_tc_int_scene8_10_interaction_manual_quest_and_dash`
+  覆盖 portal/elder 通过 `InteractionComponent.try_interact()` 聚焦并触发、`quest.phase8.supply_request`
+  通过 `AdvanceObjectiveEffect` + `CompleteQuestEffect` 手动完成、`DashAction` 产生位移并回到 idle。
 
-> S0–S10 全部落地后,§2 矩阵中 🟡 与 ❌ 清零(Roguelike 一组按 §3 方案 A 在 S6 覆盖,零豁免)。
+> S0–S10 已全部落地,§2 矩阵中 🟡 与 ❌ 清零(Roguelike 一组按 §3 方案 A 在 S6 覆盖,零豁免)。
 
 ### S11 — 退役旧 demo 场景,收敛到唯一入口
 
@@ -343,7 +352,7 @@ $GODOT game/demo/bootstrap_phase8.tscn -- --phase8-auto-run
 
 - §2 覆盖矩阵的 🟡 / ❌ 清零;无法/不值得纳入 phase8 的类进入"显式豁免"表并写明理由。
 - `make ut` 全绿;贴真实结果(脚本数 / 测试数 / 断言数)。
-- `--phase8-auto-run` headless 跑通并 `quit(0)`,`_phase8_loop_complete()` 通过;completion gate 必须覆盖 command combat kill、firebolt cast、burn tick 和 `phase8_burn_tick` LogEffect。
+- `--phase8-auto-run` headless 跑通并 `quit(0)`,`_phase8_loop_complete()` 通过;completion gate 必须覆盖 command combat kill、firebolt cast、burn tick、`phase8_burn_tick` LogEffect 和 save/load round-trip。
 - 新建 `.gd` 都生成并提交 `.uid`(跑一次 `make ut` 让 Godot 写入,勿手写 UID)。
 - 改了公共接口的类同步更新 `docs/ref/<ClassName>.md` 及相关 layer/pipeline 文档(中文概念段保持中文)。
 - 无 `game → addon` 反向依赖;无具体内容硬编码进 `addons/mkit/`(新机制缺口在 addon 补通用实现,

@@ -1,7 +1,9 @@
 class_name DebugOverlay
 extends CanvasLayer
 @export var watch_entity_path: NodePath
+@export var status_provider_path: NodePath
 @export var visible_on_start: bool = true
+@export var show_registered_services: bool = true
 var _label: Label = null
 var _events: EventRouter = null
 
@@ -27,6 +29,9 @@ func toggle() -> void:
 
 func _build_text() -> String:
 	var lines: Array[String] = []
+	if show_registered_services and ServiceRegistry.has_method("get_registered_service_ids"):
+		lines.append("Services: %s" % ", ".join(ServiceRegistry.get_registered_service_ids()))
+	_append_status_provider_lines(lines)
 	var entity := get_node_or_null(watch_entity_path)
 	if entity != null:
 		var sm := entity.get_node_or_null("StateMachine") as StateMachine
@@ -49,3 +54,15 @@ func _build_text() -> String:
 			names.append(e.event_type)
 		lines.append("Recent events: %s" % ", ".join(names))
 	return "\n".join(lines)
+
+
+func _append_status_provider_lines(lines: Array[String]) -> void:
+	var provider := get_node_or_null(status_provider_path)
+	if provider == null or not provider.has_method("get_debug_status_lines"):
+		return
+	var raw_lines = provider.call("get_debug_status_lines")
+	if raw_lines is Array:
+		for line in raw_lines:
+			lines.append(str(line))
+	elif str(raw_lines) != "":
+		lines.append(str(raw_lines))

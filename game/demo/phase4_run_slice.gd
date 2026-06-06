@@ -4,8 +4,7 @@ extends Node2D
 #   Start a run. Enter a generated room.
 #   Detect room clear. Choose reward. Advance to the next room.
 #
-# Controls: WASD/Arrows = move, Space/J = melee, Q = fireball
-#           1/2/3 = pick reward when prompted
+# Controls: WASD/Arrows = move, Space/J = melee, 1/2/3 = pick reward when prompted
 
 @onready var _run_director: RunDirector = $RunDirector
 @onready var player: Node = $Player

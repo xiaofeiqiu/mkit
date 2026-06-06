@@ -83,7 +83,7 @@ func _initialize_command_receiver(entity: Node) -> void:
 	var receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
 	if receiver == null:
 		return
-	receiver.receiver_id = identity.entity_id
+	receiver.configure_receiver_id(identity.entity_id)
 
 
 func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:

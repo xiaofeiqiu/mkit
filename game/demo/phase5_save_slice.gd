@@ -4,8 +4,7 @@ extends Node2D
 #   Complete a run. Gain currency. Restart game.
 #   Persistent state restores correctly.
 #
-# Controls: WASD/Arrows = move, Space/J = melee, Q = fireball
-#           1/2/3 = pick reward when prompted
+# Controls: WASD/Arrows = move, Space/J = melee, 1/2/3 = pick reward when prompted
 #           S = manual save, L = load, U = unlock upgrade (costs 100 meta_currency)
 
 @onready var _run_director: RunDirector = $RunDirector

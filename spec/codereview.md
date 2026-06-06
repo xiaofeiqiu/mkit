@@ -1,143 +1,64 @@
 # Code Review — Scene8 S5 (Enemy AI)
 
-**Scope:** working-tree changes vs `origin/main` (Scene8 step S5 — enemy AI).
-**Reviewer effort:** extra-high recall pass.
-**Build/test status:** `4.7.dev5` · full `test_scene8_full_tour_integration.gd` → **6/6 pass**;
-`test_tc_int_scene8_05` re-run 5× → **5/5 pass** (no observed flakiness).
+**Scope:** `main` branch vs prior commit (`git diff main~1...HEAD`)
+**Effort:** high-recall, 7-angle finder pass + 1-vote verifier per candidate
+**Date:** 2026-06-06
 
-## Files under review
-
-- `addons/mkit/modules/ai/brain.gd` — adds `blackboard: Blackboard`.
-- `addons/mkit/modules/ai/simple_ai_enemy_brain.gd` — writes intent/target/distance/move_direction
-  to the blackboard, adds cached `_get_target()`.
-- `game/demo/phase8/entities/states/{enemy_idle,enemy_move,enemy_attack}_state.gd` — new HFSM states (untracked).
-- `game/demo/phase8/entities/field_beast.tscn` — HFSM tree, `HitboxComponent`, `SimpleAIEnemyBrain`, `move_speed`.
-- `game/demo/entities/player/player.tscn` — adds `HurtboxComponent` so the player can take hits.
-- `game/demo/phase8/resources/phase8_rpg_content.tres` — `move_speed` on the field-beast definition.
-- `test/integration/test_scene8_full_tour_integration.gd` — new test 05 + `_disable_beast_ai` helper on tests 00–03.
-- `docs/ref/{Brain,SimpleAIEnemyBrain}.md`, `spec/scene8test.md` — doc/status updates.
-
-## Resolution
-
-| # | Finding | Status |
-|---|---------|--------|
-| 1 | `_get_target()` stale freed-target cache | ✅ **Fixed** — `is_instance_valid()` + `erase_value` on miss |
-| 2 | Brain `move_direction` blackboard write | ⏸ **Kept by design** — intentional, documented observability (parallels `distance`/`intent` in `Brain.md`) |
-| 3 | Shared hardcoded `receiver_id` | ⏸ **Accepted (dormant)** — guarded by single-beast spawn; a real fix needs per-instance `entity_id`+`receiver_id`, out of scope for this slice |
-| 4 | Duplicated player/enemy melee states | ⏸ **Deferred** — refactor of working demo content, disproportionate to a demo |
-| 5 | Test 05 auto-think race | ✅ **Hardened** — auto-think disabled after the autonomous `_ready` cache is asserted; `think()` driven explicitly |
-
-Re-verified after the fixes: `test_tc_int_scene8_05` 5/5 reruns · full `test_scene8_full_tour_integration.gd` 6/6 · `test_ui_interaction_ai_scene_integration.gd` 5/5 · module unit suite 214/214.
-
-## Verdict
-
-The slice is coherent and the combat/AI wiring is correct: the brain dispatches to its own
-`entity_id`, the `CommandReceiver` is registered under the same id, the HFSM routes
-MOVE/ATTACK to the right states, and the beast `HitboxComponent` → player `HurtboxComponent`
-→ `CombatResolver` → `HealthComponent` chain lands exactly 8 damage (no defense, faction-filtered
-so neither the player nor the beast can hit itself). No crashing or happy-path defects found.
-Findings below are one latent correctness bug in reusable addon code plus cleanup/altitude items.
-
----
-
-## Findings
-
-### 1. (Medium — latent correctness, addon) `_get_target()` never refreshes a freed/replaced target
-
-`addons/mkit/modules/ai/simple_ai_enemy_brain.gd:40`
-
-```gdscript
-func _get_target() -> Node:
-	var stored := blackboard.get_value("target", null) as Node
-	if stored != null:            # <-- a freed Node is NOT null here
-		return stored
-	stored = get_tree().get_first_node_in_group(target_group)
-	...
+```json
+[
+  {
+    "file": "game/demo/entities/player/player_input_reader.gd",
+    "line": 57,
+    "summary": "Q-key ability cast silently broken in all pre-phase8 scenes after hardcoded ability_id was replaced with an unset @export",
+    "failure_scenario": "cast_ability_id defaults to '' so the early-return guard fires on every Q press in phase1/phase4/phase5 scenes — those scenes never override the export. Players lose the ability to cast from the keyboard in all phases except phase8 where the override was wired."
+  },
+  {
+    "file": "game/demo/phase8/entities/states/enemy_attack_state.gd",
+    "line": 25,
+    "summary": "Enemy permanently stuck in Attack state when the 'actions' service is unavailable at enter() time",
+    "failure_scenario": "If ServiceRegistry.get_service('actions') returns null, the TimedAttackAction is created and connected to _on_action_completed but never started via runner.start_action(). The completed signal never fires, so _on_action_completed never calls request_transition('Enemy/Idle'). The enemy has no other exit path from this state and is locked forever."
+  },
+  {
+    "file": "game/demo/phase8_village_rpg.gd",
+    "line": 649,
+    "summary": "_command_combat_succeeded never set when the scripted fallback strike kills the beast",
+    "failure_scenario": "_engage_field_beast_via_commands() sets _command_combat_succeeded = true only when health.dead is true immediately after _attack_field_beast(). When the command chain stalls, it calls _defeat_field_beast() (which may kill the beast) and then returns — _command_combat_succeeded stays false. The auto-loop milestone check at line 1829 then reports 'command_combat' as missing even though combat was completed."
+  },
+  {
+    "file": "game/demo/phase8_village_rpg.gd",
+    "line": 1527,
+    "summary": "_field_beast() relies on the implicit node name 'FieldBeast' that EntitySpawner does not guarantee",
+    "failure_scenario": "EntitySpawner.spawn_entity() calls scene.instantiate() and parent.add_child(entity). Godot deduplicates names on add_child, so a second spawn (e.g., after the beast is freed but before the zone refreshes the dedup table) produces 'FieldBeast2'. root.get_node_or_null('FieldBeast') returns null and all subsequent combat checks (_defeat_field_beast, _engage_field_beast_via_commands) silently bail with 'field beast not found'."
+  },
+  {
+    "file": "game/demo/phase8/entities/states/enemy_attack_state.gd",
+    "line": 39,
+    "summary": "handle_command() writes move_direction to the shared blackboard during Attack, polluting subsequent Move state reads",
+    "failure_scenario": "Attack state consumes MOVE/STOP_MOVE commands and stores them in blackboard.set_value('move_direction', ...). Attack never reads this key itself. On transition to Enemy/Move, MoveState.physics_update immediately reads 'move_direction' and drives movement before the Brain issues a fresh command (up to think_interval=0.2 s later). A stale ZERO stored by STOP_MOVE causes an instant re-transition to Idle, breaking post-attack repositioning."
+  },
+  {
+    "file": "game/demo/phase8/entities/states/enemy_move_state.gd",
+    "line": 33,
+    "summary": "_move_speed() calls get_node_or_null('Components/StatsComponent') on every physics_update tick",
+    "failure_scenario": "get_node_or_null performs a scene-tree path lookup each call. For an entity with a non-trivial subtree this runs every physics frame (60 Hz). Caching the StatsComponent reference in _ready() or on first access would eliminate the repeated lookup at no correctness cost."
+  },
+  {
+    "file": "game/demo/phase8/entities/states/enemy_move_state.gd",
+    "line": 12,
+    "summary": "dir.normalized() called each physics frame on a direction already stored normalized by the Brain",
+    "failure_scenario": "SimpleAIEnemyBrain stores direction as (target - owner).normalized() in the blackboard. MoveState reads it and calls .normalized() again unconditionally — a redundant sqrt per frame. The Brain could store the pre-normalized value or MoveState could trust the stored value, not both normalize."
+  },
+  {
+    "file": "addons/mkit/modules/entity/entity_spawner.gd",
+    "line": 77,
+    "summary": "EntitySpawner encodes the CommandReceiver boot protocol, coupling the spawner to a specific node layout detail",
+    "failure_scenario": "_initialize_command_receiver() reaching into 'CommandReceiver' by path and pre-setting receiver_id replicates knowledge that already lives in CommandReceiver._ready(). If CommandReceiver changes its registration timing or id-derivation logic, EntitySpawner must be updated in sync. The correct fix is to expose a configure(id) method on CommandReceiver so the protocol is owned by one class."
+  },
+  {
+    "file": "addons/mkit/modules/ai/brain.gd",
+    "line": 8,
+    "summary": "Brain.blackboard and StateMachine.blackboard are separate instances sharing overlapping key names with no documented contract",
+    "failure_scenario": "Brain writes 'intent', 'distance', 'move_direction', 'facing', 'target' to its own blackboard; States read 'move_direction' and 'facing' from StateMachine.blackboard. A future maintainer writing a state that reads from blackboard (thinking it shares Brain writes) gets stale/default values. The design needs either one shared blackboard or a documented boundary."
+  }
+]
 ```
-
-`!= null` does not detect a freed Node — after the target is freed (player death+respawn,
-zone unload that keeps the beast, target leaving its group), the blackboard still holds a
-dangling reference that compares `!= null` as `true`. `_get_target()` then returns the dead
-node forever and never re-queries `target_group`. `think()` masks the symptom
-(`target as Node2D` → `null` → falls to `idle`) but the brain can never re-acquire a live
-target. This is reusable framework code, so every game using `SimpleAIEnemyBrain` inherits it.
-
-The current tests don't hit it because targets aren't freed mid-life.
-
-**Fix:** validate with `is_instance_valid()`:
-
-```gdscript
-var stored := blackboard.get_value("target", null) as Node
-if is_instance_valid(stored):
-	return stored
-```
-
-(and clear/overwrite the stale key when re-querying).
-
-### 2. (Low — cleanup/altitude, addon) AI memory is split across two un-synced `Blackboard` instances; `move_direction` write is dead
-
-`addons/mkit/modules/ai/simple_ai_enemy_brain.gd:33`, `brain.gd:8` vs `state_machine.gd:10`
-
-`Brain.blackboard` and `StateMachine.blackboard` are two distinct `Blackboard.new()` objects.
-The brain writes `move_direction` to *its* blackboard (line 33), but the move state reads
-`move_direction` from the *StateMachine's* blackboard (`state.gd:16` → `machine.blackboard`),
-which is fed independently from the MOVE command payload. So the brain's `move_direction`
-write is dead — movement only works via the command payload. `target/intent/distance` on the
-brain blackboard are genuinely useful (observed by tests/DebugOverlay), but the `move_direction`
-line is misleading: it looks like it couples the brain to the HFSM and does not.
-
-**Fix:** drop the `blackboard.set_value("move_direction", direction)` line, or document that the
-brain blackboard is a read-only observation scratchpad distinct from the HFSM blackboard.
-
-### 3. (Low — reusability, dormant) Hardcoded `receiver_id` shared by every FieldBeast instance
-
-`game/demo/phase8/entities/field_beast.tscn:36` (`receiver_id = "enemy.phase8.field_beast"`)
-
-The brain dispatches commands to its own `entity_id`, and `CommandRouter` maps an id to a
-single receiver (last-registered wins, `command_router.gd:15`). Every `FieldBeast` instance
-carries the same hardcoded `receiver_id`, so with multiple beasts alive their brains would all
-drive one receiver while the others sit inert. Newly *reachable* because the AI now self-issues
-commands (previously nothing auto-dispatched to this id). The demo dodges it only because
-`_spawn_field_beast()` (`phase8_village_rpg.gd:841`) enforces a single beast.
-
-**Fix:** if multi-enemy is ever needed, derive a per-instance receiver id (e.g. from the spawned
-node's instance id) at spawn time rather than baking it into the shared scene.
-
-### 4. (Low — altitude/cleanup, game) Enemy melee states duplicate the player melee states
-
-`game/demo/phase8/entities/states/enemy_attack_state.gd` vs `game/demo/entities/player/states/player_attack_state.gd`
-
-The new enemy idle/move/attack states largely re-implement the player states' command handling,
-facing-from-context logic, `TimedAttackAction` wiring, and the magic `28.0` melee offset
-(`enemy_attack_state.gd:14`). Acceptable for demo content, but the shared melee attack-state
-behavior is a candidate for a reusable base state so the reach offset and action setup live in
-one place.
-
-### 5. (Informational — test) Test 05 drives `brain.think()` manually while the AI is left enabled
-
-`test/integration/test_scene8_full_tour_integration.gd:447`
-
-Unlike tests 00–03 (which call `_disable_beast_ai`), test 05 leaves `Brain.enabled == true`, so
-`Brain._process` auto-fires `think()` on idle frames during the `await ... physics_frame` waits,
-racing the manual `think()` calls and the exact command-history / state / `hp_before - 8.0`
-assertions. It holds because the choreography keeps an auto-started attack action from reaching
-its 0.05 s active window within the ~2-frame measured budget — verified stable (5/5 reruns under
-fixed headless deltas). Flagged as fragile-by-construction: a change to `think_interval`, the
-action durations, or the frame budget could break it. Optional hardening: disable the brain and
-drive `think()` purely manually (as the other tests do), or assert ranges rather than exact deltas.
-
----
-
-## Non-issues confirmed during review
-
-- **Self-damage / friendly fire:** faction filtering (`HitboxComponent._is_valid_target`) blocks
-  the player's own hitbox (`target_factions ["enemy"]`) from its new hurtbox, and the beast's
-  hitbox (`["player"]`) from its own/other beasts' hurtboxes. Default collision layers (all 1)
-  are fine because the faction filter, not layers, gates hits.
-- **Lingering active hitbox:** `TimedAttackAction` disables the hitbox on startup, on `complete`,
-  and on `cancel` — no residual active hitbox after an attack.
-- **Damage math:** beast `base_damage 8` + beast `attack_power 0` − player `defense 0` = exactly
-  `8.0`, matching the test assertion.
-- **`move_speed` consistency:** the field-beast scene `StatsComponent` and the `EntityDefinition`
-  in `phase8_rpg_content.tres` both carry `move_speed = 120.0`, so the spawned beast reports 120
-  with empty base-overrides (asserted by test 04).

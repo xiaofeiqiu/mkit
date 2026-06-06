@@ -61,11 +61,15 @@ func _instantiate(scene_path: String) -> Node:
 
 func _activate(node: Node) -> void:
 	node.process_mode = Node.PROCESS_MODE_INHERIT
+	if node is CanvasItem:
+		(node as CanvasItem).visible = true
 	if node.has_method("on_pool_acquired"):
 		node.call("on_pool_acquired")
 
 
 func _deactivate(node: Node) -> void:
 	node.process_mode = Node.PROCESS_MODE_DISABLED
+	if node is CanvasItem:
+		(node as CanvasItem).visible = false
 	if node.has_method("on_pool_released"):
 		node.call("on_pool_released")

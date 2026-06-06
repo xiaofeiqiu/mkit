@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/demo/phase8/ui/phase8_hit_vfx.gd" id="1_hit"]
+
+[node name="Phase8HitVFX" type="Node2D"]
+script = ExtResource("1_hit")
+
+[node name="Flash" type="Polygon2D" parent="."]
+color = Color(1, 0.7, 0.15, 0.8)
+polygon = PackedVector2Array(-10, 0, 0, -10, 10, 0, 0, 10)

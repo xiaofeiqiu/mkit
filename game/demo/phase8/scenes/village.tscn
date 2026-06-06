@@ -1,7 +1,13 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
+
+[sub_resource type="CircleShape2D" id="CircleShape_room_portal"]
+radius = 52.0
+
+[sub_resource type="CircleShape2D" id="CircleShape_field_portal"]
+radius = 56.0
 
 [node name="Village" type="Node2D"]
 
@@ -27,14 +33,30 @@ position = Vector2(600, 260)
 script = ExtResource("1_spawn")
 spawn_id = "from_field"
 
-[node name="ToRoom" type="Node" parent="."]
+[node name="ToRoom" type="Area2D" parent="."]
+position = Vector2(320, 174)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToRoom"]
+shape = SubResource("CircleShape_room_portal")
+
+[node name="Interactable" type="Node" parent="ToRoom"]
 script = ExtResource("2_portal")
 interaction_id = "portal.phase8.village_to_room"
 display_text = "Enter elder room"
 target_zone_id = "zone.phase8.village_room"
 target_spawn_id = "room_entry"
 
-[node name="ToField" type="Node" parent="."]
+[node name="ToField" type="Area2D" parent="."]
+position = Vector2(610, 260)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ToField"]
+shape = SubResource("CircleShape_field_portal")
+
+[node name="Interactable" type="Node" parent="ToField"]
 script = ExtResource("2_portal")
 interaction_id = "portal.phase8.village_to_field"
 display_text = "Leave for field"

@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="2_identity"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="3_receiver"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="4_state_machine"]
 [ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_interactable.gd" id="5_dialogue"]
+
+[sub_resource type="CircleShape2D" id="CircleShape_interaction"]
+radius = 54.0
 
 [node name="Elder" type="CharacterBody2D" groups=["npc"]]
 script = ExtResource("1_root")
@@ -29,6 +32,20 @@ auto_start = false
 [node name="Controllers" type="Node" parent="."]
 
 [node name="DialogueInteractable" type="Node" parent="Controllers"]
+script = ExtResource("5_dialogue")
+interaction_id = "interaction.phase8.elder"
+display_text = "Talk"
+dialogue_id = "dialogue.phase8.elder"
+npc_id = "npc.phase8.elder"
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("CircleShape_interaction")
+
+[node name="Interactable" type="Node" parent="InteractionArea"]
 script = ExtResource("5_dialogue")
 interaction_id = "interaction.phase8.elder"
 display_text = "Talk"

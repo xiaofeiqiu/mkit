@@ -59,7 +59,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 	target.global_position = Vector2(96.0, 128.0)
 	world.add_child(target)
 
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	assert_not_null(effects)
 
 	var source_effect := _make_spawn_effect(false)
@@ -124,7 +124,7 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	director.player_entity_id = PLAYER_ID
 	world.add_child(director)
 
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events := ServiceRegistry.get_service("events") as EventService
 	assert_not_null(events)
 	watch_signals(director)
 	watch_signals(events)
@@ -210,7 +210,7 @@ func test_tc_int_spawn_room_run_03_object_pool_acquire_release_roundtrip() -> vo
 	_save_spawn_probe_scene()
 	var bootstrap := GameBootstrap.new()
 	add_child_autofree(bootstrap)
-	var pool := ServiceRegistry.get_service("pool") as ObjectPool
+	var pool := ServiceRegistry.get_service("pool") as PoolService
 	assert_not_null(pool)
 
 	var parent := Node2D.new()

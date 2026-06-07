@@ -1,9 +1,9 @@
 class_name QuestLogUI
 extends Control
-var quest_system: QuestSystem = null
+var quest_system: QuestService = null
 
 
-func bind(system: QuestSystem) -> void:
+func bind(system: QuestService) -> void:
 	if quest_system != null and quest_system != system:
 		_disconnect_quest_system(quest_system)
 	quest_system = system
@@ -23,7 +23,7 @@ func refresh() -> void:
 		_render_state(container, state)
 
 
-func _connect_quest_system(system: QuestSystem) -> void:
+func _connect_quest_system(system: QuestService) -> void:
 	if not system.quest_accepted.is_connected(_on_quest_changed):
 		system.quest_accepted.connect(_on_quest_changed)
 	if not system.objective_advanced.is_connected(_on_objective_advanced):
@@ -34,7 +34,7 @@ func _connect_quest_system(system: QuestSystem) -> void:
 		system.quest_turned_in.connect(_on_quest_changed)
 
 
-func _disconnect_quest_system(system: QuestSystem) -> void:
+func _disconnect_quest_system(system: QuestService) -> void:
 	if system.quest_accepted.is_connected(_on_quest_changed):
 		system.quest_accepted.disconnect(_on_quest_changed)
 	if system.objective_advanced.is_connected(_on_objective_advanced):

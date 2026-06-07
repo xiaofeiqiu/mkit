@@ -3,13 +3,13 @@ extends Node
 @export var enabled: bool = true
 @export var think_interval: float = 0.2
 var _timer: float = 0.0
-var command_router: CommandRouter = null
+var command_router: CommandService = null
 var target: Node = null
 var blackboard: Blackboard = Blackboard.new()
 
 
 func _ready() -> void:
-	command_router = ServiceRegistry.get_service("commands") as CommandRouter
+	command_router = ServiceRegistry.get_service("commands") as CommandService
 
 
 func _process(delta: float) -> void:

@@ -22,30 +22,30 @@ func _register_kernel_services() -> void:
 		return
 	if ServiceRegistry.has_service("events"):
 		return
-	var events := EventRouter.new()
-	var content := ContentRegistry.new()
+	var events := EventService.new()
+	var content := ContentService.new()
 	var random := RandomService.new()
 	var time := TimeService.new()
-	var action_runner := ActionRunner.new()
-	var effect_executor := EffectExecutor.new()
-	var command_router := CommandRouter.new()
-	var combat := CombatResolver.new()
-	var scene_router := SceneRouter.new()
-	var object_pool := ObjectPool.new()
-	var save_manager := SaveManager.new()
-	var progression := ProgressionSystem.new()
+	var action_runner := ActionService.new()
+	var effect_executor := EffectService.new()
+	var command_router := CommandService.new()
+	var combat := CombatService.new()
+	var scene_router := SceneService.new()
+	var object_pool := PoolService.new()
+	var save_manager := SaveService.new()
+	var progression := ProgressionService.new()
 	var analytics := AnalyticsServiceMock.new()
 	var ads := AdServiceMock.new()
 	var iap := IAPServiceMock.new()
 	var cloud_save := CloudSaveServiceMock.new()
-	events.name = "EventRouter"
-	content.name = "ContentRegistry"
-	action_runner.name = "ActionRunner"
-	command_router.name = "CommandRouter"
-	scene_router.name = "SceneRouter"
-	object_pool.name = "ObjectPool"
-	save_manager.name = "SaveManager"
-	progression.name = "ProgressionSystem"
+	events.name = "EventService"
+	content.name = "ContentService"
+	action_runner.name = "ActionService"
+	command_router.name = "CommandService"
+	scene_router.name = "SceneService"
+	object_pool.name = "PoolService"
+	save_manager.name = "SaveService"
+	progression.name = "ProgressionService"
 	analytics.name = "AnalyticsService"
 	ads.name = "AdService"
 	iap.name = "IAPService"
@@ -78,32 +78,32 @@ func _register_kernel_services() -> void:
 	ServiceRegistry.register_service("ads", ads)
 	ServiceRegistry.register_service("iap", iap)
 	ServiceRegistry.register_service("cloud_save", cloud_save)
-	var quest := QuestSystem.new()
-	quest.name = "QuestSystem"
+	var quest := QuestService.new()
+	quest.name = "QuestService"
 	ServiceRegistry.add_child(quest)
 	ServiceRegistry.register_service("quest", quest)
-	var shop := ShopController.new()
-	shop.name = "ShopController"
+	var shop := ShopService.new()
+	shop.name = "ShopService"
 	ServiceRegistry.add_child(shop)
 	ServiceRegistry.register_service("shop", shop)
-	var audio := AudioManager.new()
-	audio.name = "AudioManager"
+	var audio := AudioService.new()
+	audio.name = "AudioService"
 	ServiceRegistry.add_child(audio)
 	ServiceRegistry.register_service("audio", audio)
-	var dialogue := DialogueController.new()
-	dialogue.name = "DialogueController"
+	var dialogue := DialogueService.new()
+	dialogue.name = "DialogueService"
 	ServiceRegistry.add_child(dialogue)
 	ServiceRegistry.register_service("dialogue", dialogue)
-	var world := WorldRouter.new()
-	world.name = "WorldRouter"
+	var world := WorldService.new()
+	world.name = "WorldService"
 	ServiceRegistry.add_child(world)
 	ServiceRegistry.register_service("world", world)
 
 
 func _load_content() -> void:
-	var registry := ServiceRegistry.get_service("content") as ContentRegistry
+	var registry := ServiceRegistry.get_service("content") as ContentService
 	if registry == null:
-		push_error("GameBootstrap._load_content: missing ContentRegistry service")
+		push_error("GameBootstrap._load_content: missing ContentService service")
 		return
 	for db in resource_databases:
 		if db != null:
@@ -111,9 +111,9 @@ func _load_content() -> void:
 
 
 func _validate_content() -> void:
-	var registry := ServiceRegistry.get_service("content") as ContentRegistry
+	var registry := ServiceRegistry.get_service("content") as ContentService
 	if registry == null:
-		push_error("GameBootstrap._validate_content: missing ContentRegistry service")
+		push_error("GameBootstrap._validate_content: missing ContentService service")
 		return
 	var result := registry.validate_all()
 	if not result.success:
@@ -121,9 +121,9 @@ func _validate_content() -> void:
 
 
 func _load_profile() -> void:
-	var save_manager: SaveManager = null
+	var save_manager: SaveService = null
 	if ServiceRegistry.has_service("save"):
-		save_manager = ServiceRegistry.get_service("save") as SaveManager
+		save_manager = ServiceRegistry.get_service("save") as SaveService
 	if save_manager == null:
 		return
 	var tree := get_tree()
@@ -150,9 +150,9 @@ func _enter_initial_scene() -> void:
 			)
 		)
 		return
-	var scene_router: SceneRouter = null
+	var scene_router: SceneService = null
 	if ServiceRegistry.has_service("scenes"):
-		scene_router = ServiceRegistry.get_service("scenes") as SceneRouter
+		scene_router = ServiceRegistry.get_service("scenes") as SceneService
 	if scene_router != null:
 		scene_router.change_scene(initial_scene_path)
 	else:

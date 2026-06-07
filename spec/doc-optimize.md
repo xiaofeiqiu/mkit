@@ -14,11 +14,11 @@
 - [x] 文档站支持 Mermaid 渲染（`docs/index.html` + vendored `docs/vendor/mermaid.min.js`；`docs/readme.md` Runtime Pipeline 已作示范）
 
 **Phase 1 — 先让人能"跑通 + 看懂"**（易学 + 易理解）
-- [ ] P1.1 `docs/getting_started.md`（5 分钟跑通 + 学习地图 + 改一行 + cheat sheet）
-- [ ] P1.2 `docs/concepts.md`（主管线心智模型 + Resource/Instance/Node 三分 + service flavor + 存档契约 + 扩展点地图 + 反模式对照 + **动画两通道集成**，含 5 张图）
-- [ ] P1.3 `docs/glossary.md` + `docs/debugging.md`；`readme.md` 顶部新手入口；接入 `index.html` 的 `navGroups`（新增「新手入门」「Cookbook」两组）；根 `README.MD` 首链接指向 `docs/getting_started.md`
+- [x] P1.1 `docs/getting_started.md`（5 分钟跑通 + 学习地图 + 改一行 + cheat sheet）
+- [x] P1.2 `docs/concepts.md`（主管线心智模型 + Resource/Instance/Node 三分 + service flavor + 存档契约 + 扩展点地图 + 反模式对照 + **动画两通道集成**，含 5 张图）
+- [x] P1.3 `docs/glossary.md` + `docs/debugging.md`；`readme.md` 顶部新手入口；接入 `index.html` 的 `navGroups`（新增「新手入门」「Cookbook」两组）；根 `README.MD` 首链接指向 `docs/getting_started.md`
 - [ ] P1.4 给 `village_rpg` 关键脚本加文档锚注释
-- [ ] ✅ **P1 验收**：找一位没接触过 Mkit 的人 dry-run——30 分钟内跑通 demo + 改一行见效（不提问）；能复述"攻击→扣血"的分层与解耦原因；生词都能在 glossary 自助解决（详见第六章；卡点回灌文档后才可勾选）
+- [ ] ✅ **P1 验收**：找一位没接触过 Mkit 的人 dry-run——30 分钟内跑通 demo + 改一行见效（不提问）；能复述"攻击→扣血"的分层与解耦原因；生词都能在 glossary 自助解决；**能说清"加一个技能，我负责什么、mkit 负责什么"**（详见第六章；卡点回灌文档后才可勾选）
 
 **Phase 2 — 让人能"照着改"**（易用）
 - [ ] P2.1 Cookbook 骨架 + recipe `01_run_the_demo` / `02_add_ability` / `03_add_enemy_in_room`
@@ -54,6 +54,15 @@
 | ④ 自己写 | "完整调用链长什么样？为什么这么设计？" | pipeline 全是伪代码，无 GDScript | **pipeline 代码示例** + **ref 页分级示例** |
 
 这些产物不是并列的"几批活"，而是一条**由浅入深、互相引用**的学习路径。下面分别展开。
+
+**第五个设计原则：始终清晰标明"用户负责 vs mkit 负责"的边界。**
+
+学习者最常见的困惑不是"某个 API 怎么调"，而是"这块逻辑到底该我写还是框架帮我做？"。所有文档——图、表、步骤——都必须让这条边界一目了然：
+
+- **图**：用颜色区分。蓝色（`#4A90D9`）= mkit 内部实现，学习者不需要动；绿色（`#7ED321`）= 用户扩展点，学习者在这里写自己的内容。Mermaid 用 `classDef` 实现，见"图的标准"节。
+- **表**：扩展点地图和 recipe 步骤里，在"由谁负责"列或标注（`[用户]` / `[mkit]`）明确归属。
+- **Recipe**：每篇固定模板里加"你负责 / mkit 负责"一节（见产物 4 模板），让读者在动手前先知道自己要改哪几行、框架兜底的是什么。
+- **验收**：每个 Phase 的验收条目里加一条"能清楚说出哪些部分是自己负责的"（见第六章）。
 
 ---
 
@@ -136,8 +145,14 @@
 **图的标准（Mermaid 已支持 ✅）**：`docs/index.html` 已加入 Mermaid 渲染——` ```mermaid ` 代码块会被渲染成图。mermaid.js 已 vendored 在 `docs/vendor/mermaid.min.js`（本地引用、离线可用，`make docs-server` 无需联网）。因此：
 - **优先用 Mermaid**（`sequenceDiagram` / `flowchart`）画时序图与数据流图，纯文本可 diff。
 - 渲染兼容性：文档站已支持；GitHub 原生支持；多数 IDE 插件支持。万一某处渲染器不支持，文档站有**降级样式**（把图源显示为等宽代码块，仍可读），不会崩。
-- 至少产出：主管线时序图、Resource/Instance/Node 数据流图、bootstrap 启动时序图、战斗伤害结算时序图、**动画两通道对照图（Action 驱动 vs 事件反馈）**。
-- 参考示范：`docs/readme.md` 的 Runtime Pipeline 已改用 Mermaid flowchart。
+- **配色规范（用户 vs mkit 边界，所有图强制执行）**：`flowchart` 类图必须包含以下 `classDef` 并按归属着色（`sequenceDiagram` 不支持 participant 着色，改用归属 Note，见本节末条）：
+  ```
+  classDef mkitCore  fill:#4A90D9,color:#fff,stroke:#2C6FAC  %% 蓝色 = mkit 内部，学习者不需改
+  classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18  %% 绿色 = 用户扩展点，学习者在这里写内容
+  ```
+  图例说明（放在每张图下方）：`🔵 蓝色 = mkit 负责 / 🟢 绿色 = 你负责`。时序图（`sequenceDiagram`）用矩形 Note 标注归属（`Note over X: [mkit]` / `Note over Y: [你]`）。
+- 至少产出：主管线时序图、Resource/Instance/Node 数据流图、bootstrap 启动时序图、战斗伤害结算时序图、**动画两通道对照图（Action 驱动 vs 事件反馈）**。每张图均按上述规范标明 user/mkit 归属（flowchart 着色 / sequenceDiagram 用 Note）。
+- 参考示范：`docs/readme.md` 的 Runtime Pipeline 已改用 Mermaid flowchart（后续同步补色）。
 
 ### 产物 3：Pipeline 代码示例（服务"自己写"）— 扩充 `docs/pipeline.md`
 
@@ -186,8 +201,16 @@ docs/cookbook/
 - 已跑通 Recipe 01
 - 涉及的概念：[Resource/Instance/Node 三分](../concepts.md#…)
 
+## 你负责 / mkit 负责
+| 你需要做的 | mkit 帮你做的 |
+|-----------|-------------|
+| 定义 .tres 配置文件（填写参数） | 解析并验证资源格式 |
+| 在 ResourceDatabase 注册 | 运行时加载与缓存 |
+| 在实体初始化时调用接线方法 | 执行逻辑、触发事件、更新状态 |
+（每篇按实际内容填写，绿色 = 你，蓝色 = mkit；配一张按配色规范着色的小图）
+
 ## 心智模型（30 秒）
-这个任务在主管线的哪一段、动到哪几层（一句话 + 小图）。
+这个任务在主管线的哪一段、动到哪几层（一句话 + 小图，按配色规范标注用户/mkit 归属）。
 
 ## 步骤
 1. 定义资源 .tres（字段逐项说明，标"必填/可选/默认值语义"）
@@ -287,19 +310,24 @@ ref 是字典而非读物，定位下沉到产物 1-4 之后，但核心类仍�
   1. 只看 `getting_started`，**30 分钟内**跑起 `village_rpg` demo，并完成一处"改一行 .tres 数值"看到游戏内变化——全程不提问。
   2. 看完 `concepts`，能用**自己的话**复述"玩家攻击 → 扣血"经过哪些层、为什么命令要和效果解耦。
   3. 阅读中遇到的生词，都能在 `glossary` 自助查到，不需要问人。
+  4. **边界验收**：看完 `concepts` 的扩展点地图后，能不翻源码地说出"加一个新技能，我需要自己写哪几个文件、mkit 帮我处理哪些"——答案与扩展点地图一致，不遗漏也不多填。图中蓝色节点和绿色节点的区分无歧义。
 
 ### Phase 2 验收 —— 易用
 - **谁来验**：通过了 Phase 1 验收的同一人。
-- **怎么算过**：只靠 recipe `02_add_ability`，**独立加出一个新技能并在 demo 里释放成功**；不看 addon 源码、不提问；过程中所有报错都能在该 recipe 的"常见错误"表里找到对应条目。
+- **怎么算过**（须全部满足）：
+  1. 只靠 recipe `02_add_ability`，**独立加出一个新技能并在 demo 里释放成功**；不看 addon 源码、不提问；过程中所有报错都能在该 recipe 的"常见错误"表里找到对应条目。
+  2. **边界验收**：看完 recipe 的"你负责 / mkit 负责"节后，能准确指出"这一步是我填数据，那一步是 mkit 跑逻辑"——不把需要自己写的步骤误认为框架自动完成，也不把框架已处理的部分重复实现。
 
 ### Phase 3 验收 —— 易用 + 易理解
 - **谁来验**：一位有 Godot 基础、但没写过 Mkit 扩展的开发者。
 - **怎么算过**（须全部满足）：
   1. 照 pipeline 代码示例 + `concepts` 的扩展点地图，写出一个自定义 `GameEffect` 并**通过一个 GUT 测试**。
   2. 给 demo 故意植入一个 bug（如"技能放了不生效"），该开发者**只用 `debugging` 指南的工具**（DebugOverlay / recent_events / EffectExecutor trace）就能定位到出问题的那一跳。
+  3. **边界验收**：自定义 `GameEffect` 实现中，无多余的胶水代码（重复实现 mkit 已内置的注册/调度逻辑），也无遗漏的必要代码（未填 mkit 要求实现的接口方法）——代码 review 时发现的"误越界"或"误遗漏"条数为零。
 
 ### Phase 4 验收 —— 防腐（文档长期可信）
 - **怎么算过**：`make docs-check` 通过（无断链、无漏 ref、公共 API 与接口块一致、新文档已接入 `navGroups`）；CI 的 demo 冒烟通过；抽查 5 个示例均可直接粘贴运行。
+- **边界验收**：`make docs-check` 额外检查：① 所有 recipe 文件均包含"你负责 / mkit 负责"节（缺失则报错）；② Mermaid 图块均标明 user/mkit 归属——`flowchart` 含 `classDef mkitCore` 与 `classDef userOwned` 声明、`sequenceDiagram` 含 `[mkit]`/`[你]` 归属 Note（缺失则报 warning）。
 
 **通用规则**：每次 Phase 验收都记录 dry-run 的卡点，**回灌对应文档后才关闭该 Phase**。验收本身就是 tracker 里的一项任务，必须勾上才算 Phase 完成。
 

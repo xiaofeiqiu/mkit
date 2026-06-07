@@ -1,10 +1,10 @@
 class_name ShopUI
 extends Control
-var controller: ShopController = null
+var controller: ShopService = null
 var buyer: Node = null
 
 
-func bind(shop_controller: ShopController, shop_buyer: Node = null) -> void:
+func bind(shop_controller: ShopService, shop_buyer: Node = null) -> void:
 	controller = shop_controller
 	buyer = shop_buyer
 	if controller != null:

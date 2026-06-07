@@ -6,7 +6,7 @@ const COMMAND_SCENE_PATH := "res://test/unit/modules/tmp_entity_spawner_command_
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -113,7 +113,7 @@ func test_tc_es_06_spawned_definition_base_stats_are_save_baseline() -> void:
 
 func test_tc_es_07_spawned_command_receiver_tracks_runtime_identity() -> void:
 	_save_command_scene()
-	var router := CommandRouter.new()
+	var router := CommandService.new()
 	add_child_autofree(router)
 	ServiceRegistry.register_service("commands", router)
 	var definition := _make_def("command_entity", COMMAND_SCENE_PATH)

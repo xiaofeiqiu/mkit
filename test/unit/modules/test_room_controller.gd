@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -21,14 +21,14 @@ func _make_room_def(
 
 var ctrl: RoomController
 var content: StubContent
-var events: EventRouter
+var events: EventService
 var entity: Node
 
 
 func before_each() -> void:
 	content = StubContent.new()
 	add_child_autofree(content)
-	events = EventRouter.new()
+	events = EventService.new()
 	add_child_autofree(events)
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("events", events)

@@ -8,12 +8,12 @@ signal cooldown_started(ability_id: String, duration: float)
 @export var starting_ability_ids: Array[String] = []
 var abilities: Dictionary = {}
 var active_cast_actions: Array[GameAction] = []
-var content: ContentRegistry = null
+var content: ContentService = null
 
 
 func _ready() -> void:
 	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentRegistry
+		content = ServiceRegistry.get_service("content") as ContentService
 	for id in starting_ability_ids:
 		if id.strip_edges() == "":
 			push_warning("AbilityController: ignoring empty starting ability id")
@@ -92,7 +92,7 @@ func cast(ability_id: String, context: GameplayContext) -> bool:
 	if definition == null or instance == null:
 		ability_failed.emit(ability_id, "invalid_ability_data")
 		return false
-	var action_runner: ActionRunner = null
+	var action_runner: ActionService = null
 	if definition.cast_time > 0.0:
 		action_runner = _get_action_runner()
 		if action_runner == null:
@@ -126,7 +126,7 @@ func get_definition(ability_id: String) -> AbilityDefinition:
 		return null
 	if content == null:
 		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentRegistry
+			content = ServiceRegistry.get_service("content") as ContentService
 	if content == null:
 		return null
 	return content.get_resource(ability_id) as AbilityDefinition
@@ -183,11 +183,11 @@ func _execute_ability_effects(definition: AbilityDefinition, context: GameplayCo
 	if context == null:
 		push_error("AbilityController._execute_ability_effects: context is null")
 		return
-	var executor: EffectExecutor = null
+	var executor: EffectService = null
 	if ServiceRegistry.has_service("effects"):
-		executor = ServiceRegistry.get_service("effects") as EffectExecutor
+		executor = ServiceRegistry.get_service("effects") as EffectService
 	if executor == null:
-		executor = EffectExecutor.new()
+		executor = EffectService.new()
 	executor.execute_many(definition.effects, context)
 
 
@@ -217,7 +217,7 @@ func _start_cooldown(instance: AbilityInstance, definition: AbilityDefinition) -
 
 
 func _start_cast_action(
-	definition: AbilityDefinition, context: GameplayContext, action_runner: ActionRunner
+	definition: AbilityDefinition, context: GameplayContext, action_runner: ActionService
 ) -> void:
 	if definition == null or context == null:
 		var failed_id := definition.ability_id if definition != null else ""
@@ -251,10 +251,10 @@ func _start_cast_action(
 	action_runner.start_action(action, action_context)
 
 
-func _get_action_runner() -> ActionRunner:
+func _get_action_runner() -> ActionService:
 	if not ServiceRegistry.has_service("actions"):
 		return null
-	return ServiceRegistry.get_service("actions") as ActionRunner
+	return ServiceRegistry.get_service("actions") as ActionService
 
 
 func _has_enough_cost(definition: AbilityDefinition) -> bool:

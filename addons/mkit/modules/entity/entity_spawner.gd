@@ -2,12 +2,12 @@ class_name EntitySpawner
 extends Node
 signal entity_spawned(entity: Node, definition_id: String)
 signal entity_spawn_failed(definition_id: String, reason: String)
-var content: ContentRegistry = null
+var content: ContentService = null
 
 
 func _ready() -> void:
 	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentRegistry
+		content = ServiceRegistry.get_service("content") as ContentService
 
 
 func spawn_entity(
@@ -50,7 +50,7 @@ func _get_definition(definition_id: String) -> EntityDefinition:
 		return null
 	if content == null:
 		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentRegistry
+			content = ServiceRegistry.get_service("content") as ContentService
 	if content == null:
 		return null
 	return content.get_resource(definition_id) as EntityDefinition

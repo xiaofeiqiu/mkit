@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -12,9 +12,9 @@ class StubContent:
 const QUEST_LOG_UI_SCRIPT := preload("res://addons/mkit/modules/ui/quest_log_ui.gd")
 
 var content: StubContent
-var events: EventRouter
-var effects: EffectExecutor
-var quest: QuestSystem
+var events: EventService
+var effects: EffectService
+var quest: QuestService
 var ui: Control = null
 var container: VBoxContainer
 var empty_label: Label
@@ -23,13 +23,13 @@ var empty_label: Label
 func before_each() -> void:
 	content = StubContent.new()
 	add_child_autofree(content)
-	events = EventRouter.new()
+	events = EventService.new()
 	add_child_autofree(events)
-	effects = EffectExecutor.new()
+	effects = EffectService.new()
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("events", events)
 	ServiceRegistry.register_service("effects", effects)
-	quest = QuestSystem.new()
+	quest = QuestService.new()
 	add_child_autofree(quest)
 	ServiceRegistry.register_service("quest", quest)
 	ui = QUEST_LOG_UI_SCRIPT.new() as Control

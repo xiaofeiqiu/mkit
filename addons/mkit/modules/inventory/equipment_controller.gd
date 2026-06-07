@@ -3,11 +3,11 @@ extends SaveableComponent
 signal equipment_changed(slot_id: String, item: ItemInstance)
 @export var allowed_slots: Array[String] = ["weapon", "helmet", "armor", "ring", "amulet"]
 var equipped: Dictionary = {}
-var content: ContentRegistry = null
+var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service("content") as ContentRegistry
+	content = ServiceRegistry.get_service("content") as ContentService
 
 
 func can_equip(item: ItemInstance, slot_id: String) -> bool:
@@ -49,7 +49,7 @@ func get_equipped(slot_id: String) -> ItemInstance:
 func get_item_definition(item_id: String) -> ItemDefinition:
 	if content == null:
 		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentRegistry
+			content = ServiceRegistry.get_service("content") as ContentService
 	if content == null:
 		return null
 	return content.get_resource(item_id) as ItemDefinition

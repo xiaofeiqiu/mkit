@@ -9,7 +9,7 @@ func _interact_impl(context: GameplayContext) -> bool:
 		return false
 	if not ServiceRegistry.has_service("dialogue"):
 		return false
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueController
+	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
 	if dialogue == null:
 		return false
 	if not dialogue.start(dialogue_id, context):
@@ -21,7 +21,7 @@ func _interact_impl(context: GameplayContext) -> bool:
 	return true
 
 
-func _get_events() -> EventRouter:
+func _get_events() -> EventService:
 	if ServiceRegistry.has_service("events"):
-		return ServiceRegistry.get_service("events") as EventRouter
+		return ServiceRegistry.get_service("events") as EventService
 	return null

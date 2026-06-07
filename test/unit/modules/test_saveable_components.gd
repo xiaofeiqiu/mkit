@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -27,7 +27,7 @@ func before_each() -> void:
 	content = StubContent.new()
 	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
-	ServiceRegistry.register_service("effects", EffectExecutor.new())
+	ServiceRegistry.register_service("effects", EffectService.new())
 
 
 func after_each() -> void:
@@ -54,9 +54,9 @@ func test_tc_svc_01_p1a_components_use_saveable_component_base() -> void:
 
 func test_tc_svc_17_global_systems_use_saveable_base() -> void:
 	var nodes: Array[Node] = [
-		ProgressionSystem.new(),
-		QuestSystem.new(),
-		AudioManager.new()
+		ProgressionService.new(),
+		QuestService.new(),
+		AudioService.new()
 	]
 	for node in nodes:
 		assert_true(node is Saveable)

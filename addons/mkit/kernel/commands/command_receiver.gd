@@ -23,7 +23,7 @@ func _ready() -> void:
 		if receiver_id == "":
 			push_warning("CommandReceiver auto_register skipped: receiver_id is empty")
 			return
-		var router := ServiceRegistry.get_service("commands") as CommandRouter
+		var router := ServiceRegistry.get_service("commands") as CommandService
 		if router != null:
 			router.register_receiver(receiver_id, self)
 

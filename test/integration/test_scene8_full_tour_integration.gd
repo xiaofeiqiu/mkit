@@ -111,15 +111,15 @@ func after_each() -> void:
 # chain. This drives it end to end through the kernel pipeline instead of bare keys
 # or a scripted DealDamageEffect: a MOVE command makes the Move state move the body,
 # and ATTACK commands run a TimedAttackAction whose HitboxComponent overlaps the field
-# beast HurtboxComponent, feeding CombatResolver until the beast dies.
+# beast HurtboxComponent, feeding CombatService until the beast dies.
 func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var router := ServiceRegistry.get_service("commands") as CommandService
+	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var events := ServiceRegistry.get_service("events") as EventService
 	assert_not_null(router)
 	assert_not_null(actions)
 	assert_not_null(events)
@@ -170,7 +170,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 
-	# --- ATTACK 1: command -> Attack state -> TimedAttackAction -> hitbox -> CombatResolver ---
+	# --- ATTACK 1: command -> Attack state -> TimedAttackAction -> hitbox -> CombatService ---
 	assert_true(router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, PLAYER_ID, PLAYER_ID, {})))
 	assert_eq(state_machine.get_current_path(), "Player/Attack")
 	assert_eq(actions.active_actions.size(), 1)
@@ -192,7 +192,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	assert_eq(actions.active_actions.size(), 0)
 	assert_eq(state_machine.get_current_path(), "Player/Idle")
 
-	# --- ATTACK 2: lethal hit -> HealthComponent.die -> EventRouter entity_died ---
+	# --- ATTACK 2: lethal hit -> HealthComponent.die -> EventService entity_died ---
 	assert_true(router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, PLAYER_ID, PLAYER_ID, {})))
 	assert_eq(state_machine.get_current_path(), "Player/Attack")
 	actions._process(0.08)
@@ -215,7 +215,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
+	var actions := ServiceRegistry.get_service("actions") as ActionService
 	assert_not_null(actions)
 
 	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
@@ -286,16 +286,16 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 # It creates a StatusEffectInstance, applies a StatModifierDefinition-driven defense
 # modifier while active, executes DealDamage + LogEffect on tick, removes the modifier
 # when duration expires, and the elder dialogue exposes an ApplyStatModifierEffect
-# blessing that CombatResolver reads through StatsComponent.
+# blessing that CombatService reads through StatsComponent.
 func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_attack() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentRegistry
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
-	var events := ServiceRegistry.get_service("events") as EventRouter
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueController
+	var content := ServiceRegistry.get_service("content") as ContentService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var events := ServiceRegistry.get_service("events") as EventService
+	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
 	assert_not_null(content)
 	assert_not_null(effects)
 	assert_not_null(events)
@@ -387,20 +387,20 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	request.target = beast
 	request.base_amount = 10.0
 	request.can_crit = false
-	var damage := (ServiceRegistry.get_service("combat") as CombatResolver).resolve(request)
+	var damage := (ServiceRegistry.get_service("combat") as CombatService).resolve(request)
 	assert_eq(damage.final_amount, 15.0)
 
 
 # S3: the field blade is a weapon-slot equippable that the EquipmentController applies through
 # the StatModifier path. Equipping it raises attack_power and the extra power flows straight into
-# CombatResolver damage; unequipping restores both; and a Saveable round-trip on the controller
+# CombatService damage; unequipping restores both; and a Saveable round-trip on the controller
 # re-applies the equipped item and its modifier.
 func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_round_trips() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentRegistry
+	var content := ServiceRegistry.get_service("content") as ContentService
 	assert_not_null(content)
 
 	# the blade content: a weapon-slot item carrying a +attack_power StatModifierDefinition
@@ -419,7 +419,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	var stats := player.get_node("Components/StatsComponent") as StatsComponent
 	stats.set_base_stat("crit_chance", 0.0)
 
-	# a defenseless target to read combat damage off CombatResolver
+	# a defenseless target to read combat damage off CombatService
 	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
 	_disable_beast_ai(beast)
 	add_child_autofree(beast)
@@ -481,7 +481,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentRegistry
+	var content := ServiceRegistry.get_service("content") as ContentService
 	assert_not_null(content)
 	var definition := content.get_resource(ENTITY_FIELD_BEAST) as EntityDefinition
 	assert_not_null(definition)
@@ -507,7 +507,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldRouter
+	var world := ServiceRegistry.get_service("world") as WorldService
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 	var root := demo.call("_current_zone_root") as Node
 	assert_not_null(root)
@@ -526,7 +526,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_true(identity.tags.has("field_beast"))
 	var receiver := beast.get_node("CommandReceiver") as CommandReceiver
 	assert_eq(receiver.receiver_id, identity.entity_id)
-	var commands := ServiceRegistry.get_service("commands") as CommandRouter
+	var commands := ServiceRegistry.get_service("commands") as CommandService
 	assert_true(commands._receivers.has(identity.entity_id))
 	assert_false(commands._receivers.has(BEAST_ID))
 
@@ -551,7 +551,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldRouter
+	var world := ServiceRegistry.get_service("world") as WorldService
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 
 	var player := demo.get_node("Player") as CharacterBody2D
@@ -590,7 +590,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 
 	beast.global_position = Vector2(28.0, 0.0)
 	watch_signals(player_health)
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events := ServiceRegistry.get_service("events") as EventService
 	watch_signals(events)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -600,7 +600,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	assert_eq(receiver.command_history[-1].command_type, BuiltinCommands.ATTACK)
 	assert_eq(state_machine.get_current_path(), "Enemy/Attack")
 
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
+	var actions := ServiceRegistry.get_service("actions") as ActionService
 	assert_eq(actions.active_actions.size(), 1)
 	assert_true(actions.active_actions[0] is TimedAttackAction)
 	actions._process(0.08)
@@ -617,8 +617,8 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentRegistry
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var content := ServiceRegistry.get_service("content") as ContentService
+	var events := ServiceRegistry.get_service("events") as EventService
 	assert_not_null(content)
 	assert_not_null(events)
 
@@ -743,7 +743,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var save := ServiceRegistry.get_service("save") as SaveManager
+	var save := ServiceRegistry.get_service("save") as SaveService
 	assert_not_null(save)
 	save.save_path = SCENE8_S7_SAVE_PATH
 
@@ -868,7 +868,7 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
 
-	var save := ServiceRegistry.get_service("save") as SaveManager
+	var save := ServiceRegistry.get_service("save") as SaveService
 	assert_not_null(save)
 	save.save_path = SCENE8_PLATFORM_SAVE_PATH
 
@@ -890,8 +890,8 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 	assert_true(iap is IAPServiceMock)
 	assert_true(cloud is CloudSaveServiceMock)
 
-	var quest := ServiceRegistry.get_service("quest") as QuestSystem
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
+	var quest := ServiceRegistry.get_service("quest") as QuestService
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
 	assert_not_null(quest)
 	assert_not_null(progression)
 
@@ -949,8 +949,8 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	await _settle_scene8_world()
 
 	var time := ServiceRegistry.get_service("time") as TimeService
-	var pool := ServiceRegistry.get_service("pool") as ObjectPool
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var pool := ServiceRegistry.get_service("pool") as PoolService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	var ui := ServiceRegistry.get_service("ui") as UIManager
 	assert_not_null(time)
 	assert_not_null(pool)
@@ -1051,12 +1051,12 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldRouter
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueController
-	var quest := ServiceRegistry.get_service("quest") as QuestSystem
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
+	var world := ServiceRegistry.get_service("world") as WorldService
+	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+	var quest := ServiceRegistry.get_service("quest") as QuestService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var router := ServiceRegistry.get_service("commands") as CommandService
+	var actions := ServiceRegistry.get_service("actions") as ActionService
 	assert_not_null(world)
 	assert_not_null(dialogue)
 	assert_not_null(quest)
@@ -1133,7 +1133,7 @@ func _resolve_damage(source: Node, target: Node) -> float:
 	request.target = target
 	request.base_amount = 10.0
 	request.can_crit = false
-	return (ServiceRegistry.get_service("combat") as CombatResolver).resolve(request).final_amount
+	return (ServiceRegistry.get_service("combat") as CombatService).resolve(request).final_amount
 
 
 func _disable_beast_ai(beast: Node) -> void:

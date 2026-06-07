@@ -8,7 +8,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	var source_id := _node_name(context.source)
 	var target_id := _node_name(context.target)
 	if ServiceRegistry.has_service("events"):
-		var events := ServiceRegistry.get_service("events") as EventRouter
+		var events := ServiceRegistry.get_service("events") as EventService
 		if events != null:
 			(
 				events

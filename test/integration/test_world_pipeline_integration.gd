@@ -14,7 +14,7 @@ const FIELD_ENTRY_POS := Vector2(300.0, 120.0)
 
 
 class TestSceneRouter:
-	extends SceneRouter
+	extends SceneService
 	var host: Node = null
 
 	func change_scene(scene_path: String) -> bool:
@@ -35,7 +35,7 @@ class TestSceneRouter:
 
 
 class AudioProbe:
-	extends AudioManager
+	extends AudioService
 	var played: Array[String] = []
 
 	func play_music(music_id: String, _fade_seconds: float = 0.0) -> void:
@@ -58,10 +58,10 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	bootstrap.resource_databases = [_make_database()]
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentRegistry
-	var events := ServiceRegistry.get_service("events") as EventRouter
-	var quest := ServiceRegistry.get_service("quest") as QuestSystem
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
+	var content := ServiceRegistry.get_service("content") as ContentService
+	var events := ServiceRegistry.get_service("events") as EventService
+	var quest := ServiceRegistry.get_service("quest") as QuestService
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
 	assert_not_null(content)
 	assert_not_null(events)
 	assert_not_null(quest)
@@ -81,7 +81,7 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	ServiceRegistry.unregister_service("audio")
 	ServiceRegistry.register_service("audio", audio)
 
-	var world := ServiceRegistry.get_service("world") as WorldRouter
+	var world := ServiceRegistry.get_service("world") as WorldService
 	assert_not_null(world)
 	world.scene_router = null
 

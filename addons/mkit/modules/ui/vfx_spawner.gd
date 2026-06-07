@@ -3,7 +3,7 @@ extends Node
 @export var vfx_scene_map: Dictionary = {}
 @export var auto_free_seconds: float = 2.0
 @export var use_pool: bool = false
-var _pool: ObjectPool = null
+var _pool: PoolService = null
 
 
 func spawn(vfx_id: String, position: Vector2, direction: Vector2 = Vector2.ZERO) -> Node:
@@ -31,7 +31,7 @@ func spawn(vfx_id: String, position: Vector2, direction: Vector2 = Vector2.ZERO)
 
 func _create_vfx_node(scene_path: String) -> Node:
 	if use_pool and ServiceRegistry.has_service("pool"):
-		_pool = ServiceRegistry.get_service("pool") as ObjectPool
+		_pool = ServiceRegistry.get_service("pool") as PoolService
 		if _pool != null:
 			return _pool.acquire(scene_path, self)
 	_pool = null

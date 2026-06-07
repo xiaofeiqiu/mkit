@@ -9,9 +9,9 @@ func load_room(room_definition_id: String, container: Node) -> RoomController:
 	if room_definition_id.strip_edges() == "":
 		last_error = "empty_room_definition_id"
 		return null
-	var content: ContentRegistry = null
+	var content: ContentService = null
 	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentRegistry
+		content = ServiceRegistry.get_service("content") as ContentService
 	if content == null:
 		last_error = "missing_content_registry"
 		return null

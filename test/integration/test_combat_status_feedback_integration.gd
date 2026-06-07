@@ -45,7 +45,7 @@ class ProbeVFXSpawner:
 
 
 class ProbeAudioManager:
-	extends AudioManager
+	extends AudioService
 	var played: Array[String] = []
 
 	func _ready() -> void:
@@ -68,7 +68,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 	_boot_with_database(_make_database(tick_probe))
 	ServiceRegistry.unregister_service("random")
 	ServiceRegistry.register_service("random", FixedRandom.new())
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events := ServiceRegistry.get_service("events") as EventService
 	var feedback := _make_feedback_system()
 	var damage_numbers := feedback.get_node("DamageNumbers") as ProbeDamageNumberSystem
 	var vfx := feedback.get_node("VFX") as ProbeVFXSpawner
@@ -122,7 +122,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 
 func test_tc_int_cmb_02_heal_clamps_to_max_hp_and_emits() -> void:
 	_boot_with_database(_make_database(null))
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	var source := _make_entity("Source", "entity.int.source", "player", false, false, false)
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, false)
 	var target_stats := target.get_node("Components/StatsComponent") as StatsComponent
@@ -143,8 +143,8 @@ func test_tc_int_cmb_02_heal_clamps_to_max_hp_and_emits() -> void:
 
 func test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_feedback() -> void:
 	_boot_with_database(_make_database(null))
-	var events := ServiceRegistry.get_service("events") as EventRouter
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var events := ServiceRegistry.get_service("events") as EventService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	var feedback := _make_feedback_system()
 	var vfx := feedback.get_node("VFX") as ProbeVFXSpawner
 	var audio := feedback.get_node("Audio") as ProbeAudioManager
@@ -174,7 +174,7 @@ func test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_feedback() -> void
 
 func test_tc_int_cmb_04_status_duration_expiry_removes_stat_modifier() -> void:
 	_boot_with_database(_make_database(null))
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	var source := _make_entity("Source", "entity.int.source", "player", false, false, false)
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, false)
 	var target_stats := target.get_node("Components/StatsComponent") as StatsComponent
@@ -205,7 +205,7 @@ func test_tc_int_cmb_04_status_duration_expiry_removes_stat_modifier() -> void:
 
 func test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target() -> void:
 	_boot_with_database(_make_database(null))
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events := ServiceRegistry.get_service("events") as EventService
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, true)
 	var health := target.get_node("Components/HealthComponent") as HealthComponent
 	health.current_hp = 42.0

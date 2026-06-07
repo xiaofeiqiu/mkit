@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -33,13 +33,13 @@ class _StubRoomController:
 
 var director: RunDirector
 var content: StubContent
-var events: EventRouter
+var events: EventService
 
 
 func before_each() -> void:
 	content = StubContent.new()
 	add_child_autofree(content)
-	events = EventRouter.new()
+	events = EventService.new()
 	add_child_autofree(events)
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("events", events)
@@ -260,7 +260,7 @@ func test_tc_rd_20_select_reward_applies_advances_and_continues() -> void:
 	safe.run_state = RunState.create(1)
 	safe.run_state.current_room_index = 0
 	safe.run_state.status = "choosing_reward"
-	var executor := EffectExecutor.new()
+	var executor := EffectService.new()
 	ServiceRegistry.register_service("effects", executor)
 	var opt := RewardOption.new()
 	opt.reward_id = "speed_up"

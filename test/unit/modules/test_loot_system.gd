@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -122,7 +122,7 @@ func test_tc_loot_07_quantity_rolled_at_min() -> void:
 	assert_eq(result.item_instances[0].quantity, 3)
 
 
-# --- roll_table (via ContentRegistry) ---
+# --- roll_table (via ContentService) ---
 
 
 func test_tc_loot_08_roll_table_missing_service_returns_empty() -> void:

@@ -11,16 +11,16 @@ signal screen_shake_requested(strength: float)
 @export var death_toast_template: String = ""
 var damage_numbers: DamageNumberSystem
 var vfx: VFXSpawner
-var audio: AudioManager
+var audio: AudioService
 var ui: UIManager
 
 
 func _ready() -> void:
 	damage_numbers = get_node_or_null(damage_number_system_path) as DamageNumberSystem
 	vfx = get_node_or_null(vfx_spawner_path) as VFXSpawner
-	audio = get_node_or_null(audio_manager_path) as AudioManager
+	audio = get_node_or_null(audio_manager_path) as AudioService
 	ui = get_node_or_null(ui_manager_path) as UIManager
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events := ServiceRegistry.get_service("events") as EventService
 	if events != null:
 		events.damage_applied.connect(_on_damage_applied)
 		events.entity_died.connect(_on_entity_died)

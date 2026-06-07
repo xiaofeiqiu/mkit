@@ -34,7 +34,7 @@ var _save_path: String = "/tmp/mkit_village_rpg_loop_integration_save.json"
 
 
 class TestSceneRouter:
-	extends SceneRouter
+	extends SceneService
 	var host: Node = null
 
 	func change_scene(scene_path: String) -> bool:
@@ -55,7 +55,7 @@ class TestSceneRouter:
 
 
 class AudioProbe:
-	extends AudioManager
+	extends AudioService
 	var played: Array[String] = []
 
 	func play_music(music_id: String, _fade_seconds: float = 0.0) -> void:
@@ -80,14 +80,14 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	bootstrap.resource_databases = [_make_database()]
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentRegistry
-	var events := ServiceRegistry.get_service("events") as EventRouter
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueController
-	var quest := ServiceRegistry.get_service("quest") as QuestSystem
-	var shop := ServiceRegistry.get_service("shop") as ShopController
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
-	var save := ServiceRegistry.get_service("save") as SaveManager
+	var content := ServiceRegistry.get_service("content") as ContentService
+	var events := ServiceRegistry.get_service("events") as EventService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+	var quest := ServiceRegistry.get_service("quest") as QuestService
+	var shop := ServiceRegistry.get_service("shop") as ShopService
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var save := ServiceRegistry.get_service("save") as SaveService
 	assert_not_null(content)
 	assert_not_null(events)
 	assert_not_null(effects)
@@ -115,7 +115,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	ServiceRegistry.unregister_service("audio")
 	ServiceRegistry.register_service("audio", audio)
 
-	var world := ServiceRegistry.get_service("world") as WorldRouter
+	var world := ServiceRegistry.get_service("world") as WorldService
 	assert_not_null(world)
 	world.scene_router = null
 

@@ -53,9 +53,9 @@ class TraceEventEffect:
 			"position": context.position,
 			"direction": context.direction
 		}
-		var events: EventRouter = null
+		var events: EventService = null
 		if ServiceRegistry.has_service("events"):
-			events = ServiceRegistry.get_service("events") as EventRouter
+			events = ServiceRegistry.get_service("events") as EventService
 		if events != null:
 			events.emit_domain_event(
 				DomainEvent.create(event_type, _get_entity_id(context.source), "", payload)
@@ -147,9 +147,9 @@ func after_each() -> void:
 func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.grant"])
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var router := ServiceRegistry.get_service("commands") as CommandService
+	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var events := ServiceRegistry.get_service("events") as EventService
 	var receiver := player.get_node("CommandReceiver") as CommandReceiver
 	var state_machine := player.get_node("StateMachine") as StateMachine
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
@@ -215,9 +215,9 @@ func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 func test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.blocked"])
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var router := ServiceRegistry.get_service("commands") as CommandService
+	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 	var resources := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
@@ -255,8 +255,8 @@ func test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure() -> 
 func test_tc_int_game_03_time_pause_blocks_action_progress() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.grant"])
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
+	var router := ServiceRegistry.get_service("commands") as CommandService
+	var actions := ServiceRegistry.get_service("actions") as ActionService
 	var time := ServiceRegistry.get_service("time") as TimeService
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
@@ -299,7 +299,7 @@ func test_tc_int_game_03_time_pause_blocks_action_progress() -> void:
 
 func test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results() -> void:
 	_boot_gameplay()
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	var first := ProbeEffect.new()
 	first.effect_id = "fx.int.first"
 	var failing := FailingEffect.new()
@@ -329,10 +329,10 @@ func test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results
 func test_tc_int_game_05_command_payload_context_blackboard_effect_event_trace() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.trace"])
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
-	var actions := ServiceRegistry.get_service("actions") as ActionRunner
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var router := ServiceRegistry.get_service("commands") as CommandService
+	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var events := ServiceRegistry.get_service("events") as EventService
 	var state_machine := player.get_node("StateMachine") as StateMachine
 
 	var command := GameCommand.create(
@@ -555,17 +555,17 @@ func _make_player(ability_ids: Array[String]) -> Node:
 
 	IntTestHelpers.assign_owner(player, player)
 	add_child_autofree(player)
-	(ServiceRegistry.get_service("commands") as CommandRouter).register_receiver("player.int", receiver)
+	(ServiceRegistry.get_service("commands") as CommandService).register_receiver("player.int", receiver)
 	return player
 
 
-func _latest_event(events: EventRouter) -> DomainEvent:
+func _latest_event(events: EventService) -> DomainEvent:
 	if events.recent_events.is_empty():
 		return null
 	return events.recent_events[-1]
 
 
-func _find_event(events: EventRouter, event_type: String) -> DomainEvent:
+func _find_event(events: EventService, event_type: String) -> DomainEvent:
 	for event in events.recent_events:
 		if event.event_type == event_type:
 			return event

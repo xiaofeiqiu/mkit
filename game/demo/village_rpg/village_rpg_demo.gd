@@ -39,7 +39,7 @@ const HIT_VFX_SCENE := "res://game/demo/village_rpg/ui/hit_vfx.tscn"
 
 
 class EmbeddedSceneRouter:
-	extends SceneRouter
+	extends SceneService
 
 	var host: Node = null
 
@@ -80,16 +80,16 @@ class EmbeddedSceneRouter:
 @onready var _feedback_system: FeedbackSystem = $FeedbackSystem
 @onready var _debug_overlay: DebugOverlay = $DebugOverlay
 
-var _dialogue: DialogueController = null
-var _quest: QuestSystem = null
-var _shop: ShopController = null
-var _world: WorldRouter = null
-var _events: EventRouter = null
-var _effects: EffectExecutor = null
+var _dialogue: DialogueService = null
+var _quest: QuestService = null
+var _shop: ShopService = null
+var _world: WorldService = null
+var _events: EventService = null
+var _effects: EffectService = null
 var _time: TimeService = null
-var _progression: ProgressionSystem = null
-var _audio: AudioManager = null
-var _save_manager: SaveManager = null
+var _progression: ProgressionService = null
+var _audio: AudioService = null
+var _save_manager: SaveService = null
 var _analytics: AnalyticsService = null
 var _ads: AdService = null
 var _iap: IAPService = null
@@ -97,7 +97,7 @@ var _cloud_save: CloudSaveService = null
 var _entity_spawner: EntitySpawner = null
 var _loot_system := LootSystem.new()
 var _scene_router := EmbeddedSceneRouter.new()
-var _previous_scene_router: SceneRouter = null
+var _previous_scene_router: SceneService = null
 var _log_lines: Array[String] = []
 var _field_beast_ref: Node = null
 var _field_beast_looted: bool = false
@@ -211,7 +211,7 @@ func _input(event: InputEvent) -> void:
 func _exit_tree() -> void:
 	_cleanup_audio_players()
 	if ServiceRegistry.has_service("scenes"):
-		var current := ServiceRegistry.get_service("scenes") as SceneRouter
+		var current := ServiceRegistry.get_service("scenes") as SceneService
 		if current == _scene_router:
 			ServiceRegistry.unregister_service("scenes")
 			if _previous_scene_router != null:
@@ -221,16 +221,16 @@ func _exit_tree() -> void:
 
 
 func _resolve_services() -> void:
-	_dialogue = ServiceRegistry.get_service("dialogue") as DialogueController
-	_quest = ServiceRegistry.get_service("quest") as QuestSystem
-	_shop = ServiceRegistry.get_service("shop") as ShopController
-	_world = ServiceRegistry.get_service("world") as WorldRouter
-	_events = ServiceRegistry.get_service("events") as EventRouter
-	_effects = ServiceRegistry.get_service("effects") as EffectExecutor
+	_dialogue = ServiceRegistry.get_service("dialogue") as DialogueService
+	_quest = ServiceRegistry.get_service("quest") as QuestService
+	_shop = ServiceRegistry.get_service("shop") as ShopService
+	_world = ServiceRegistry.get_service("world") as WorldService
+	_events = ServiceRegistry.get_service("events") as EventService
+	_effects = ServiceRegistry.get_service("effects") as EffectService
 	_time = ServiceRegistry.get_service("time") as TimeService
-	_progression = ServiceRegistry.get_service("progression") as ProgressionSystem
-	_audio = ServiceRegistry.get_service("audio") as AudioManager
-	_save_manager = ServiceRegistry.get_service("save") as SaveManager
+	_progression = ServiceRegistry.get_service("progression") as ProgressionService
+	_audio = ServiceRegistry.get_service("audio") as AudioService
+	_save_manager = ServiceRegistry.get_service("save") as SaveService
 	_analytics = ServiceRegistry.get_service("analytics") as AnalyticsService
 	_ads = ServiceRegistry.get_service("ads") as AdService
 	_iap = ServiceRegistry.get_service("iap") as IAPService
@@ -266,7 +266,7 @@ func _configure_entity_spawner() -> void:
 	_entity_spawner = EntitySpawner.new()
 	_entity_spawner.name = "DemoEntitySpawner"
 	if ServiceRegistry.has_service("content"):
-		_entity_spawner.content = ServiceRegistry.get_service("content") as ContentRegistry
+		_entity_spawner.content = ServiceRegistry.get_service("content") as ContentService
 	add_child(_entity_spawner)
 
 
@@ -276,7 +276,7 @@ func _configure_embedded_router() -> void:
 	add_child(_scene_router)
 	_previous_scene_router = null
 	if ServiceRegistry.has_service("scenes"):
-		_previous_scene_router = ServiceRegistry.get_service("scenes") as SceneRouter
+		_previous_scene_router = ServiceRegistry.get_service("scenes") as SceneService
 	ServiceRegistry.unregister_service("scenes")
 	ServiceRegistry.register_service("scenes", _scene_router)
 	if _world != null:
@@ -671,7 +671,7 @@ func _attack_field_beast(health: HealthComponent) -> void:
 
 
 func _dispatch_player_command(command_type: String, payload: Dictionary) -> void:
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
+	var router := ServiceRegistry.get_service("commands") as CommandService
 	if router == null:
 		return
 	router.dispatch(GameCommand.create(command_type, PLAYER_ID, PLAYER_ID, payload))

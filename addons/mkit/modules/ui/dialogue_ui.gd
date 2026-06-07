@@ -1,9 +1,9 @@
 class_name DialogueUI
 extends Control
-var controller: DialogueController = null
+var controller: DialogueService = null
 
 
-func bind(dialogue_controller: DialogueController) -> void:
+func bind(dialogue_controller: DialogueService) -> void:
 	controller = dialogue_controller
 	if controller != null:
 		if not controller.node_entered.is_connected(_on_node_entered):

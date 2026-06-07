@@ -1,7 +1,7 @@
 extends Node
 
 # Translates raw keyboard input into GameCommands and dispatches them through the
-# CommandRouter to this entity's CommandReceiver. The state machine decides what
+# CommandService to this entity's CommandReceiver. The state machine decides what
 # (if anything) each command does — input never touches gameplay state directly.
 #
 # Reads keys directly (instead of named input actions) so the demo needs no
@@ -13,17 +13,17 @@ extends Node
 @export var target_id: String = "player_001"
 @export var cast_ability_id: String = ""
 
-var _router: CommandRouter = null
+var _router: CommandService = null
 var _was_moving: bool = false
 
 
 func _ready() -> void:
-	_router = ServiceRegistry.get_service("commands") as CommandRouter
+	_router = ServiceRegistry.get_service("commands") as CommandService
 
 
 func _physics_process(_delta: float) -> void:
 	if _router == null:
-		_router = ServiceRegistry.get_service("commands") as CommandRouter
+		_router = ServiceRegistry.get_service("commands") as CommandService
 		if _router == null:
 			return
 

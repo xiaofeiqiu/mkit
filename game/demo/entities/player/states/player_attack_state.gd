@@ -27,7 +27,7 @@ func enter(context: Dictionary = {}) -> void:
 	action.completed.connect(_on_action_completed)
 	current_action = action
 
-	var runner := ServiceRegistry.get_service("actions") as ActionRunner
+	var runner := ServiceRegistry.get_service("actions") as ActionService
 	runner.start_action(action, ctx)
 
 

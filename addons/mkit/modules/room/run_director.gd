@@ -22,9 +22,9 @@ func _ready() -> void:
 func _connect_events() -> void:
 	if _events_connected:
 		return
-	var events: EventRouter = null
+	var events: EventService = null
 	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventRouter
+		events = ServiceRegistry.get_service("events") as EventService
 	if events != null:
 		events.entity_died.connect(_on_entity_died)
 		_events_connected = true
@@ -49,9 +49,9 @@ func start_run(seed: int = 0) -> void:
 	room_graph = DungeonGenerator.new().generate_linear(first_floor_room_pool, seed, run_length)
 	run_state.status = "active"
 	run_started.emit(run_state)
-	var events: EventRouter = null
+	var events: EventService = null
 	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventRouter
+		events = ServiceRegistry.get_service("events") as EventService
 	if events != null:
 		events.emit_run_started(run_state.run_id, seed)
 	_connect_events()
@@ -119,10 +119,13 @@ func complete_run() -> void:
 		push_warning("RunDirector.complete_run: run_state is null")
 		return
 	run_state.status = "completed"
+	if room_graph != null:
+		room_graph.clear()
+		room_graph = null
 	run_finished.emit("completed")
-	var events: EventRouter = null
+	var events: EventService = null
 	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventRouter
+		events = ServiceRegistry.get_service("events") as EventService
 	if events != null:
 		events.emit_run_finished(run_state.run_id, "completed")
 
@@ -132,10 +135,13 @@ func fail_run(reason: String) -> void:
 		reason = "unknown"
 	if run_state != null:
 		run_state.status = "failed"
+	if room_graph != null:
+		room_graph.clear()
+		room_graph = null
 	run_finished.emit("failed:%s" % reason)
-	var events: EventRouter = null
+	var events: EventService = null
 	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventRouter
+		events = ServiceRegistry.get_service("events") as EventService
 	if events != null:
 		events.emit_run_finished(
 			run_state.run_id if run_state != null else "", "failed:%s" % reason

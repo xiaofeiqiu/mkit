@@ -8,11 +8,11 @@ func generate_options(
 	if count <= 0 or pool_ids.is_empty():
 		return []
 	if not ServiceRegistry.has_service("content"):
-		push_warning("RewardSystem.generate_options: missing ContentRegistry service")
+		push_warning("RewardSystem.generate_options: missing ContentService service")
 		return []
-	var content := ServiceRegistry.get_service("content") as ContentRegistry
+	var content := ServiceRegistry.get_service("content") as ContentService
 	if content == null:
-		push_warning("RewardSystem.generate_options: ContentRegistry service is invalid")
+		push_warning("RewardSystem.generate_options: ContentService service is invalid")
 		return []
 	var ctx := context if context != null else GameplayContext.new()
 	var candidates: Array[RewardDefinition] = []
@@ -36,18 +36,18 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	if option == null:
 		return false
 	var ctx := context if context != null else GameplayContext.new()
-	var executor: EffectExecutor = null
+	var executor: EffectService = null
 	if ServiceRegistry.has_service("effects"):
-		executor = ServiceRegistry.get_service("effects") as EffectExecutor
+		executor = ServiceRegistry.get_service("effects") as EffectService
 	if executor == null:
-		executor = EffectExecutor.new()
+		executor = EffectService.new()
 	var results := executor.execute_many(option.effects, ctx, true)
 	for r in results:
 		if not r.success:
 			return false
-	var events: EventRouter = null
+	var events: EventService = null
 	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventRouter
+		events = ServiceRegistry.get_service("events") as EventService
 	if events != null:
 		events.emit_reward_selected(option.reward_id, ctx.source.name if ctx.source != null else "")
 	return true

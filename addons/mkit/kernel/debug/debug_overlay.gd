@@ -5,7 +5,7 @@ extends CanvasLayer
 @export var visible_on_start: bool = true
 @export var show_registered_services: bool = true
 var _label: Label = null
-var _events: EventRouter = null
+var _events: EventService = null
 
 
 func _ready() -> void:
@@ -13,7 +13,7 @@ func _ready() -> void:
 	add_child(_label)
 	visible = visible_on_start
 	if ServiceRegistry.has_service("events"):
-		_events = ServiceRegistry.get_service("events") as EventRouter
+		_events = ServiceRegistry.get_service("events") as EventService
 	if not ServiceRegistry.has_service("debug"):
 		ServiceRegistry.register_service("debug", self)
 

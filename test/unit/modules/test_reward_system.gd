@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -176,10 +176,10 @@ func test_tc_rwd_13_null_option_returns_false() -> void:
 
 
 func test_tc_rwd_14_option_no_effects_returns_true_emits_reward_selected() -> void:
-	var events := EventRouter.new()
+	var events := EventService.new()
 	add_child_autofree(events)
 	ServiceRegistry.register_service("events", events)
-	var executor := EffectExecutor.new()
+	var executor := EffectService.new()
 	ServiceRegistry.register_service("effects", executor)
 	watch_signals(events)
 	var option := RewardOption.new()
@@ -191,7 +191,7 @@ func test_tc_rwd_14_option_no_effects_returns_true_emits_reward_selected() -> vo
 
 
 func test_tc_rwd_15_option_with_failing_effect_returns_false() -> void:
-	var executor := EffectExecutor.new()
+	var executor := EffectService.new()
 	ServiceRegistry.register_service("effects", executor)
 	var option := RewardOption.new()
 	option.reward_id = "broken"
@@ -201,7 +201,7 @@ func test_tc_rwd_15_option_with_failing_effect_returns_false() -> void:
 
 
 func test_tc_rwd_16_apply_null_context_falls_back_gracefully() -> void:
-	var executor := EffectExecutor.new()
+	var executor := EffectService.new()
 	ServiceRegistry.register_service("effects", executor)
 	var option := RewardOption.new()
 	option.reward_id = "safe"

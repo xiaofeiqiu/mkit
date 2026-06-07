@@ -35,7 +35,7 @@ func apply_damage(result: DamageResult) -> void:
 	damaged.emit(result)
 	health_changed.emit(current_hp, get_max_hp())
 	if ServiceRegistry.has_service("events"):
-		var events := ServiceRegistry.get_service("events") as EventRouter
+		var events := ServiceRegistry.get_service("events") as EventService
 		if events != null:
 			events.emit_damage_applied(result)
 	if current_hp <= 0.0:
@@ -76,7 +76,7 @@ func die(killer: Node = null) -> void:
 	var identity := owner.get_node_or_null("EntityIdentity") as EntityIdentity
 	var entity_id: String = identity.entity_id if identity != null else str(owner.name)
 	if ServiceRegistry.has_service("events"):
-		var events := ServiceRegistry.get_service("events") as EventRouter
+		var events := ServiceRegistry.get_service("events") as EventService
 		if events != null:
 			events.emit_entity_died(entity_id, owner)
 	if destroy_on_death:

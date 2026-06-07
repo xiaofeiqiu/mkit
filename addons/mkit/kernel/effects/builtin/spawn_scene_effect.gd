@@ -11,9 +11,9 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null or tree.current_scene == null:
 		return EffectResult.fail(effect_id, "no_scene_tree")
-	var pool: ObjectPool = null
+	var pool: PoolService = null
 	if use_pool and ServiceRegistry.has_service("pool"):
-		pool = ServiceRegistry.get_service("pool") as ObjectPool
+		pool = ServiceRegistry.get_service("pool") as PoolService
 	var instance := _create_spawn_instance(tree.current_scene, pool)
 	if instance == null:
 		return EffectResult.fail(effect_id, "cannot_load_scene")
@@ -31,7 +31,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	return EffectResult.ok(effect_id, {"spawned": instance.name, "pooled": pool != null})
 
 
-func _create_spawn_instance(parent: Node, pool: ObjectPool) -> Node:
+func _create_spawn_instance(parent: Node, pool: PoolService) -> Node:
 	if pool != null:
 		return pool.acquire(scene_path, parent)
 	var packed := load(scene_path) as PackedScene

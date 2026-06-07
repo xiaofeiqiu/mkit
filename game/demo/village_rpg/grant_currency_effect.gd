@@ -12,7 +12,7 @@ func _apply_impl(_context: GameplayContext) -> EffectResult:
 		return EffectResult.fail(effect_id, "Invalid amount")
 	if not ServiceRegistry.has_service("progression"):
 		return EffectResult.fail(effect_id, "Missing progression service")
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
 	if progression == null:
 		return EffectResult.fail(effect_id, "Missing progression service")
 	progression.add_currency(currency_id, amount)

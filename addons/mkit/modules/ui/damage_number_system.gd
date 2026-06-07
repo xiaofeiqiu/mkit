@@ -4,7 +4,7 @@ extends Node
 @export var default_offset: Vector2 = Vector2(0, -24)
 @export var use_pool: bool = false
 @export var auto_release_seconds: float = 0.0
-var _pool: ObjectPool = null
+var _pool: PoolService = null
 
 
 func show_number(position: Vector2, amount: float, critical: bool = false) -> Node:
@@ -26,7 +26,7 @@ func show_number(position: Vector2, amount: float, critical: bool = false) -> No
 
 func _create_number_node() -> Node:
 	if use_pool and ServiceRegistry.has_service("pool"):
-		_pool = ServiceRegistry.get_service("pool") as ObjectPool
+		_pool = ServiceRegistry.get_service("pool") as PoolService
 		if _pool != null:
 			return _pool.acquire(damage_number_scene_path, self)
 	_pool = null

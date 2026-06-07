@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -252,11 +252,11 @@ func test_tc_inv_20_count_zero_for_absent_definition() -> void:
 	assert_eq(total, 0)
 
 
-# --- EventRouter integration ---
+# --- EventService integration ---
 
 
 func test_tc_inv_21_add_item_triggers_inventory_changed_event() -> void:
-	var events := EventRouter.new()
+	var events := EventService.new()
 	add_child_autofree(events)
 	ServiceRegistry.register_service("events", events)
 	content._defs["key"] = _make_item_def("key")

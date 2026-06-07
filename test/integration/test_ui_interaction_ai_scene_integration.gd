@@ -25,7 +25,7 @@ class EffectInteractable:
 	func _interact_impl(context: GameplayContext) -> bool:
 		call_count += 1
 		last_context = context
-		var executor := ServiceRegistry.get_service("effects") as EffectExecutor
+		var executor := ServiceRegistry.get_service("effects") as EffectService
 		if executor == null:
 			return false
 		var results := executor.execute_many(effects, context, true)
@@ -44,7 +44,7 @@ func after_each() -> void:
 
 func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
 	_boot_runtime()
-	var router := ServiceRegistry.get_service("commands") as CommandRouter
+	var router := ServiceRegistry.get_service("commands") as CommandService
 	assert_not_null(router)
 
 	var world := Node2D.new()
@@ -84,7 +84,7 @@ func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
 
 func test_tc_int_ui_02_interaction_executes_interactable_effects() -> void:
 	_boot_runtime()
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	assert_not_null(effects)
 
 	var world := Node2D.new()
@@ -125,7 +125,7 @@ func test_tc_int_ui_02_interaction_executes_interactable_effects() -> void:
 func test_tc_int_ui_03_scene_router_emits_success_and_failure_paths() -> void:
 	_boot_runtime()
 	_save_plain_scene(SCENE_TARGET_PATH, "SceneRouterTarget")
-	var router := ServiceRegistry.get_service("scenes") as SceneRouter
+	var router := ServiceRegistry.get_service("scenes") as SceneService
 	assert_not_null(router)
 
 	watch_signals(router)

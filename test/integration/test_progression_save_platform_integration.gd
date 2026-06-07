@@ -73,9 +73,9 @@ func test_tc_int_prog_01_xp_level_up_progression_unlock_and_save() -> void:
 	effect.effect_id = "fx.int.upgrade_probe"
 	_boot_with_database(_make_progression_database(effect))
 
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
-	var save := ServiceRegistry.get_service("save") as SaveManager
-	var effects := ServiceRegistry.get_service("effects") as EffectExecutor
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var save := ServiceRegistry.get_service("save") as SaveService
+	var effects := ServiceRegistry.get_service("effects") as EffectService
 	assert_not_null(progression)
 	assert_not_null(save)
 	assert_not_null(effects)
@@ -141,8 +141,8 @@ func test_tc_int_prog_01_xp_level_up_progression_unlock_and_save() -> void:
 
 func test_tc_int_prog_02_load_applies_migration_before_restore() -> void:
 	_boot_with_database(ResourceDatabase.new())
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
-	var save := ServiceRegistry.get_service("save") as SaveManager
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var save := ServiceRegistry.get_service("save") as SaveService
 	assert_not_null(progression)
 	assert_not_null(save)
 	save.save_path = _save_path
@@ -190,7 +190,7 @@ func test_tc_int_prog_02_load_applies_migration_before_restore() -> void:
 
 func test_tc_int_prog_03_analytics_probe_records_runtime_event() -> void:
 	_boot_with_database(ResourceDatabase.new())
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var events := ServiceRegistry.get_service("events") as EventService
 	assert_not_null(events)
 	var analytics := ProbeAnalyticsService.new()
 	analytics.name = "ProbeAnalyticsService"
@@ -215,7 +215,7 @@ func test_tc_int_prog_03_analytics_probe_records_runtime_event() -> void:
 func test_tc_int_prog_04_rewarded_ad_completion_grants_revival_or_reward() -> void:
 	_boot_with_database(ResourceDatabase.new())
 	var ads := ServiceRegistry.get_service("ads") as AdService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
 	assert_not_null(ads)
 	assert_not_null(progression)
 	var entity := _make_health_entity()

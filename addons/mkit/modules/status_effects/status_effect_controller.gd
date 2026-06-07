@@ -4,11 +4,11 @@ signal status_applied(status_id: String, stacks: int)
 signal status_removed(status_id: String)
 signal status_ticked(status_id: String)
 var active_statuses: Dictionary = {}
-var content: ContentRegistry = null
+var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service("content") as ContentRegistry
+	content = ServiceRegistry.get_service("content") as ContentService
 
 
 func _process(delta: float) -> void:
@@ -88,7 +88,7 @@ func from_save_data(data: Dictionary) -> void:
 
 func get_definition(status_id: String) -> StatusEffectDefinition:
 	if content == null:
-		content = ServiceRegistry.get_service("content") as ContentRegistry
+		content = ServiceRegistry.get_service("content") as ContentService
 	if content == null:
 		return null
 	return content.get_resource(status_id) as StatusEffectDefinition
@@ -106,7 +106,7 @@ func _execute_effects(effects: Array[GameEffect], instance: StatusEffectInstance
 	context.status_id = instance.definition_id
 	context.payload["stacks"] = instance.stacks
 	context.payload["source_id"] = instance.source_id
-	var executor := ServiceRegistry.get_service("effects") as EffectExecutor
+	var executor := ServiceRegistry.get_service("effects") as EffectService
 	if executor != null:
 		executor.execute_many(effects, context)
 

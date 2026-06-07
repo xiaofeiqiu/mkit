@@ -10,9 +10,9 @@ func test_tc_int_shop_01_open_buy_sell_and_stock_pipeline() -> void:
 	bootstrap.resource_databases = [_make_database()]
 	add_child_autofree(bootstrap)
 
-	var shop := ServiceRegistry.get_service("shop") as ShopController
-	var progression := ServiceRegistry.get_service("progression") as ProgressionSystem
-	var events := ServiceRegistry.get_service("events") as EventRouter
+	var shop := ServiceRegistry.get_service("shop") as ShopService
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var events := ServiceRegistry.get_service("events") as EventService
 	assert_not_null(shop)
 	assert_not_null(progression)
 	assert_not_null(events)

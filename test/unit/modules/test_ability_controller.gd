@@ -2,7 +2,7 @@ extends GutTest
 
 
 class StubContent:
-	extends ContentRegistry
+	extends ContentService
 	var _defs: Dictionary = {}
 
 	func get_resource(id: String) -> Resource:
@@ -37,7 +37,7 @@ func _make_ability(id: String, cooldown: float = 0.0) -> AbilityDefinition:
 
 var ctrl: AbilityController
 var content: StubContent
-var actions: ActionRunner
+var actions: ActionService
 var time: TimeService
 var entity: Node
 var ctx: GameplayContext
@@ -49,7 +49,7 @@ func before_each() -> void:
 	content = StubContent.new()
 	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
-	actions = ActionRunner.new()
+	actions = ActionService.new()
 	add_child_autofree(actions)
 	ServiceRegistry.register_service("actions", actions)
 	time = TimeService.new()

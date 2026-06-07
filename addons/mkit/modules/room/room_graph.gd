@@ -9,3 +9,12 @@ func get_room_at(index: int) -> RoomNode:
 	if index < 0 or index >= nodes.size():
 		return null
 	return nodes[index]
+
+
+func clear() -> void:
+	for node in nodes:
+		node.next_nodes.clear()
+		node.previous_nodes.clear()
+	nodes.clear()
+	start_node = null
+	boss_node = null

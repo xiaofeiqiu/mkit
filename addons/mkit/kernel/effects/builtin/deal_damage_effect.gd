@@ -32,9 +32,9 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 
 
 func _resolve_combat(request: DamageRequest) -> DamageResult:
-	var resolver: CombatResolver = null
+	var resolver: CombatService = null
 	if ServiceRegistry.has_service("combat"):
-		resolver = ServiceRegistry.get_service("combat") as CombatResolver
+		resolver = ServiceRegistry.get_service("combat") as CombatService
 	if resolver == null:
-		resolver = CombatResolver.new()
+		resolver = CombatService.new()
 	return resolver.resolve(request)

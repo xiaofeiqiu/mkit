@@ -45,17 +45,9 @@ docs/
     │   ├── GameAction.md
     │   ├── ActionService.md
     │   ├── ActionContext.md
-    │   ├── CastAction.md
-    │   ├── DashAction.md
-    │   ├── TimedAttackAction.md
     │   ├── GameEffect.md
     │   ├── EffectService.md
     │   ├── EffectResult.md
-    │   ├── DealDamageEffect.md
-    │   ├── HealEffect.md
-    │   ├── ApplyStatusEffect.md
-    │   ├── ApplyStatModifierEffect.md
-    │   ├── GrantItemEffect.md
     │   ├── SpawnSceneEffect.md
     │   ├── LogEffect.md
     │   ├── GameplayContext.md
@@ -74,12 +66,12 @@ docs/
     │   ├── StateMachine.md
     │   ├── Condition.md
     │   ├── ConditionEvaluator.md
-    │   ├── CooldownReadyCondition.md
     │   ├── TargetInRangeCondition.md
     │   ├── TimeService.md
     │   ├── RandomService.md
     │   ├── SceneService.md
     │   ├── PoolService.md
+    │   ├── AudioService.md
     │   ├── AnalyticsService.md
     │   ├── AdService.md
     │   ├── IAPService.md
@@ -89,6 +81,8 @@ docs/
         ├── AbilityDefinition.md
         ├── AbilityInstance.md
         ├── AbilityController.md
+        ├── CastAction.md
+        ├── CooldownReadyCondition.md
         ├── Brain.md
         ├── SimpleAIEnemyBrain.md
         ├── CombatService.md
@@ -96,6 +90,9 @@ docs/
         ├── DamageResult.md
         ├── HitboxComponent.md
         ├── HurtboxComponent.md
+        ├── DealDamageEffect.md
+        ├── DashAction.md
+        ├── TimedAttackAction.md
         ├── DialogueDefinition.md
         ├── DialogueNode.md
         ├── DialogueChoice.md
@@ -108,6 +105,7 @@ docs/
         ├── EntitySpawner.md
         ├── HealthComponent.md
         ├── ResourcePoolComponent.md
+        ├── HealEffect.md
         ├── Interactable.md
         ├── InteractionComponent.md
         ├── ItemDefinition.md
@@ -116,9 +114,10 @@ docs/
         ├── InventoryModel.md
         ├── InventoryController.md
         ├── EquipmentController.md
+        ├── GrantItemEffect.md
         ├── LootTableDefinition.md
         ├── LootEntry.md
-        ├── LootSystem.md
+        ├── LootService.md
         ├── LootRollResult.md
         ├── RewardDefinition.md
         ├── RewardOption.md
@@ -128,6 +127,8 @@ docs/
         ├── ProgressionState.md
         ├── ProgressionService.md
         ├── UpgradeDefinition.md
+        ├── AddCurrencyEffect.md
+        ├── SpendCurrencyEffect.md
         ├── QuestDefinition.md
         ├── QuestObjectiveDefinition.md
         ├── QuestState.md
@@ -153,15 +154,16 @@ docs/
         ├── StatModifier.md
         ├── StatModifierDefinition.md
         ├── StatsComponent.md
+        ├── ApplyStatModifierEffect.md
         ├── StatusEffectDefinition.md
         ├── StatusEffectInstance.md
         ├── StatusEffectController.md
+        ├── ApplyStatusEffect.md
         ├── UIManager.md
         ├── DialogueUI.md
         ├── QuestLogUI.md
         ├── ShopUI.md
         ├── RewardSelectionUI.md
-        ├── AudioService.md
         ├── FeedbackSystem.md
         ├── DamageNumberSystem.md
         ├── VFXSpawner.md
@@ -196,19 +198,22 @@ docs/
 3. 标准管线一览（见下），每段一行说明职责：
    ```
    Input / AI / Script
-     → GameCommand                                     ← 意图封装为类型化对象（kernel）
-     → CommandService.dispatch → CommandReceiver       ← kernel 路由到目标实体的接收器
-     → StateMachine / State.handle_command             ← kernel HFSM 决定是否响应、触发状态转换
-     → ActionService.start_action → GameAction         ← kernel 管理带时序的行为生命周期
-     → EffectService.execute → GameEffect._apply_impl  ← kernel 执行条件检查 + 效果链
-        │ 在 _apply_impl 内部直接访问 module 组件/服务：
-        │   get_node_or_null("Components/HealthComponent") → health.apply_damage()
+     → GameCommand                                        ← 意图封装为类型化对象（kernel）
+     → CommandService.dispatch → CommandReceiver          ← kernel 路由到目标实体的接收器
+     → StateMachine / State.handle_command                ← kernel HFSM 决定是否响应、触发状态转换
+     → AbilityController.cast → 条件/cost 检查            ← module 技能桥接；cast_time>0 时走 ActionService
+     → ActionService.start_action → GameAction            ← kernel 管理带时序的行为生命周期
+     → GameAction._on_start / _on_complete / _on_cancel   ← 生命周期钩子（module subclass override）
+       start/complete 后 kernel 自动 _fire_effects(on_xxx_effects + _resolve_effects(ctx))
+       cancel 后 kernel 自动 _fire_effects(on_cancel_effects)  # cancel 不调 _resolve_effects
+     → EffectService.execute_many → GameEffect._apply_impl ← kernel 调度；_apply_impl 由 module 实现
+        │ 例（DealDamageEffect，位于 modules/combat/damage/）：
+        │   target.get_node_or_null("Components/HealthComponent") → health.apply_damage()
         │   ServiceRegistry.get_service("combat") → CombatService.resolve()
-        │   get_node_or_null("Components/StatsComponent") → stats.add_modifier()
-     → EventService.emit_*                             ← kernel 广播领域事件
-     → UI / Audio / VFX / Analytics                   ← modules 订阅信号，产生表现
+     → EventService.emit_*                                ← kernel 广播领域事件
+     → UI / Audio / VFX / Analytics                      ← modules 订阅信号，产生表现
    ```
-   **kernel 是管线的全部骨架（Command / HFSM / Action / Effect / Event 均在 kernel）。`GameEffect._apply_impl` 是 kernel 穿透到 module 组件的唯一正规接缝；没有"Domain System"这层抽象。**
+   **kernel 是管线的骨架（Command / HFSM / Action / Effect / Event 均在 kernel）。`GameEffect` 是 kernel 的抽象基类；具体效果实现（`DealDamageEffect` 等）位于 modules，通过覆写 `_apply_impl` 访问 module 组件。`GameAction` 在每个生命周期钩子执行完毕后，由 kernel 自动触发 `on_start/complete/cancel_effects` 数组（data-driven）；subclass 可 override `_resolve_effects` 在运行时动态补充 effect。`AbilityController`（module）是 StateMachine 与 ActionService/EffectService 之间的桥接层。**
 4. 文件结构速览（`addons/mkit/kernel/`、`addons/mkit/modules/`、`res://game/` 各含什么）
 5. 快速导航表（"我想做 X → 看 Y"）
 
@@ -314,20 +319,23 @@ EntityRoot
 
 ```
 Input / AI / Script
-  → GameCommand                                     # 意图封装为类型化对象（kernel）
-  → CommandService.dispatch → CommandReceiver       # kernel 路由；CommandReceiver 由实体实现
-  → StateMachine / State.handle_command             # kernel HFSM，决定是否响应、触发状态转换
-  → ActionService.start_action → GameAction         # kernel 管理行为时序（start/update/complete/cancel）
-  → EffectService.execute_many → GameEffect         # kernel 执行效果链，条件检查 → _apply_impl
-       _apply_impl 直接访问 module 组件/服务：
-         get_node_or_null("Components/HealthComponent")  → health.apply_damage()
-         ServiceRegistry.get_service("combat")           → CombatService.resolve()
-         get_node_or_null("Components/StatsComponent")   → stats.add_modifier()
-  → EventService.emit_*                             # kernel 广播领域事件（damage_applied、entity_died…）
-  → UI / Audio / VFX / Analytics                   # modules 订阅信号，产生表现
+  → GameCommand                                        # 意图封装为类型化对象（kernel）
+  → CommandService.dispatch → CommandReceiver          # kernel 路由；CommandReceiver 由实体实现
+  → StateMachine / State.handle_command                # kernel HFSM，决定是否响应、触发状态转换
+  → AbilityController.cast → 条件/cost 检查            # module 技能桥接层（cast_time>0 时走 ActionService）
+  → ActionService.start_action → GameAction            # kernel 管理行为时序（start/update/complete/cancel）
+  → GameAction._on_start / _on_complete / _on_cancel   # 生命周期钩子；钩子结束后 kernel 自动
+    start/complete: _fire_effects(on_xxx_effects + _resolve_effects(ctx))  # _resolve_effects 可 override
+    cancel:         _fire_effects(on_cancel_effects)                        # cancel 不调 _resolve_effects
+  → EffectService.execute_many → GameEffect            # kernel 调度效果链；GameEffect 是 kernel 抽象基类
+       _apply_impl 由 module 实现（如 DealDamageEffect，位于 modules/combat/damage/）：
+         target.get_node_or_null("Components/HealthComponent") → health.apply_damage()
+         ServiceRegistry.get_service("combat") → CombatService.resolve()
+  → EventService.emit_*                               # kernel 广播领域事件（damage_applied、entity_died…）
+  → UI / Audio / VFX / Analytics                      # modules 订阅信号，产生表现
 ```
 
-**核心关系：kernel 包含管线所有骨架节点（Command / HFSM / Action / Effect / Event）。`GameEffect._apply_impl` 是 kernel 穿透到 module 的接缝点，没有"Domain System"这层抽象——effects 直接通过节点路径或 ServiceRegistry 访问 module 组件。`EventService` 是 module 工作完成后向外广播的出口。**
+**核心关系：kernel 包含管线骨架（Command / HFSM / Action / Effect / Event）。`GameAction` 在每个生命周期钩子执行完毕后，由 kernel 自动触发 `on_start/complete/cancel_effects` 数组（data-driven）；subclass 可 override `_resolve_effects` 在运行时动态补充 effect，无需手动调用 EffectService。`GameEffect` 是 kernel 的抽象基类；具体效果实现（`DealDamageEffect`、`HealEffect` 等）位于 modules，通过覆写 `_apply_impl` 直接访问 module 组件。`AbilityController`（module）是 State 与 ActionService/EffectService 之间的桥接层，没有"Domain System"这层抽象。`EventService` 是 module 工作完成后向外广播的出口。**
 
 每一跳解释：产出什么对象、交给谁、**为什么要这一跳**（命令与效果解耦的原因；Action 层的价值；Effect 是 Resource 的意义）。
 
@@ -359,7 +367,7 @@ Input / AI / Script
 | 扩展点 | 你继承的类 | 你实现的方法 | mkit 负责什么 |
 |--------|-----------|------------|--------------|
 | 自定义效果 | `GameEffect` | `_apply_impl(ctx)` | 条件检查、结果包装、执行链调度 |
-| 自定义动作 | `GameAction` | `_on_start/update/cancel/complete` | 生命周期管理、complete/cancelled 信号 |
+| 自定义动作 | `GameAction` | `_on_start/update/cancel/complete`；声明 `on_start/complete/cancel_effects` 数组；可 override `_resolve_effects(_ctx)` 动态补充 effect | 生命周期管理、钩子后自动 `_fire_effects`、complete/cancelled 信号 |
 | 自定义状态 | `State` | `enter/exit/update/handle_command/can_enter/can_exit` | 层级结构、transition 路由、blackboard 注入 |
 | 自定义 AI | `Brain` | `think(entity, delta)` | 被 AI 系统按帧调用 |
 | 自定义交互 | `Interactable` | `_interact_impl(interactor)` | 交互检测、触发时机 |
@@ -440,7 +448,7 @@ Command、Action、Effect、Condition、EffectResult、GameplayContext、Definit
 #### P1 — 最高频
 3. **Command Dispatch**：发出 `GameCommand` → `CommandService.dispatch` → `CommandReceiver.receive` → `State.handle_command`
 4. **HFSM Transition**：`State.request_transition` → `StateMachine.transition_to` → `can_exit` / `can_enter` → `exit` / `enter`
-5. **Ability Cast**：`AbilityController.cast` → 条件检查 → cost 扣除 → `ActionService.start_action`（cast_time > 0）或直接 `EffectService.execute_many`
+5. **Ability Cast**：`AbilityController.cast` → 条件检查 → cost 扣除 → cast_time > 0 时 `ActionService.start_action(CastAction)`，cast_time == 0 时创建临时 `GameAction` 并立即 `start()`+`complete()`；两条路径均通过 `GameAction.on_complete_effects` data-driven 触发 effect，kernel 自动 `_fire_effects`，不直接调用 `EffectService`
 6. **Effect Execution**：`EffectService.execute` → `GameEffect.apply` → `ConditionEvaluator.evaluate_all` → `_apply_impl` → `EffectResult`
 7. **Damage Resolution**：`CombatService` 接收 `DamageRequest` → stat 计算 → `HealthComponent.apply_damage` → `EventService.emit_damage_applied`
 
@@ -453,7 +461,7 @@ Command、Action、Effect、Condition、EffectResult、GameplayContext、Definit
 #### P3 — RPG 流程
 12. **Quest Lifecycle**：`QuestService.accept` → `QuestState` 创建 → `AdvanceObjectiveEffect` 推进 → `QuestService.complete` → `EventService.emit_quest_completed`
 13. **Save / Load**：`SaveService.save_game` → 遍历树收集 Saveable + SaveableComponent → 序列化 → 写文件；`load_game` 反向
-14. **Loot Roll**：`LootSystem.roll` → 权重计算 → `LootRollResult` → `RewardSystem.apply`
+14. **Loot Roll**：`LootService.roll_table(table_id, ctx)` → 权重计算 → `LootRollResult` → `LootService.apply_selected` / `RewardSystem`
 15. **Dialogue**：`DialogueService.start` → `DialogueRuntime` 状态机 → 推进节点 → 发 `EventService.emit_dialogue_ended`
 16. **Shop Purchase**：`ShopService.purchase` → 检查 currency / stock → `InventoryController.add_item` → `EventService.emit_item_purchased`
 
@@ -541,7 +549,7 @@ Recipe 14  → 在房间之间开放商店购买物品             [扩展]
 | 05 | `05_ability.md` | `AbilityDefinition`（`.tres`）注册到 `ResourceDatabase`、`AbilityController` 注册并 cast、ResourcePool 消耗、冷却 | `AbilityDefinition`、`AbilityInstance`、`AbilityController`、`ContentService`、`ResourcePoolComponent`、`CooldownReadyCondition` |
 | 06 | `06_ai_enemy.md` | 敌人实体（同样的场景树约定）、继承 `Brain` 实现决策逻辑、敌人发 `GameCommand` 攻击玩家 | `Brain`、`EntitySpawner`、`StateMachine`、`GameCommand`、`CommandService` |
 | 07 | `07_room.md` | `RoomDefinition`（`.tres`）、`RoomController`、`RoomLoader`、在房间里 spawn 敌人、监听 `room_cleared`；`RunDirector` 串联多个房间 | `RoomDefinition`、`RoomRuntime`、`RoomController`、`RoomLoader`、`RoomGraph`、`DungeonGenerator`、`RunDirector`、`RunState` |
-| 08 | `08_loot_and_rewards.md` | 房间清空后 `LootSystem` 掷骰子、`RewardDefinition` 定义奖励池、`RewardSelectionUI` 让玩家选 | `LootTableDefinition`、`LootEntry`、`LootSystem`、`LootRollResult`、`RewardDefinition`、`RewardOption`、`RewardSystem`、`RewardCoordinator`、`RewardSelectionUI`、`GrantItemEffect` |
+| 08 | `08_loot_and_rewards.md` | 房间清空后 `LootService` 掷骰子、`RewardDefinition` 定义奖励池、`RewardSelectionUI` 让玩家选 | `LootTableDefinition`、`LootEntry`、`LootService`、`LootRollResult`、`RewardDefinition`、`RewardOption`、`RewardSystem`、`RewardCoordinator`、`RewardSelectionUI`、`GrantItemEffect` |
 | 09 | `09_npc_dialogue.md` | NPC 实体 + `Interactable` / `InteractionComponent`、`DialogueDefinition`（`.tres`）树形对话、`DialogueService` 推进、监听 `dialogue_ended` | `Interactable`、`InteractionComponent`、`DialogueDefinition`、`DialogueNode`、`DialogueChoice`、`DialogueRuntime`、`DialogueService`、`DialogueInteractable` |
 | 10 | `10_quest.md` | `QuestDefinition`（`.tres`）、NPC 对话末尾触发 `AcceptQuestEffect`、击杀敌人时 `AdvanceObjectiveEffect` 推进、达成后 `CompleteQuestEffect` + 奖励 | `QuestDefinition`、`QuestObjectiveDefinition`、`QuestState`、`QuestLog`、`QuestService`、`AcceptQuestEffect`、`AdvanceObjectiveEffect`、`CompleteQuestEffect`、`EventService` |
 | 11 | `11_progression_and_save.md` | `ExperienceComponent` 击杀获 XP、`ExperienceCurve` 定义升级阈值、`ProgressionService` 处理升级；`Saveable` / `SaveableComponent` 实现存读档 | `ExperienceComponent`、`ExperienceCurve`、`ProgressionState`、`ProgressionService`、`UpgradeDefinition`、`Saveable`、`SaveableComponent`、`SaveService`、`SaveMigration` |
@@ -593,7 +601,7 @@ Recipe 14  → 在房间之间开放商店购买物品             [扩展]
 |--------|----|
 | P0 | `GameBootstrap`、`ServiceRegistry`、`GameCommand`、`CommandService`、`GameAction`、`ActionService`、`GameEffect`、`EffectService`、`GameplayContext`、`EventService`、`ContentService`、`ResourceDatabase`、`State`、`StateMachine` |
 | P1 | `AbilityController`、`AbilityDefinition`、`CombatService`、`DamageRequest`、`HealthComponent`、`StatsComponent`、`Saveable`、`SaveableComponent`、`SaveService` |
-| P2 | `EntityRoot`、`EntitySpawner`、`QuestService`、`QuestDefinition`、`StatusEffectController`、`LootSystem`、`InventoryController`、`ProgressionService`、`FeedbackSystem`、`VFXSpawner` |
+| P2 | `EntityRoot`、`EntitySpawner`、`QuestService`、`QuestDefinition`、`StatusEffectController`、`LootService`、`InventoryController`、`ProgressionService`、`FeedbackSystem`、`VFXSpawner` |
 | P3 | 其余所有类 |
 
 ---
@@ -644,43 +652,44 @@ Note over YourState,YourEffect: [你实现]
 
 ## 五、全类覆盖清单（生成检查用）
 
-以下 136 个类每个必须在某个 ref 文件中有完整条目。
+以下 139 个类每个必须在某个 ref 文件中有完整条目。
 
-### Kernel（53 类）
+### Kernel（46 类）
 
-**Actions（5）**：`GameAction`、`ActionService`、`ActionContext`、`CastAction`、`DashAction`、`TimedAttackAction`  
+**Actions（3）**：`GameAction`、`ActionService`、`ActionContext`  
 **Bootstrap（1）**：`GameBootstrap`  
 **Commands（4）**：`GameCommand`、`CommandService`、`CommandReceiver`、`BuiltinCommands`  
-**Conditions（4）**：`Condition`、`ConditionEvaluator`、`CooldownReadyCondition`、`TargetInRangeCondition`  
+**Conditions（3）**：`Condition`、`ConditionEvaluator`、`TargetInRangeCondition`  
 **Context（3）**：`GameplayContext`、`ActionContext`、`Blackboard`  
 **Debug（1）**：`DebugOverlay`  
-**Effects（10）**：`GameEffect`、`EffectService`、`EffectResult`、`DealDamageEffect`、`HealEffect`、`ApplyStatusEffect`、`ApplyStatModifierEffect`、`GrantItemEffect`、`SpawnSceneEffect`、`LogEffect`  
+**Effects（5）**：`GameEffect`、`EffectService`、`EffectResult`、`SpawnSceneEffect`、`LogEffect`  
 **Events（2）**：`DomainEvent`、`EventService`  
 **Registry（4）**：`ContentDefinition`、`ContentService`、`ContentValidationResult`、`ResourceDatabase`  
 **Save（4）**：`Saveable`、`SaveableComponent`、`SaveService`、`SaveMigration`  
-**Services（13）**：`ServiceRegistry`、`TimeService`、`RandomService`、`SceneService`、`PoolService`、`AnalyticsService`、`AnalyticsServiceMock`、`AdService`、`AdServiceMock`、`IAPService`、`IAPServiceMock`、`CloudSaveService`、`CloudSaveServiceMock`  
+**Services（14）**：`ServiceRegistry`、`TimeService`、`RandomService`、`SceneService`、`PoolService`、`AudioService`、`AnalyticsService`、`AnalyticsServiceMock`、`AdService`、`AdServiceMock`、`IAPService`、`IAPServiceMock`、`CloudSaveService`、`CloudSaveServiceMock`  
 **StateMachine（2）**：`State`、`StateMachine`
 
-> Actions 中 `ActionContext` 同时属于 context 目录，ref 文件放 `ref/kernel/ActionContext.md`，目录以文件位置为准。
+> `ActionContext` 同时属于 context 目录，ref 文件放 `ref/kernel/ActionContext.md`，目录以文件位置为准。  
+> 模块特定的 Effects（`DealDamageEffect` 等）、Actions（`CastAction` 等）、Conditions（`CooldownReadyCondition`）均在 modules，ref 文件放 `ref/modules/`。
 
-### Modules（83 类）
+### Modules（93 类）
 
-**Abilities（3）**：`AbilityDefinition`、`AbilityInstance`、`AbilityController`  
+**Abilities（5）**：`AbilityDefinition`、`AbilityInstance`、`AbilityController`、`CastAction`、`CooldownReadyCondition`  
 **AI（2）**：`Brain`、`SimpleAIEnemyBrain`  
-**Combat（5）**：`CombatService`、`DamageRequest`、`DamageResult`、`HitboxComponent`、`HurtboxComponent`  
+**Combat（8）**：`CombatService`、`DamageRequest`、`DamageResult`、`HitboxComponent`、`HurtboxComponent`、`DealDamageEffect`、`DashAction`、`TimedAttackAction`  
 **Dialogue（6）**：`DialogueDefinition`、`DialogueNode`、`DialogueChoice`、`DialogueRuntime`、`DialogueInteractable`、`DialogueService`  
 **Entity（4）**：`EntityDefinition`、`EntityIdentity`、`EntityRoot`、`EntitySpawner`  
-**Health（2）**：`HealthComponent`、`ResourcePoolComponent`  
+**Health（3）**：`HealthComponent`、`ResourcePoolComponent`、`HealEffect`  
 **Interaction（2）**：`Interactable`、`InteractionComponent`  
-**Inventory（6）**：`ItemDefinition`、`ItemInstance`、`InventorySlot`、`InventoryModel`、`InventoryController`、`EquipmentController`  
-**Loot（7）**：`LootTableDefinition`、`LootEntry`、`LootSystem`、`LootRollResult`、`RewardDefinition`、`RewardOption`、`RewardSystem`  
-**Progression（5）**：`ExperienceComponent`、`ExperienceCurve`、`ProgressionState`、`ProgressionService`、`UpgradeDefinition`  
+**Inventory（7）**：`ItemDefinition`、`ItemInstance`、`InventorySlot`、`InventoryModel`、`InventoryController`、`EquipmentController`、`GrantItemEffect`  
+**Loot（7）**：`LootTableDefinition`、`LootEntry`、`LootService`、`LootRollResult`、`RewardDefinition`、`RewardOption`、`RewardSystem`  
+**Progression（7）**：`ExperienceComponent`、`ExperienceCurve`、`ProgressionState`、`ProgressionService`、`UpgradeDefinition`、`AddCurrencyEffect`、`SpendCurrencyEffect`  
 **Quest（8）**：`QuestDefinition`、`QuestObjectiveDefinition`、`QuestState`、`QuestLog`、`QuestService`、`AcceptQuestEffect`、`AdvanceObjectiveEffect`、`CompleteQuestEffect`  
 **Room（10）**：`RoomDefinition`、`RoomGraph`、`RoomLoader`、`RoomNode`、`RoomRuntime`、`RoomController`、`DungeonGenerator`、`RunState`、`RunDirector`、`RewardCoordinator`  
 **Shop（3）**：`ShopDefinition`、`ShopEntry`、`ShopService`  
-**Stats（4）**：`StatDefinition`、`StatModifier`、`StatModifierDefinition`、`StatsComponent`  
-**Status Effects（3）**：`StatusEffectDefinition`、`StatusEffectInstance`、`StatusEffectController`  
-**UI（9）**：`UIManager`、`DialogueUI`、`QuestLogUI`、`ShopUI`、`RewardSelectionUI`、`AudioService`、`FeedbackSystem`、`DamageNumberSystem`、`VFXSpawner`  
+**Stats（5）**：`StatDefinition`、`StatModifier`、`StatModifierDefinition`、`StatsComponent`、`ApplyStatModifierEffect`  
+**Status Effects（4）**：`StatusEffectDefinition`、`StatusEffectInstance`、`StatusEffectController`、`ApplyStatusEffect`  
+**UI（8）**：`UIManager`、`DialogueUI`、`QuestLogUI`、`ShopUI`、`RewardSelectionUI`、`FeedbackSystem`、`DamageNumberSystem`、`VFXSpawner`  
 **World（4）**：`ZoneDefinition`、`WorldService`、`Portal`、`SpawnPoint`
 
 ---
@@ -688,16 +697,16 @@ Note over YourState,YourEffect: [你实现]
 ## 六、实施优先级
 
 ### Phase 1 — 基础骨架（先让文档站能跑、能找到东西）
-- [ ] `docs/index.html`（带 navGroups，参考第一节分组）
-- [ ] `docs/readme.md`
-- [ ] `docs/getting_started.md`
-- [ ] `docs/architecture.md`（含服务 ID 表、实体节点约定、层依赖图）
-- [ ] `docs/glossary.md`
+- [x] `docs/index.html`（带 navGroups，参考第一节分组）
+- [x] `docs/readme.md`
+- [x] `docs/getting_started.md`
+- [x] `docs/architecture.md`（含服务 ID 表、实体节点约定、层依赖图）
+- [x] `docs/glossary.md`
 
 ### Phase 2 — 核心理解层
-- [ ] `docs/concepts.md`（5 个心智模型 + 所有图）
-- [ ] `docs/pipeline.md`（P0 + P1 共 7 条管线，含代码示例）
-- [ ] `docs/debugging.md`
+- [x] `docs/concepts.md`（5 个心智模型 + 所有图）
+- [x] `docs/pipeline.md`（P0 + P1 共 7 条管线，含代码示例）
+- [x] `docs/debugging.md`
 
 ### Phase 3 — 动手层
 - [ ] `docs/cookbook/` 骨架 + 主线 recipes 01–06（bootstrap → AI enemy）

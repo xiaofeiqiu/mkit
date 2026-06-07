@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mkit Docs</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked@13/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+  <style>
+    :root {
+      --bg: #1e2128;
+      --sidebar-bg: #161a20;
+      --border: #2d3342;
+      --text: #cdd6f4;
+      --muted: #6c7086;
+      --link: #89b4fa;
+      --link-hover: #b4befe;
+      --accent: #89b4fa;
+      --code-bg: #242834;
+      --heading: #cdd6f4;
+      --active-bg: rgba(137,180,250,0.12);
+      --active-border: #89b4fa;
+      --tag-bg: #2d3342;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { display: flex; height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.65; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 260px; min-width: 260px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 18px 16px 14px;
+      font-size: 15px; font-weight: 700;
+      color: var(--heading);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.2px;
+    }
+    .sidebar-header span { opacity: 0.55; font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+    .nav-group { margin-top: 4px; }
+    .nav-group-label {
+      padding: 8px 16px 4px;
+      font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      user-select: none;
+    }
+    .nav-group-label:hover { color: var(--text); }
+    .chevron { font-size: 9px; transition: transform 0.15s; }
+    .nav-group.collapsed .chevron { transform: rotate(-90deg); }
+    .nav-group.collapsed .nav-items { display: none; }
+    .nav-items { list-style: none; padding-bottom: 4px; }
+    .nav-items a {
+      display: block; padding: 4px 16px 4px 28px;
+      color: var(--link); text-decoration: none;
+      font-size: 12.5px;
+      border-left: 2px solid transparent;
+      transition: background 0.1s, border-color 0.1s;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .nav-items a:hover { background: rgba(137,180,250,0.06); border-left-color: var(--border); color: var(--link-hover); }
+    .nav-items a.active { background: var(--active-bg); border-left-color: var(--active-border); color: #fff; }
+    .nav-items a.unavailable { color: var(--muted); cursor: default; pointer-events: none; }
+
+    /* ── Content ── */
+    #content-wrap { flex: 1; overflow-y: auto; padding: 40px 52px 80px; }
+    #content { max-width: 860px; }
+
+    #content h1 { font-size: 1.9em; color: var(--heading); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-weight: 700; letter-spacing: -0.5px; }
+    #content h2 { font-size: 1.25em; color: var(--heading); margin: 36px 0 10px; font-weight: 700; }
+    #content h3 { font-size: 1.05em; color: var(--heading); margin: 28px 0 8px; font-weight: 600; }
+    #content h4 { font-size: 0.95em; color: var(--heading); margin: 20px 0 6px; font-weight: 600; }
+    #content p { margin-bottom: 12px; }
+    #content ul, #content ol { padding-left: 22px; margin-bottom: 12px; }
+    #content li { margin-bottom: 3px; }
+    #content a { color: var(--link); text-decoration: none; border-bottom: 1px dotted rgba(137,180,250,0.4); }
+    #content a:hover { color: var(--link-hover); border-bottom-color: var(--link-hover); }
+    #content code { background: var(--code-bg); padding: 2px 5px; border-radius: 3px; font-family: 'JetBrains Mono','Fira Code','Cascadia Code',monospace; font-size: 0.84em; color: #f5c2e7; }
+    #content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; overflow-x: auto; margin-bottom: 16px; }
+    #content pre code { background: none; padding: 0; color: var(--text); font-size: 0.845em; }
+    #content blockquote { border-left: 3px solid var(--accent); padding: 8px 16px; background: rgba(137,180,250,0.05); margin-bottom: 12px; border-radius: 0 4px 4px 0; }
+    #content table { border-collapse: collapse; width: 100%; margin-bottom: 16px; font-size: 13px; }
+    #content th { background: var(--code-bg); border: 1px solid var(--border); padding: 8px 12px; text-align: left; font-weight: 600; color: var(--heading); }
+    #content td { border: 1px solid var(--border); padding: 6px 12px; }
+    #content tr:nth-child(even) td { background: rgba(45,51,66,0.4); }
+    #content hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    /* mermaid diagrams */
+    .mermaid { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 20px; margin-bottom: 16px; overflow-x: auto; text-align: center; }
+    .mermaid svg { max-width: 100%; }
+
+    /* ── Mermaid fullscreen lightbox ── */
+    #mermaid-lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.85);
+      align-items: center; justify-content: center;
+      cursor: zoom-out;
+    }
+    #mermaid-lightbox.open { display: flex; }
+    #mermaid-lightbox-inner {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 92vw; height: 88vh;
+      overflow: hidden;
+      cursor: default;
+    }
+    #mermaid-lightbox-inner svg {
+      width: 100%; height: 100%;
+    }
+    #mermaid-lightbox-toolbar {
+      position: absolute; top: 10px; right: 10px;
+      display: flex; gap: 6px; z-index: 10;
+    }
+    .lb-btn {
+      background: rgba(45,51,66,0.9); border: 1px solid var(--border);
+      color: var(--text); border-radius: 4px;
+      padding: 4px 9px; font-size: 13px; cursor: pointer;
+      line-height: 1.4;
+    }
+    .lb-btn:hover { background: var(--border); color: #fff; }
+    .mermaid { cursor: zoom-in; }
+
+    /* status messages */
+    #status { color: var(--muted); padding: 40px 0; text-align: center; font-size: 13px; }
+    #status.error { color: #f38ba8; }
+    .unavail-banner { background: rgba(249,226,175,0.07); border: 1px solid rgba(249,226,175,0.2); border-radius: 6px; padding: 12px 16px; color: #f9e2af; font-size: 13px; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+<!-- Mermaid fullscreen lightbox -->
+<div id="mermaid-lightbox">
+  <div id="mermaid-lightbox-inner">
+    <div id="mermaid-lightbox-toolbar">
+      <button class="lb-btn" id="lb-fit" title="Fit to screen">⊡ Fit</button>
+      <button class="lb-btn" id="lb-zoom-in" title="Zoom in">＋</button>
+      <button class="lb-btn" id="lb-zoom-out" title="Zoom out">－</button>
+      <button class="lb-btn" id="lb-close" title="Close (Esc)">✕</button>
+    </div>
+    <div id="mermaid-lightbox-svg"></div>
+  </div>
+</div>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    Mkit Docs
+    <span>Godot 4.x RPG Framework</span>
+  </div>
+  <div id="nav-root"></div>
+</nav>
+
+<div id="content-wrap">
+  <div id="content">
+    <div id="status">正在加载…</div>
+  </div>
+</div>
+
+<script>
+// ── Nav definition ───────────────────────────────────────────────────────────
+const NAV = [
+  { group: '入门', items: [
+    { label: 'Overview',        href: 'readme.md' },
+    { label: 'Getting Started', href: 'getting_started.md' },
+    { label: 'Architecture',    href: 'architecture.md' },
+    { label: 'Concepts',        href: 'concepts.md' },
+    { label: 'Glossary',        href: 'glossary.md' },
+  ]},
+  { group: '指南', items: [
+    { label: 'Pipeline',   href: 'pipeline.md' },
+    { label: 'Debugging',  href: 'debugging.md' },
+  ]},
+  { group: 'Cookbook', collapsed: true, items: [
+    { label: 'Index',                   href: 'cookbook/index.md' },
+    { label: '01 · Bootstrap',          href: 'cookbook/01_bootstrap.md' },
+    { label: '02 · Player Entity',      href: 'cookbook/02_player_entity.md' },
+    { label: '03 · Health & Stats',     href: 'cookbook/03_health_and_stats.md' },
+    { label: '04 · Attack Action',      href: 'cookbook/04_attack_action.md' },
+    { label: '05 · Ability',            href: 'cookbook/05_ability.md' },
+    { label: '06 · AI Enemy',           href: 'cookbook/06_ai_enemy.md' },
+    { label: '07 · Room',               href: 'cookbook/07_room.md' },
+    { label: '08 · Loot & Rewards',     href: 'cookbook/08_loot_and_rewards.md' },
+    { label: '09 · NPC Dialogue',       href: 'cookbook/09_npc_dialogue.md' },
+    { label: '10 · Quest',              href: 'cookbook/10_quest.md' },
+    { label: '11 · Progression & Save', href: 'cookbook/11_progression_and_save.md' },
+    { label: '12 · Status Effects',     href: 'cookbook/12_status_effects.md' },
+    { label: '13 · Animation',          href: 'cookbook/13_animation.md' },
+    { label: '14 · Shop',               href: 'cookbook/14_shop.md' },
+  ]},
+  { group: 'Kernel Ref', collapsed: true, items: [
+    'GameBootstrap','ServiceRegistry','GameCommand','CommandService',
+    'CommandReceiver','BuiltinCommands','GameAction','ActionService',
+    'ActionContext','CastAction','DashAction','TimedAttackAction',
+    'GameEffect','EffectService','EffectResult','DealDamageEffect',
+    'HealEffect','ApplyStatusEffect','ApplyStatModifierEffect',
+    'GrantItemEffect','SpawnSceneEffect','LogEffect',
+    'GameplayContext','Blackboard','DomainEvent','EventService',
+    'ContentDefinition','ContentService','ContentValidationResult','ResourceDatabase',
+    'Saveable','SaveableComponent','SaveService','SaveMigration',
+    'State','StateMachine','Condition','ConditionEvaluator',
+    'CooldownReadyCondition','TargetInRangeCondition',
+    'TimeService','RandomService','SceneService','PoolService',
+    'AnalyticsService','AdService','IAPService','CloudSaveService','DebugOverlay',
+  ].map(c => ({ label: c, href: `ref/kernel/${c}.md` })),
+  },
+  { group: 'Module Ref', collapsed: true, items: [
+    'AbilityDefinition','AbilityInstance','AbilityController',
+    'Brain','SimpleAIEnemyBrain',
+    'CombatService','DamageRequest','DamageResult','HitboxComponent','HurtboxComponent',
+    'DialogueDefinition','DialogueNode','DialogueChoice','DialogueRuntime',
+    'DialogueInteractable','DialogueService',
+    'EntityDefinition','EntityIdentity','EntityRoot','EntitySpawner',
+    'HealthComponent','ResourcePoolComponent',
+    'Interactable','InteractionComponent',
+    'ItemDefinition','ItemInstance','InventorySlot','InventoryModel',
+    'InventoryController','EquipmentController',
+    'LootTableDefinition','LootEntry','LootSystem','LootRollResult',
+    'RewardDefinition','RewardOption','RewardSystem',
+    'ExperienceComponent','ExperienceCurve','ProgressionState',
+    'ProgressionService','UpgradeDefinition',
+    'QuestDefinition','QuestObjectiveDefinition','QuestState','QuestLog',
+    'QuestService','AcceptQuestEffect','AdvanceObjectiveEffect','CompleteQuestEffect',
+    'RoomDefinition','RoomGraph','RoomLoader','RoomNode','RoomRuntime',
+    'RoomController','DungeonGenerator','RunState','RunDirector','RewardCoordinator',
+    'ShopDefinition','ShopEntry','ShopService',
+    'StatDefinition','StatModifier','StatModifierDefinition','StatsComponent',
+    'StatusEffectDefinition','StatusEffectInstance','StatusEffectController',
+    'UIManager','DialogueUI','QuestLogUI','ShopUI','RewardSelectionUI',
+    'AudioService','FeedbackSystem','DamageNumberSystem','VFXSpawner',
+    'ZoneDefinition','WorldService','Portal','SpawnPoint',
+  ].map(c => ({ label: c, href: `ref/modules/${c}.md` })),
+  },
+]
+
+// ── Mermaid config ────────────────────────────────────────────────────────────
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  securityLevel: 'loose',
+  themeVariables: {
+    primaryColor: '#4A90D9',
+    primaryTextColor: '#fff',
+    primaryBorderColor: '#2C6FAC',
+    lineColor: '#6c7086',
+    secondaryColor: '#2d3342',
+    tertiaryColor: '#1e2128',
+    background: '#1e2128',
+    mainBkg: '#242834',
+    nodeBorder: '#2C6FAC',
+    clusterBkg: '#2d3342',
+    titleColor: '#cdd6f4',
+    edgeLabelBackground: '#242834',
+    sequenceNumberColor: '#cdd6f4',
+    actorBkg: '#242834',
+    actorBorder: '#2C6FAC',
+    actorTextColor: '#cdd6f4',
+    actorLineColor: '#6c7086',
+    signalColor: '#89b4fa',
+    signalTextColor: '#cdd6f4',
+    noteBkgColor: '#2d3342',
+    noteTextColor: '#cdd6f4',
+    noteBorderColor: '#4A90D9',
+    loopTextColor: '#cdd6f4',
+    labelBoxBkgColor: '#2d3342',
+    labelBoxBorderColor: '#4A90D9',
+    labelTextColor: '#cdd6f4',
+    activationBorderColor: '#89b4fa',
+    activationBkgColor: '#2d3342',
+  },
+})
+
+// ── Sidebar rendering ─────────────────────────────────────────────────────────
+function buildNav() {
+  const root = document.getElementById('nav-root')
+  NAV.forEach((group, gi) => {
+    const div = document.createElement('div')
+    div.className = 'nav-group' + (group.collapsed ? ' collapsed' : '')
+    div.dataset.gi = gi
+
+    const label = document.createElement('div')
+    label.className = 'nav-group-label'
+    label.innerHTML = `${group.group} <span class="chevron">▾</span>`
+    label.addEventListener('click', () => div.classList.toggle('collapsed'))
+
+    const ul = document.createElement('ul')
+    ul.className = 'nav-items';
+
+    (group.items || []).forEach(item => {
+      const li = document.createElement('li')
+      const a = document.createElement('a')
+      a.textContent = item.label
+      a.href = '#' + item.href
+      a.dataset.href = item.href
+      li.appendChild(a)
+      ul.appendChild(li)
+    })
+
+    div.appendChild(label)
+    div.appendChild(ul)
+    root.appendChild(div)
+  })
+}
+
+function setActiveLink(href) {
+  document.querySelectorAll('.nav-items a').forEach(a => {
+    const isActive = a.dataset.href === href
+    a.classList.toggle('active', isActive)
+    if (isActive) {
+      // expand collapsed parent group
+      const group = a.closest('.nav-group')
+      if (group) group.classList.remove('collapsed')
+    }
+  })
+}
+
+// ── Content rendering ─────────────────────────────────────────────────────────
+async function loadPage(href) {
+  const content = document.getElementById('content')
+  const status = document.createElement('div')
+  status.id = 'status'
+  status.textContent = '正在加载…'
+  content.innerHTML = ''
+  content.appendChild(status)
+
+  setActiveLink(href)
+
+  let md
+  try {
+    const res = await fetch(href)
+    if (res.status === 404) {
+      content.innerHTML = `
+        <div class="unavail-banner">📋 该文档尚未生成（该页面在规划中，预计在后续阶段完成）。</div>
+        <p style="color:var(--muted);font-size:13px;">文件路径：<code>${href}</code></p>`
+      return
+    }
+    md = await res.text()
+  } catch {
+    content.innerHTML = `<div id="status" class="error">加载失败：无法获取 ${href}<br><br>请通过 HTTP 服务访问此文档站，例如：<code>python3 -m http.server 8080</code></div>`
+    return
+  }
+
+  // Render markdown
+  const html = marked.parse(md)
+  content.innerHTML = html
+
+  // Convert mermaid code blocks
+  content.querySelectorAll('pre code.language-mermaid').forEach(el => {
+    const div = document.createElement('div')
+    div.className = 'mermaid'
+    div.textContent = el.textContent
+    el.parentElement.replaceWith(div)
+  })
+
+  // Run mermaid
+  try { await mermaid.run({ nodes: content.querySelectorAll('.mermaid') }) } catch {}
+  window.attachMermaidLightbox()
+
+  // Intercept internal .md links
+  content.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href')
+    if (h && h.endsWith('.md') && !h.startsWith('http')) {
+      a.addEventListener('click', e => {
+        e.preventDefault()
+        window.location.hash = h
+      })
+    }
+  })
+
+  // Scroll to top
+  document.getElementById('content-wrap').scrollTop = 0
+}
+
+// ── Mermaid lightbox ─────────────────────────────────────────────────────────
+;(function () {
+  const lb      = document.getElementById('mermaid-lightbox')
+  const inner   = document.getElementById('mermaid-lightbox-inner')
+  const svgWrap = document.getElementById('mermaid-lightbox-svg')
+  let panZoom   = null
+
+  function openLightbox(mermaidEl) {
+    const svg = mermaidEl.querySelector('svg')
+    if (!svg) return
+
+    // Clone SVG and give it explicit dimensions
+    const clone = svg.cloneNode(true)
+    clone.removeAttribute('width')
+    clone.removeAttribute('height')
+    clone.style.width = '100%'
+    clone.style.height = '100%'
+    svgWrap.innerHTML = ''
+    svgWrap.style.width = '100%'
+    svgWrap.style.height = '100%'
+    svgWrap.appendChild(clone)
+
+    lb.classList.add('open')
+
+    // Init svg-pan-zoom after DOM settles
+    requestAnimationFrame(() => {
+      if (panZoom) { try { panZoom.destroy() } catch {} }
+      panZoom = svgPanZoom(clone, {
+        zoomEnabled: true,
+        panEnabled: true,
+        controlIconsEnabled: false,
+        fit: true,
+        center: true,
+        minZoom: 0.1,
+        maxZoom: 20,
+      })
+    })
+  }
+
+  function closeLightbox() {
+    lb.classList.remove('open')
+    if (panZoom) { try { panZoom.destroy() } catch {} panZoom = null }
+    svgWrap.innerHTML = ''
+  }
+
+  // Toolbar buttons
+  document.getElementById('lb-close').addEventListener('click', closeLightbox)
+  document.getElementById('lb-fit').addEventListener('click', () => panZoom && (panZoom.fit(), panZoom.center()))
+  document.getElementById('lb-zoom-in').addEventListener('click', () => panZoom && panZoom.zoomIn())
+  document.getElementById('lb-zoom-out').addEventListener('click', () => panZoom && panZoom.zoomOut())
+
+  // Close on backdrop click
+  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox() })
+
+  // Close on Escape
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox() })
+
+  // Prevent click inside inner from closing
+  inner.addEventListener('click', e => e.stopPropagation())
+
+  // Attach click handler to every mermaid diagram after render
+  window.attachMermaidLightbox = function () {
+    document.querySelectorAll('.mermaid').forEach(el => {
+      if (el.dataset.lbBound) return
+      el.dataset.lbBound = '1'
+      el.addEventListener('click', () => openLightbox(el))
+    })
+  }
+})()
+
+// ── Router ────────────────────────────────────────────────────────────────────
+function currentHref() {
+  return window.location.hash.slice(1) || 'readme.md'
+}
+
+window.addEventListener('hashchange', () => loadPage(currentHref()))
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildNav()
+loadPage(currentHref())
+</script>
+</body>
+</html>

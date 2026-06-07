@@ -103,7 +103,10 @@ func cast(ability_id: String, context: GameplayContext) -> bool:
 	if definition.cast_time > 0.0:
 		_start_cast_action(definition, context, action_runner)
 	else:
-		_execute_ability_effects(definition, context)
+		var instant := GameAction.new()
+		instant.on_complete_effects = definition.effects
+		instant.start(_build_action_context(context, definition))
+		instant.complete()
 		_start_cooldown(instance, definition)
 		ability_cast_finished.emit(ability_id)
 	return true
@@ -176,19 +179,17 @@ func from_save_data(data: Dictionary) -> void:
 				instance.current_charges = clampi(int(charges[ability_id]), 0, max(1, definition.charges))
 
 
-func _execute_ability_effects(definition: AbilityDefinition, context: GameplayContext) -> void:
-	if definition == null:
-		push_error("AbilityController._execute_ability_effects: definition is null")
-		return
-	if context == null:
-		push_error("AbilityController._execute_ability_effects: context is null")
-		return
-	var executor: EffectService = null
-	if ServiceRegistry.has_service("effects"):
-		executor = ServiceRegistry.get_service("effects") as EffectService
-	if executor == null:
-		executor = EffectService.new()
-	executor.execute_many(definition.effects, context)
+func _build_action_context(context: GameplayContext, definition: AbilityDefinition) -> ActionContext:
+	var ctx := ActionContext.new()
+	ctx.source = context.source
+	ctx.target = context.target
+	ctx.ability_id = definition.ability_id
+	ctx.payload = context.payload.duplicate(true) if context.payload != null else {}
+	ctx.position = context.position
+	ctx.direction = context.direction
+	ctx.tags = context.tags.duplicate()
+	ctx.amount = context.amount
+	return ctx
 
 
 func _restore_recharge_duration(
@@ -228,10 +229,10 @@ func _start_cast_action(
 		return
 	var action := CastAction.new()
 	action.duration = definition.cast_time
+	action.on_complete_effects = definition.effects
 	action.completed.connect(
 		func(_a: GameAction) -> void:
 			active_cast_actions.erase(_a)
-			_execute_ability_effects(definition, context)
 			var ability_instance := abilities.get(definition.ability_id, null) as AbilityInstance
 			if ability_instance != null:
 				_start_cooldown(ability_instance, definition)
@@ -242,13 +243,8 @@ func _start_cast_action(
 			active_cast_actions.erase(_a)
 			ability_failed.emit(definition.ability_id, "cast_cancelled:%s" % reason)
 	)
-	var action_context := ActionContext.new()
-	action_context.source = context.source
-	action_context.target = context.target
-	action_context.ability_id = definition.ability_id
-	action_context.payload = context.payload.duplicate(true) if context.payload != null else {}
 	active_cast_actions.append(action)
-	action_runner.start_action(action, action_context)
+	action_runner.start_action(action, _build_action_context(context, definition))
 
 
 func _get_action_runner() -> ActionService:

@@ -11,12 +11,12 @@
 > 完成一项就把 `[ ]` 改成 `[x]`。详细说明见对应章节（第七章实施计划）。
 
 **基础设施**
-- [x] 文档站支持 Mermaid 渲染（`docs/index.html` + vendored `docs/vendor/mermaid.min.js`；`docs/readme.md` Runtime Pipeline 已作示范）
+- [ ] 文档站支持 Mermaid 渲染（`docs/index.html` + vendored `docs/vendor/mermaid.min.js`；`docs/readme.md` Runtime Pipeline 已作示范）
 
 **Phase 1 — 先让人能"跑通 + 看懂"**（易学 + 易理解）
-- [x] P1.1 `docs/getting_started.md`（5 分钟跑通 + 学习地图 + 改一行 + cheat sheet）
-- [x] P1.2 `docs/concepts.md`（主管线心智模型 + Resource/Instance/Node 三分 + service flavor + 存档契约 + 扩展点地图 + 反模式对照 + **动画两通道集成**，含 5 张图）
-- [x] P1.3 `docs/glossary.md` + `docs/debugging.md`；`readme.md` 顶部新手入口；接入 `index.html` 的 `navGroups`（新增「新手入门」「Cookbook」两组）；根 `README.MD` 首链接指向 `docs/getting_started.md`
+- [ ] P1.1 `docs/getting_started.md`（5 分钟跑通 + 学习地图 + 改一行 + cheat sheet）
+- [ ] P1.2 `docs/concepts.md`（主管线心智模型 + Resource/Instance/Node 三分 + service flavor + 存档契约 + 扩展点地图 + 反模式对照 + **动画两通道集成**，含 5 张图）
+- [ ] P1.3 `docs/glossary.md` + `docs/debugging.md`；`readme.md` 顶部新手入口；接入 `index.html` 的 `navGroups`（新增「新手入门」「Cookbook」两组）；根 `README.MD` 首链接指向 `docs/getting_started.md`
 - [ ] P1.4 给 `village_rpg` 关键脚本加文档锚注释
 - [ ] ✅ **P1 验收**：找一位没接触过 Mkit 的人 dry-run——30 分钟内跑通 demo + 改一行见效（不提问）；能复述"攻击→扣血"的分层与解耦原因；生词都能在 glossary 自助解决；**能说清"加一个技能，我负责什么、mkit 负责什么"**（详见第六章；卡点回灌文档后才可勾选）
 

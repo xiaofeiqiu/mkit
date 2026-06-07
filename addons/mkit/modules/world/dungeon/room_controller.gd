@@ -100,7 +100,7 @@ func generate_reward() -> void:
 	if def == null or def.reward_pool_ids.is_empty():
 		reward_ready.emit([])
 		return
-	var reward_system := RewardSystem.new()
+	var reward_system := ServiceRegistry.get_service("loot") as LootService
 	var ctx := GameplayContext.new()
 	ctx.room_id = runtime.room_runtime_id
 	var options := reward_system.generate_options(def.reward_pool_ids, reward_count, ctx)

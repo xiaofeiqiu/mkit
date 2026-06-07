@@ -167,7 +167,7 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	assert_eq(room.active_enemies.size(), 1)
 	assert_eq(room.runtime.active_enemy_ids.size(), 1)
 
-	var loot := LootSystem.new()
+	var loot := LootService.new()
 	var loot_context := GameplayContext.new().with_source(enemy)
 	var loot_result := loot.roll_table(LOOT_TABLE_ID, loot_context)
 	assert_eq(loot_result.item_instances.size(), 1)

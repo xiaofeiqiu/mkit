@@ -98,6 +98,8 @@ func _register_kernel_services() -> void:
 	world.name = "WorldService"
 	ServiceRegistry.add_child(world)
 	ServiceRegistry.register_service("world", world)
+	var loot := LootService.new()
+	ServiceRegistry.register_service("loot", loot)
 
 
 func _load_content() -> void:

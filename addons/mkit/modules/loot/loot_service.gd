@@ -1,21 +1,21 @@
-class_name LootSystem
+class_name LootService
 extends RefCounted
 
 
 func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 	if table_id.strip_edges() == "":
-		push_warning("LootSystem.roll_table: table_id is empty")
+		push_warning("LootService.roll_table: table_id is empty")
 		return LootRollResult.new()
 	if not ServiceRegistry.has_service("content"):
-		push_warning("LootSystem.roll_table: missing ContentService service")
+		push_warning("LootService.roll_table: missing ContentService service")
 		return LootRollResult.new()
 	var content := ServiceRegistry.get_service("content") as ContentService
 	if content == null:
-		push_warning("LootSystem.roll_table: ContentService service is invalid")
+		push_warning("LootService.roll_table: ContentService service is invalid")
 		return LootRollResult.new()
 	var table := content.get_resource(table_id) as LootTableDefinition
 	if table == null:
-		push_warning("LootSystem.roll_table: table not found: %s" % table_id)
+		push_warning("LootService.roll_table: table not found: %s" % table_id)
 		return LootRollResult.new()
 	return roll(table, context if context != null else GameplayContext.new())
 
@@ -23,7 +23,7 @@ func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 func roll(table: LootTableDefinition, context: GameplayContext) -> LootRollResult:
 	var result := LootRollResult.new()
 	if table == null:
-		push_warning("LootSystem.roll: table is null")
+		push_warning("LootService.roll: table is null")
 		return result
 	if table.rolls <= 0:
 		return result
@@ -84,3 +84,13 @@ func _roll_quantity(entry: LootEntry, random: RandomService) -> int:
 	if random != null:
 		return max(0, random.randi_range(min_quantity, max_quantity))
 	return max(0, randi_range(min_quantity, max_quantity))
+
+
+func generate_options(
+	pool_ids: Array[String], count: int, context: GameplayContext
+) -> Array[RewardOption]:
+	return RewardSystem.new().generate_options(pool_ids, count, context)
+
+
+func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
+	return RewardSystem.new().apply_selected(option, context)

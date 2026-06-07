@@ -51,14 +51,14 @@ func _make_table(
 	return t
 
 
-var loot: LootSystem
+var loot: LootService
 var content: StubContent
 var rng: FixedRandom
 var ctx: GameplayContext
 
 
 func before_each() -> void:
-	loot = LootSystem.new()
+	loot = LootService.new()
 	content = StubContent.new()
 	add_child_autofree(content)
 	rng = FixedRandom.new()

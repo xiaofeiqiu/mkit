@@ -58,15 +58,22 @@ func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 		transaction_failed.emit(item_id, reason)
 		return false
 	var total_cost := get_buy_price(item_id) * quantity
-	var progression := _get_progression()
-	if total_cost > 0 and not progression.spend_currency(current_shop.currency_id, total_cost):
-		transaction_failed.emit(item_id, "Insufficient currency")
-		return false
+	if total_cost > 0:
+		var spend := SpendCurrencyEffect.new()
+		spend.currency_id = current_shop.currency_id
+		spend.amount = total_cost
+		var result := _run_effect(spend, _make_context(buyer))
+		if not result.success:
+			transaction_failed.emit(item_id, "Insufficient currency")
+			return false
 	var inventory := _get_inventory(buyer)
 	var item := ItemInstance.create(item_id, quantity)
 	if not inventory.add_item(item):
 		if total_cost > 0:
-			progression.add_currency(current_shop.currency_id, total_cost)
+			var refund := AddCurrencyEffect.new()
+			refund.currency_id = current_shop.currency_id
+			refund.amount = total_cost
+			_run_effect(refund, _make_context(buyer))
 		transaction_failed.emit(item_id, "Inventory could not accept item")
 		return false
 	var entry := current_shop.get_entry(item_id)
@@ -108,9 +115,10 @@ func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	if not inventory.remove_item_by_instance_id(item_instance_id, quantity):
 		transaction_failed.emit(item_id, "Could not remove item")
 		return false
-	var progression := _get_progression()
-	if progression != null:
-		progression.add_currency(current_shop.currency_id, total_gain)
+	var add := AddCurrencyEffect.new()
+	add.currency_id = current_shop.currency_id
+	add.amount = total_gain
+	_run_effect(add, _make_context(seller))
 	item_sold.emit(item_id, quantity, total_gain)
 	var events := _get_events()
 	if events != null:
@@ -147,19 +155,23 @@ func _buy_block_reason(item_id: String, quantity: int, buyer: Node) -> String:
 		return "Buyer has no inventory"
 	if not inventory.can_add_item(ItemInstance.create(item_id, quantity)):
 		return "Inventory cannot accept item"
-	var progression := _get_progression()
-	if progression == null:
-		return "Missing progression service"
-	if progression.get_currency(current_shop.currency_id) < get_buy_price(item_id) * quantity:
+	var total_cost := get_buy_price(item_id) * quantity
+	if total_cost > 0 and not SpendCurrencyEffect.can_spend(current_shop.currency_id, total_cost):
 		return "Insufficient currency"
 	return ""
 
 
-func _make_context(buyer: Node) -> GameplayContext:
+func _make_context(actor: Node) -> GameplayContext:
 	var ctx := GameplayContext.new()
-	if buyer != null:
-		ctx.source = buyer
+	if actor != null:
+		ctx.source = actor
 	return ctx
+
+
+func _run_effect(effect: GameEffect, ctx: GameplayContext) -> EffectResult:
+	if ServiceRegistry.has_service("effects"):
+		return (ServiceRegistry.get_service("effects") as EffectService).execute(effect, ctx)
+	return effect.apply(ctx)
 
 
 func _get_inventory(node: Node) -> InventoryController:
@@ -174,12 +186,6 @@ func _get_item_definition(item_id: String) -> ItemDefinition:
 	if content == null:
 		return null
 	return content.get_resource(item_id) as ItemDefinition
-
-
-func _get_progression() -> ProgressionService:
-	if ServiceRegistry.has_service("progression"):
-		return ServiceRegistry.get_service("progression") as ProgressionService
-	return null
 
 
 func _get_events() -> EventService:

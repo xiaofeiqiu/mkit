@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://addons/mkit/modules/room/room_controller.gd" id="1_room_controller"]
+[ext_resource type="Script" path="res://addons/mkit/modules/world/dungeon/room_controller.gd" id="1_room_controller"]
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_spawner.gd" id="2_entity_spawner"]
 
 [node name="TrialRoom02" type="Node2D"]

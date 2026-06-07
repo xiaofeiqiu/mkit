@@ -1,10 +1,10 @@
 [gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="1_identity"]
-[ext_resource type="Script" path="res://addons/mkit/modules/stats/stats_component.gd" id="2_stats"]
-[ext_resource type="Script" path="res://addons/mkit/modules/health/health_component.gd" id="3_health"]
+[ext_resource type="Script" path="res://addons/mkit/modules/combat/stats/stats_component.gd" id="2_stats"]
+[ext_resource type="Script" path="res://addons/mkit/modules/combat/health/health_component.gd" id="3_health"]
 [ext_resource type="Script" path="res://addons/mkit/modules/combat/hurtbox_component.gd" id="4_hurtbox"]
-[ext_resource type="Script" path="res://addons/mkit/modules/status_effects/status_effect_controller.gd" id="5_status"]
+[ext_resource type="Script" path="res://addons/mkit/modules/combat/status_effects/status_effect_controller.gd" id="5_status"]
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="6_root"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="7_receiver"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="8_state_machine"]

@@ -63,30 +63,31 @@ GDScript 通过全局 class_name 解析类型，不使用路径 import，因此 
   ```
 
 **Phase 1 — 合并 combat/（战斗问题域）**
-- [ ] P1.1 `modules/stats/` → `modules/combat/`
-- [ ] P1.2 `modules/health/` → `modules/combat/`
-- [ ] P1.3 `modules/abilities/` → `modules/combat/`
-- [ ] P1.4 `modules/status_effects/` → `modules/combat/`
-- [ ] P1.5 全局替换 StatsComponent / HealthComponent / AbilityController / StatusEffectController 的引用路径
-- [ ] P1.6 删除空目录 `stats/` `health/` `abilities/` `status_effects/`
-- [ ] ✅ **P1 验收**：上述 4 个目录不存在；combat/ 测试通过；`make demo-test` 通过
+- [x] P1.1 `modules/stats/` → `modules/combat/stats/`
+- [x] P1.2 `modules/health/` → `modules/combat/health/`
+- [x] P1.3 `modules/abilities/` → `modules/combat/abilities/`
+- [x] P1.4 `modules/status_effects/` → `modules/combat/status_effects/`
+- [x] P1.5 更新 player.tscn / field_beast.tscn（无 uid，路径解析）及 village_rpg_content.tres 中的引用路径
+- [x] P1.6 删除空目录 `stats/` `health/` `abilities/` `status_effects/`
+- [x] ✅ **P1 验收**：上述 4 个目录不存在；`make ut` 221/221 通过；`make demo-test` 通过
 
 **Phase 2 — 解耦 shop → progression**
-- [ ] P2.1 在 `modules/progression/` 新增 `spend_currency_effect.gd`（extends GameEffect）
+- [x] P2.1 在 `modules/progression/` 新增 `spend_currency_effect.gd`（extends GameEffect）
   - `execute()` 必须**同步**完成余额检查与扣款，并返回对应 `EffectResult`（success / fail）
   - shop_service 依赖该返回值决定购买是否继续，不可异步延迟
-- [ ] P2.2 `shop_service.gd` 改为 `EffectService.execute(SpendCurrencyEffect.new(amount))`，移除 `_get_progression()` 私有方法及对 `ProgressionService` 的直接调用
-- [ ] P2.3 在 `game_bootstrap.gd` 新增 `LootSystem` 注册为 `"loot"` service（bootstrap 豁免，同其他模块 service 注册方式）
-- [ ] ✅ **P2 验收**：`shop_service.gd` 中无 `ProgressionService` 直接引用；shop 购买（含余额不足失败路径）测试通过；`make demo-test` 通过
+- [x] P2.2 `shop_service.gd` 改为 `EffectService.execute(SpendCurrencyEffect.new(amount))`，移除 `_get_progression()` 私有方法及对 `ProgressionService` 的直接调用
+  - 同时新增 `add_currency_effect.gd`（供 sell 路径用）；`_buy_block_reason` 通过 `SpendCurrencyEffect.can_spend()` 静态方法检查余额
+- [x] P2.3 在 `game_bootstrap.gd` 新增 `LootSystem` 注册为 `"loot"` service（bootstrap 豁免，同其他模块 service 注册方式）
+- [x] ✅ **P2 验收**：`shop_service.gd` 中无 `ProgressionService` 直接引用；shop 购买（含余额不足失败路径）测试通过；`make demo-test` 通过
 
 **Phase 3 — 合并 world/（世界问题域）**
-- [ ] P3.1 `modules/room/` → `modules/world/dungeon/`
-- [ ] P3.2 修复两处 `RewardSystem.new()` 直接实例化：
+- [x] P3.1 `modules/room/` → `modules/world/dungeon/`
+- [x] P3.2 修复两处 `RewardSystem.new()` 直接实例化：
   - `modules/world/dungeon/reward_coordinator.gd:8` → `ServiceRegistry.get_service("loot")`
   - `modules/world/dungeon/room_controller.gd:103` → 同上
-- [ ] P3.3 `game_bootstrap.gd` 无需更新 room 路径（class_name 全局解析）；确认 .godot 缓存刷新
-- [ ] P3.4 删除空目录 `modules/room/`
-- [ ] ✅ **P3 验收**：`modules/room/` 不存在；`grep -n "RewardSystem.new()" modules/world/dungeon/*.gd` 返回空；测试通过；`make demo-test` 通过
+- [x] P3.3 `game_bootstrap.gd` 无需更新 room 路径（class_name 全局解析）；确认 .godot 缓存刷新
+- [x] P3.4 删除空目录 `modules/room/`
+- [x] ✅ **P3 验收**：`modules/room/` 不存在；`grep -n "RewardSystem.new()" modules/world/dungeon/*.gd` 返回空；测试通过；`make demo-test` 通过
 
 **Phase 4 — ~~合并 narrative/~~（已取消）**
 

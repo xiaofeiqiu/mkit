@@ -124,7 +124,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	var experience := player.get_node("Components/ExperienceComponent") as ExperienceComponent
 	var elder := _make_elder()
 	var beast := _make_beast()
-	var loot_system := LootSystem.new()
+	var loot_system := LootService.new()
 
 	watch_signals(dialogue)
 	watch_signals(quest)

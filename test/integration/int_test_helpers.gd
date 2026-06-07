@@ -100,6 +100,7 @@ class DeterministicRandom:
 
 
 static func cleanup_service_registry() -> void:
+	remove_file("user://save.json")
 	for child in ServiceRegistry.get_children():
 		child.queue_free()
 	ServiceRegistry.clear()

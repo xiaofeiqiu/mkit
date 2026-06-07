@@ -43,6 +43,7 @@ func before_each() -> void:
 	add_child_autofree(events)
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("events", events)
+	ServiceRegistry.register_service("loot", LootService.new())
 	director = RunDirector.new()
 	director.first_floor_room_pool = ["room_a", "room_b"]
 	director.run_length = 2

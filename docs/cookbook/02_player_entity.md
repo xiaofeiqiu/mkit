@@ -101,7 +101,7 @@ var _commands: CommandService = null
 
 
 func _ready() -> void:
-    _commands = ServiceRegistry.get_service("commands") as CommandService
+    _commands = ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
 
 
 func _process(_delta: float) -> void:

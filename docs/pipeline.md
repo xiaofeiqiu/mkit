@@ -2,6 +2,9 @@
 
 每条管线描述一个完整流程的调用序列——从触发点到最终输出。
 
+> 当前改版建议：服务获取优先走 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`，`get_service` 作为兼容路径保留。  
+> 旧字符串 id 示例保留用于说明，不作为新增代码入口推荐。
+
 ---
 
 ## P0-1：Runtime Bootstrap
@@ -65,6 +68,8 @@ func _register_kernel_services() -> void:
     var my_svc := MyGameService.new()
     ServiceRegistry.register_service("my_game", my_svc)
 ```
+
+> 可选（阶段5过渡期）：若你需要固定引用，建议先定义模块常量或封装注册入口，随后在文档里同步新入口与兼容入口的移除条件。
 
 ### 相关文档
 
@@ -430,7 +435,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 
 ```gdscript
 # 手动执行（不经由 GameAction；少数情况下需要直接触发）
-var svc := ServiceRegistry.get_service("effects") as EffectService
+var svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 var ctx := GameplayContext.new()
 ctx.source = player
 ctx.target = enemy
@@ -510,7 +515,7 @@ sequenceDiagram
 
 ```gdscript
 # 订阅伤害事件（UI / VFX / 任务推进等）
-var events := ServiceRegistry.get_service("events") as EventService
+var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 events.damage_applied.connect(func(result: DamageResult) -> void:
     if result.was_critical:
         spawn_crit_vfx(result.target)
@@ -518,7 +523,7 @@ events.damage_applied.connect(func(result: DamageResult) -> void:
 )
 events.entity_died.connect(func(entity_id: String, entity_ref: Node) -> void:
     # 推进击杀任务、触发掉落……
-    var quest := ServiceRegistry.get_service("quest") as QuestService
+    var quest := ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
     quest.advance_objective_for_entity(entity_id)
 ))
 ```
@@ -573,7 +578,7 @@ sequenceDiagram
 
 ```gdscript
 # 精确订阅：只关心伤害
-var events := ServiceRegistry.get_service("events") as EventService
+var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 events.damage_applied.connect(func(result: DamageResult) -> void:
     print("命中 %.0f（暴击=%s）" % [result.final_amount, result.was_critical])
 )
@@ -717,7 +722,7 @@ sequenceDiagram
 # VFXSpawner.vfx_scene_map = {"hit": "...", "death": "..."}
 
 # 想自己监听做别的表现：
-var events := ServiceRegistry.get_service("events") as EventService
+var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 events.entity_died.connect(func(_id: String, ref: Node) -> void:
     if ref is Node2D:
         ($Vfx as VFXSpawner).spawn("death", (ref as Node2D).global_position)
@@ -764,7 +769,7 @@ sequenceDiagram
 # 目标配置（QuestObjectiveDefinition）：对准 QuestService 合成的事件
 #   event_type = "enemy_killed"   match_key = "faction"   match_value = "enemy"   required_count = 3
 # 手动推进非击杀类目标（如"对话 N 次"）：
-var quest := ServiceRegistry.get_service("quest") as QuestService
+var quest := ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
 quest.advance_objective("quest.talk_villagers", "talk", 1)
 ```
 
@@ -846,7 +851,7 @@ flowchart TB
 ### 关键代码
 
 ```gdscript
-var loot := ServiceRegistry.get_service("loot") as LootService
+var loot := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
 var ctx := GameplayContext.new()
 ctx.source = $Player
 var result := loot.roll_table("loot.beast_drop", ctx)
@@ -893,7 +898,7 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
 dialogue.dialogue_ended.connect(func(id: String): print("对话结束: %s" % id))
 var ctx := GameplayContext.new()
 ctx.source = $Player
@@ -944,7 +949,7 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-var shop := ServiceRegistry.get_service("shop") as ShopService
+var shop := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
 shop.open_shop("shop.village")
 shop.transaction_failed.connect(func(id: String, reason: String): print("失败 %s: %s" % [id, reason]))
 if shop.can_buy("item.potion", 1, $Player):
@@ -991,7 +996,7 @@ events.entity_died.connect(func(_id: String, ref: Node) -> void:
 )
 
 # 花元货币升级
-var prog := ServiceRegistry.get_service("progression") as ProgressionService
+var prog := ServiceRegistry.get_port(ServiceRegistry.SERVICE_PROGRESSION) as ProgressionService
 if prog.can_unlock("upgrade.max_hp"):
     prog.unlock_or_level_up("upgrade.max_hp")
 ```
@@ -1127,7 +1132,7 @@ sequenceDiagram
 #   target_zone_id = "zone.forest"   target_spawn_id = "from_village"
 
 # 代码直接换场景：
-var scenes := ServiceRegistry.get_service("scenes") as SceneService
+var scenes := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
 if not scenes.change_scene("res://game/scenes/forest.tscn"):
     push_error("场景切换失败")
 ```

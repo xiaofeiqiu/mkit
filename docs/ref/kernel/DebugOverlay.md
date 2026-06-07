@@ -34,7 +34,7 @@
 # 想用按键开关：
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("toggle_debug"):
-        (ServiceRegistry.get_service("debug") as DebugOverlay).toggle()
+        (ServiceRegistry.get_port("debug") as DebugOverlay).toggle()
 ```
 
 ## 相关

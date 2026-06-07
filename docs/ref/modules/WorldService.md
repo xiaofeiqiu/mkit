@@ -33,7 +33,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var world := ServiceRegistry.get_service("world") as WorldService
+var world := ServiceRegistry.get_port(ServiceRegistry.SERVICE_WORLD) as WorldService
 world.go_to_zone("zone.forest", "from_village")
 ```
 

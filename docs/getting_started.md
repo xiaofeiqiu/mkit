@@ -69,10 +69,17 @@ res://addons/mkit/
 Services online: ["actions", "ads", "analytics", "audio", "cloud_save",
   "commands", "combat", "content", "dialogue", "effects", "events",
   "iap", "loot", "pool", "progression", "quest", "random", "save",
-  "scenes", "shop", "time", "world"]
+  "scenes", "shop", "time", "world", "ui"]
 ```
 
 看到上述输出说明 Bootstrap 成功运行，所有服务在线。验证完成后删除临时代码即可。
+
+### 运行后建议的收口验证（阶段5）
+
+在改版收口阶段，建议额外跑三项门禁：
+- `make ut`
+- `make int`
+- `make docs-check`
 
 > **没看到输出？** 确认 `bootstrap.tscn` 已设为主场景（Project Settings → Application → Run → Main Scene），且 `GameBootstrap` 节点存在于场景根节点下。
 
@@ -145,3 +152,4 @@ mkit 附带一个可直接运行的 village RPG demo，覆盖了从战斗、技�
 | 理解命令→状态→动作→效果管线 | [concepts.md](concepts.md) |
 | 按步骤构建完整 RPG | [cookbook/01_bootstrap.md](cookbook/01_bootstrap.md) |
 | 查术语定义 | [glossary.md](glossary.md) |
+| 查看阶段5收口计划 | [../spec/implementation-plan.md](../spec/implementation-plan.md) |

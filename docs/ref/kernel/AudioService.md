@@ -33,7 +33,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var audio := ServiceRegistry.get_service("audio") as AudioService
+var audio := ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
 audio.play_sfx("hit")
 audio.play_music("dungeon_theme", 1.5)   # 1.5s 淡入
 ```

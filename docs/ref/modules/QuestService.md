@@ -47,7 +47,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var quest: QuestService = ServiceRegistry.get_service("quest") as QuestService
+var quest: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
 var ctx := GameplayContext.new()
 quest.accept_quest("quest.first_hunt", ctx)
 ```
@@ -56,7 +56,7 @@ quest.accept_quest("quest.first_hunt", ctx)
 
 ```gdscript
 func accept_and_watch(quest_id: String, player: Node) -> void:
-    var quest: QuestService = ServiceRegistry.get_service("quest") as QuestService
+    var quest: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
     if quest == null:
         return
     quest.objective_advanced.connect(func(id: String, obj: String, current: int, required: int) -> void:

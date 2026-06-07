@@ -87,7 +87,7 @@ func _setup_action() -> void:
     var action := GameAction.new()
     action.on_complete_effects = [buff]
 
-    var action_svc := ServiceRegistry.get_service("actions") as ActionService
+    var action_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
     var ctx := ActionContext.new()
     ctx.source = self
     ctx.target = self       # 给自己加 buff

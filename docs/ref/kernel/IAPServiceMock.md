@@ -29,7 +29,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var iap: IAPService = ServiceRegistry.get_service("iap") as IAPService
+var iap: IAPService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_IAP) as IAPService
 iap.purchase("premium_pack")
 ```
 
@@ -37,7 +37,7 @@ iap.purchase("premium_pack")
 
 ```gdscript
 func buy_no_ads() -> void:
-    var iap: IAPService = ServiceRegistry.get_service("iap") as IAPService
+    var iap: IAPService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_IAP) as IAPService
     if iap == null:
         return
     iap.purchase_completed.connect(func(product_id: String) -> void:

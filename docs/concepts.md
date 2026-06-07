@@ -229,7 +229,7 @@ flowchart LR
 4. 运行后查询：
 
 ```gdscript
-var content := ServiceRegistry.get_service("content") as ContentService
+var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 var def := content.get_resource("fireball") as AbilityDefinition
 if def == null:
     push_error("fireball 未注册")

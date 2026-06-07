@@ -63,7 +63,7 @@ func _ready() -> void:
         # 这里可以加属性、播特效等
     )
 
-    var events := ServiceRegistry.get_service("events") as EventService
+    var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
     if events != null:
         events.entity_died.connect(_on_entity_died.bind(xp))
 

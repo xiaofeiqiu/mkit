@@ -45,7 +45,7 @@ var cmd := GameCommand.create(BuiltinCommands.MOVE, "player", "player", {
 
 ```gdscript
 func _send_attack_command(source_id: String, target_id: String) -> void:
-    var commands := ServiceRegistry.get_service("commands") as CommandService
+    var commands := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
     if commands == null:
         push_error("CommandService not available")
         return
@@ -63,7 +63,7 @@ func _send_attack_command(source_id: String, target_id: String) -> void:
 
 
 func _send_ability_command(caster_id: String, ability_id: String) -> void:
-    var commands := ServiceRegistry.get_service("commands") as CommandService
+    var commands := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
     if commands == null:
         return
     var cmd := GameCommand.create(

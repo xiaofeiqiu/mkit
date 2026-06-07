@@ -33,7 +33,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var rng := ServiceRegistry.get_service("random") as RandomService
+var rng := ServiceRegistry.get_port(ServiceRegistry.SERVICE_RANDOM) as RandomService
 rng.set_seed(12345)           # 固定种子 → 可复现
 if rng.chance(0.25):
     print("暴击！")

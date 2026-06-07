@@ -126,7 +126,7 @@ var _current_action: GameAction = null
 
 
 func _ready() -> void:
-    _action_svc = ServiceRegistry.get_service("actions") as ActionService
+    _action_svc = ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
 
 
 func enter(_context: Dictionary = {}) -> void:

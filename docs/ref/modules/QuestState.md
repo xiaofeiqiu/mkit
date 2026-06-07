@@ -40,7 +40,7 @@ state.set_progress("kill_enemy", 1)
 
 ```gdscript
 func print_progress(quest_id: String, objective_id: String) -> void:
-    var quest: QuestService = ServiceRegistry.get_service("quest") as QuestService
+    var quest: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
     var state: QuestState = quest.get_state(quest_id)
     if state == null:
         return

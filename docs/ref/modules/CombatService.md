@@ -31,7 +31,7 @@ amount = max(0, amount - defense) # trace["after_defense"]
 ### 最小示例（Level 1）
 
 ```gdscript
-var combat := ServiceRegistry.get_service("combat") as CombatService
+var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
 var req := DamageRequest.new()
 req.source = attacker
 req.target = victim
@@ -45,7 +45,7 @@ print(result.final_amount, result.was_critical)
 ```gdscript
 # 自定义攻击：结算后自己扣血并读 trace 调试
 func _deal_custom_damage(attacker: Node, victim: Node) -> void:
-    var combat := ServiceRegistry.get_service("combat") as CombatService
+    var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
     if combat == null:
         return
     var req := DamageRequest.new()

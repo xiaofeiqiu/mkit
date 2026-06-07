@@ -26,7 +26,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var quest: QuestService = ServiceRegistry.get_service("quest") as QuestService
+var quest: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
 $QuestLogUI.bind(quest)
 ```
 
@@ -35,7 +35,7 @@ $QuestLogUI.bind(quest)
 ```gdscript
 func toggle_quest_log() -> void:
     var ui := $QuestLogUI as QuestLogUI
-    var quest: QuestService = ServiceRegistry.get_service("quest") as QuestService
+    var quest: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
     if quest == null:
         return
     ui.bind(quest)

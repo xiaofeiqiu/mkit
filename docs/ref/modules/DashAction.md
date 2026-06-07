@@ -25,7 +25,7 @@ var dash := DashAction.new()
 var ctx := ActionContext.new()
 ctx.source = player           # CharacterBody2D
 ctx.direction = Vector2.RIGHT
-(ServiceRegistry.get_service("actions") as ActionService).start_action(dash, ctx)
+(ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService).start_action(dash, ctx)
 ```
 
 ## 相关

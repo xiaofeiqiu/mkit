@@ -55,7 +55,7 @@ func _on_command_received(cmd: GameCommand) -> void:
     var ctx := GameplayContext.from_command(cmd, owner_entity, _find_target(cmd.target_id))
     # ctx.direction / position / ability_id 已从 cmd.payload 自动填充
 
-    var effects_svc := ServiceRegistry.get_service("effects") as EffectService
+    var effects_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
     if effects_svc == null:
         return
     effects_svc.execute(my_effect, ctx)

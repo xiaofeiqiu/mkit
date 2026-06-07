@@ -40,7 +40,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var ui: UIManager = ServiceRegistry.get_service("ui") as UIManager
+var ui: UIManager = ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
 ui.open_screen("inventory", {}, true)
 ```
 
@@ -48,7 +48,7 @@ ui.open_screen("inventory", {}, true)
 
 ```gdscript
 func show_rewards(options: Array[RewardOption], director: RunDirector) -> void:
-    var ui: UIManager = ServiceRegistry.get_service("ui") as UIManager
+    var ui: UIManager = ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
     if ui == null:
         return
     ui.open_screen("reward_selection", {"options": options, "run_director": director}, true)

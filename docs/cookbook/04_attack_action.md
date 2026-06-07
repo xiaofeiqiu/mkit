@@ -57,7 +57,7 @@ var _current_action: GameAction = null
 
 
 func _ready() -> void:
-    _action_svc = ServiceRegistry.get_service("actions") as ActionService
+    _action_svc = ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
 
 
 func enter(_context: Dictionary = {}) -> void:
@@ -66,6 +66,7 @@ func enter(_context: Dictionary = {}) -> void:
     attack.active_duration  = 0.10
     attack.recovery_duration = 0.25
     attack.hitbox_path = NodePath("Components/HitboxComponent")
+    # 若你的场景中 hitbox 节点命名非标准，可继续保留 hitbox_component_name 兼容
 
     # 命中后执行的伤害效果（data-driven）
     var dmg := DealDamageEffect.new()
@@ -158,7 +159,7 @@ ctx.target = get_tree().get_first_node_in_group("enemy")  # Recipe 06 会换成�
 | 现象 | 原因 | 修复 |
 |------|------|------|
 | Action 立即 complete，没有时序 | 未调 `_action_svc.start_action()`，直接 `action.start()` + `action.complete()` | 必须通过 `ActionService.start_action` 注册，才会每帧 `update` |
-| Hitbox 不开启 | `hitbox_path` 路径不对 | 用 `NodePath("Components/HitboxComponent")` 且与场景树一致 |
+| Hitbox 不开启 | `hitbox_path` 为空或命名不匹配 | 1) 用 `NodePath("Components/HitboxComponent")` ；2) 保留 `hitbox_component_name` 为默认组件名 |
 | 攻击完成但无伤害 | `context.target` 为 null | 在 `ActionContext` 里赋 `ctx.target` |
 | 状态无法进入 Attack | `can_enter()` 返回 false（默认 true，不应该出现）| 检查 State 节点是否正确挂在 Root 下 |
 | 攻击动画不播放 | `Presentation/AnimationPlayer` 不存在或无 `"attack"` 动画 | `TimedAttackAction._play_animation` 会静默跳过，不影响逻辑 |

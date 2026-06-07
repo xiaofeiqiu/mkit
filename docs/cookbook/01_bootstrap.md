@@ -123,7 +123,7 @@ func _verify_services() -> void:
 | `ServiceRegistry autoload is missing` | 未将 `ServiceRegistry` 加为 autoload | Project Settings → AutoLoad → 添加 `addons/mkit/kernel/services/service_registry.gd`，命名为 `ServiceRegistry` |
 | `Content validation failed` | ResourceDatabase 中有 `ContentDefinition` 的 `get_content_id()` 返回空串 | 确认每个 `.tres` 的 ID 字段非空且唯一 |
 | `initial_scene_path ... points to the scene that already contains this GameBootstrap` | Bootstrap 场景的 `initial_scene_path` 指向了自身 | 将 `initial_scene_path` 改为另一个场景，或留空 |
-| `ServiceRegistry.get_service("content")` 返回 null | 在 `_ready` 中过早访问服务（Bootstrap 还未执行）| 确保 Bootstrap 场景是第一个运行的场景 |
+| `ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT)` 返回 null | 在 `_ready` 中过早访问服务（Bootstrap 还未执行）| 确保 Bootstrap 场景是第一个运行的场景 |
 
 ## 延伸阅读
 

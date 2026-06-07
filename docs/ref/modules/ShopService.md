@@ -30,7 +30,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var shop := ServiceRegistry.get_service("shop") as ShopService
+var shop := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
 shop.open_shop("shop.village")
 shop.buy("item.potion", 1, player)
 ```
@@ -40,7 +40,7 @@ shop.buy("item.potion", 1, player)
 ```gdscript
 # 购买，覆盖钱不够 / 缺货 / 背包满
 func try_buy(player: Node, item_id: String) -> void:
-    var shop := ServiceRegistry.get_service("shop") as ShopService
+    var shop := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
     shop.transaction_failed.connect(func(id: String, reason: String):
         print("买不了 %s：%s" % [id, reason])      # Insufficient currency / Out of stock / Inventory…
     )

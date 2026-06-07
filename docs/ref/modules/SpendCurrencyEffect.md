@@ -31,7 +31,7 @@ if SpendCurrencyEffect.can_spend("gold", 50):
     var spend := SpendCurrencyEffect.new()
     spend.currency_id = "gold"
     spend.amount = 50
-    (ServiceRegistry.get_service("effects") as EffectService).execute(spend, GameplayContext.new())
+    (ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService).execute(spend, GameplayContext.new())
 ```
 
 ## 相关

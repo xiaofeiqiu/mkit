@@ -21,7 +21,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var analytics: AnalyticsService = ServiceRegistry.get_service("analytics") as AnalyticsService
+var analytics: AnalyticsService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_ANALYTICS) as AnalyticsService
 analytics.track_event("run_started", {"seed": 1234})
 ```
 
@@ -29,7 +29,7 @@ analytics.track_event("run_started", {"seed": 1234})
 
 ```gdscript
 func track_run_finished(result: String, floor: int) -> void:
-    var analytics: AnalyticsService = ServiceRegistry.get_service("analytics") as AnalyticsService
+    var analytics: AnalyticsService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_ANALYTICS) as AnalyticsService
     if analytics == null:
         return
     analytics.track_event("run_finished", {"result": result, "floor": floor})

@@ -46,7 +46,7 @@ extends CommandReceiver
 func handle_unhandled_command(command: GameCommand) -> bool:
     match command.command_type:
         BuiltinCommands.OPEN_INVENTORY:
-            var ui := ServiceRegistry.get_service("ui") as UIManager
+            var ui := ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
             if ui != null:
                 ui.open_screen("inventory", {}, true)
                 return true

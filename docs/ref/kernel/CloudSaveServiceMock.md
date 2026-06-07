@@ -28,7 +28,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var cloud: CloudSaveService = ServiceRegistry.get_service("cloud_save") as CloudSaveService
+var cloud: CloudSaveService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CLOUD_SAVE) as CloudSaveService
 cloud.save_to_cloud("slot_1", {"gold": 10})
 ```
 
@@ -36,7 +36,7 @@ cloud.save_to_cloud("slot_1", {"gold": 10})
 
 ```gdscript
 func sync_profile(data: Dictionary) -> void:
-    var cloud: CloudSaveService = ServiceRegistry.get_service("cloud_save") as CloudSaveService
+    var cloud: CloudSaveService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CLOUD_SAVE) as CloudSaveService
     if cloud == null or not cloud.is_available():
         return
     cloud.cloud_load_failed.connect(func(slot: String, reason: String) -> void:

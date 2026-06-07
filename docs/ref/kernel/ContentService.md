@@ -26,7 +26,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var content := ServiceRegistry.get_service("content") as ContentService
+var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 var def := content.get_resource("fireball") as AbilityDefinition
 if def == null:
     push_error("fireball not registered")
@@ -39,7 +39,7 @@ if def == null:
 func get_definition(ability_id: String) -> AbilityDefinition:
     if ability_id.strip_edges() == "":
         return null
-    var content := ServiceRegistry.get_service("content") as ContentService
+    var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
     if content == null:
         push_error("ContentService not available")
         return null
@@ -54,7 +54,7 @@ func get_definition(ability_id: String) -> AbilityDefinition:
 
 # 列出所有已注册的 ItemDefinition（如商店列表）
 func get_all_items() -> Array[ItemDefinition]:
-    var content := ServiceRegistry.get_service("content") as ContentService
+    var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
     if content == null:
         return []
     var raw := content.get_all_by_type("item_definition")
@@ -68,7 +68,7 @@ func get_all_items() -> Array[ItemDefinition]:
 
 # 启动时手动注册一个运行时生成的资源
 func _register_dynamic_content() -> void:
-    var content := ServiceRegistry.get_service("content") as ContentService
+    var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
     if content == null:
         return
     var def := QuestDefinition.new()

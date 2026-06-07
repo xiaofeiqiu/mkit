@@ -25,7 +25,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var pool := ServiceRegistry.get_service("pool") as PoolService
+var pool := ServiceRegistry.get_port(ServiceRegistry.SERVICE_POOL) as PoolService
 pool.warmup("res://game/vfx/spark.tscn", 16)     # 开局预热
 var fx := pool.acquire("res://game/vfx/spark.tscn", self)
 # 用完归还

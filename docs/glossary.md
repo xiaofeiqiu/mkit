@@ -144,7 +144,7 @@
 
 **SaveMigration**：存档版本迁移基类，`SaveService` 在加载旧格式存档时按版本顺序执行迁移链。→ [ref/kernel/SaveMigration.md](ref/kernel/SaveMigration.md)
 
-**Service**：四分模式中的全局单例层，通过 `ServiceRegistry.get_service("id")` 获取。
+**Service**：四分模式中的全局单例层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取（新代码优先）；`get_service` / `get_service_or_null` / `get_typed` 保留兼容旧样例。
 
 **ServiceRegistry**：唯一的框架 autoload（Node），持有所有服务的引用并提供 `register_service` / `get_service` / `has_service` 接口。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
 

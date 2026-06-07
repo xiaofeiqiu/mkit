@@ -40,7 +40,7 @@ print(room.scene_path)
 
 ```gdscript
 func validate_room(room_id: String) -> bool:
-    var content: ContentService = ServiceRegistry.get_service("content") as ContentService
+    var content: ContentService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
     var room: RoomDefinition = content.get_resource(room_id) as RoomDefinition
     if room == null or room.scene_path == "":
         return false

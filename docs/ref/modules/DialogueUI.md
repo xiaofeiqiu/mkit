@@ -25,7 +25,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var dialogue: DialogueService = ServiceRegistry.get_service("dialogue") as DialogueService
+var dialogue: DialogueService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
 $DialogueUI.bind(dialogue)
 ```
 
@@ -33,7 +33,7 @@ $DialogueUI.bind(dialogue)
 
 ```gdscript
 func open_dialogue(dialogue_id: String, npc: Node, player: Node) -> void:
-    var service: DialogueService = ServiceRegistry.get_service("dialogue") as DialogueService
+    var service: DialogueService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
     if service == null:
         return
     $DialogueUI.visible = true

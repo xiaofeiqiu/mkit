@@ -67,7 +67,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var events := ServiceRegistry.get_service("events") as EventService
+var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 events.entity_died.connect(_on_entity_died)
 
 func _on_entity_died(entity_id: String, _ref: Node) -> void:
@@ -84,7 +84,7 @@ var _events: EventService = null
 
 
 func _ready() -> void:
-    _events = ServiceRegistry.get_service("events") as EventService
+    _events = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
     if _events == null:
         push_error("EventService not available")
         return
@@ -111,7 +111,7 @@ func _on_quest_completed(quest_id: String) -> void:
 
 # 调试：检查最近事件列表
 func _debug_recent_events() -> void:
-    var events := ServiceRegistry.get_service("events") as EventService
+    var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
     if events == null:
         return
     for ev in events.recent_events:

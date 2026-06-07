@@ -47,7 +47,7 @@
 
 # 运行时动态添加内容（如 DLC）
 func _load_dlc_content(dlc_db_path: String) -> void:
-    var content := ServiceRegistry.get_service("content") as ContentService
+    var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
     if content == null:
         return
     var db := ResourceLoader.load(dlc_db_path) as ResourceDatabase

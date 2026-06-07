@@ -27,7 +27,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var shop: ShopService = ServiceRegistry.get_service("shop") as ShopService
+var shop: ShopService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
 $ShopUI.bind(shop, player)
 ```
 
@@ -35,7 +35,7 @@ $ShopUI.bind(shop, player)
 
 ```gdscript
 func open_shop_ui(shop_id: String, player: Node) -> void:
-    var shop: ShopService = ServiceRegistry.get_service("shop") as ShopService
+    var shop: ShopService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
     if shop == null or not shop.open_shop(shop_id):
         return
     $ShopUI.visible = true

@@ -95,7 +95,7 @@ func _ready() -> void:
 
 
 func _on_choosing_reward(options: Array[RewardOption]) -> void:
-    var ui := ServiceRegistry.get_service("ui") as UIManager
+    var ui := ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
     if ui == null:
         # 没有 UI 时退化为自动选第一个，保证 run 能继续（仅供调试）
         if not options.is_empty():

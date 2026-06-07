@@ -37,7 +37,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var iap := ServiceRegistry.get_service("iap") as IAPService
+var iap := ServiceRegistry.get_port(ServiceRegistry.SERVICE_IAP) as IAPService
 iap.purchase_completed.connect(func(id: String): unlock_premium(id))
 iap.purchase("remove_ads")
 ```

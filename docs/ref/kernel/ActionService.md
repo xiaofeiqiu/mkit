@@ -35,7 +35,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var action_svc := ServiceRegistry.get_service("actions") as ActionService
+var action_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
 var ctx := ActionContext.new()
 ctx.source = self
 action_svc.start_action(TimedAttackAction.new(), ctx)
@@ -45,7 +45,7 @@ action_svc.start_action(TimedAttackAction.new(), ctx)
 
 ```gdscript
 func _start_attack_action(source: Node, target: Node) -> void:
-    var action_svc := ServiceRegistry.get_service("actions") as ActionService
+    var action_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
     if action_svc == null:
         push_error("ActionService not available")
         return
@@ -80,7 +80,7 @@ func _start_attack_action(source: Node, target: Node) -> void:
 
 func _on_entity_died(entity: Node) -> void:
     # 实体死亡时取消所有在途 Action
-    var action_svc := ServiceRegistry.get_service("actions") as ActionService
+    var action_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
     if action_svc != null:
         action_svc.cancel_actions_for_source(entity, "death")
 ```

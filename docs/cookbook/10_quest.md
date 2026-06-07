@@ -93,7 +93,7 @@ choice_help:
 ```gdscript
 # 主场景 _ready 中
 func _ready() -> void:
-    var quest := ServiceRegistry.get_service("quest") as QuestService
+    var quest := ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
     if quest == null:
         return
     quest.quest_accepted.connect(func(id: String):

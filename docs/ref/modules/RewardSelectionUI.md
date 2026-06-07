@@ -33,7 +33,7 @@ $RewardSelectionUI.setup({"options": options, "run_director": director})
 
 ```gdscript
 func show_reward_screen(options: Array[RewardOption], director: RunDirector) -> void:
-    var ui: UIManager = ServiceRegistry.get_service("ui") as UIManager
+    var ui: UIManager = ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
     if ui == null:
         return
     ui.open_screen("reward_selection", {"options": options, "run_director": director}, true)

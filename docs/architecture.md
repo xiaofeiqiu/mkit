@@ -148,11 +148,15 @@ EntityRoot                   ← 继承 EntityRoot，持有 entity_id
     Sprite2D / …
 ```
 
-**路径是合约**——module 组件通过 `owner.get_node_or_null("Components/HealthComponent")` 定位兄弟节点。改动节点路径会破坏所有依赖此路径的系统。
+**路径是合约**——module 组件默认通过固定布局约定访问，阶段性路径通过 `owner.get_node_or_null("Components/HealthComponent")` 等。  
+新接入代码优先通过 `EntityContract` 语义入口（`get_component` / `get_controller`）获取组件与控制器，避免直接依赖绝对路径。
 
 ```gdscript
 # 正确：通过 owner 按约定路径访问
 var health := owner.get_node_or_null("Components/HealthComponent") as HealthComponent
+
+# 推荐：通过 EntityContract 访问（可配置）
+var health2 := owner.get_component(HealthComponent)
 
 # 错误：硬编码绝对路径或依赖节点顺序
 var health := get_node("/root/World/Player/Components/HealthComponent")  # 脆弱
@@ -176,5 +180,4 @@ func _register_kernel_services() -> void:
 
 > `super()` 必须在自定义服务注册前调用，否则内置服务尚未就绪。
 
-> 模块迁移与发布清单入口见：  
-> [`docs/phase5_migration_and_release_checklist.md`](phase5_migration_and_release_checklist.md)
+> 模块迁移与发布说明统一收敛到本文与 [pipeline.md](pipeline.md)，并以 `spec/implementation-plan.md` 的里程碑完成记录为准。

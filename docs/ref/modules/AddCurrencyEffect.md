@@ -31,7 +31,7 @@
 var add := AddCurrencyEffect.new()
 add.currency_id = "gold"
 add.amount = 25
-(ServiceRegistry.get_service("effects") as EffectService).execute(add, GameplayContext.new())
+(ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService).execute(add, GameplayContext.new())
 ```
 
 ## 相关

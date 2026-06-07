@@ -81,8 +81,8 @@ var _player: Node = null
 
 
 func _ready() -> void:
-    _effect_svc = ServiceRegistry.get_service("effects") as EffectService
-    _event_svc = ServiceRegistry.get_service("events") as EventService
+    _effect_svc = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+    _event_svc = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 
     # 订阅死亡事件
     if _event_svc != null:

@@ -34,7 +34,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var cmds := ServiceRegistry.get_service("commands") as CommandService
+var cmds := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
 var cmd := GameCommand.create(BuiltinCommands.ATTACK, "player", "enemy_1")
 var handled := cmds.dispatch(cmd)
 ```
@@ -43,7 +43,7 @@ var handled := cmds.dispatch(cmd)
 
 ```gdscript
 func _on_input_attack() -> void:
-    var cmds := ServiceRegistry.get_service("commands") as CommandService
+    var cmds := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
     if cmds == null:
         return
 
@@ -56,7 +56,7 @@ func _on_input_attack() -> void:
 
 
 func _broadcast_area_command(command_type: String, ids: Array[String]) -> void:
-    var cmds := ServiceRegistry.get_service("commands") as CommandService
+    var cmds := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
     if cmds == null:
         return
     var cmd := GameCommand.create(command_type, "game_master", "", {})

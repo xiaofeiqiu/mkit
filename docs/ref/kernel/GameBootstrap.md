@@ -59,7 +59,7 @@ func _load_profile() -> void:
     super._load_profile()               # 调用默认存档加载
 
     # 加载后做额外初始化（如从存档恢复游戏状态）
-    var save_svc := ServiceRegistry.get_service("save") as SaveService
+    var save_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
     if save_svc != null:
         print("Save loaded from: %s" % save_svc.save_path)
 ```

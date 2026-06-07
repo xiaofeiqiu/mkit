@@ -135,8 +135,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 无需额外代码：`GameBootstrap._load_profile()` 在 boot 流程里，若 `save.save_path` 文件存在就自动 `load_game(tree.root)`。所以下次启动游戏，进度自动回到上次存档点。
 
-> 想加版本迁移：给 `SaveService.migrations` 配 `SaveMigration` 资源（`from_version` / `to_version` / override `_migrate_impl`），`save_version` 升级时自动按链迁移旧存档。
-
 ## 运行验证
 
 1. 杀敌 → 控制台累计 XP；攒够 → `升级！1 → 2`
@@ -158,7 +156,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## 延伸阅读
 
-- [SaveService ref](../ref/kernel/SaveService.md) — save_game / load_game / 迁移链
+- [SaveService ref](../ref/kernel/SaveService.md) — save_game / load_game
 - [Saveable ref](../ref/kernel/Saveable.md) · [SaveableComponent ref](../ref/kernel/SaveableComponent.md) — 两种契约的差异
 - [ExperienceComponent ref](../ref/modules/ExperienceComponent.md) · [ProgressionService ref](../ref/modules/ProgressionService.md)
 - [pipeline.md — Save / Load](../pipeline.md#13-save--load) · [pipeline.md — Progression / Level Up](../pipeline.md#17-progression--level-up)

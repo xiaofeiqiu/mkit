@@ -34,7 +34,6 @@ const MELEE_RANGE := 30.0
 const FIREBOLT_RANGE := 100.0
 const TRIAL_SEED := 8606
 const TRIAL_REWARD_UI_SCENE := preload("res://game/scenes/trial_reward_selection.tscn")
-const DEMO_SAVE_MIGRATION := preload("res://game/save_migration_v1_to_v2.gd")
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
 
 
@@ -140,7 +139,8 @@ var _dash_succeeded: bool = false
 func _ready() -> void:
 	_auto_run_enabled = OS.get_cmdline_args().has("--demo-auto-run")
 	_resolve_services()
-	_configure_save()
+	if _save_manager != null and _auto_run_enabled:
+		_save_manager.save_path = "/tmp/mkit_demo_auto_save.json"
 	_configure_entity_spawner()
 	_configure_embedded_router()
 	_reset_demo_state()
@@ -241,29 +241,6 @@ func _resolve_services() -> void:
 	_cloud_save = ServiceRegistry.get_service("cloud_save") as CloudSaveService
 
 
-func _configure_save() -> void:
-	if _save_manager == null:
-		return
-	if _auto_run_enabled:
-		_save_manager.save_path = "/tmp/mkit_demo_auto_save.json"
-	_save_manager.save_version = max(_save_manager.save_version, 2)
-	var migration := DEMO_SAVE_MIGRATION.new() as SaveMigration
-	if _has_save_migration(migration.from_version, migration.to_version):
-		return
-	var migrations: Array[SaveMigration] = []
-	for existing in _save_manager.migrations:
-		migrations.append(existing)
-	migrations.append(migration)
-	_save_manager.migrations = migrations
-
-
-func _has_save_migration(from_version: int, to_version: int) -> bool:
-	if _save_manager == null:
-		return false
-	for migration in _save_manager.migrations:
-		if migration.from_version == from_version and migration.to_version == to_version:
-			return true
-	return false
 
 
 func _configure_entity_spawner() -> void:

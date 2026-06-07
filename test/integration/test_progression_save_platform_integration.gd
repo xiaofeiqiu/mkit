@@ -15,37 +15,6 @@ class UpgradeProbeEffect:
 		return EffectResult.ok(effect_id, {"applied_count": applied_count})
 
 
-class LegacyProgressionMigration:
-	extends SaveMigration
-	var applied_count: int = 0
-
-	func _migrate_impl(data: Dictionary) -> Dictionary:
-		applied_count += 1
-		var payload: Dictionary = data.get("payload", {})
-		var legacy_progression: Dictionary = payload.get("legacy_progression", {})
-		var unlocked: Array[String] = []
-		var legacy_unlocked: Array = legacy_progression.get("unlocked_content_ids", [])
-		unlocked.assign(legacy_unlocked)
-		var upgrade_id := str(legacy_progression.get("upgrade_id", ""))
-		var currencies := {"crystal": int(legacy_progression.get("crystal", 0))}
-		var upgrade_levels: Dictionary = {}
-		upgrade_levels[upgrade_id] = int(legacy_progression.get("upgrade_level", 0))
-		payload["progression"] = {
-			"currencies": currencies,
-			"upgrade_levels": upgrade_levels,
-			"unlocked_content_ids": unlocked,
-		}
-		var legacy_experience: Dictionary = payload.get("legacy_experience", {})
-		payload["experience"] = {
-			"current_level": int(legacy_experience.get("level", 1)),
-			"current_xp": int(legacy_experience.get("xp", 0)),
-		}
-		payload.erase("legacy_progression")
-		payload.erase("legacy_experience")
-		data["payload"] = payload
-		return data
-
-
 class ProbeAnalyticsService:
 	extends AnalyticsService
 	var tracked_events: Array[Dictionary] = []
@@ -137,55 +106,6 @@ func test_tc_int_prog_01_xp_level_up_progression_unlock_and_save() -> void:
 	assert_eq(progression.get_currency("crystal"), 70)
 	assert_eq(progression.state.get_upgrade_level("upgrade.int.archive"), 1)
 	assert_true(progression.state.unlocked_content_ids.has("ability.int.archive"))
-
-
-func test_tc_int_prog_02_load_applies_migration_before_restore() -> void:
-	_boot_with_database(ResourceDatabase.new())
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	var save := ServiceRegistry.get_service("save") as SaveService
-	assert_not_null(progression)
-	assert_not_null(save)
-	save.save_path = _save_path
-	save.save_version = 2
-	var migration := LegacyProgressionMigration.new()
-	migration.from_version = 1
-	migration.to_version = 2
-	var migrations: Array[SaveMigration] = [migration]
-	save.migrations = migrations
-
-	var player := _make_player_with_experience()
-	var experience := player.get_node("Components/ExperienceComponent") as ExperienceComponent
-	_write_json(
-		_save_path,
-		{
-			"save_version": 1,
-			"game_version": "0.0.1",
-			"timestamp": "",
-			"profile_id": "legacy_profile",
-			"payload": {
-				"legacy_progression": {
-					"crystal": 42,
-					"upgrade_id": "upgrade.int.legacy",
-					"upgrade_level": 2,
-					"unlocked_content_ids": ["ability.int.legacy"],
-				},
-				"legacy_experience": {
-					"level": 4,
-					"xp": 12,
-				},
-			},
-		}
-	)
-
-	watch_signals(save)
-	assert_true(save.load_game(get_tree().root))
-	assert_signal_emitted_with_parameters(save, "load_completed", [_save_path])
-	assert_eq(migration.applied_count, 1)
-	assert_eq(progression.get_currency("crystal"), 42)
-	assert_eq(progression.state.get_upgrade_level("upgrade.int.legacy"), 2)
-	assert_true(progression.state.unlocked_content_ids.has("ability.int.legacy"))
-	assert_eq(experience.current_level, 4)
-	assert_eq(experience.current_xp, 12)
 
 
 func test_tc_int_prog_03_analytics_probe_records_runtime_event() -> void:

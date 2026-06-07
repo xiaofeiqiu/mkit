@@ -8,9 +8,9 @@
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
 | `resolve_entity_root(node: Node) -> EntityRoot` | `EntityRoot` | 向上追溯最近的 `EntityRoot` |
-| `get_component(node: Node, id_or_type: Variant) -> Node` | `Node` | 获取组件（含契约路径 fallback） |
-| `get_controller(node: Node, id_or_type: Variant) -> Node` | `Node` | 获取控制器（含契约路径 fallback） |
-| `get_contract_node(node: Node, container: String, id_or_type: Variant) -> Node` | `Node` | 泛化契约节点读取 |
+| `get_component(node: Node, id_or_type: Variant) -> Node` | `Node` | 通过 `EntityRoot` 获取组件 |
+| `get_controller(node: Node, id_or_type: Variant) -> Node` | `Node` | 通过 `EntityRoot` 获取控制器 |
+| `get_contract_node(node: Node, container: String, id_or_type: Variant) -> Node` | `Node` | 基于容器路径获取任意契约节点 |
 | `get_identity(node: Node) -> EntityIdentity` | `EntityIdentity` | 获取 `EntityIdentity` |
 | `get_entity_id(node: Node) -> String` | `String` | 读取实体 ID（回退到节点名） |
 | `get_state_machine(node: Node) -> StateMachine` | `StateMachine` | 获取实体状态机 |

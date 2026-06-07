@@ -770,7 +770,7 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	)
 
 
-func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrates() -> void:
+func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	add_child_autofree(bootstrap)
@@ -782,8 +782,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
-	assert_eq(save.save_version, 2)
-	assert_eq(save.migrations.size(), 1)
+	assert_eq(save.save_version, 1)
 
 	var player := demo.get_node("Player") as CharacterBody2D
 	var stats := player.get_node("Components/StatsComponent") as StatsComponent
@@ -815,7 +814,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	assert_true(save.save_game(get_tree().root))
 	assert_signal_emitted_with_parameters(save, "save_completed", [SCENE8_S7_SAVE_PATH])
 	var saved := _read_json(SCENE8_S7_SAVE_PATH)
-	assert_eq(int(saved.get("save_version", 0)), 2)
+	assert_eq(int(saved.get("save_version", 0)), 1)
 	var saved_payload: Dictionary = saved.get("payload", {})
 	var saved_scopes: Dictionary = saved.get("scopes", {})
 	assert_true(saved_payload.has("demo_player"))
@@ -860,47 +859,6 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	assert_eq(inventory.find_item_by_definition(FIELD_BLADE).instance_id, "scene8_save_blade")
 	assert_eq(equipment.get_equipped("weapon").definition_id, FIELD_BLADE)
 	assert_eq(stats.get_stat_value("attack_power"), 20.0)
-
-	_write_json(
-		SCENE8_S7_SAVE_PATH,
-		{
-			"save_version": 1,
-			"game_version": "0.1.0",
-			"timestamp": "",
-			"profile_id": "legacy_demo",
-			"payload": {
-				"demo_player": {
-					"position_x": 444.0,
-					"position_y": 222.0,
-					"current_hp": 34.0,
-					"dead": false,
-					"mana": 12.0,
-					"components": {
-						"StatsComponent": {
-							"base_overrides": {"attack_power": 18.0},
-							"persistent_modifiers": []
-						},
-						"StatusEffectController": {"active": []},
-						"AbilityController": {
-							"learned": [FIREBOLT],
-							"cooldowns": {},
-							"charges": {FIREBOLT: 1},
-							"recharge_durations": {}
-						},
-						"InventoryController": {"capacity": 20, "items": []},
-						"EquipmentController": {"slots": {}}
-					}
-				}
-			}
-		}
-	)
-
-	assert_true(save.load_game(get_tree().root))
-	assert_eq(player.global_position, Vector2(444.0, 222.0))
-	assert_eq(health.current_hp, 34.0)
-	assert_eq(pool.get_current("mana"), 12.0)
-	assert_eq(stats.get_stat_value("attack_power"), 18.0)
-
 
 func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_save() -> void:
 	var bootstrap := GameBootstrap.new()

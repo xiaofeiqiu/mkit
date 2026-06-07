@@ -2,8 +2,8 @@
 
 每条管线描述一个完整流程的调用序列——从触发点到最终输出。
 
-> 当前改版建议：服务获取优先走 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`，`get_service` 作为兼容路径保留。  
-> 旧字符串 id 示例保留用于说明，不作为新增代码入口推荐。
+> 当前改版建议：服务获取统一走 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`。  
+> `ServiceRegistry.SERVICE_*` 常量用于避免硬编码服务 ID 字符串。
 
 ---
 
@@ -69,7 +69,7 @@ func _register_kernel_services() -> void:
     ServiceRegistry.register_service("my_game", my_svc)
 ```
 
-> 可选（阶段5过渡期）：若你需要固定引用，建议先定义模块常量或封装注册入口，随后在文档里同步新入口与兼容入口的移除条件。
+> 可选：若你需要固定引用，建议先定义模块常量或封装注册入口，避免直接分散地引用服务 ID 字符串。
 
 ### 相关文档
 
@@ -783,7 +783,7 @@ quest.advance_objective("quest.talk_villagers", "talk", 1)
 ## P3-13：Save / Load
 
 **触发点：** `SaveService.save_game(root)` / `load_game(root)`  
-**涉及系统：** `SaveService`、`Saveable`、`SaveableComponent`、`SaveMigration`  
+**涉及系统：** `SaveService`、`Saveable`、`SaveableComponent`
 **输出：** 所有 `Saveable` 序列化为 JSON 写盘 / 反序列化恢复
 
 ### 流程
@@ -802,7 +802,6 @@ sequenceDiagram
 
     Note over Caller,SV: 读档
     Caller->>SV: load_game(root)
-    SV->>SV: _migrate_data()（按 SaveMigration 链升级旧版本）
     SV->>N: 优先按 scope 恢复，后回退 payload[from_save_data]
 ```
 

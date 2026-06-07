@@ -101,7 +101,7 @@ addons/mkit/
     actions/          # GameAction, ActionService
     conditions/       # Condition, ConditionEvaluator, builtin conditions
     effects/          # GameEffect, EffectService, EffectResult, builtin effects
-    save/             # Saveable, SaveableComponent, SaveService, SaveMigration
+    save/             # Saveable, SaveableComponent, SaveService
     debug/            # DebugOverlay
   modules/
     ai/               # Brain, SimpleAIEnemyBrain

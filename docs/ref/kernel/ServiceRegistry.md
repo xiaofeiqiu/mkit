@@ -60,13 +60,10 @@ func _setup_test_registry() -> void:
     # 需要先 remove_child 再 clear，参见集成测试陷阱文档
 ```
 
-## 兼容说明
+## 说明
 
-- 兼容层保留 `get_service` / `get_service_or_null` / `get_typed`，用于以下场景：
-  - 第三方脚本还未迁移到端口 API
-  - 兼容旧版本教程与样例
-- 新代码优先采用 `get_port(ServiceRegistry.SERVICE_*)`，便于兼容策略统一并减少字符串改写风控。
-- 迁移顺序建议：先替换高频路径（combat/quest/world/events），再替换 UI/保存相关路径，最后清理可选 fallback。
+- 新代码统一优先采用 `get_port(ServiceRegistry.SERVICE_*)`。
+- `get_service` / `get_service_or_null` / `get_typed` 保留历史兼容脚本，不作为默认入口。
 
 ## 相关
 

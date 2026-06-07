@@ -14,15 +14,15 @@ push_error("[WorldService] save load failed: save file missing")
 push_error("[ServiceRegistry] Required service not found: %s" % service_id)
 ```
 
-## 2. 兼容提示（`push_warning`）
+## 2. 降级提示（`push_warning`）
 
-- 用于降级、兼容、冗余路径被触发的场景。
+- 用于降级、回退和冗余路径触发的场景。
 - 关键是保留上下文，避免“silent fallback”。
 
 示例：
 
 ```gdscript
-push_warning("[SaveService] Missing legacy payload id; using scope restore")
+push_warning("[SaveService] Missing scoped payload id; using scene payload restore")
 push_warning("[SaveService] register_saveable_scope skipped: provider is null")
 ```
 
@@ -41,5 +41,4 @@ save_completed.connect(func(path: String):
 
 ## 阶段5收口建议
 
-- 仍需兼容的 API 保留原有日志语义，但新增功能优先增加模块前缀。
-- 新增迁移或弃用提示统一使用模块前缀，便于 `make docs-check` 与回归日志检索。
+- 新增降级提示统一使用模块前缀，便于 `make docs-check` 与回归日志检索。

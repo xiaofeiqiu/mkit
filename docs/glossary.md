@@ -140,11 +140,9 @@
 
 **SaveableComponent**：实体内组件级存档基类（`Node`），与 `Saveable` 同接口，键由节点 `name` 决定（实体内唯一）。→ [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)
 
-**SaveService**：协调 `Saveable` 的 scene-scope 与 scope-scope 持久化，支持迁移链与兼容旧 `payload`。`SaveableComponent` 不被直接收集，需由所属 `Saveable` 实体主动序列化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
+**SaveService**：协调 `Saveable` 的 scene-scope 与 scope-scope 持久化；`SaveableComponent` 不被直接收集，需由所属 `Saveable` 实体主动序列化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
 
-**SaveMigration**：存档版本迁移基类，`SaveService` 在加载旧格式存档时按版本顺序执行迁移链。→ [ref/kernel/SaveMigration.md](ref/kernel/SaveMigration.md)
-
-**Service**：四分模式中的全局单例层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取（新代码优先）；`get_service` / `get_service_or_null` / `get_typed` 保留兼容旧样例。
+**Service**：四分模式中的全局单例层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取（新代码优先）；`get_service` / `get_service_or_null` / `get_typed` 为历史脚本保留。
 
 **ServiceRegistry**：唯一的框架 autoload（Node），持有所有服务的引用并提供 `register_service` / `get_service` / `has_service` 接口。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
 

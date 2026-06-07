@@ -64,7 +64,7 @@ flowchart LR
 外加两个贯穿全程的概念：
 
 - **GameplayContext** —— 沿管线传递的**共享信使**（谁打谁、多少伤害）。详见 [第四节](#四gameplaycontext流水线上的信使)。
-- **Service** —— 上面那组干活的机器，优先 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 取用；`get_service` 保留兼容。
+- **Service** —— 上面那组干活的机器，优先 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 取用；`get_service` 留给旧工程历史代码。
 
 ---
 
@@ -329,7 +329,7 @@ flowchart TB
 | 自定义 AI | `Brain` | `think(entity, delta)` | 被 AI 系统每帧调用 |
 | 自定义交互 | `Interactable` | `_interact_impl(interactor)` | 交互检测、触发时机 |
 | 自定义内容 | `ContentDefinition` | `get_content_id()` + `@export` 字段 | 注册、校验、按 ID 查询 |
-| 自定义存档 | `Saveable` / `SaveableComponent` | `to_save_data()` / `from_save_data()` | 序列化协调、版本迁移调度 |
+| 自定义存档 | `Saveable` / `SaveableComponent` | `to_save_data()` / `from_save_data()` | 序列化协调与场景重建 |
 | 自定义服务 | 任意类 | 服务逻辑 | `ServiceRegistry` 持有引用，按 ID 取用 |
 | Bootstrap 扩展 | `GameBootstrap` | override `_register_kernel_services` / `_load_profile` | 其余启动步骤 |
 

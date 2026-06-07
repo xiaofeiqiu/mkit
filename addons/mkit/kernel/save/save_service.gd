@@ -8,7 +8,6 @@ const DEFAULT_SCOPE: String = "global"
 @export var save_path: String = "user://save.json"
 @export var save_version: int = 1
 @export var game_version: String = "0.1.0"
-@export var migrations: Array[SaveMigration] = []
 var _registered_scopes: Dictionary = {}
 
 
@@ -72,7 +71,6 @@ func load_game(root: Node) -> bool:
 		load_failed.emit(save_path, "Invalid JSON")
 		return false
 	var data: Dictionary = parsed
-	data = _migrate_data(data)
 	var payload: Dictionary = data.get("payload", {})
 	var scopes: Dictionary = data.get("scopes", {})
 	_restore_saveables(root, payload, scopes)
@@ -172,23 +170,3 @@ func _normalize_scope(scope_name: String) -> String:
 		return DEFAULT_SCOPE
 	return normalized_scope
 
-
-func _migrate_data(data: Dictionary) -> Dictionary:
-	var current_version := int(data.get("save_version", 1))
-	while current_version < save_version:
-		var migration := _find_migration(current_version, current_version + 1)
-		if migration == null:
-			push_warning(
-				"Missing save migration: %d -> %d" % [current_version, current_version + 1]
-			)
-			break
-		data = migration.migrate(data)
-		current_version = int(data.get("save_version", current_version + 1))
-	return data
-
-
-func _find_migration(from_version: int, to_version: int) -> SaveMigration:
-	for migration in migrations:
-		if migration.from_version == from_version and migration.to_version == to_version:
-			return migration
-	return null

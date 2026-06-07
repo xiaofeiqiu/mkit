@@ -1,7 +1,7 @@
 # Addon 结构重组计划
 
 **范围：** `addons/mkit/kernel/` 和 `addons/mkit/modules/`
-**目标：** 每个模块对应一个游戏设计问题域；Kernel 零模块依赖；模块从 17 个收拢到 11 个。
+**目标：** 每个模块对应一个游戏设计问题域；Kernel 零模块依赖；模块从 17 个收拢到 12 个。
 
 ---
 
@@ -34,7 +34,8 @@ GDScript 通过全局 class_name 解析类型，不使用路径 import，因此 
 | `shop/` | 玩家如何购买？ | shop |
 | `loot/` | 玩家如何获得掉落？ | loot |
 | `world/` | 事情发生在哪里？ | room + world |
-| `narrative/` | 故事是什么？ | quest + dialogue |
+| `quest/` | 故事任务是什么？ | quest |
+| `dialogue/` | NPC 说什么？ | dialogue |
 | `ui/` | 玩家如何感知游戏？ | ui |
 
 ---
@@ -55,7 +56,7 @@ GDScript 通过全局 class_name 解析类型，不使用路径 import，因此 
   - `timed_attack_action.gd` → `modules/combat/`（攻击窗口是战斗机制）
   - `dash_action.gd` → `modules/combat/`（冲刺在此项目里属于战斗能力）
   - 理由：Kernel 是任意游戏可复用的纯基础设施；这三者是具体游戏行为，"目前没有引用模块类"只是偶然，不是归属 kernel 的依据
-- [x] ✅ **P0 验收**：以下命令均返回空（game_bootstrap.gd 除外）；测试通过
+- [x] ✅ **P0 验收**：以下命令均返回空（game_bootstrap.gd 除外）；`make demo-test` 通过；测试通过
   ```bash
   grep -rn "AbilityController\|StatsComponent\|HealthComponent\|StatusEffectController\|InventoryController" \
     addons/mkit/kernel/ --include="*.gd" | grep -v "game_bootstrap.gd"
@@ -68,7 +69,7 @@ GDScript 通过全局 class_name 解析类型，不使用路径 import，因此 
 - [ ] P1.4 `modules/status_effects/` → `modules/combat/`
 - [ ] P1.5 全局替换 StatsComponent / HealthComponent / AbilityController / StatusEffectController 的引用路径
 - [ ] P1.6 删除空目录 `stats/` `health/` `abilities/` `status_effects/`
-- [ ] ✅ **P1 验收**：上述 4 个目录不存在；combat/ 测试通过
+- [ ] ✅ **P1 验收**：上述 4 个目录不存在；combat/ 测试通过；`make demo-test` 通过
 
 **Phase 2 — 解耦 shop → progression**
 - [ ] P2.1 在 `modules/progression/` 新增 `spend_currency_effect.gd`（extends GameEffect）
@@ -76,7 +77,7 @@ GDScript 通过全局 class_name 解析类型，不使用路径 import，因此 
   - shop_service 依赖该返回值决定购买是否继续，不可异步延迟
 - [ ] P2.2 `shop_service.gd` 改为 `EffectService.execute(SpendCurrencyEffect.new(amount))`，移除 `_get_progression()` 私有方法及对 `ProgressionService` 的直接调用
 - [ ] P2.3 在 `game_bootstrap.gd` 新增 `LootSystem` 注册为 `"loot"` service（bootstrap 豁免，同其他模块 service 注册方式）
-- [ ] ✅ **P2 验收**：`shop_service.gd` 中无 `ProgressionService` 直接引用；shop 购买（含余额不足失败路径）测试通过
+- [ ] ✅ **P2 验收**：`shop_service.gd` 中无 `ProgressionService` 直接引用；shop 购买（含余额不足失败路径）测试通过；`make demo-test` 通过
 
 **Phase 3 — 合并 world/（世界问题域）**
 - [ ] P3.1 `modules/room/` → `modules/world/dungeon/`
@@ -85,14 +86,11 @@ GDScript 通过全局 class_name 解析类型，不使用路径 import，因此 
   - `modules/world/dungeon/room_controller.gd:103` → 同上
 - [ ] P3.3 `game_bootstrap.gd` 无需更新 room 路径（class_name 全局解析）；确认 .godot 缓存刷新
 - [ ] P3.4 删除空目录 `modules/room/`
-- [ ] ✅ **P3 验收**：`modules/room/` 不存在；`grep -n "RewardSystem.new()" modules/world/dungeon/*.gd` 返回空；测试通过
+- [ ] ✅ **P3 验收**：`modules/room/` 不存在；`grep -n "RewardSystem.new()" modules/world/dungeon/*.gd` 返回空；测试通过；`make demo-test` 通过
 
-**Phase 4 — 合并 narrative/（叙事问题域）**
-- [ ] P4.1 `modules/quest/` → `modules/narrative/`
-- [ ] P4.2 `modules/dialogue/` → `modules/narrative/`
-- [ ] P4.3 更新 `game_bootstrap.gd` 的 quest / dialogue service 注册路径
-- [ ] P4.4 删除空目录 `modules/quest/` `modules/dialogue/`
-- [ ] ✅ **P4 验收**：上述两个目录不存在；narrative/ 测试通过
+**Phase 4 — ~~合并 narrative/~~（已取消）**
+
+quest/ 和 dialogue/ 保持独立模块，不合并为 narrative/。两者虽同属叙事域，但各自有独立 service 边界，合并收益有限。目标模块数调整为 12。
 
 **Phase 5 — 文档化边界规则**
 - [ ] P5.1 在 `docs/` 补充模块依赖方向规则
@@ -312,13 +310,10 @@ world/
 
 ---
 
-### modules/narrative/　— 故事是什么？
-
-任务系统与 NPC 对话。
+### modules/quest/　— 故事任务是什么？
 
 ```
-narrative/
-  # 任务（原 quest/）
+quest/
   quest_service.gd
   quest_log.gd
   quest_state.gd
@@ -327,13 +322,22 @@ narrative/
   accept_quest_effect.gd
   advance_objective_effect.gd
   complete_quest_effect.gd
-  # 对话（原 dialogue/）
+```
+
+**依赖：** Kernel only
+
+---
+
+### modules/dialogue/　— NPC 说什么？
+
+```
+dialogue/
   dialogue_service.gd
   dialogue_runtime.gd
   dialogue_definition.gd
   dialogue_node.gd
   dialogue_choice.gd
-  dialogue_interactable.gd         ← extends entity/interaction/Interactable
+  dialogue_interactable.gd         ← extends interaction/Interactable
 ```
 
 **依赖：** Kernel + `interaction/`（DialogueInteractable extends Interactable）
@@ -367,7 +371,7 @@ ui/
                                 ↑
                entity      interaction      progression   loot
                  ↑               ↑               ↑
-                ai           narrative    shop（effect→progression）
+                ai        quest+dialogue  shop（effect→progression）
               combat           world（← entity + interaction + loot svc）
             inventory
                                 ↑
@@ -388,5 +392,6 @@ ui/
 - inventory：依赖 Kernel + combat
 - shop：只依赖 Kernel（货币扣减通过 SpendCurrencyEffect → EffectService 同步返回 EffectResult，不直接引用 progression）
 - world：依赖 Kernel + entity + interaction；通过 `get_service("loot")` 调用 loot（唯一受控跨模块 service 依赖）
-- narrative：依赖 Kernel + interaction
+- quest：依赖 Kernel only
+- dialogue：依赖 Kernel + `interaction/`（DialogueInteractable extends Interactable）
 - ui：可引用任何层，任何层不得反向引用 ui

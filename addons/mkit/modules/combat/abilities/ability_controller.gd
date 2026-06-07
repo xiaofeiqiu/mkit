@@ -12,8 +12,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	for id in starting_ability_ids:
 		if id.strip_edges() == "":
 			push_warning("AbilityController: ignoring empty starting ability id")
@@ -128,8 +127,7 @@ func get_definition(ability_id: String) -> AbilityDefinition:
 	if ability_id.strip_edges() == "":
 		return null
 	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(ability_id) as AbilityDefinition
@@ -180,15 +178,8 @@ func from_save_data(data: Dictionary) -> void:
 
 
 func _build_action_context(context: GameplayContext, definition: AbilityDefinition) -> ActionContext:
-	var ctx := ActionContext.new()
-	ctx.source = context.source
-	ctx.target = context.target
+	var ctx := ActionContext.from_context(context)
 	ctx.ability_id = definition.ability_id
-	ctx.payload = context.payload.duplicate(true) if context.payload != null else {}
-	ctx.position = context.position
-	ctx.direction = context.direction
-	ctx.tags = context.tags.duplicate()
-	ctx.amount = context.amount
 	return ctx
 
 
@@ -248,9 +239,7 @@ func _start_cast_action(
 
 
 func _get_action_runner() -> ActionService:
-	if not ServiceRegistry.has_service("actions"):
-		return null
-	return ServiceRegistry.get_service("actions") as ActionService
+	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_ACTIONS) as ActionService
 
 
 func _has_enough_cost(definition: AbilityDefinition) -> bool:

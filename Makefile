@@ -22,11 +22,14 @@ int: reimport
 	$(GODOT) --headless --log-file $(INT_LOG) -s $(GUT) -gdir=res://test/integration -gexit
 
 demo-test:
-	$(GODOT) --headless --log-file $(DEMO_LOG) --path . res://game/demo/bootstrap.tscn --demo-auto-run
+	$(GODOT) --headless --log-file $(DEMO_LOG) --path . res://game/bootstrap.tscn --demo-auto-run
 
 docs-server:
 	@lsof -ti tcp:$(DOCS_PORT) | xargs kill -9 2>/dev/null || true
 	python3 -m http.server $(DOCS_PORT) --directory docs
 
+docs-check:
+	python3 tools/check_docs_sync.py
+
 .NOTPARALLEL:
-.PHONY: reimport ut ut-kernel ut-modules int demo-test docs-server
+.PHONY: reimport ut ut-kernel ut-modules int demo-test docs-server docs-check

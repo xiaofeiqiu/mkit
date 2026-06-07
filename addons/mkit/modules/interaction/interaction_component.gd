@@ -13,9 +13,7 @@ func _ready() -> void:
 func try_interact() -> bool:
 	if current_interactable == null:
 		return false
-	var ctx := GameplayContext.new()
-	ctx.source = owner
-	ctx.target = current_interactable.owner
+	var ctx := GameplayContext.from_nodes(owner, current_interactable.owner)
 	return current_interactable.interact(ctx)
 
 

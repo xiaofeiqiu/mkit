@@ -8,7 +8,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func _process(delta: float) -> void:
@@ -88,7 +88,7 @@ func from_save_data(data: Dictionary) -> void:
 
 func get_definition(status_id: String) -> StatusEffectDefinition:
 	if content == null:
-		content = ServiceRegistry.get_service("content") as ContentService
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(status_id) as StatusEffectDefinition
@@ -100,13 +100,11 @@ func _tick_status(instance: StatusEffectInstance, definition: StatusEffectDefini
 
 
 func _execute_effects(effects: Array[GameEffect], instance: StatusEffectInstance) -> void:
-	var context := GameplayContext.new()
-	context.source = instance.source
-	context.target = instance.target
+	var context := GameplayContext.from_nodes(instance.source, instance.target)
 	context.status_id = instance.definition_id
 	context.payload["stacks"] = instance.stacks
 	context.payload["source_id"] = instance.source_id
-	var executor := ServiceRegistry.get_service("effects") as EffectService
+	var executor := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor != null:
 		executor.execute_many(effects, context)
 

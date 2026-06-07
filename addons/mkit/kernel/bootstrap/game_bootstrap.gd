@@ -20,90 +20,175 @@ func _register_kernel_services() -> void:
 	if ServiceRegistry == null:
 		push_error("GameBootstrap: ServiceRegistry autoload is missing")
 		return
-	if ServiceRegistry.has_service("events"):
+	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
 		return
-	var events := EventService.new()
-	var content := ContentService.new()
-	var random := RandomService.new()
-	var time := TimeService.new()
-	var action_runner := ActionService.new()
-	var effect_executor := EffectService.new()
-	var command_router := CommandService.new()
-	var combat := CombatService.new()
-	var scene_router := SceneService.new()
-	var object_pool := PoolService.new()
-	var save_manager := SaveService.new()
-	var progression := ProgressionService.new()
-	var analytics := AnalyticsServiceMock.new()
-	var ads := AdServiceMock.new()
-	var iap := IAPServiceMock.new()
-	var cloud_save := CloudSaveServiceMock.new()
-	events.name = "EventService"
-	content.name = "ContentService"
-	action_runner.name = "ActionService"
-	command_router.name = "CommandService"
-	scene_router.name = "SceneService"
-	object_pool.name = "PoolService"
-	save_manager.name = "SaveService"
-	progression.name = "ProgressionService"
-	analytics.name = "AnalyticsService"
-	ads.name = "AdService"
-	iap.name = "IAPService"
-	cloud_save.name = "CloudSaveService"
-	ServiceRegistry.add_child(events)
-	ServiceRegistry.add_child(content)
-	ServiceRegistry.add_child(action_runner)
-	ServiceRegistry.add_child(command_router)
-	ServiceRegistry.add_child(scene_router)
-	ServiceRegistry.add_child(object_pool)
-	ServiceRegistry.add_child(save_manager)
-	ServiceRegistry.add_child(progression)
-	ServiceRegistry.add_child(analytics)
-	ServiceRegistry.add_child(ads)
-	ServiceRegistry.add_child(iap)
-	ServiceRegistry.add_child(cloud_save)
-	ServiceRegistry.register_service("events", events)
-	ServiceRegistry.register_service("content", content)
-	ServiceRegistry.register_service("random", random)
-	ServiceRegistry.register_service("time", time)
-	ServiceRegistry.register_service("actions", action_runner)
-	ServiceRegistry.register_service("effects", effect_executor)
-	ServiceRegistry.register_service("commands", command_router)
-	ServiceRegistry.register_service("combat", combat)
-	ServiceRegistry.register_service("scenes", scene_router)
-	ServiceRegistry.register_service("pool", object_pool)
-	ServiceRegistry.register_service("save", save_manager)
-	ServiceRegistry.register_service("progression", progression)
-	ServiceRegistry.register_service("analytics", analytics)
-	ServiceRegistry.register_service("ads", ads)
-	ServiceRegistry.register_service("iap", iap)
-	ServiceRegistry.register_service("cloud_save", cloud_save)
-	var quest := QuestService.new()
-	quest.name = "QuestService"
-	ServiceRegistry.add_child(quest)
-	ServiceRegistry.register_service("quest", quest)
-	var shop := ShopService.new()
-	shop.name = "ShopService"
-	ServiceRegistry.add_child(shop)
-	ServiceRegistry.register_service("shop", shop)
-	var audio := AudioService.new()
-	audio.name = "AudioService"
-	ServiceRegistry.add_child(audio)
-	ServiceRegistry.register_service("audio", audio)
-	var dialogue := DialogueService.new()
-	dialogue.name = "DialogueService"
-	ServiceRegistry.add_child(dialogue)
-	ServiceRegistry.register_service("dialogue", dialogue)
-	var world := WorldService.new()
-	world.name = "WorldService"
-	ServiceRegistry.add_child(world)
-	ServiceRegistry.register_service("world", world)
-	var loot := LootService.new()
-	ServiceRegistry.register_service("loot", loot)
+	for service_data in _build_kernel_services():
+		_register_service_entry(
+			service_data["id"],
+			service_data["service"],
+			service_data["add_as_child"],
+			service_data.get("node_name", "")
+		)
+
+
+func _build_kernel_services() -> Array[Dictionary]:
+	return [
+		{
+			"id": ServiceRegistry.SERVICE_EVENTS,
+			"service": EventService.new(),
+			"node_name": "EventService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_CONTENT,
+			"service": ContentService.new(),
+			"node_name": "ContentService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_RANDOM,
+			"service": RandomService.new(),
+			"node_name": "",
+			"add_as_child": false
+		},
+		{
+			"id": ServiceRegistry.SERVICE_TIME,
+			"service": TimeService.new(),
+			"node_name": "",
+			"add_as_child": false
+		},
+		{
+			"id": ServiceRegistry.SERVICE_ACTIONS,
+			"service": ActionService.new(),
+			"node_name": "ActionService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_EFFECTS,
+			"service": EffectService.new(),
+			"node_name": "",
+			"add_as_child": false
+		},
+		{
+			"id": ServiceRegistry.SERVICE_COMMANDS,
+			"service": CommandService.new(),
+			"node_name": "CommandService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_COMBAT,
+			"service": CombatService.new(),
+			"node_name": "",
+			"add_as_child": false
+		},
+		{
+			"id": ServiceRegistry.SERVICE_SCENES,
+			"service": SceneService.new(),
+			"node_name": "SceneService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_POOL,
+			"service": PoolService.new(),
+			"node_name": "PoolService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_SAVE,
+			"service": SaveService.new(),
+			"node_name": "SaveService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_PROGRESSION,
+			"service": ProgressionService.new(),
+			"node_name": "ProgressionService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_ANALYTICS,
+			"service": AnalyticsServiceMock.new(),
+			"node_name": "AnalyticsService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_ADS,
+			"service": AdServiceMock.new(),
+			"node_name": "AdService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_IAP,
+			"service": IAPServiceMock.new(),
+			"node_name": "IAPService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_CLOUD_SAVE,
+			"service": CloudSaveServiceMock.new(),
+			"node_name": "CloudSaveService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_QUEST,
+			"service": QuestService.new(),
+			"node_name": "QuestService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_SHOP,
+			"service": ShopService.new(),
+			"node_name": "ShopService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_AUDIO,
+			"service": AudioService.new(),
+			"node_name": "AudioService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_DIALOGUE,
+			"service": DialogueService.new(),
+			"node_name": "DialogueService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_WORLD,
+			"service": WorldService.new(),
+			"node_name": "WorldService",
+			"add_as_child": true
+		},
+		{
+			"id": ServiceRegistry.SERVICE_LOOT,
+			"service": LootService.new(),
+			"node_name": "",
+			"add_as_child": false
+		}
+	]
+
+
+func _register_service_entry(
+	service_id: String, service: Object, add_as_child: bool, node_name: String = ""
+) -> void:
+	if service == null:
+		push_warning("GameBootstrap._register_service_entry: service is null for %s" % service_id)
+		return
+	if add_as_child:
+		var node := service as Node
+		if node == null:
+			push_warning(
+				"GameBootstrap._register_service_entry: %s expected Node but got %s"
+				% [service_id, service.get_class()]
+			)
+			return
+		node.name = node_name if node_name != "" else str(service.get_class())
+		ServiceRegistry.add_child(node)
+	ServiceRegistry.register_service(service_id, service)
 
 
 func _load_content() -> void:
-	var registry := ServiceRegistry.get_service("content") as ContentService
+	var registry := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if registry == null:
 		push_error("GameBootstrap._load_content: missing ContentService service")
 		return
@@ -113,7 +198,7 @@ func _load_content() -> void:
 
 
 func _validate_content() -> void:
-	var registry := ServiceRegistry.get_service("content") as ContentService
+	var registry := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if registry == null:
 		push_error("GameBootstrap._validate_content: missing ContentService service")
 		return
@@ -123,9 +208,7 @@ func _validate_content() -> void:
 
 
 func _load_profile() -> void:
-	var save_manager: SaveService = null
-	if ServiceRegistry.has_service("save"):
-		save_manager = ServiceRegistry.get_service("save") as SaveService
+	var save_manager := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_SAVE) as SaveService
 	if save_manager == null:
 		return
 	var tree := get_tree()
@@ -153,8 +236,7 @@ func _enter_initial_scene() -> void:
 		)
 		return
 	var scene_router: SceneService = null
-	if ServiceRegistry.has_service("scenes"):
-		scene_router = ServiceRegistry.get_service("scenes") as SceneService
+	scene_router = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_SCENES) as SceneService
 	if scene_router != null:
 		scene_router.change_scene(initial_scene_path)
 	else:

@@ -78,8 +78,7 @@ func _stat(stats: StatsComponent, stat_id: String, default_value: float) -> floa
 
 func _roll_chance(chance: float) -> bool:
 	var random: RandomService = null
-	if ServiceRegistry.has_service("random"):
-		random = ServiceRegistry.get_service("random") as RandomService
+	random = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_RANDOM) as RandomService
 	if random != null:
 		return random.randf() < chance
 	return randf() < chance

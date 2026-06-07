@@ -7,14 +7,14 @@ func generate_options(
 ) -> Array[RewardOption]:
 	if count <= 0 or pool_ids.is_empty():
 		return []
-	if not ServiceRegistry.has_service("content"):
+	if ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) == null:
 		push_warning("RewardSystem.generate_options: missing ContentService service")
 		return []
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		push_warning("RewardSystem.generate_options: ContentService service is invalid")
 		return []
-	var ctx := context if context != null else GameplayContext.new()
+	var ctx := GameplayContext.from_context(context)
 	var candidates: Array[RewardDefinition] = []
 	for id in pool_ids:
 		if id.strip_edges() == "":
@@ -35,10 +35,9 @@ func generate_options(
 func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	if option == null:
 		return false
-	var ctx := context if context != null else GameplayContext.new()
+	var ctx := GameplayContext.from_context(context)
 	var executor: EffectService = null
-	if ServiceRegistry.has_service("effects"):
-		executor = ServiceRegistry.get_service("effects") as EffectService
+	executor = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		executor = EffectService.new()
 	var results := executor.execute_many(option.effects, ctx, true)
@@ -46,8 +45,7 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 		if not r.success:
 			return false
 	var events: EventService = null
-	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventService
+	events = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null:
 		events.emit_reward_selected(option.reward_id, ctx.source.name if ctx.source != null else "")
 	return true
@@ -63,8 +61,7 @@ func _weighted_pick(candidates: Array[RewardDefinition]) -> RewardDefinition:
 	if total <= 0.0:
 		return candidates[0]
 	var random: RandomService = null
-	if ServiceRegistry.has_service("random"):
-		random = ServiceRegistry.get_service("random") as RandomService
+	random = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_RANDOM) as RandomService
 	var r := random.randf_range(0.0, total) if random != null else randf_range(0.0, total)
 	var cursor := 0.0
 	for c in candidates:

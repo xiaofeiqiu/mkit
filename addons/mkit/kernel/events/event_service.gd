@@ -39,12 +39,12 @@ func emit_damage_applied(result: DamageResult) -> void:
 	if result != null:
 		source_id = _get_entity_id(result.source)
 		target_id = _get_entity_id(result.target)
-	emit_domain_event(DomainEvent.create("damage_applied", source_id, target_id, data))
+	_emit_domain_event("damage_applied", source_id, target_id, data)
 
 
 func emit_entity_died(entity_id: String, entity_ref: Node) -> void:
 	entity_died.emit(entity_id, entity_ref)
-	emit_domain_event(DomainEvent.create("entity_died", entity_id, "", {"entity_id": entity_id}))
+	_emit_domain_event("entity_died", entity_id, "", {"entity_id": entity_id})
 
 
 func emit_inventory_changed(
@@ -58,118 +58,92 @@ func emit_inventory_changed(
 		payload["quantity"] = quantity
 	if change_type != "":
 		payload["change_type"] = change_type
-	emit_domain_event(DomainEvent.create("inventory_changed", owner_id, item_id, payload))
+	_emit_domain_event("inventory_changed", owner_id, item_id, payload)
 
 
 func emit_room_cleared(room_id: String) -> void:
 	room_cleared.emit(room_id)
-	emit_domain_event(DomainEvent.create("room_cleared", room_id, "", {}))
+	_emit_domain_event("room_cleared", room_id, "", {})
 
 
 func emit_reward_selected(reward_id: String, source_id: String = "") -> void:
 	reward_selected.emit(reward_id)
-	emit_domain_event(
-		DomainEvent.create("reward_selected", source_id, "", {"reward_id": reward_id})
-	)
+	_emit_domain_event("reward_selected", source_id, "", {"reward_id": reward_id})
 
 
 func emit_run_started(run_id: String, seed: int) -> void:
 	run_started.emit(run_id, seed)
-	emit_domain_event(DomainEvent.create("run_started", run_id, "", {"seed": seed}))
+	_emit_domain_event("run_started", run_id, "", {"seed": seed})
 
 
 func emit_run_finished(run_id: String, result: String) -> void:
 	run_finished.emit(run_id, result)
-	emit_domain_event(DomainEvent.create("run_finished", run_id, "", {"result": result}))
+	_emit_domain_event("run_finished", run_id, "", {"result": result})
 
 
 func emit_quest_accepted(quest_id: String) -> void:
 	quest_accepted.emit(quest_id)
-	emit_domain_event(DomainEvent.create("quest_accepted", quest_id, "", {"quest_id": quest_id}))
+	_emit_domain_event("quest_accepted", quest_id, "", {"quest_id": quest_id})
 
 
 func emit_quest_objective_advanced(
 	quest_id: String, objective_id: String, current: int, required: int
 ) -> void:
 	quest_objective_advanced.emit(quest_id, objective_id, current, required)
-	emit_domain_event(
-		DomainEvent.create(
-			"quest_objective_advanced",
-			quest_id,
-			objective_id,
-			{
-				"quest_id": quest_id,
-				"objective_id": objective_id,
-				"current": current,
-				"required": required
-			}
-		)
+	_emit_domain_event(
+		"quest_objective_advanced",
+		quest_id,
+		objective_id,
+		{"quest_id": quest_id, "objective_id": objective_id, "current": current, "required": required}
 	)
 
 
 func emit_quest_completed(quest_id: String) -> void:
 	quest_completed.emit(quest_id)
-	emit_domain_event(DomainEvent.create("quest_completed", quest_id, "", {"quest_id": quest_id}))
+	_emit_domain_event("quest_completed", quest_id, "", {"quest_id": quest_id})
 
 
 func emit_quest_turned_in(quest_id: String) -> void:
 	quest_turned_in.emit(quest_id)
-	emit_domain_event(DomainEvent.create("quest_turned_in", quest_id, "", {"quest_id": quest_id}))
+	_emit_domain_event("quest_turned_in", quest_id, "", {"quest_id": quest_id})
 
 
 func emit_dialogue_started(dialogue_id: String) -> void:
 	dialogue_started.emit(dialogue_id)
-	emit_domain_event(
-		DomainEvent.create("dialogue_started", dialogue_id, "", {"dialogue_id": dialogue_id})
-	)
+	_emit_domain_event("dialogue_started", dialogue_id, "", {"dialogue_id": dialogue_id})
 
 
 func emit_dialogue_ended(dialogue_id: String) -> void:
 	dialogue_ended.emit(dialogue_id)
-	emit_domain_event(
-		DomainEvent.create("dialogue_ended", dialogue_id, "", {"dialogue_id": dialogue_id})
-	)
+	_emit_domain_event("dialogue_ended", dialogue_id, "", {"dialogue_id": dialogue_id})
 
 
 func emit_npc_talked(npc_id: String) -> void:
 	npc_talked.emit(npc_id)
-	emit_domain_event(DomainEvent.create("npc_talked", npc_id, "", {"npc_id": npc_id}))
+	_emit_domain_event("npc_talked", npc_id, "", {"npc_id": npc_id})
 
 
 func emit_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
 	zone_changed.emit(from_zone_id, to_zone_id)
-	emit_domain_event(
-		DomainEvent.create(
-			"zone_changed",
-			from_zone_id,
-			to_zone_id,
-			{"from_zone_id": from_zone_id, "to_zone_id": to_zone_id}
-		)
+	_emit_domain_event(
+		"zone_changed", from_zone_id, to_zone_id, {"from_zone_id": from_zone_id, "to_zone_id": to_zone_id}
 	)
 
 
 func emit_item_purchased(shop_id: String, item_id: String, quantity: int) -> void:
 	item_purchased.emit(shop_id, item_id, quantity)
-	emit_domain_event(
-		DomainEvent.create(
-			"item_purchased",
-			shop_id,
-			item_id,
-			{"shop_id": shop_id, "item_id": item_id, "quantity": quantity}
-		)
-	)
+	_emit_domain_event("item_purchased", shop_id, item_id, {"shop_id": shop_id, "item_id": item_id, "quantity": quantity})
 
 
 func emit_item_sold(shop_id: String, item_id: String, quantity: int) -> void:
 	item_sold.emit(shop_id, item_id, quantity)
-	emit_domain_event(
-		DomainEvent.create(
-			"item_sold",
-			shop_id,
-			item_id,
-			{"shop_id": shop_id, "item_id": item_id, "quantity": quantity}
-		)
-	)
+	_emit_domain_event("item_sold", shop_id, item_id, {"shop_id": shop_id, "item_id": item_id, "quantity": quantity})
+
+
+func _emit_domain_event(
+	event_type: String, source_id: String, target_id: String, payload: Dictionary
+) -> void:
+	emit_domain_event(DomainEvent.create(event_type, source_id, target_id, payload))
 
 
 func _get_entity_id(entity: Node) -> String:

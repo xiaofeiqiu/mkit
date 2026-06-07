@@ -61,8 +61,7 @@ func is_screen_open(screen_id: String) -> bool:
 
 
 func _set_gameplay_paused(value: bool) -> void:
-	if not ServiceRegistry.has_service("time"):
+	var time := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_TIME) as TimeService
+	if time == null:
 		return
-	var time := ServiceRegistry.get_service("time") as TimeService
-	if time != null:
-		time.set_paused(value)
+	time.set_paused(value)

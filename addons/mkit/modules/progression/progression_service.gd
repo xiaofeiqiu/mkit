@@ -94,11 +94,10 @@ func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayCont
 	if definition.effects.is_empty():
 		return
 	var executor: EffectService = null
-	if ServiceRegistry.has_service("effects"):
-		executor = ServiceRegistry.get_service("effects") as EffectService
+	executor = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		return
-	var ctx := context if context != null else GameplayContext.new()
+	var ctx := GameplayContext.from_context(context)
 	executor.execute_many(definition.effects, ctx)
 
 

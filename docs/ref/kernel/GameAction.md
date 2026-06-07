@@ -141,5 +141,5 @@ func _cast_spell(source: Node, target: Node) -> void:
 - → [ActionService](ActionService.md) — 管理 Action 生命周期，每帧 update
 - → [ActionContext](ActionContext.md) — 继承 GameplayContext，添加 action_id / duration / phase
 - → [GameEffect](GameEffect.md) — on_complete_effects 中的效果类型
-- → [pipeline.md — Ability Cast](../pipeline.md#5-ability-cast)
-- → [cookbook/04_attack_action.md](../cookbook/04_attack_action.md)
+- → [pipeline.md — Ability Cast](../../pipeline.md#5-ability-cast)
+- → [cookbook/04_attack_action.md](../../cookbook/04_attack_action.md)

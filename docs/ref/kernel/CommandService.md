@@ -75,5 +75,5 @@ func _on_command_failed(command: GameCommand, reason: String) -> void:
 - → [GameCommand](GameCommand.md) — 命令对象结构
 - → [CommandReceiver](CommandReceiver.md) — 接收端实现
 - → [BuiltinCommands](BuiltinCommands.md) — 内置命令类型
-- → [pipeline.md — Command Dispatch](../pipeline.md#3-command-dispatch)
-- → [cookbook/02_player_entity.md](../cookbook/02_player_entity.md)
+- → [pipeline.md — Command Dispatch](../../pipeline.md#3-command-dispatch)
+- → [cookbook/02_player_entity.md](../../cookbook/02_player_entity.md)

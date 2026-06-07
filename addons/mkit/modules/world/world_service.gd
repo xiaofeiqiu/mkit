@@ -16,10 +16,10 @@ func _ready() -> void:
 
 
 func _resolve_services() -> void:
-	if content == null and ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
-	if scene_router == null and ServiceRegistry.has_service("scenes"):
-		scene_router = ServiceRegistry.get_service("scenes") as SceneService
+	if content == null:
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	if scene_router == null:
+		scene_router = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_SCENES) as SceneService
 	_bind_scene_router()
 
 
@@ -61,8 +61,8 @@ func get_current_zone() -> ZoneDefinition:
 func get_zone(zone_id: String) -> ZoneDefinition:
 	if zone_id.strip_edges() == "":
 		return null
-	if content == null and ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	if content == null:
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(zone_id) as ZoneDefinition
@@ -139,12 +139,8 @@ func _find_player() -> Node2D:
 
 
 func _get_events() -> EventService:
-	if ServiceRegistry.has_service("events"):
-		return ServiceRegistry.get_service("events") as EventService
-	return null
+	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
 
 
 func _get_audio() -> AudioService:
-	if ServiceRegistry.has_service("audio"):
-		return ServiceRegistry.get_service("audio") as AudioService
-	return null
+	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_AUDIO) as AudioService

@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3]
-
-[ext_resource type="Script" path="res://addons/mkit/kernel/bootstrap/game_bootstrap.gd" id="1_boot"]
-[ext_resource type="Resource" path="res://game/demo/village_rpg/resources/village_rpg_content.tres" id="2_content"]
-
-[node name="Bootstrap" type="Node"]
-script = ExtResource("1_boot")
-resource_databases = Array[Resource]([ExtResource("2_content")])
-initial_scene_path = "res://game/demo/village_rpg/village_rpg_demo.tscn"

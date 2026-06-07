@@ -15,12 +15,9 @@ var entity_spawner: EntitySpawner = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	entity_spawner = get_node_or_null(entity_spawner_path) as EntitySpawner
-	var events: EventService = null
-	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventService
+	var events: EventService = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null and not events.entity_died.is_connected(_on_entity_died):
 		events.entity_died.connect(_on_entity_died)
 
@@ -81,9 +78,7 @@ func check_clear_condition() -> void:
 		runtime.cleared = true
 		generate_reward()
 		room_cleared.emit(runtime.room_runtime_id)
-		var events: EventService = null
-		if ServiceRegistry.has_service("events"):
-			events = ServiceRegistry.get_service("events") as EventService
+		var events: EventService = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
 		if events != null:
 			events.emit_room_cleared(runtime.room_runtime_id)
 
@@ -100,8 +95,11 @@ func generate_reward() -> void:
 	if def == null or def.reward_pool_ids.is_empty():
 		reward_ready.emit([])
 		return
-	var reward_system := ServiceRegistry.get_service("loot") as LootService
-	var ctx := GameplayContext.new()
+	var reward_system := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_LOOT) as LootService
+	if reward_system == null:
+		reward_ready.emit([])
+		return
+	var ctx := GameplayContext.from_context()
 	ctx.room_id = runtime.room_runtime_id
 	var options := reward_system.generate_options(def.reward_pool_ids, reward_count, ctx)
 	runtime.reward_options = options
@@ -112,8 +110,7 @@ func get_definition() -> RoomDefinition:
 	if room_definition_id.strip_edges() == "":
 		return null
 	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(room_definition_id) as RoomDefinition

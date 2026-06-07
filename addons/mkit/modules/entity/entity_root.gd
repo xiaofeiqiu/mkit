@@ -5,6 +5,18 @@ extends CharacterBody2D
 @onready var command_receiver: CommandReceiver = $CommandReceiver
 
 
+func get_entity_identity() -> EntityIdentity:
+	return identity
+
+
+func get_state_machine_node() -> StateMachine:
+	return state_machine
+
+
+func get_command_receiver_node() -> CommandReceiver:
+	return command_receiver
+
+
 func get_entity_id() -> String:
 	if identity == null:
 		return name

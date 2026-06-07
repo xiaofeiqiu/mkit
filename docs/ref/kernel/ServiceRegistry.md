@@ -59,5 +59,5 @@ func _setup_test_registry() -> void:
 ## 相关
 
 - → [GameBootstrap](GameBootstrap.md) — 在启动时批量注册服务
-- → [pipeline.md — Runtime Bootstrap](../pipeline.md#1-runtime-bootstrap)
-- → [architecture.md — ServiceRegistry 模式](../architecture.md#serviceregistry-模式)
+- → [pipeline.md — Runtime Bootstrap](../../pipeline.md#1-runtime-bootstrap)
+- → [architecture.md — ServiceRegistry 模式](../../architecture.md#serviceregistry-模式)

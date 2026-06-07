@@ -186,7 +186,7 @@ func think() -> void:
         # 近身时随机使用技能或普攻
         var roll := randf()
         if roll < 0.3:
-            issue_command(BuiltinCommands.USE_ABILITY, {"ability_id": skill_ability_id})
+            issue_command(BuiltinCommands.CAST_ABILITY, {"ability_id": skill_ability_id})
         else:
             issue_command(BuiltinCommands.ATTACK)
     elif distance <= detection_range:

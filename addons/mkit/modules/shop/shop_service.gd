@@ -9,8 +9,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func open_shop(shop_id: String) -> bool:
@@ -129,8 +128,8 @@ func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 func get_definition(shop_id: String) -> ShopDefinition:
 	if shop_id.strip_edges() == "":
 		return null
-	if content == null and ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	if content == null:
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(shop_id) as ShopDefinition
@@ -162,15 +161,13 @@ func _buy_block_reason(item_id: String, quantity: int, buyer: Node) -> String:
 
 
 func _make_context(actor: Node) -> GameplayContext:
-	var ctx := GameplayContext.new()
-	if actor != null:
-		ctx.source = actor
-	return ctx
+	return GameplayContext.from_nodes(actor, null)
 
 
 func _run_effect(effect: GameEffect, ctx: GameplayContext) -> EffectResult:
-	if ServiceRegistry.has_service("effects"):
-		return (ServiceRegistry.get_service("effects") as EffectService).execute(effect, ctx)
+	var effects := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	if effects != null:
+		return effects.execute(effect, ctx)
 	return effect.apply(ctx)
 
 
@@ -181,14 +178,12 @@ func _get_inventory(node: Node) -> InventoryController:
 
 
 func _get_item_definition(item_id: String) -> ItemDefinition:
-	if content == null and ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	if content == null:
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(item_id) as ItemDefinition
 
 
 func _get_events() -> EventService:
-	if ServiceRegistry.has_service("events"):
-		return ServiceRegistry.get_service("events") as EventService
-	return null
+	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService

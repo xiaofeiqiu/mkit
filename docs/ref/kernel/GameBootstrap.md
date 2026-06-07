@@ -69,5 +69,5 @@ func _load_profile() -> void:
 - → [ServiceRegistry](ServiceRegistry.md)
 - → [ResourceDatabase](ResourceDatabase.md)
 - → [ContentService](ContentService.md)
-- → [pipeline.md — Runtime Bootstrap](../pipeline.md#1-runtime-bootstrap)
-- → [cookbook/01_bootstrap.md](../cookbook/01_bootstrap.md)
+- → [pipeline.md — Runtime Bootstrap](../../pipeline.md#1-runtime-bootstrap)
+- → [cookbook/01_bootstrap.md](../../cookbook/01_bootstrap.md)

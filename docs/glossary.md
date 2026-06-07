@@ -32,7 +32,7 @@
 
 **Command**：→ **GameCommand**。意图封装对象，是管线的起点。
 
-**CastAction**：处理技能施法前摇（cast time）的内置 `GameAction`，前摇结束后执行 effect 链。→ [ref/kernel/CastAction.md](ref/kernel/CastAction.md)
+**CastAction**：处理技能施法前摇（cast time）的内置 `GameAction`，前摇结束后执行 effect 链。→ [ref/modules/CastAction.md](ref/modules/CastAction.md)
 
 **Command**：→ **GameCommand**
 

@@ -15,12 +15,21 @@ var tags: Array[String] = []
 var payload: Dictionary = {}
 
 
-static func from_command(
-	command: GameCommand, source_node: Node = null, target_node: Node = null
-) -> GameplayContext:
+static func from_nodes(source_node: Node = null, target_node: Node = null) -> GameplayContext:
 	var ctx := GameplayContext.new()
 	ctx.source = source_node
 	ctx.target = target_node
+	return ctx
+
+
+static func from_context(context: GameplayContext = null) -> GameplayContext:
+	return context if context != null else GameplayContext.new()
+
+
+static func from_command(
+	command: GameCommand, source_node: Node = null, target_node: Node = null
+) -> GameplayContext:
+	var ctx := from_nodes(source_node, target_node)
 	ctx.payload = command.payload.duplicate(true)
 	ctx.direction = command.get_vector2("direction", Vector2.ZERO)
 	ctx.position = command.get_vector2("position", Vector2.ZERO)

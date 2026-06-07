@@ -9,8 +9,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func is_active() -> bool:
@@ -25,7 +24,7 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 		return false
 	runtime = DialogueRuntime.new()
 	runtime.dialogue_id = dialogue_id
-	runtime.context = context if context != null else GameplayContext.new()
+	runtime.context = GameplayContext.from_context(context)
 	dialogue_started.emit(dialogue_id)
 	var events := _get_events()
 	if events != null:
@@ -92,8 +91,8 @@ func end() -> void:
 func get_definition(dialogue_id: String) -> DialogueDefinition:
 	if dialogue_id.strip_edges() == "":
 		return null
-	if content == null and ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	if content == null:
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(dialogue_id) as DialogueDefinition
@@ -134,15 +133,11 @@ func _run_effects(effects: Array[GameEffect]) -> void:
 		return
 	if runtime == null:
 		return
-	if not ServiceRegistry.has_service("effects"):
-		return
-	var executor := ServiceRegistry.get_service("effects") as EffectService
+	var executor := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		return
 	executor.execute_many(effects, runtime.context, false)
 
 
 func _get_events() -> EventService:
-	if ServiceRegistry.has_service("events"):
-		return ServiceRegistry.get_service("events") as EventService
-	return null
+	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService

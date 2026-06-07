@@ -67,7 +67,7 @@ func _send_ability_command(caster_id: String, ability_id: String) -> void:
     if commands == null:
         return
     var cmd := GameCommand.create(
-        BuiltinCommands.USE_ABILITY,
+        BuiltinCommands.CAST_ABILITY,
         caster_id,
         caster_id,
         {"ability_id": ability_id}
@@ -81,4 +81,4 @@ func _send_ability_command(caster_id: String, ability_id: String) -> void:
 - → [CommandReceiver](CommandReceiver.md) — receive_command
 - → [BuiltinCommands](BuiltinCommands.md) — 内置命令类型常量
 - → [GameplayContext](GameplayContext.md) — `from_command(cmd, source, target)` 从命令创建上下文
-- → [pipeline.md — Command Dispatch](../pipeline.md#3-command-dispatch)
+- → [pipeline.md — Command Dispatch](../../pipeline.md#3-command-dispatch)

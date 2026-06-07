@@ -540,3 +540,598 @@ dmg.hit_tags = ["melee"]
 → [ref/modules/DealDamageEffect.md](ref/modules/DealDamageEffect.md)  
 → [ref/modules/HealthComponent.md](ref/modules/HealthComponent.md)  
 → [cookbook/03_health_and_stats.md](cookbook/03_health_and_stats.md)
+
+---
+
+## P2-8：Event Notification
+
+**触发点：** 任意 `EventService.emit_*()`  
+**涉及系统：** `EventService`、`DomainEvent`、订阅方（`FeedbackSystem`、`QuestService`、UI、`RoomController` …）  
+**输出：** 类型化信号广播 + `recent_events` 入队，所有订阅者收到通知
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant Caller as 发出方<br/>(HealthComponent…)
+    participant ES as EventService
+    participant Sub as 订阅方<br/>(FeedbackSystem/QuestService/UI)
+
+    Note over Caller,ES: [mkit 内部]
+    Caller->>ES: emit_damage_applied(result)
+    ES->>ES: damage_applied.emit(result)  (类型化信号)
+    ES->>ES: emit_domain_event(DomainEvent)
+    ES->>ES: recent_events.append(event)  (上限 100)
+    ES->>ES: domain_event_emitted.emit(event)  (通用信号)
+    Note over Sub: [你/模块] 订阅了 damage_applied 或 domain_event_emitted
+    ES-->>Sub: 信号回调
+```
+
+**设计要点：** 每个 `emit_*` 都做两件事——发一个**类型化信号**（`damage_applied`）给精确订阅者，再发一个**通用信号**（`domain_event_emitted`）给"什么都想听"的订阅者（如 `QuestService` 靠它统计目标）。发出方完全不知道谁在听，这是表现层与逻辑层解耦的关键。
+
+### 关键代码
+
+```gdscript
+# 精确订阅：只关心伤害
+var events := ServiceRegistry.get_service("events") as EventService
+events.damage_applied.connect(func(result: DamageResult) -> void:
+    print("命中 %.0f（暴击=%s）" % [result.final_amount, result.was_critical])
+)
+
+# 通用订阅：监听一切领域事件（调试 / 统计 / 任务）
+events.domain_event_emitted.connect(func(event: DomainEvent) -> void:
+    print("[%s] %s → %s" % [event.event_type, event.source_id, event.target_id])
+)
+```
+
+### 相关文档
+
+→ [ref/kernel/EventService.md](ref/kernel/EventService.md) · [ref/kernel/DomainEvent.md](ref/kernel/DomainEvent.md)  
+→ [concepts.md — 模型 1：标准管线](concepts.md#模型-1标准管线时序图)（最后一跳）  
+→ [debugging.md](debugging.md)（recent_events 回放）
+
+---
+
+## P2-9：Entity Spawn
+
+**触发点：** `EntitySpawner.spawn_entity(definition_id, parent, position)`  
+**涉及系统：** `EntitySpawner`、`EntityDefinition`、`EntityIdentity`、`CommandReceiver`、`StatsComponent`、`AbilityController`  
+**输出：** 一个已注入身份/属性/技能并挂入场景树的实体节点
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方<br/>(RoomController…)
+    participant SP as EntitySpawner
+    participant CS as ContentService
+    participant E as 新实体
+
+    Note over Caller,SP: [你] 提供 definition_id 与 parent
+    Caller->>SP: spawn_entity("enemy.field_beast", parent, pos)
+    SP->>CS: get_resource(definition_id) as EntityDefinition
+    SP->>E: load(definition.scene_path).instantiate()
+    Note over SP,E: [mkit 内部] 注入阶段
+    SP->>E: _initialize_identity()  (faction/tags/definition_id/entity_id)
+    SP->>E: _initialize_command_receiver()  (configure_receiver_id)
+    SP->>E: _initialize_stats()  (用 base_stats 覆盖 + mark_save_baseline)
+    SP->>E: parent.add_child(entity) + 设 global_position
+    SP->>E: _initialize_abilities()  (register_ability × N)
+    SP-->>Caller: entity（并发 entity_spawned 信号）
+```
+
+### 关键代码
+
+```gdscript
+var spawner := $EntitySpawner as EntitySpawner
+spawner.entity_spawn_failed.connect(func(def_id: String, reason: String) -> void:
+    push_warning("spawn 失败 %s：%s" % [def_id, reason])  # missing_definition / missing_scene_path …
+)
+var enemy := spawner.spawn_entity("enemy.field_beast", $Enemies, Vector2(120, 80))
+if enemy != null:
+    print("spawned: %s" % (enemy.get_node("EntityIdentity") as EntityIdentity).entity_id)
+```
+
+### 相关文档
+
+→ [ref/modules/EntitySpawner.md](ref/modules/EntitySpawner.md) · [ref/modules/EntityDefinition.md](ref/modules/EntityDefinition.md)  
+→ [cookbook/07_room.md](cookbook/07_room.md)
+
+---
+
+## P2-10：Animation — Action 驱动通道
+
+**触发点：** `GameAction._on_start()` / `_on_update()`  
+**涉及系统：** `GameAction`（及子类）、`Presentation/AnimationPlayer`、`HitboxComponent`  
+**输出：** 动画播放，且逻辑（Hitbox 开关）与动画时序严格对齐
+
+### 流程
+
+```mermaid
+flowchart LR
+    A["State.enter →<br/>ActionService.start_action"]:::userOwned -->
+    B["GameAction._on_start()"]:::userOwned -->
+    C["source/Presentation/<br/>AnimationPlayer.play('attack')"]:::userOwned
+    B --> D["_on_update(delta)"]:::userOwned -->
+    E["active 窗口内<br/>HitboxComponent.set_active(true)"]:::mkitCore
+
+    classDef mkitCore  fill:#4A90D9,color:#fff,stroke:#2C6FAC
+    classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
+```
+> 🔵 mkit 提供动作生命周期与 Hitbox / 🟢 你提供 AnimationPlayer 动画
+
+**要点：** 动作先 `has_animation(name)` 再 `play`，缺动画静默跳过（不报错）。命中窗口由 `_on_update` 中 `elapsed` 与 startup/active/recovery 时长比较得出——动画与判定共用同一条时间线。
+
+### 关键代码
+
+```gdscript
+# 自定义动作里播动画
+class_name SpinAttackAction
+extends GameAction
+
+func _on_start() -> void:
+    action_id = "spin"
+    var anim := context.source.get_node_or_null("Presentation/AnimationPlayer") as AnimationPlayer
+    if anim != null and anim.has_animation("spin"):
+        anim.play("spin")
+```
+
+### 相关文档
+
+→ [ref/kernel/GameAction.md](ref/kernel/GameAction.md) · [ref/modules/TimedAttackAction.md](ref/modules/TimedAttackAction.md)  
+→ [cookbook/13_animation.md](cookbook/13_animation.md)（通道 A）
+
+---
+
+## P2-11：Animation — 事件反馈通道
+
+**触发点：** `EventService.damage_applied` / `entity_died`  
+**涉及系统：** `EventService`、`FeedbackSystem`、`DamageNumberSystem`、`VFXSpawner`、`AudioService`  
+**输出：** 浮动伤害数字 + 命中/死亡特效 + 音效（被动触发，与发出方解耦）
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant H as HealthComponent
+    participant ES as EventService
+    participant FS as FeedbackSystem
+    participant DN as DamageNumberSystem
+    participant VFX as VFXSpawner
+
+    Note over H,ES: [mkit 内部]
+    H->>ES: emit_damage_applied(result)
+    ES->>FS: damage_applied 信号
+    Note over FS,VFX: [模块] FeedbackSystem 在 _ready 连接了事件
+    FS->>DN: show_number(target.global_position, final_amount, was_critical)
+    FS->>VFX: spawn("hit", target.global_position)
+    FS->>FS: request_screen_shake(strength)  (可选)
+```
+
+### 关键代码
+
+```gdscript
+# FeedbackSystem 全部在 Inspector 配路径，无需写代码：
+#   damage_number_system_path = "../DamageNumbers"
+#   vfx_spawner_path          = "../Vfx"
+# VFXSpawner.vfx_scene_map = {"hit": "...", "death": "..."}
+
+# 想自己监听做别的表现：
+var events := ServiceRegistry.get_service("events") as EventService
+events.entity_died.connect(func(_id: String, ref: Node) -> void:
+    if ref is Node2D:
+        ($Vfx as VFXSpawner).spawn("death", (ref as Node2D).global_position)
+)
+```
+
+### 相关文档
+
+→ [ref/modules/FeedbackSystem.md](ref/modules/FeedbackSystem.md) · [ref/modules/VFXSpawner.md](ref/modules/VFXSpawner.md) · [ref/modules/DamageNumberSystem.md](ref/modules/DamageNumberSystem.md)  
+→ [cookbook/13_animation.md](cookbook/13_animation.md)（通道 B）
+
+---
+
+## P3-12：Quest Lifecycle
+
+**触发点：** `AcceptQuestEffect`（接受）/ 任意领域事件（推进）  
+**涉及系统：** `QuestService`、`QuestDefinition`、`QuestState`、`EventService`、`AcceptQuestEffect` / `AdvanceObjectiveEffect` / `CompleteQuestEffect`  
+**输出：** 任务从 `available → active → completed → turned_in`，达成时跑 `reward_effects`
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant Eff as AcceptQuestEffect
+    participant QS as QuestService
+    participant ES as EventService
+
+    Note over Eff,QS: [你] 在对话选项 / effect 链触发
+    Eff->>QS: accept_quest("quest.cull_beasts", ctx)
+    QS->>QS: can_accept? → QuestState(active)
+    QS->>ES: emit_quest_accepted
+    Note over ES,QS: [mkit 内部] 自动推进
+    ES->>QS: entity_died → 合成 "enemy_killed" 事件
+    QS->>QS: notify_event() 匹配目标 → _advance_progress (+1)
+    QS->>ES: emit_quest_objective_advanced
+    QS->>QS: 集满 + auto_complete → complete_quest → turn_in_quest
+    QS->>QS: _run_reward_effects(reward_effects)
+    QS->>ES: emit_quest_completed / emit_quest_turned_in
+```
+
+### 关键代码
+
+```gdscript
+# 目标配置（QuestObjectiveDefinition）：对准 QuestService 合成的事件
+#   event_type = "enemy_killed"   match_key = "faction"   match_value = "enemy"   required_count = 3
+# 手动推进非击杀类目标（如"对话 N 次"）：
+var quest := ServiceRegistry.get_service("quest") as QuestService
+quest.advance_objective("quest.talk_villagers", "talk", 1)
+```
+
+### 相关文档
+
+→ [ref/modules/QuestService.md](ref/modules/QuestService.md) · [ref/modules/QuestDefinition.md](ref/modules/QuestDefinition.md)  
+→ [cookbook/10_quest.md](cookbook/10_quest.md)
+
+---
+
+## P3-13：Save / Load
+
+**触发点：** `SaveService.save_game(root)` / `load_game(root)`  
+**涉及系统：** `SaveService`、`Saveable`、`SaveableComponent`、`SaveMigration`  
+**输出：** 所有 `Saveable` 序列化为 JSON 写盘 / 反序列化恢复
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant SV as SaveService
+    participant N as Saveable 节点们
+
+    Note over Caller,SV: 存档
+    Caller->>SV: save_game(root)
+    SV->>N: find_children → 仅收集 is Saveable
+    N-->>SV: to_save_data() per node（按 get_save_id() 归档）
+    SV->>SV: JSON.stringify → 写 save_path
+
+    Note over Caller,SV: 读档
+    Caller->>SV: load_game(root)
+    SV->>SV: _migrate_data()（按 SaveMigration 链升级旧版本）
+    SV->>N: 对每个 Saveable 调 from_save_data(payload[id])
+```
+
+> **关键：`SaveService` 只自动收集 `Saveable`。** `SaveableComponent`（HealthComponent、InventoryController…）需由一个 `Saveable` 代理主动收集——见 [cookbook/11](cookbook/11_progression_and_save.md) 步骤 4。
+
+### 关键代码
+
+```gdscript
+var save := ServiceRegistry.get_service("save") as SaveService
+save.save_completed.connect(func(path: String): print("已存 → %s" % path))
+if not save.save_game(get_tree().root):
+    push_error("存档失败")
+```
+
+### 相关文档
+
+→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md) · [ref/kernel/Saveable.md](ref/kernel/Saveable.md) · [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)  
+→ [concepts.md — 模型 4：两条存档契约](concepts.md#模型-4两条存档契约) · [cookbook/11_progression_and_save.md](cookbook/11_progression_and_save.md)
+
+---
+
+## P3-14：Loot Roll
+
+**触发点：** `LootService.roll_table(table_id, ctx)` 或 `generate_options(pool_ids, count, ctx)`  
+**涉及系统：** `LootService`、`LootTableDefinition`、`LootEntry`、`LootRollResult`、`RewardSystem`、`RandomService`  
+**输出：** 掉落物 `LootRollResult.item_instances` 或可选奖励 `Array[RewardOption]`
+
+### 流程
+
+```mermaid
+flowchart TB
+    A["roll_table(table_id, ctx)"]:::userOwned -->
+    B["按 table.rolls 循环"]:::mkitCore -->
+    C["_get_valid_entries：过 conditions"]:::mkitCore -->
+    D["累加权重 + empty_weight"]:::mkitCore -->
+    E["RandomService.randf_range(0, total)"]:::mkitCore -->
+    F["命中区间 → _roll_quantity →<br/>ItemInstance.create"]:::mkitCore -->
+    G["LootRollResult.item_instances"]:::mkitCore
+
+    classDef mkitCore  fill:#4A90D9,color:#fff,stroke:#2C6FAC
+    classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
+```
+
+**两个入口：** `roll_table` 走掉落表（权重 + 数量 + 可空）；`generate_options` 走 `RewardSystem`，从 `RewardDefinition` 池**无放回**加权抽 `count` 个 `RewardOption`（房间清空奖励用这条）。`apply_selected(option, ctx)` 再执行选中项的 effect 链。
+
+### 关键代码
+
+```gdscript
+var loot := ServiceRegistry.get_service("loot") as LootService
+var ctx := GameplayContext.new()
+ctx.source = $Player
+var result := loot.roll_table("loot.beast_drop", ctx)
+for item in result.item_instances:
+    print("掉落 %s × %d" % [item.definition_id, item.quantity])
+```
+
+### 相关文档
+
+→ [ref/modules/LootService.md](ref/modules/LootService.md) · [ref/modules/LootTableDefinition.md](ref/modules/LootTableDefinition.md) · [ref/modules/RewardSystem.md](ref/modules/RewardSystem.md)  
+→ [cookbook/08_loot_and_rewards.md](cookbook/08_loot_and_rewards.md)
+
+---
+
+## P3-15：Dialogue
+
+**触发点：** `DialogueService.start(dialogue_id, ctx)`  
+**涉及系统：** `DialogueService`、`DialogueDefinition`、`DialogueNode`、`DialogueChoice`、`DialogueRuntime`  
+**输出：** 节点推进、选项求值、节点/选项 effect 触发，结束发 `dialogue_ended`
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant Caller as DialogueInteractable
+    participant DS as DialogueService
+    participant UI as DialogueUI
+
+    Caller->>DS: start("dialogue.elder_intro", ctx)
+    DS->>DS: _enter_node(start_node_id)
+    DS->>DS: 跑 node.on_enter_effects
+    DS->>UI: node_entered(node)
+    alt 节点有 choices
+        DS->>UI: choices_presented(node, 可用选项)
+        UI->>DS: choose(index) → 跑 choice.effects → _enter_node(next)
+    else 无 choices
+        UI->>DS: advance() → _enter_node(next_node_id)
+    end
+    Note over DS: next 为空 → end() → dialogue_ended
+```
+
+> 选项的 `conditions` 决定是否在 UI 出现（`get_available_choices` 过滤）；`choose(index)` 的 index 是**可用选项**的下标，不是原始下标。
+
+### 关键代码
+
+```gdscript
+var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+dialogue.dialogue_ended.connect(func(id: String): print("对话结束: %s" % id))
+var ctx := GameplayContext.new()
+ctx.source = $Player
+dialogue.start("dialogue.elder_intro", ctx)   # 已有对话进行中则返回 false
+```
+
+### 相关文档
+
+→ [ref/modules/DialogueService.md](ref/modules/DialogueService.md) · [ref/modules/DialogueDefinition.md](ref/modules/DialogueDefinition.md)  
+→ [cookbook/09_npc_dialogue.md](cookbook/09_npc_dialogue.md)
+
+---
+
+## P3-16：Shop Purchase
+
+**触发点：** `ShopService.buy(item_id, quantity, buyer)`  
+**涉及系统：** `ShopService`、`ShopDefinition`、`ShopEntry`、`SpendCurrencyEffect`、`InventoryController`、`ProgressionService`  
+**输出：** 扣货币、物品入包、库存减少，发 `item_purchased`
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant Caller as ShopUI / 代码
+    participant SH as ShopService
+    participant Prog as ProgressionService
+    participant Inv as InventoryController
+
+    Caller->>SH: buy("item.potion", 1, buyer)
+    SH->>SH: _buy_block_reason()（开店?/库存?/conditions?/能加包?/钱够?）
+    SH->>Prog: SpendCurrencyEffect 扣 currency_id
+    alt 扣款成功
+        SH->>Inv: add_item(ItemInstance)
+        alt 入包失败
+            SH->>Prog: AddCurrencyEffect 退款
+            SH-->>Caller: transaction_failed
+        else 成功
+            SH->>SH: entry.stock -= quantity
+            SH-->>Caller: item_purchased + emit_item_purchased
+        end
+    else 钱不够
+        SH-->>Caller: transaction_failed("Insufficient currency")
+    end
+```
+
+> **货币在 `ProgressionService`，不是实体的 `ResourcePoolComponent`。** 买家必须有 `Controllers/InventoryController`。
+
+### 关键代码
+
+```gdscript
+var shop := ServiceRegistry.get_service("shop") as ShopService
+shop.open_shop("shop.village")
+shop.transaction_failed.connect(func(id: String, reason: String): print("失败 %s: %s" % [id, reason]))
+if shop.can_buy("item.potion", 1, $Player):
+    shop.buy("item.potion", 1, $Player)
+```
+
+### 相关文档
+
+→ [ref/modules/ShopService.md](ref/modules/ShopService.md) · [ref/modules/ShopDefinition.md](ref/modules/ShopDefinition.md)  
+→ [cookbook/14_shop.md](cookbook/14_shop.md)
+
+---
+
+## P4-17：Progression / Level Up
+
+**触发点：** `ExperienceComponent.add_xp(amount)` / `ProgressionService.unlock_or_level_up(id)`  
+**涉及系统：** `ExperienceComponent`、`ExperienceCurve`、`ProgressionService`、`UpgradeDefinition`  
+**输出：** 等级提升（`level_up`）/ 永久升级解锁（`upgrade_level_changed`）
+
+### 流程
+
+```mermaid
+flowchart TB
+    A["add_xp(amount)"]:::userOwned -->
+    B["current_xp += amount"]:::mkitCore -->
+    C["_check_level_ups：<br/>current_xp >= curve.get_xp_required(level)?"]:::mkitCore -->
+    D["跨级：xp -= required，level++，<br/>溢出结转，发 level_up"]:::mkitCore
+    C -->|未达阈值| E["xp_changed 信号"]:::mkitCore
+
+    classDef mkitCore  fill:#4A90D9,color:#fff,stroke:#2C6FAC
+    classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
+```
+
+**两套并行系统：** `ExperienceComponent`（实体局内等级，是 `Saveable`）与 `ProgressionService`（全局货币/元升级，也是 `Saveable`）。`unlock_or_level_up` 会校验前置、扣 `currency_id`、跑 `UpgradeDefinition.effects`。
+
+### 关键代码
+
+```gdscript
+# 击杀给 XP（自己接线）
+events.entity_died.connect(func(_id: String, ref: Node) -> void:
+    var idn := ref.get_node_or_null("EntityIdentity") as EntityIdentity if ref != null else null
+    if idn != null and idn.faction == "enemy":
+        ($Player/ExperienceComponent as ExperienceComponent).add_xp(20)
+)
+
+# 花元货币升级
+var prog := ServiceRegistry.get_service("progression") as ProgressionService
+if prog.can_unlock("upgrade.max_hp"):
+    prog.unlock_or_level_up("upgrade.max_hp")
+```
+
+### 相关文档
+
+→ [ref/modules/ExperienceComponent.md](ref/modules/ExperienceComponent.md) · [ref/modules/ProgressionService.md](ref/modules/ProgressionService.md)  
+→ [cookbook/11_progression_and_save.md](cookbook/11_progression_and_save.md)
+
+---
+
+## P4-18：Room / Run
+
+**触发点：** `RunDirector.start_run(seed)`  
+**涉及系统：** `RunDirector`、`DungeonGenerator`、`RoomGraph`、`RoomLoader`、`RoomController`、`RunState`、`EventService`  
+**输出：** 线性房间序列逐个加载、清空、推进，直到 `run_finished`
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant RD as RunDirector
+    participant DG as DungeonGenerator
+    participant RL as RoomLoader
+    participant RC as RoomController
+
+    RD->>DG: generate_linear(pool, seed, run_length) → RoomGraph
+    RD->>RD: enter_next_room()
+    RD->>RL: load_room(room_id, RoomRoot)
+    RL->>RC: instantiate 场景 + setup(room_id)
+    RD->>RC: enter_room() → spawn_enemies()
+    Note over RC: [mkit 内部] 监听 entity_died
+    RC->>RC: 敌人清空 → check_clear_condition → generate_reward
+    RC->>RD: room_cleared
+    alt 有奖励选项
+        RD->>RD: choosing_reward.emit → 等 select_reward()
+    else 无奖励
+        RD->>RD: current_room_index++ → enter_next_room()
+    end
+    Note over RD: 走完最后一间 → complete_run → run_finished("completed")
+```
+
+> 玩家死亡（`entity_died` 命中 `player_entity_id`）→ `fail_run("player_died")` → `run_finished("failed:player_died")`。
+
+### 关键代码
+
+```gdscript
+var director := $RunDirector as RunDirector
+director.run_finished.connect(func(result: String): print("Run: %s" % result))
+director.choosing_reward.connect(func(opts: Array[RewardOption]):
+    # 显示 UI；玩家选定后：
+    if not opts.is_empty():
+        director.select_reward(opts[0])
+)
+director.start_run(12345)
+```
+
+### 相关文档
+
+→ [ref/modules/RunDirector.md](ref/modules/RunDirector.md) · [ref/modules/RoomController.md](ref/modules/RoomController.md) · [ref/modules/DungeonGenerator.md](ref/modules/DungeonGenerator.md)  
+→ [cookbook/07_room.md](cookbook/07_room.md) · [cookbook/08_loot_and_rewards.md](cookbook/08_loot_and_rewards.md)
+
+---
+
+## P4-19：Status Effect Tick
+
+**触发点：** `StatusEffectController._process(delta)`（每帧）  
+**涉及系统：** `StatusEffectController`、`StatusEffectInstance`、`StatusEffectDefinition`、`StatsComponent`  
+**输出：** 周期触发 `effects_on_tick`，到期移除并卸下属性加成
+
+### 流程
+
+```mermaid
+flowchart TB
+    A["_process(delta)：遍历 active_statuses"]:::mkitCore -->
+    B["remaining_duration -= delta<br/>tick_timer -= delta"]:::mkitCore -->
+    C{"tick_timer <= 0<br/>且 tick_interval>0?"}:::mkitCore
+    C -->|是| D["_tick_status：跑 effects_on_tick<br/>重置 tick_timer"]:::mkitCore
+    C -->|否| E{"remaining_duration <= 0?"}:::mkitCore
+    D --> E
+    E -->|是| F["remove_status：跑 effects_on_remove<br/>+ 卸下 stat_modifiers"]:::mkitCore
+
+    classDef mkitCore fill:#4A90D9,color:#fff,stroke:#2C6FAC
+```
+
+**施加入口有两条：** `ApplyStatusEffect`（effect 链显式施加）或伤害的 `on_hit_statuses`（`CombatService` 掷骰 → `DamageResult.status_applications` → `HealthComponent` 转交）。两者最终都落到 `StatusEffectController.apply_status()`，按 `stack_rule` 叠加。
+
+### 关键代码
+
+```gdscript
+# 直接施加（绕过技能）
+var ctrl := $Enemy/Controllers/StatusEffectController as StatusEffectController
+ctrl.apply_status("status.poison", $Player, 1, -1.0)   # source, stacks, duration_override
+ctrl.status_removed.connect(func(id: String): print("状态结束: %s" % id))
+```
+
+### 相关文档
+
+→ [ref/modules/StatusEffectController.md](ref/modules/StatusEffectController.md) · [ref/modules/StatusEffectDefinition.md](ref/modules/StatusEffectDefinition.md)  
+→ [cookbook/12_status_effects.md](cookbook/12_status_effects.md)
+
+---
+
+## P4-20：Scene / Zone Transition
+
+**触发点：** `SceneService.change_scene(path)` 或 `WorldService.go_to_zone(zone_id, spawn_id)`  
+**涉及系统：** `SceneService`、`WorldService`、`ZoneDefinition`、`SpawnPoint`、`Portal`  
+**输出：** 场景切换，玩家落到目标出生点，发 `zone_changed`
+
+### 流程
+
+```mermaid
+sequenceDiagram
+    participant P as Portal
+    participant WS as WorldService
+    participant SC as SceneService
+
+    P->>WS: go_to_zone("zone.forest", "from_village")
+    WS->>WS: 记下 _pending_zone_id / _pending_spawn_id
+    WS->>SC: change_scene(zone.scene_path)
+    SC->>SC: get_tree().change_scene_to_file → scene_changed
+    Note over WS: 监听 scene_changed → _finalize_zone_entry（call_deferred）
+    WS->>WS: place_player_at_spawn(spawn_id)（找 SpawnPoint）
+    WS->>WS: zone_changed.emit + emit_zone_changed + 播 BGM
+```
+
+> 纯换场景用 `SceneService.change_scene`（带 `transition_locked` 防重入）；带"区域 + 出生点 + BGM"语义用 `WorldService.go_to_zone`，目标场景里要有 `spawn_id` 匹配的 `SpawnPoint`。
+
+### 关键代码
+
+```gdscript
+# Portal 是 Interactable 子类，交互即跳转，无需写代码：
+#   target_zone_id = "zone.forest"   target_spawn_id = "from_village"
+
+# 代码直接换场景：
+var scenes := ServiceRegistry.get_service("scenes") as SceneService
+if not scenes.change_scene("res://game/scenes/forest.tscn"):
+    push_error("场景切换失败")
+```
+
+### 相关文档
+
+→ [ref/kernel/SceneService.md](ref/kernel/SceneService.md) · [ref/modules/WorldService.md](ref/modules/WorldService.md) · [ref/modules/Portal.md](ref/modules/Portal.md) · [ref/modules/SpawnPoint.md](ref/modules/SpawnPoint.md)

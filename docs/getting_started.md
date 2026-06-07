@@ -96,7 +96,7 @@ mkit 附带一个可直接运行的 village RPG demo，覆盖了从战斗、技�
 
 项目主场景已预设为 demo 的 bootstrap，直接按 **F5** 即可启动。
 
-> 如果主场景被改动过，在 FileSystem 面板中右键 `game/demo/bootstrap.tscn` → **Set as Main Scene**，再按 F5。
+> 如果主场景被改动过，在 FileSystem 面板中右键 `game/bootstrap.tscn` → **Set as Main Scene**，再按 F5。
 
 **完整操作键位：**
 
@@ -119,12 +119,13 @@ mkit 附带一个可直接运行的 village RPG demo，覆盖了从战斗、技�
 | 试炼 | 选择奖励 1 / 2 / 3 | **1** / **2** / **3** |
 | 存档 | 保存 / 读取 | **S** / **L** |
 | 调试 | 即时击败田野野兽 | **K** |
+| 调试 | 显示 / 隐藏 DebugOverlay | **F3** |
 
 **通关流程（完整 RPG loop）：**
 
 1. **村庄出发**：启动后进入村庄场景。按 **T** 与长老对话，接取田野报告任务（对话中按 T 推进 / 选择选项）。
 
-2. **前往田野**：按 **G** 穿越传送门进入 Field。用 **WASD** 靠近 Field Beast，**Space** 近战或 **Q** 施放 Firebolt 击杀。击杀后任务目标自动推进，地面会掉落兽爪。（调试快捷键：**K** 直接击败野兽跳过战斗）
+2. **前往田野**：按 **G** 穿越传送门进入 Field。用 **WASD** 靠近 Field Beast，**Space** 近战或 **Q/F** 施放 Firebolt。Firebolt 会先造成伤害并施加 burn，右侧 HUD 会显示 Field Beast 的 HP / burn 状态；击杀后敌人会从画面移除，任务目标自动推进并掉落兽爪。（调试快捷键：**K** 直接击败野兽跳过战斗）
 
 3. **返回村庄**：按 **G** 返回村庄。按 **T** 再次与长老对话，交还任务领取奖励，可选择接受祝福（**Y**）。
 

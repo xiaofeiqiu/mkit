@@ -1,11 +1,11 @@
 extends GutTest
 
 
-const PLAYER_SCENE := "res://game/demo/entities/player/player.tscn"
-const BEAST_SCENE := "res://game/demo/village_rpg/entities/field_beast.tscn"
-const DEMO_SCENE := "res://game/demo/village_rpg/village_rpg_demo.tscn"
-const FIELD_SCENE := "res://game/demo/village_rpg/scenes/field.tscn"
-const CONTENT_DB := "res://game/demo/village_rpg/resources/village_rpg_content.tres"
+const PLAYER_SCENE := "res://game/entities/player.tscn"
+const BEAST_SCENE := "res://game/entities/field_beast.tscn"
+const DEMO_SCENE := "res://game/village_rpg_demo.tscn"
+const FIELD_SCENE := "res://game/scenes/field.tscn"
+const CONTENT_DB := "res://game/resources/village_rpg_content.tres"
 const PLAYER_ID := "player_001"
 const BEAST_ID := "enemy.demo.field_beast"
 const ENTITY_FIELD_BEAST := "entity.demo.field_beast"
@@ -30,8 +30,8 @@ const PLATFORM_CLOUD_SLOT := "demo_profile"
 const GOLD_PACK_AMOUNT := 25
 const SCENE8_S7_SAVE_PATH := "/tmp/mkit_scene8_s7_save.json"
 const SCENE8_PLATFORM_SAVE_PATH := "/tmp/mkit_scene8_platform_save.json"
-const DAMAGE_NUMBER_SCENE := "res://game/demo/village_rpg/ui/damage_number.tscn"
-const HIT_VFX_SCENE := "res://game/demo/village_rpg/ui/hit_vfx.tscn"
+const DAMAGE_NUMBER_SCENE := "res://game/ui/damage_number.tscn"
+const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
 const TOAST_SCREEN_ID := "demo.toast"
 
 var _previous_current_scene: Node = null
@@ -515,7 +515,11 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_not_null(marker)
 	var beast := root.get_node_or_null("FieldBeast") as Node2D
 	assert_not_null(beast)
+	_disable_beast_ai(beast)
 	assert_eq(beast.global_position, marker.global_position)
+	var combat_label := demo.get_node("HUD/StatsPanel/CombatInfo") as Label
+	demo.call("_update_hud")
+	assert_eq(combat_label.text, "Beast: HP 35/35")
 
 	var identity := beast.get_node("EntityIdentity") as EntityIdentity
 	assert_eq(identity.definition_id, ENTITY_FIELD_BEAST)
@@ -537,6 +541,34 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_eq(stats.get_stat_value("move_speed"), 120.0)
 	var save_data := stats.to_save_data()
 	assert_true((save_data["base_overrides"] as Dictionary).is_empty())
+	var health := beast.get_node("Components/HealthComponent") as HealthComponent
+	assert_true(health.destroy_on_death)
+
+	var player := demo.get_node("Player") as CharacterBody2D
+	player.global_position = beast.global_position + Vector2(-80.0, 0.0)
+	var ability := player.get_node("Controllers/AbilityController") as AbilityController
+	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
+	watch_signals(ability)
+	demo.call("_cast_firebolt_command")
+	assert_true(await wait_for_signal(ability.ability_cast_finished, 1.0, "firebolt"))
+	demo.call("_update_hud")
+	assert_eq(pool.get_current("mana"), 40.0)
+	assert_eq(health.current_hp, 17.0)
+	assert_true(combat_label.text.contains("Beast: HP 17/35"))
+	assert_true(combat_label.text.contains("burn"))
+
+	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var lethal := DealDamageEffect.new()
+	lethal.effect_id = "effect.test.scene8.destroy_field_beast"
+	lethal.base_amount = 999.0
+	lethal.can_crit = false
+	assert_true(effects.execute(lethal, GameplayContext.new().with_source(player).with_target(beast)).success)
+	assert_true(bool(demo.get("_field_beast_defeated")))
+	demo.call("_update_hud")
+	assert_eq(combat_label.text, "Beast: defeated")
+	await get_tree().process_frame
+	assert_false(is_instance_valid(beast))
+	assert_null(root.get_node_or_null("FieldBeast"))
 
 
 func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> void:
@@ -961,10 +993,18 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	var damage_numbers := feedback.get_node("DamageNumbers") as DamageNumberSystem
 	var vfx := feedback.get_node("VFX") as VFXSpawner
 	var overlay := demo.get_node("DebugOverlay") as DebugOverlay
+	assert_eq(int(ProjectSettings.get_setting("display/window/size/viewport_width")), 1280)
+	assert_eq(int(ProjectSettings.get_setting("display/window/size/viewport_height")), 720)
+	assert_eq(str(ProjectSettings.get_setting("display/window/stretch/mode")), "canvas_items")
+	assert_eq(str(ProjectSettings.get_setting("display/window/stretch/aspect")), "expand")
 	assert_true(damage_numbers.use_pool)
+	assert_eq(damage_numbers.auto_release_seconds, 0.55)
 	assert_true(vfx.use_pool)
+	assert_eq(vfx.auto_free_seconds, 0.55)
 	assert_eq(feedback.toast_screen_id, TOAST_SCREEN_ID)
-	assert_eq(ui.screen_scene_map[TOAST_SCREEN_ID], "res://game/demo/village_rpg/ui/toast_screen.tscn")
+	assert_eq(ui.screen_scene_map[TOAST_SCREEN_ID], "res://game/ui/toast_screen.tscn")
+	assert_false(overlay.visible)
+	assert_false(overlay.show_registered_services)
 
 	var time_before := time.elapsed_gameplay_time
 	await get_tree().process_frame
@@ -1007,6 +1047,9 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	assert_eq(spawned_hit.global_position, beast.global_position)
 
 	await _wait_scene8_seconds(0.25)
+	assert_true(first_number.visible)
+	assert_true(first_vfx.visible)
+	await _wait_scene8_seconds(0.35)
 	assert_false(first_number.visible)
 	assert_false(first_vfx.visible)
 	var number_pool: Array = pool._pools.get(DAMAGE_NUMBER_SCENE, [])
@@ -1031,6 +1074,8 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	assert_true((toast.get_node("Label") as Label).text.begins_with("Defeated "))
 	await _wait_scene8_seconds(0.25)
 
+	overlay.visible = true
+	overlay.show_registered_services = true
 	overlay._process(0.0)
 	var overlay_text := (overlay.get_child(0) as Label).text
 	assert_true(overlay_text.contains("Services:"))

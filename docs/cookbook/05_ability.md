@@ -84,7 +84,7 @@ func handle_command(command: GameCommand) -> bool:
             return request_transition("Root/Move", {"direction": command.get_vector2("direction")})
         BuiltinCommands.ATTACK:
             return request_transition("Root/Attack")
-        BuiltinCommands.USE_ABILITY:
+        BuiltinCommands.CAST_ABILITY:
             return _try_cast_ability(command)
     return false
 
@@ -121,7 +121,7 @@ func _get_nearest_enemy() -> Node:
 # 在 PlayerInputController._process 中：
 if Input.is_action_just_pressed("ability_1"):
     var cmd := GameCommand.create(
-        BuiltinCommands.USE_ABILITY, "player", "player", {"ability_id": "fireball"}
+        BuiltinCommands.CAST_ABILITY, "player", "player", {"ability_id": "fireball"}
     )
     _commands.dispatch(cmd)
 ```

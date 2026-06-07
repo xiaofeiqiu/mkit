@@ -11,13 +11,20 @@ config_version=5
 [application]
 
 config/name="mkit"
-run/main_scene="res://game/demo/bootstrap.tscn"
+run/main_scene="res://game/bootstrap.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
 
 ServiceRegistry="*res://addons/mkit/kernel/services/service_registry.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [editor_plugins]
 

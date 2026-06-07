@@ -13,8 +13,7 @@ var _quest_contexts: Dictionary = {}
 func _ready() -> void:
 	if save_id == "":
 		save_id = "quest"
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	_connect_events()
 
 
@@ -42,7 +41,7 @@ func can_accept(quest_id: String, context: GameplayContext) -> bool:
 		var prerequisite := log.get_state(prerequisite_id)
 		if prerequisite == null or prerequisite.status != "turned_in":
 			return false
-	var ctx := context if context != null else GameplayContext.new()
+	var ctx := GameplayContext.from_context(context)
 	if not ConditionEvaluator.evaluate_all(definition.accept_conditions, ctx):
 		return false
 	return true
@@ -147,11 +146,10 @@ func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 	if state == null or state.status != "completed":
 		return false
 	var definition := get_definition(quest_id)
-	var ctx := context
-	if ctx == null:
-		ctx = _quest_contexts.get(quest_id, null)
-	if ctx == null:
-		ctx = GameplayContext.new()
+	var source_ctx := context
+	if source_ctx == null:
+		source_ctx = _quest_contexts.get(quest_id, null)
+	var ctx := GameplayContext.from_context(source_ctx)
 	if not _run_reward_effects(definition, ctx):
 		return false
 	state.status = "turned_in"
@@ -168,8 +166,8 @@ func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 func get_definition(quest_id: String) -> QuestDefinition:
 	if quest_id.strip_edges() == "":
 		return null
-	if content == null and ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	if content == null:
+		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(quest_id) as QuestDefinition
@@ -247,9 +245,7 @@ func _run_reward_effects(definition: QuestDefinition, context: GameplayContext) 
 		return false
 	if definition.reward_effects.is_empty():
 		return true
-	if not ServiceRegistry.has_service("effects"):
-		return false
-	var executor := ServiceRegistry.get_service("effects") as EffectService
+	var executor := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		return false
 	var results := executor.execute_many(definition.reward_effects, context, true)
@@ -260,6 +256,4 @@ func _run_reward_effects(definition: QuestDefinition, context: GameplayContext) 
 
 
 func _get_events() -> EventService:
-	if ServiceRegistry.has_service("events"):
-		return ServiceRegistry.get_service("events") as EventService
-	return null
+	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService

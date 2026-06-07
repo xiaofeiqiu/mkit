@@ -116,10 +116,7 @@ func _restore_saveables(root: Node, payload: Dictionary, scoped_payload: Diction
 				var data: Dictionary = scoped_data[id]
 				if data is Dictionary and saveable.apply_save_payload_for_scope(normalized_scope, data):
 					restored = true
-					break
-		if restored:
-			continue
-		if payload.has(id):
+		if not restored and payload.has(id):
 			saveable.from_save_data(payload[id])
 
 
@@ -169,4 +166,3 @@ func _normalize_scope(scope_name: String) -> String:
 	if normalized_scope == "":
 		return DEFAULT_SCOPE
 	return normalized_scope
-

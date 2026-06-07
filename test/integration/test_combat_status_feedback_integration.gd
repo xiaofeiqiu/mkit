@@ -280,6 +280,7 @@ func _make_feedback_system() -> FeedbackSystem:
 	return feedback
 
 
+
 func _make_entity(
 	node_name: String,
 	entity_id: String,
@@ -287,34 +288,12 @@ func _make_entity(
 	with_hitbox: bool,
 	with_hurtbox: bool,
 	with_debug_nodes: bool
-) -> Node2D:
-	var entity := Node2D.new()
-	entity.name = node_name
-
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = entity_id
-	identity.faction = faction
-	entity.add_child(identity)
-
-	var components := Node.new()
-	components.name = "Components"
-	entity.add_child(components)
-
-	var stats := StatsComponent.new()
-	stats.name = "StatsComponent"
-	stats.set_base_stat("max_hp", 100.0)
-	stats.set_base_stat("attack_power", 0.0)
-	stats.set_base_stat("crit_chance", 0.0)
-	stats.set_base_stat("damage_multiplier", 1.0)
-	stats.set_base_stat("defense", 0.0)
-	stats.set_base_stat("evade_chance", 0.0)
-	components.add_child(stats)
-
-	var health := HealthComponent.new()
-	health.name = "HealthComponent"
-	health.current_hp = 40.0
-	components.add_child(health)
+) -> EntityRoot:
+	var entity := IntTestHelpers.make_entity(node_name, entity_id, [], faction)
+	var health := entity.get_node("Components/HealthComponent") as HealthComponent
+	if health != null:
+		health.current_hp = 40.0
+	var components := entity.get_node("Components") as Node
 
 	if with_hitbox:
 		var hitbox := HitboxComponent.new()
@@ -332,13 +311,12 @@ func _make_entity(
 		components.add_child(hurtbox)
 		IntTestHelpers.add_circle_collision_shape(hurtbox, 12.0)
 
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	entity.add_child(controllers)
-
-	var status := StatusEffectController.new()
-	status.name = "StatusEffectController"
-	controllers.add_child(status)
+	var controllers := IntTestHelpers.ensure_child(entity, "Controllers")
+	var status := controllers.get_node_or_null("StatusEffectController") as StatusEffectController
+	if status == null:
+		status = StatusEffectController.new()
+		status.name = "StatusEffectController"
+		controllers.add_child(status)
 
 	if with_debug_nodes:
 		_add_debug_nodes(entity)
@@ -349,6 +327,13 @@ func _make_entity(
 
 
 func _add_debug_nodes(entity: Node) -> void:
+	var existing_machine := entity.get_node_or_null("StateMachine") as StateMachine
+	if existing_machine != null:
+		existing_machine.free()
+	var existing_receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+	if existing_receiver != null:
+		existing_receiver.free()
+
 	var state_machine := StateMachine.new()
 	state_machine.name = "StateMachine"
 	state_machine.initial_state_path = "Root/Idle"

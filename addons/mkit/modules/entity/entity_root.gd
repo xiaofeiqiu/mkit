@@ -1,19 +1,25 @@
 class_name EntityRoot
 extends CharacterBody2D
-@onready var identity: EntityIdentity = $EntityIdentity
-@onready var state_machine: StateMachine = $StateMachine
-@onready var command_receiver: CommandReceiver = $CommandReceiver
+var identity: EntityIdentity
+var state_machine: StateMachine
+var command_receiver: CommandReceiver
 
 
 func get_entity_identity() -> EntityIdentity:
+	if identity == null:
+		identity = get_node_or_null("EntityIdentity")
 	return identity
 
 
 func get_state_machine_node() -> StateMachine:
+	if state_machine == null:
+		state_machine = get_node_or_null("StateMachine")
 	return state_machine
 
 
 func get_command_receiver_node() -> CommandReceiver:
+	if command_receiver == null:
+		command_receiver = get_node_or_null("CommandReceiver")
 	return command_receiver
 
 

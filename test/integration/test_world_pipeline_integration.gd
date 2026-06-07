@@ -164,19 +164,7 @@ func _make_zone(
 
 
 func _make_player() -> Node2D:
-	var player := Node2D.new()
-	player.name = "Player"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player"
-	player.add_child(identity)
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	player.add_child(controllers)
-	var inventory := InventoryController.new()
-	inventory.name = "InventoryController"
-	inventory.capacity = 10
-	controllers.add_child(inventory)
+	var player := IntTestHelpers.make_inventory_entity("Player", "player", 10)
 	player.add_to_group("player")
 	add_child_autofree(player)
 	return player

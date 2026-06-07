@@ -11,7 +11,6 @@ static func resolve_entity_root(node: Node) -> EntityRoot:
 		current = current.get_parent()
 	return null
 
-
 static func get_component(node: Node, id_or_type: Variant) -> Node:
 	var owner := resolve_entity_root(node)
 	if owner == null:
@@ -114,7 +113,7 @@ static func _warn_missing(node: Node, contract_kind: String, id_or_type: Variant
 	var owner_class := node.get_class()
 	if owner != null:
 		owner_name = owner.name
-	owner_class = owner.get_class()
+		owner_class = owner.get_class()
 	push_warning(
 		"EntityContract missing %s '%s' for %s(%s); add to %s."
 		% [contract_kind, str(id_or_type), owner_name, owner_class, _format_contract_hint(contract_kind)]

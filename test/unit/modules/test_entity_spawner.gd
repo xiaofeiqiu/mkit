@@ -129,7 +129,7 @@ func test_tc_es_07_spawned_command_receiver_tracks_runtime_identity() -> void:
 
 
 func _save_stats_scene() -> void:
-	var entity := Node.new()
+	var entity := EntityRoot.new()
 	entity.name = "StatsEntity"
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
@@ -148,7 +148,7 @@ func _save_stats_scene() -> void:
 
 
 func _save_command_scene() -> void:
-	var entity := Node.new()
+	var entity := EntityRoot.new()
 	entity.name = "CommandEntity"
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"

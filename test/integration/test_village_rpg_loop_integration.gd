@@ -350,39 +350,27 @@ func _make_curve() -> ExperienceCurve:
 
 
 func _make_player() -> Node2D:
-	var player := Node2D.new()
+	var player := IntTestHelpers.make_inventory_entity("Player", "player", 10)
 	player.name = "Player"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player"
-	player.add_child(identity)
-	var components := Node.new()
-	components.name = "Components"
-	player.add_child(components)
-	var experience := ExperienceComponent.new()
-	experience.name = "ExperienceComponent"
-	experience.curve = _make_curve()
-	experience.starting_level = 1
-	components.add_child(experience)
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	player.add_child(controllers)
-	var inventory := InventoryController.new()
-	inventory.name = "InventoryController"
-	inventory.capacity = 10
-	controllers.add_child(inventory)
+	var components := player.get_node("Components") as Node
+	var existing := components.get_node_or_null("ExperienceComponent") as ExperienceComponent
+	if existing == null:
+		var experience := ExperienceComponent.new()
+		experience.name = "ExperienceComponent"
+		experience.curve = _make_curve()
+		experience.starting_level = 1
+		components.add_child(experience)
+	else:
+		existing.curve = _make_curve()
+		existing.starting_level = 1
 	player.add_to_group("player")
 	add_child_autofree(player)
 	return player
 
 
 func _make_elder() -> Node:
-	var elder := Node2D.new()
+	var elder := IntTestHelpers.make_entity("Elder", NPC_ELDER)
 	elder.name = "Elder"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = NPC_ELDER
-	elder.add_child(identity)
 	var interactable := DialogueInteractable.new()
 	interactable.name = "Interactable"
 	interactable.npc_id = NPC_ELDER

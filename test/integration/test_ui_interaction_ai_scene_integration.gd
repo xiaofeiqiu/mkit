@@ -190,65 +190,51 @@ func _boot_runtime() -> GameBootstrap:
 
 
 func _make_ai_target() -> Node2D:
-	var player := Node2D.new()
+	var player := IntTestHelpers.make_health_entity("Player", "player.int.ai", 100.0)
 	player.name = "Player"
 	player.global_position = Vector2(24.0, 0.0)
 	player.add_to_group("player")
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player.int.ai"
-	player.add_child(identity)
-	IntTestHelpers.assign_owner(player, player)
 	return player
 
 
 func _make_ai_enemy() -> Node2D:
-	var enemy := Node2D.new()
-	enemy.name = "Enemy"
+	var enemy := IntTestHelpers.make_entity("Enemy", "enemy.int.ai")
 	enemy.global_position = Vector2.ZERO
-
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "enemy.int.ai"
-	enemy.add_child(identity)
-
+	var old_receiver := enemy.get_node("CommandReceiver") as CommandReceiver
+	if old_receiver != null:
+		enemy.remove_child(old_receiver)
+		old_receiver.free()
 	var receiver := RecordingReceiver.new()
 	receiver.name = "CommandReceiver"
+	receiver.receiver_id = "enemy.int.ai"
+	receiver.auto_register = true
 	enemy.add_child(receiver)
-
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	enemy.add_child(controllers)
-
 	var brain := SimpleAIEnemyBrain.new()
 	brain.name = "SimpleAIEnemyBrain"
 	brain.enabled = false
 	brain.attack_range = 48.0
 	brain.detection_range = 160.0
+	var controllers := enemy.get_node("Controllers") as Node
 	controllers.add_child(brain)
-
 	IntTestHelpers.assign_owner(enemy, enemy)
 	return enemy
 
 
 func _make_interactor_entity() -> Node2D:
-	var player := Node2D.new()
+	var player := IntTestHelpers.make_entity("Interactor", "interactor.int", [])
 	player.name = "Interactor"
 	player.global_position = Vector2.ZERO
-
-	var components := Node.new()
-	components.name = "Components"
-	player.add_child(components)
-
-	var interaction := InteractionComponent.new()
-	interaction.name = "InteractionComponent"
+	var components := player.get_node("Components") as Node
+	var interaction := components.get_node_or_null("InteractionComponent") as InteractionComponent
+	if interaction == null:
+		interaction = InteractionComponent.new()
+		interaction.name = "InteractionComponent"
+		components.add_child(interaction)
+		IntTestHelpers.add_circle_collision_shape(interaction, 16.0)
 	interaction.collision_layer = 1
 	interaction.collision_mask = 2
 	interaction.monitoring = true
 	interaction.monitorable = true
-	components.add_child(interaction)
-	IntTestHelpers.add_circle_collision_shape(interaction, 16.0)
-
 	IntTestHelpers.assign_owner(player, player)
 	return player
 
@@ -257,7 +243,6 @@ func _make_interactable_entity() -> Node2D:
 	var target := Node2D.new()
 	target.name = "InteractableTarget"
 	target.global_position = Vector2.ZERO
-
 	var area := Area2D.new()
 	area.name = "InteractionArea"
 	area.collision_layer = 2
@@ -266,12 +251,10 @@ func _make_interactable_entity() -> Node2D:
 	area.monitorable = true
 	target.add_child(area)
 	IntTestHelpers.add_circle_collision_shape(area, 16.0)
-
 	var interactable := EffectInteractable.new()
 	interactable.name = "Interactable"
 	interactable.interaction_id = "interactable.int.effect"
 	area.add_child(interactable)
-
 	IntTestHelpers.assign_owner(target, target)
 	return target
 

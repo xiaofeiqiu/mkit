@@ -152,4 +152,4 @@ mkit 附带一个可直接运行的 village RPG demo，覆盖了从战斗、技�
 | 理解命令→状态→动作→效果管线 | [concepts.md](concepts.md) |
 | 按步骤构建完整 RPG | [cookbook/01_bootstrap.md](cookbook/01_bootstrap.md) |
 | 查术语定义 | [glossary.md](glossary.md) |
-| 查看阶段5收口计划 | [../spec/implementation-plan.md](../spec/implementation-plan.md) |
+| 查看阶段5收口计划 | `spec/implementation-plan.md` |

@@ -25,8 +25,11 @@ func _register_kernel_services() -> void:
 	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
 		if _runtime_context != null:
 			ServiceRegistry.set_runtime_context(_runtime_context)
-			for existing_id in ServiceRegistry.get_port_ids():
-				var existing_service := ServiceRegistry.get_port(existing_id)
+			for service_data in _build_kernel_services():
+				var existing_id := str(service_data["id"])
+				if not ServiceRegistry.has_service(existing_id):
+					continue
+				var existing_service := ServiceRegistry.get_service(existing_id)
 				if existing_service != null:
 					_runtime_context.register_port(existing_id, existing_service)
 			print("[mkit] GameBootstrap: runtime context attached to pre-registered services")

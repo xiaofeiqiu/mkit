@@ -39,13 +39,12 @@ var ctrl: AbilityController
 var content: StubContent
 var actions: ActionService
 var time: TimeService
-var entity: Node
+var entity: EntityRoot
 var ctx: GameplayContext
 
 
 func before_each() -> void:
-	entity = Node.new()
-	add_child_autofree(entity)
+	entity = _make_entity_root()
 	content = StubContent.new()
 	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
@@ -58,6 +57,29 @@ func before_each() -> void:
 	entity.add_child(ctrl)
 	ctx = GameplayContext.new()
 	ctx.source = entity
+
+
+func _make_entity_root() -> EntityRoot:
+	var entity_root := EntityRoot.new()
+	entity_root.name = "AbilityEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = "ability.entity"
+	entity_root.add_child(identity)
+	var state_machine := StateMachine.new()
+	state_machine.name = "StateMachine"
+	entity_root.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity_root.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	entity_root.add_child(components)
+	var controllers := Node.new()
+	controllers.name = "Controllers"
+	entity_root.add_child(controllers)
+	add_child_autofree(entity_root)
+	return entity_root
 
 
 func after_each() -> void:

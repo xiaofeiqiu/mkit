@@ -95,32 +95,43 @@ func _make_quest(
 	return definition
 
 
-func _make_enemy(entity_id: String, tags: Array[String] = []) -> Node:
-	var enemy := Node.new()
-	enemy.name = "Enemy"
+func _make_entity_root(entity_id: String, tags: Array[String] = []) -> EntityRoot:
+	var entity := EntityRoot.new()
+	entity.name = "Entity"
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	identity.entity_id = entity_id
 	identity.tags = tags
-	enemy.add_child(identity)
-	add_child_autofree(enemy)
-	return enemy
-
-
-func _make_player_with_inventory() -> Node:
-	var player := Node.new()
-	player.name = "Player"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player"
-	player.add_child(identity)
+	entity.add_child(identity)
+	var state_machine := StateMachine.new()
+	state_machine.name = "StateMachine"
+	entity.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	entity.add_child(components)
 	var controllers := Node.new()
 	controllers.name = "Controllers"
-	player.add_child(controllers)
+	entity.add_child(controllers)
+	add_child_autofree(entity)
+	return entity
+
+
+func _make_enemy(entity_id: String, tags: Array[String] = []) -> EntityRoot:
+	return _make_entity_root(entity_id, tags)
+
+
+func _make_player_with_inventory() -> EntityRoot:
+	var player := _make_entity_root("player")
+	player.name = "Player"
+	var identity := player.get_node("EntityIdentity") as EntityIdentity
+	identity.entity_id = "player"
+	var controllers := player.get_node("Controllers") as Node
 	var inventory := InventoryController.new()
 	inventory.name = "InventoryController"
 	controllers.add_child(inventory)
-	add_child_autofree(player)
 	return player
 
 

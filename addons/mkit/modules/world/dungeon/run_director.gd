@@ -175,7 +175,10 @@ func _apply_reward_scope_payload(data: Dictionary) -> bool:
 	if run_state != null:
 		var reward_history := data.get("reward_history", [])
 		if reward_history is Array:
-			run_state.reward_history = Array(reward_history).duplicate(true)
+			var normalized_history: Array[String] = []
+			for raw in reward_history:
+				normalized_history.append(str(raw))
+			run_state.reward_history = normalized_history
 	var runtime := _get_active_room_runtime()
 	var pending_reward_ids := data.get("pending_reward_ids", [])
 	if runtime != null and pending_reward_ids is Array:

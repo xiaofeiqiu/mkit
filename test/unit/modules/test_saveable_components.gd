@@ -340,13 +340,19 @@ func test_tc_svc_16_stats_lowest_only_replaces_higher_with_lower_value() -> void
 	assert_eq((list[0] as StatModifier).value, -10.0)
 
 
-func _make_entity(entity_name: String, entity_id: String) -> Node:
-	var entity := Node.new()
+func _make_entity(entity_name: String, entity_id: String) -> EntityRoot:
+	var entity := EntityRoot.new()
 	entity.name = entity_name
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	identity.entity_id = entity_id
 	entity.add_child(identity)
+	var state_machine := StateMachine.new()
+	state_machine.name = "StateMachine"
+	entity.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity.add_child(receiver)
 	var components := Node.new()
 	components.name = "Components"
 	entity.add_child(components)

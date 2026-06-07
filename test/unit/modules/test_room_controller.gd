@@ -22,7 +22,7 @@ func _make_room_def(
 var ctrl: RoomController
 var content: StubContent
 var events: EventService
-var entity: Node
+var entity: EntityRoot
 
 
 func before_each() -> void:
@@ -32,8 +32,7 @@ func before_each() -> void:
 	add_child_autofree(events)
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("events", events)
-	entity = Node.new()
-	add_child_autofree(entity)
+	entity = _make_entity_root()
 	ctrl = RoomController.new()
 	ctrl.reward_count = 3
 	entity.add_child(ctrl)
@@ -42,6 +41,51 @@ func before_each() -> void:
 
 func after_each() -> void:
 	ServiceRegistry.clear()
+
+
+func _make_entity_root() -> EntityRoot:
+	var entity_root := EntityRoot.new()
+	entity_root.name = "RoomControllerEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = "room.controller"
+	entity_root.add_child(identity)
+	var state_machine := StateMachine.new()
+	state_machine.name = "StateMachine"
+	entity_root.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity_root.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	entity_root.add_child(components)
+	var controllers := Node.new()
+	controllers.name = "Controllers"
+	entity_root.add_child(controllers)
+	add_child_autofree(entity_root)
+	return entity_root
+
+
+func _make_enemy() -> EntityRoot:
+	var enemy := EntityRoot.new()
+	enemy.name = "TrackedEnemy"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	enemy.add_child(identity)
+	var state_machine := StateMachine.new()
+	state_machine.name = "StateMachine"
+	enemy.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	enemy.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	enemy.add_child(components)
+	var controllers := Node.new()
+	controllers.name = "Controllers"
+	enemy.add_child(controllers)
+	add_child_autofree(enemy)
+	return enemy
 
 
 # --- setup ---
@@ -107,13 +151,13 @@ func test_tc_rc_07_check_clear_no_active_enemies_emits_room_cleared() -> void:
 
 func test_tc_rc_08_check_clear_with_active_enemies_does_not_clear() -> void:
 	ctrl.setup("combat_01")
-	var fake_enemy := Node.new()
+	var fake_enemy := _make_enemy()
 	ctrl.active_enemies["enemy_001"] = fake_enemy
 	watch_signals(ctrl)
 	ctrl.check_clear_condition()
 	assert_false(ctrl.runtime.cleared)
 	assert_signal_not_emitted(ctrl, "room_cleared")
-	fake_enemy.free()
+
 
 
 func test_tc_rc_09_check_clear_already_cleared_is_noop() -> void:
@@ -141,8 +185,7 @@ func test_tc_rc_11_room_cleared_fires_event_router() -> void:
 
 func test_tc_rc_12_entity_died_tracked_enemy_removes_and_triggers_clear() -> void:
 	ctrl.setup("combat_01")
-	var fake_enemy := Node.new()
-	add_child_autofree(fake_enemy)
+	var fake_enemy := _make_enemy()
 	ctrl.active_enemies["e01"] = fake_enemy
 	ctrl.runtime.active_enemy_ids.append("e01")
 	watch_signals(ctrl)
@@ -154,13 +197,11 @@ func test_tc_rc_12_entity_died_tracked_enemy_removes_and_triggers_clear() -> voi
 
 func test_tc_rc_13_entity_died_untracked_entity_ignored() -> void:
 	ctrl.setup("combat_01")
-	var tracked := Node.new()
+	var tracked := _make_enemy()
 	ctrl.active_enemies["e01"] = tracked
-	var unrelated := Node.new()
-	add_child_autofree(unrelated)
+	var unrelated := _make_enemy()
 	events.emit_entity_died("unrelated", unrelated)
 	assert_true(ctrl.active_enemies.has("e01"))
-	tracked.free()
 
 
 # --- generate_reward ---

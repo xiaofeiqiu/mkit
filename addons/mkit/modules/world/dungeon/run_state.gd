@@ -52,11 +52,20 @@ func from_save_data(data: Dictionary) -> void:
 	current_room_index = int(data.get("current_room_index", current_room_index))
 	current_room_id = str(data.get("current_room_id", current_room_id))
 	elapsed_time = float(data.get("elapsed_time", elapsed_time))
-	temporary_upgrade_ids = Array(data.get("temporary_upgrade_ids", temporary_upgrade_ids)).duplicate()
+	temporary_upgrade_ids = _coerce_string_array(
+		data.get("temporary_upgrade_ids", temporary_upgrade_ids),
+		temporary_upgrade_ids
+	)
 	run_currency = (data.get("run_currency", run_currency)).duplicate(true)
 	enemy_scaling_level = int(data.get("enemy_scaling_level", enemy_scaling_level))
-	room_history = Array(data.get("room_history", room_history)).duplicate()
-	reward_history = Array(data.get("reward_history", reward_history)).duplicate()
+	room_history = _coerce_string_array(
+		data.get("room_history", room_history),
+		room_history
+	)
+	reward_history = _coerce_string_array(
+		data.get("reward_history", reward_history),
+		reward_history
+	)
 	rng_state = (data.get("rng_state", rng_state)).duplicate(true)
 	status = str(data.get("status", status))
 	var pool := data.get("first_floor_room_pool", [])
@@ -65,3 +74,12 @@ func from_save_data(data: Dictionary) -> void:
 		for raw in pool:
 			normalized_pool.append(str(raw))
 		first_floor_room_pool = normalized_pool
+
+
+func _coerce_string_array(raw: Variant, fallback: Array[String]) -> Array[String]:
+	if not (raw is Array):
+		return fallback.duplicate()
+	var values: Array[String] = []
+	for raw_value in raw:
+		values.append(str(raw_value))
+	return values

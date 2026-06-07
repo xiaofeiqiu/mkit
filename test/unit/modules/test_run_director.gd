@@ -303,9 +303,12 @@ func test_tc_rd_21_scoped_save_restore_without_scene_root() -> void:
 	var pending_reward := RewardOption.new()
 	pending_reward.reward_id = "reward.pending"
 	runtime.reward_options = [pending_reward]
-	source.current_room_controller = RoomController.new()
-	source.current_room_controller.runtime = runtime
-	add_child_autofree(source)
+	var room_controller := RoomController.new()
+	room_controller.name = "RoomController"
+	room_controller.runtime = runtime
+	add_child_autofree(room_controller)
+	source.current_room_controller = room_controller
+	add_child(source)
 
 	assert_true(save_manager.save_game(null))
 	source.free()

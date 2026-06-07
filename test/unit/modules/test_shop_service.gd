@@ -84,13 +84,22 @@ func _make_shop(
 	return definition
 
 
-func _make_buyer(capacity: int = 30) -> Node:
-	var buyer := Node.new()
+func _make_buyer(capacity: int = 30) -> EntityRoot:
+	var buyer := EntityRoot.new()
 	buyer.name = "Buyer"
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	identity.entity_id = "buyer"
 	buyer.add_child(identity)
+	var state_machine := StateMachine.new()
+	state_machine.name = "StateMachine"
+	buyer.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	buyer.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	buyer.add_child(components)
 	var controllers := Node.new()
 	controllers.name = "Controllers"
 	buyer.add_child(controllers)

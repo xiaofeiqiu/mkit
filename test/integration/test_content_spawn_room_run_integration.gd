@@ -367,35 +367,11 @@ func _save_spawn_probe_scene() -> void:
 
 
 func _save_entity_scene() -> void:
-	var entity := Node2D.new()
+	var entity := IntTestHelpers.make_health_entity("Enemy", "enemy.int.room", 10.0)
 	entity.name = "Enemy"
+	var abilities := IntTestHelpers.add_ability_controller(entity, [ENEMY_ABILITY_ID])
+	abilities.starting_ability_ids = [ENEMY_ABILITY_ID]
 
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	entity.add_child(identity)
-
-	var components := Node.new()
-	components.name = "Components"
-	entity.add_child(components)
-
-	var stats := StatsComponent.new()
-	stats.name = "StatsComponent"
-	components.add_child(stats)
-
-	var health := HealthComponent.new()
-	health.name = "HealthComponent"
-	health.current_hp = 10.0
-	components.add_child(health)
-
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	entity.add_child(controllers)
-
-	var abilities := AbilityController.new()
-	abilities.name = "AbilityController"
-	controllers.add_child(abilities)
-
-	IntTestHelpers.ensure_child(entity, "Presentation")
 	_save_packed_scene(entity, ENTITY_SCENE_PATH)
 
 

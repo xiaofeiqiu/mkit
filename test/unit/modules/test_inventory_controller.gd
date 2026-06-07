@@ -19,15 +19,14 @@ func _make_item_def(id: String, stackable: bool = false, max_stack: int = 1) -> 
 
 var inv: InventoryController
 var content: StubContent
-var entity: Node
+var entity: EntityRoot
 
 
 func before_each() -> void:
 	content = StubContent.new()
 	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
-	entity = Node.new()
-	add_child_autofree(entity)
+	entity = _make_entity_root()
 	inv = InventoryController.new()
 	inv.capacity = 5
 	entity.add_child(inv)
@@ -36,6 +35,29 @@ func before_each() -> void:
 
 func after_each() -> void:
 	ServiceRegistry.clear()
+
+
+func _make_entity_root() -> EntityRoot:
+	var entity_root := EntityRoot.new()
+	entity_root.name = "InventoryEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = "inv.entity"
+	entity_root.add_child(identity)
+	var state_machine := StateMachine.new()
+	state_machine.name = "StateMachine"
+	entity_root.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity_root.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	entity_root.add_child(components)
+	var controllers := Node.new()
+	controllers.name = "Controllers"
+	entity_root.add_child(controllers)
+	add_child_autofree(entity_root)
+	return entity_root
 
 
 # --- add_item (non-stackable) ---

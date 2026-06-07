@@ -470,44 +470,10 @@ func _make_database() -> ResourceDatabase:
 
 
 func _make_player(ability_ids: Array[String]) -> Node:
-	var player := Node.new()
+	var player := IntTestHelpers.make_entity("Player", "player.int", [], "neutral")
 	player.name = "Player"
-
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player.int"
-	player.add_child(identity)
-
-	var state_machine := StateMachine.new()
-	state_machine.name = "StateMachine"
-	state_machine.initial_state_path = "root/idle"
-	state_machine.auto_start = true
-	var root := State.new()
-	root.state_id = "root"
-	var trace: Array[String] = []
-	var idle := PipelineIdleState.new()
-	idle.state_id = "idle"
-	idle.transition_trace = trace
-	var cast := PipelineCastState.new()
-	cast.state_id = "cast"
-	cast.transition_trace = trace
-	root.add_child(idle)
-	root.add_child(cast)
-	state_machine.add_child(root)
-	player.add_child(state_machine)
-
-	var receiver := CommandReceiver.new()
-	receiver.name = "CommandReceiver"
-	receiver.receiver_id = "player.int"
-	receiver.auto_register = false
-	player.add_child(receiver)
-
-	var components := Node.new()
-	components.name = "Components"
-	player.add_child(components)
-
-	var stats := StatsComponent.new()
-	stats.name = "StatsComponent"
+	IntTestHelpers.assign_owner(player, player)
+	var stats := player.get_node("Components/StatsComponent") as StatsComponent
 	stats.base_stats = {
 		"max_hp": 100.0,
 		"attack_power": 10.0,
@@ -523,39 +489,45 @@ func _make_player(ability_ids: Array[String]) -> Node:
 		"damage_multiplier": 1.0,
 		"healing_multiplier": 1.0
 	}
-	components.add_child(stats)
+	stats.mark_save_baseline()
 
-	var resource_pool := ResourcePoolComponent.new()
-	resource_pool.name = "ResourcePoolComponent"
-	resource_pool.starting_values = {"mana": 30.0}
-	components.add_child(resource_pool)
+	var receiver := player.get_node("CommandReceiver") as CommandReceiver
+	receiver.receiver_id = "player.int"
+	receiver.auto_register = false
 
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	player.add_child(controllers)
+	var trace: Array[String] = []
+	var root_state := player.get_node("StateMachine/Root") as State
+	var existing_idle := root_state.get_node_or_null("Idle") as State
+	if existing_idle != null:
+		root_state.remove_child(existing_idle)
+		existing_idle.queue_free()
+	var idle := PipelineIdleState.new()
+	idle.name = "Idle"
+	idle.state_id = "idle"
+	idle.transition_trace = trace
+	root_state.add_child(idle)
+	if root_state.get_node_or_null("Cast") == null:
+		var cast := PipelineCastState.new()
+		cast.state_id = "cast"
+		cast.transition_trace = trace
+		root_state.add_child(cast)
+	var resources := player.get_node("Components") as Node
+	if resources != null:
+		var resource_pool := resources.get_node_or_null("ResourcePoolComponent") as ResourcePoolComponent
+		if resource_pool == null:
+			resource_pool = ResourcePoolComponent.new()
+			resource_pool.name = "ResourcePoolComponent"
+			resources.add_child(resource_pool)
+		resource_pool.starting_values = {"mana": 30.0}
 
-	var abilities := AbilityController.new()
-	abilities.name = "AbilityController"
+	var abilities := IntTestHelpers.add_ability_controller(player, ability_ids)
 	abilities.starting_ability_ids = ability_ids
-	controllers.add_child(abilities)
-
-	var inventory := InventoryController.new()
-	inventory.name = "InventoryController"
-	inventory.capacity = 8
-	controllers.add_child(inventory)
-
-	var equipment := EquipmentController.new()
-	equipment.name = "EquipmentController"
-	controllers.add_child(equipment)
-
-	var presentation := Node.new()
-	presentation.name = "Presentation"
-	player.add_child(presentation)
+	IntTestHelpers.add_inventory_controller(player, 8).capacity = 8
+	IntTestHelpers.add_equipment_controller(player)
 	IntTestHelpers.add_animation_player(player)
-
 	IntTestHelpers.assign_owner(player, player)
-	add_child_autofree(player)
 	(ServiceRegistry.get_service("commands") as CommandService).register_receiver("player.int", receiver)
+	add_child_autofree(player)
 	return player
 
 

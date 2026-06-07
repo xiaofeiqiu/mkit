@@ -130,7 +130,7 @@ res://game/           # 你的游戏内容（场景、配置 .tres、脚本）
 | 第一次接触，跑起来 | [getting_started.md](getting_started.md) |
 | 理解三层架构和依赖规则 | [architecture.md](architecture.md) |
 | 理解整条管线的"为什么" | [concepts.md](concepts.md) |
-| 了解阶段5收口路线图 | [implementation-plan.md](../spec/implementation-plan.md) |
+| 了解阶段5收口路线图 | `spec/implementation-plan.md` |
 | 查某个类的字段/方法 | [ref/kernel/](ref/kernel/GameBootstrap.md) 或 [ref/modules/](ref/modules/AbilityDefinition.md) |
 | 按步骤做一个完整 RPG | [cookbook/index.md](cookbook/index.md) |
 | 系统不按预期运行 | [debugging.md](debugging.md) |

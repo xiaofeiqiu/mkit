@@ -12,7 +12,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	var target := context.target
 	if target == null:
 		return EffectResult.fail(effect_id, "no_target")
-	var health := target.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := EntityContract.get_component(target, "HealthComponent") as HealthComponent
 	if health == null:
 		return EffectResult.fail(effect_id, "no_health_component")
 	var request := DamageRequest.new()
@@ -33,8 +33,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 
 func _resolve_combat(request: DamageRequest) -> DamageResult:
 	var resolver: CombatService = null
-	if ServiceRegistry.has_service("combat"):
-		resolver = ServiceRegistry.get_service("combat") as CombatService
+	resolver = ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
 	if resolver == null:
 		resolver = CombatService.new()
 	return resolver.resolve(request)

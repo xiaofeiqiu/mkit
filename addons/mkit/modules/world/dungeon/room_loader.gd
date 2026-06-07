@@ -10,8 +10,7 @@ func load_room(room_definition_id: String, container: Node) -> RoomController:
 		last_error = "empty_room_definition_id"
 		return null
 	var content: ContentService = null
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		last_error = "missing_content_registry"
 		return null

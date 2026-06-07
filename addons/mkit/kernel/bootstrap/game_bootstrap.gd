@@ -2,6 +2,7 @@ class_name GameBootstrap
 extends Node
 @export var resource_databases: Array[ResourceDatabase] = []
 @export var initial_scene_path: String = ""
+var _runtime_context: MkitRuntimeContext = null
 
 
 func _ready() -> void:
@@ -9,6 +10,7 @@ func _ready() -> void:
 
 
 func boot() -> void:
+	_runtime_context = MkitRuntimeContext.new()
 	_register_kernel_services()
 	_load_content()
 	_validate_content()
@@ -21,7 +23,15 @@ func _register_kernel_services() -> void:
 		push_error("GameBootstrap: ServiceRegistry autoload is missing")
 		return
 	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
+		if _runtime_context != null:
+			ServiceRegistry.set_runtime_context(_runtime_context)
+			for existing_id in ServiceRegistry.get_port_ids():
+				var existing_service := ServiceRegistry.get_port(existing_id)
+				if existing_service != null:
+					_runtime_context.register_port(existing_id, existing_service)
+			print("[mkit] GameBootstrap: runtime context attached to pre-registered services")
 		return
+	ServiceRegistry.set_runtime_context(_runtime_context)
 	for service_data in _build_kernel_services():
 		_register_service_entry(
 			service_data["id"],
@@ -29,6 +39,7 @@ func _register_kernel_services() -> void:
 			service_data["add_as_child"],
 			service_data.get("node_name", "")
 		)
+	print("[mkit] GameBootstrap runtime services: %s" % ", ".join(_runtime_context.get_registered_ports()))
 
 
 func _build_kernel_services() -> Array[Dictionary]:
@@ -188,7 +199,7 @@ func _register_service_entry(
 
 
 func _load_content() -> void:
-	var registry := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var registry := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if registry == null:
 		push_error("GameBootstrap._load_content: missing ContentService service")
 		return
@@ -198,7 +209,7 @@ func _load_content() -> void:
 
 
 func _validate_content() -> void:
-	var registry := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var registry := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if registry == null:
 		push_error("GameBootstrap._validate_content: missing ContentService service")
 		return
@@ -208,7 +219,7 @@ func _validate_content() -> void:
 
 
 func _load_profile() -> void:
-	var save_manager := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_SAVE) as SaveService
+	var save_manager := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
 	if save_manager == null:
 		return
 	var tree := get_tree()
@@ -236,7 +247,7 @@ func _enter_initial_scene() -> void:
 		)
 		return
 	var scene_router: SceneService = null
-	scene_router = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_SCENES) as SceneService
+	scene_router = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
 	if scene_router != null:
 		scene_router.change_scene(initial_scene_path)
 	else:

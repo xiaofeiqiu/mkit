@@ -12,7 +12,7 @@ var stats: StatsComponent = null
 
 func _ready() -> void:
 	if owner != null:
-		stats = owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+		stats = EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 		if stats != null:
 			stats.stat_changed.connect(_on_stat_changed)
 	current_hp = min(current_hp, get_max_hp())
@@ -34,7 +34,7 @@ func apply_damage(result: DamageResult) -> void:
 	_apply_on_hit_statuses(result)
 	damaged.emit(result)
 	health_changed.emit(current_hp, get_max_hp())
-	var events := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null:
 		events.emit_damage_applied(result)
 	if current_hp <= 0.0:
@@ -44,16 +44,24 @@ func apply_damage(result: DamageResult) -> void:
 func _apply_on_hit_statuses(result: DamageResult) -> void:
 	if result.status_applications.is_empty():
 		return
-	var controller := owner.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+	var controller := EntityContract.get_controller(owner, "StatusEffectController") as StatusEffectController
 	if controller == null:
 		return
-	for entry in result.status_applications:
-		controller.apply_status(
-			str(entry.get("status_id", "")),
-			result.source,
-			int(entry.get("stacks", 1)),
-			float(entry.get("duration", -1.0))
-		)
+	for entry: Variant in result.status_applications:
+		var status_id := ""
+		var stacks := 1
+		var duration := -1.0
+		if entry is DamageStatusApplication:
+			status_id = entry.status_id
+			stacks = entry.stacks
+			duration = entry.duration
+		elif entry is Dictionary:
+			status_id = str(entry.get("status_id", ""))
+			stacks = int(entry.get("stacks", 1))
+			duration = float(entry.get("duration", -1.0))
+		if status_id == "":
+			continue
+		controller.apply_status(status_id, result.source, stacks, duration)
 
 
 func heal(amount: float, source: Node = null) -> void:
@@ -72,9 +80,9 @@ func die(killer: Node = null) -> void:
 	dead = true
 	current_hp = 0.0
 	died.emit(owner)
-	var identity := owner.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(owner)
 	var entity_id: String = identity.entity_id if identity != null else str(owner.name)
-	var events := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null:
 		events.emit_entity_died(entity_id, owner)
 	if destroy_on_death:

@@ -31,9 +31,17 @@ class _StubRoomController:
 		pass
 
 
+class _ProbeRunDirector:
+	extends RunDirector
+
+	func get_room_runtime() -> RoomRuntime:
+		return _get_active_room_runtime()
+
+
 var director: RunDirector
 var content: StubContent
 var events: EventService
+var save_manager: SaveService
 
 
 func before_each() -> void:
@@ -41,8 +49,12 @@ func before_each() -> void:
 	add_child_autofree(content)
 	events = EventService.new()
 	add_child_autofree(events)
+	save_manager = SaveService.new()
+	add_child_autofree(save_manager)
+	save_manager.save_path = "/tmp/mkit_unit_run_director_scope.json"
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("events", events)
+	ServiceRegistry.register_service("save", save_manager)
 	ServiceRegistry.register_service("loot", LootService.new())
 	director = RunDirector.new()
 	director.first_floor_room_pool = ["room_a", "room_b"]
@@ -270,3 +282,54 @@ func test_tc_rd_20_select_reward_applies_advances_and_continues() -> void:
 	assert_eq(safe.run_state.current_room_index, 1)
 	assert_true(safe.next_room_called)
 	assert_true(safe.run_state.reward_history.has("speed_up"))
+
+
+func test_tc_rd_21_scoped_save_restore_without_scene_root() -> void:
+	var source := _ProbeRunDirector.new()
+	source.first_floor_room_pool = ["room_a", "room_b"]
+	source.run_length = 2
+	source.player_entity_id = "player_001"
+	source.run_state = RunState.create(8606)
+	source.run_state.status = "choosing_reward"
+	source.run_state.current_room_index = 1
+	source.run_state.current_room_id = "room_b"
+	source.run_state.run_length = 2
+	source.run_state.first_floor_room_pool = ["room_a", "room_b"]
+	source.run_state.reward_history = ["reward.prev_1", "reward.prev_2"]
+	source.room_graph = DungeonGenerator.new().generate_linear(source.first_floor_room_pool, 8606, 2)
+	var runtime := RoomRuntime.create("room_b", "runtime_room_b")
+	runtime.cleared = true
+	runtime.active_enemy_ids = ["enemy_001", "enemy_002"]
+	var pending_reward := RewardOption.new()
+	pending_reward.reward_id = "reward.pending"
+	runtime.reward_options = [pending_reward]
+	source.current_room_controller = RoomController.new()
+	source.current_room_controller.runtime = runtime
+	add_child_autofree(source)
+
+	assert_true(save_manager.save_game(null))
+	source.free()
+
+	var loaded := _ProbeRunDirector.new()
+	loaded.player_entity_id = "player_001"
+	loaded.first_floor_room_pool = ["room_a", "room_b"]
+	loaded.run_length = 1
+	add_child_autofree(loaded)
+	assert_true(save_manager.load_game(null))
+
+	assert_not_null(loaded.run_state)
+	assert_eq(loaded.run_state.status, "choosing_reward")
+	assert_eq(loaded.run_state.current_room_index, 1)
+	assert_eq(loaded.run_state.current_room_id, "room_b")
+	assert_eq(loaded.run_state.run_length, 2)
+	assert_eq(loaded.run_state.first_floor_room_pool, ["room_a", "room_b"])
+	assert_eq(loaded.run_state.reward_history, ["reward.prev_1", "reward.prev_2"])
+	assert_eq(loaded.get_save_scopes(), ["world.run", "world.room", "world.reward"])
+	assert_not_null(loaded.room_graph)
+	assert_eq(loaded.room_graph.nodes.size(), 2)
+	var restored_runtime := loaded.get_room_runtime()
+	assert_not_null(restored_runtime)
+	assert_eq(restored_runtime.room_runtime_id, "runtime_room_b")
+	assert_eq(restored_runtime.definition_id, "room_b")
+	assert_eq(restored_runtime.active_enemy_ids, ["enemy_001", "enemy_002"])
+	assert_eq(restored_runtime.reward_options[0].reward_id, "reward.pending")

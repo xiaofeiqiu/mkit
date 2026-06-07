@@ -6,7 +6,7 @@ func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 	if table_id.strip_edges() == "":
 		push_warning("LootService.roll_table: table_id is empty")
 		return LootRollResult.new()
-	var content := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		push_warning("LootService.roll_table: missing ContentService service")
 		return LootRollResult.new()
@@ -25,8 +25,7 @@ func roll(table: LootTableDefinition, context: GameplayContext) -> LootRollResul
 	if table.rolls <= 0:
 		return result
 	var ctx := GameplayContext.from_context(context)
-	var random: RandomService = null
-	random = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_RANDOM) as RandomService
+	var random: RandomService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_RANDOM) as RandomService
 	for _i in range(table.rolls):
 		var candidates := _get_valid_entries(table, ctx)
 		var total_weight := table.empty_weight if table.allow_empty else 0.0

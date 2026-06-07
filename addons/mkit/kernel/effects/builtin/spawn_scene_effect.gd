@@ -13,7 +13,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 		return EffectResult.fail(effect_id, "no_scene_tree")
 	var pool: PoolService = null
 	if use_pool:
-		pool = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_POOL) as PoolService
+		pool = ServiceRegistry.get_port(ServiceRegistry.SERVICE_POOL) as PoolService
 	var instance := _create_spawn_instance(tree.current_scene, pool)
 	if instance == null:
 		return EffectResult.fail(effect_id, "cannot_load_scene")

@@ -7,10 +7,10 @@ func generate_options(
 ) -> Array[RewardOption]:
 	if count <= 0 or pool_ids.is_empty():
 		return []
-	if ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) == null:
+	if ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) == null:
 		push_warning("RewardSystem.generate_options: missing ContentService service")
 		return []
-	var content := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		push_warning("RewardSystem.generate_options: ContentService service is invalid")
 		return []
@@ -37,7 +37,7 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 		return false
 	var ctx := GameplayContext.from_context(context)
 	var executor: EffectService = null
-	executor = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	executor = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		executor = EffectService.new()
 	var results := executor.execute_many(option.effects, ctx, true)
@@ -45,7 +45,7 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 		if not r.success:
 			return false
 	var events: EventService = null
-	events = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	events = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null:
 		events.emit_reward_selected(option.reward_id, ctx.source.name if ctx.source != null else "")
 	return true
@@ -60,8 +60,7 @@ func _weighted_pick(candidates: Array[RewardDefinition]) -> RewardDefinition:
 			total += max(0.0, c.weight)
 	if total <= 0.0:
 		return candidates[0]
-	var random: RandomService = null
-	random = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_RANDOM) as RandomService
+	var random: RandomService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_RANDOM) as RandomService
 	var r := random.randf_range(0.0, total) if random != null else randf_range(0.0, total)
 	var cursor := 0.0
 	for c in candidates:

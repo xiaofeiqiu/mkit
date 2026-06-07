@@ -15,9 +15,9 @@ var entity_spawner: EntitySpawner = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	entity_spawner = get_node_or_null(entity_spawner_path) as EntitySpawner
-	var events: EventService = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null and not events.entity_died.is_connected(_on_entity_died):
 		events.entity_died.connect(_on_entity_died)
 
@@ -37,7 +37,8 @@ func enter_room() -> void:
 			return
 		runtime = RoomRuntime.create(room_definition_id)
 	runtime.entered = true
-	spawn_enemies()
+	if not runtime.cleared:
+		spawn_enemies()
 	room_entered.emit(runtime.room_runtime_id)
 
 
@@ -56,19 +57,24 @@ func spawn_enemies() -> void:
 	if spawner == null:
 		push_error("RoomController: missing EntitySpawner at %s" % entity_spawner_path)
 		return
-	var spawn_index := 0
-	for enemy_def_id in def.enemy_spawn_ids:
+	var runtime_spawn_count: int = def.enemy_spawn_ids.size()
+	if not runtime.active_enemy_ids.is_empty():
+		runtime_spawn_count = min(runtime.active_enemy_ids.size(), runtime_spawn_count)
+	active_enemies.clear()
+	runtime.active_enemy_ids.clear()
+	for index in range(runtime_spawn_count):
+		if index >= def.enemy_spawn_ids.size():
+			break
+		var enemy_def_id := def.enemy_spawn_ids[index]
 		var pos := Vector2.ZERO
-		if spawn_index < spawn_positions.size():
-			pos = spawn_positions[spawn_index]
+		if index < spawn_positions.size():
+			pos = spawn_positions[index]
 		var enemy := spawner.spawn_entity(enemy_def_id, parent, pos)
 		if enemy == null:
-			spawn_index += 1
 			continue
 		var entity_id := _get_entity_id(enemy)
 		active_enemies[entity_id] = enemy
 		runtime.active_enemy_ids.append(entity_id)
-		spawn_index += 1
 
 
 func check_clear_condition() -> void:
@@ -78,7 +84,7 @@ func check_clear_condition() -> void:
 		runtime.cleared = true
 		generate_reward()
 		room_cleared.emit(runtime.room_runtime_id)
-		var events: EventService = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+		var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 		if events != null:
 			events.emit_room_cleared(runtime.room_runtime_id)
 
@@ -95,7 +101,7 @@ func generate_reward() -> void:
 	if def == null or def.reward_pool_ids.is_empty():
 		reward_ready.emit([])
 		return
-	var reward_system := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_LOOT) as LootService
+	var reward_system := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
 	if reward_system == null:
 		reward_ready.emit([])
 		return
@@ -110,7 +116,7 @@ func get_definition() -> RoomDefinition:
 	if room_definition_id.strip_edges() == "":
 		return null
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(room_definition_id) as RoomDefinition
@@ -134,7 +140,9 @@ func _get_entity_spawner() -> EntitySpawner:
 
 
 func _get_entity_id(entity: Node) -> String:
-	if entity == null:
-		return ""
-	var identity := entity.get_node_or_null("EntityIdentity") as EntityIdentity
-	return identity.entity_id if identity != null else entity.name
+	return EntityContract.get_entity_id(entity)
+
+
+func restore_runtime(runtime_data: Dictionary) -> void:
+	runtime = RoomRuntime.new()
+	runtime.from_save_data(runtime_data)

@@ -7,9 +7,7 @@ extends Interactable
 func _interact_impl(context: GameplayContext) -> bool:
 	if dialogue_id == "":
 		return false
-	if not ServiceRegistry.has_service("dialogue"):
-		return false
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+	var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
 	if dialogue == null:
 		return false
 	if not dialogue.start(dialogue_id, context):
@@ -22,6 +20,7 @@ func _interact_impl(context: GameplayContext) -> bool:
 
 
 func _get_events() -> EventService:
-	if ServiceRegistry.has_service("events"):
-		return ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	if events != null:
+		return events
 	return null

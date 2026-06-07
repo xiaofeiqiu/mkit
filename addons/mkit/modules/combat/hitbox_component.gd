@@ -62,29 +62,28 @@ func _try_hit(hurtbox: HurtboxComponent) -> void:
 	request.tags.append_array(hurtbox.damage_tags)
 	request.on_hit_statuses = on_hit_statuses.duplicate()
 	var result := _resolve_combat(request)
-	var health := target.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := EntityContract.get_component(target, "HealthComponent") as HealthComponent
 	if health != null:
 		health.apply_damage(result)
 
 
 func _resolve_combat(request: DamageRequest) -> DamageResult:
 	var resolver: CombatService = null
-	if ServiceRegistry.has_service("combat"):
-		resolver = ServiceRegistry.get_service("combat") as CombatService
+	resolver = ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
 	if resolver == null:
 		resolver = CombatService.new()
 	return resolver.resolve(request)
 
 
 func _is_valid_target(target: Node) -> bool:
-	var identity := target.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(target)
 	if identity == null:
 		return true
 	return target_factions.has(identity.faction)
 
 
 func _get_entity_id(entity: Node) -> String:
-	var identity := entity.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(entity)
 	if identity != null:
 		return identity.entity_id
 	return entity.name

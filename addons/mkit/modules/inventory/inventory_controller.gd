@@ -9,8 +9,8 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	if content == null:
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	capacity = max(1, capacity)
 	model.setup(capacity)
 	model.owner_id = _get_owner_id()
@@ -141,8 +141,7 @@ func get_item_definition(item_id: String) -> ItemDefinition:
 	if item_id.strip_edges() == "":
 		return null
 	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(item_id) as ItemDefinition
@@ -171,8 +170,7 @@ func _emit_inventory_changed(
 ) -> void:
 	inventory_changed.emit()
 	var events: EventService = null
-	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventService
+	events = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null:
 		events.emit_inventory_changed(
 			_get_owner_id(), item.definition_id if item != null else "", quantity, change_type
@@ -183,5 +181,5 @@ func _get_owner_id() -> String:
 	var owner_node := owner if owner != null else get_parent()
 	if owner_node == null:
 		return name
-	var identity := owner_node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(owner_node)
 	return identity.entity_id if identity != null else str(owner_node.name)

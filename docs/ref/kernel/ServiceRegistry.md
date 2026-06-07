@@ -18,7 +18,10 @@
 |----------|--------|------|
 | `register_service(id: String, service: Object, class_name: String = "") -> void` | `void` | 注册服务；重复注册会替换并 warning |
 | `has_service(id: String) -> bool` | `bool` | 检查服务是否已注册 |
+| `get_port(service_id: String, expected_class_name: String = "") -> Object` | `Object` | 优先入口。若 runtime_context 未就绪，退化为 `get_service_or_null` |
+| `get_port_ids() -> Array[String]` | `Array[String]` | 优先入口（从 runtime_context 读） |
 | `get_service(id: String) -> Object` | `Object` | 获取服务，不存在时返回 null 并 warning |
+| `get_service_or_null(id: String) -> Object` | `Object` | 同 `get_service` 的无 warning 变体 |
 | `get_typed(id: String, class_name: String) -> Object` | `Object` | 同 get_service，附带类型名检查 |
 | `unregister_service(id: String) -> void` | `void` | 从注册表中移除（测试清理用）|
 | `clear() -> void` | `void` | 清空所有注册（仅测试用，**生产代码禁止调用**）|
@@ -29,7 +32,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var events := ServiceRegistry.get_service("events") as EventService
+var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 if events != null:
     events.emit_domain_event(DomainEvent.create("test", "", "", {}))
 ```
@@ -39,10 +42,11 @@ if events != null:
 ```gdscript
 # 安全取服务模式（在任何 Node._ready 中）
 func _ready() -> void:
-    if not ServiceRegistry.has_service("combat"):
+    var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT)
+    if combat == null:
         push_error("CombatService not registered — is GameBootstrap running first?")
         return
-    var combat := ServiceRegistry.get_service("combat") as CombatService
+    var combat_typed := combat as CombatService
     # ... 使用 combat
 ```
 
@@ -55,6 +59,14 @@ func _setup_test_registry() -> void:
     # 注意：clear() 不移除 GameBootstrap 添加为子节点的服务节点
     # 需要先 remove_child 再 clear，参见集成测试陷阱文档
 ```
+
+## 兼容说明
+
+- 兼容层保留 `get_service` / `get_service_or_null` / `get_typed`，用于以下场景：
+  - 第三方脚本还未迁移到端口 API
+  - 兼容旧版本教程与样例
+- 新代码优先采用 `get_port(ServiceRegistry.SERVICE_*)`，便于兼容策略统一并减少字符串改写风控。
+- 迁移顺序建议：先替换高频路径（combat/quest/world/events），再替换 UI/保存相关路径，最后清理可选 fallback。
 
 ## 相关
 

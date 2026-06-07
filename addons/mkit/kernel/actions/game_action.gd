@@ -58,7 +58,7 @@ func can_cancel_with(tag: String) -> bool:
 func _fire_effects(effects: Array[GameEffect]) -> void:
 	if effects.is_empty():
 		return
-	var svc := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if svc == null:
 		return
 	svc.execute_many(effects, context)

@@ -10,7 +10,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	if target == null:
 		return EffectResult.fail(effect_id, "no_target")
 	var controller := (
-		target.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+		EntityContract.get_controller(target, "StatusEffectController") as StatusEffectController
 	)
 	if controller == null:
 		return EffectResult.fail(effect_id, "no_status_controller")

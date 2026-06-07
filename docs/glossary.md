@@ -136,11 +136,11 @@
 
 ## S
 
-**Saveable**：全局级存档节点基类（`Node`），override `to_save_data() -> Dictionary` 和 `from_save_data(data)` 实现序列化；键由 `save_id` 属性决定。→ [ref/kernel/Saveable.md](ref/kernel/Saveable.md)
+**Saveable**：全局级存档节点基类（`Node`），override `to_save_data() -> Dictionary` 和 `from_save_data(data)` 实现序列化；键由 `save_id` 属性决定，并可声明 `save_scope` 分片以支持场景树缺失恢复。→ [ref/kernel/Saveable.md](ref/kernel/Saveable.md)
 
 **SaveableComponent**：实体内组件级存档基类（`Node`），与 `Saveable` 同接口，键由节点 `name` 决定（实体内唯一）。→ [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)
 
-**SaveService**：遍历场景树收集所有 `Saveable` 节点、序列化后写文件的 kernel 服务（`"save"`）。`SaveableComponent` 不被自动收集，需由所属 `Saveable` 实体主动序列化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
+**SaveService**：协调 `Saveable` 的 scene-scope 与 scope-scope 持久化，支持迁移链与兼容旧 `payload`。`SaveableComponent` 不被直接收集，需由所属 `Saveable` 实体主动序列化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
 
 **SaveMigration**：存档版本迁移基类，`SaveService` 在加载旧格式存档时按版本顺序执行迁移链。→ [ref/kernel/SaveMigration.md](ref/kernel/SaveMigration.md)
 

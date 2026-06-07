@@ -8,7 +8,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func _process(delta: float) -> void:
@@ -88,7 +88,7 @@ func from_save_data(data: Dictionary) -> void:
 
 func get_definition(status_id: String) -> StatusEffectDefinition:
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(status_id) as StatusEffectDefinition
@@ -104,7 +104,7 @@ func _execute_effects(effects: Array[GameEffect], instance: StatusEffectInstance
 	context.status_id = instance.definition_id
 	context.payload["stacks"] = instance.stacks
 	context.payload["source_id"] = instance.source_id
-	var executor := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var executor := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor != null:
 		executor.execute_many(effects, context)
 
@@ -136,7 +136,7 @@ func _apply_stack_rule(
 func _apply_stat_modifiers(
 	instance: StatusEffectInstance, definition: StatusEffectDefinition
 ) -> void:
-	var stats := owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+	var stats := EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 	if stats == null:
 		return
 	for mod_def in definition.stat_modifiers:
@@ -148,7 +148,7 @@ func _apply_stat_modifiers(
 
 
 func _remove_stat_modifiers(instance: StatusEffectInstance) -> void:
-	var stats := owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+	var stats := EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 	if stats != null:
 		stats.remove_modifiers_from_source(instance.instance_id)
 
@@ -178,10 +178,7 @@ func _restore_status_entry(data: Dictionary) -> void:
 func _get_source_id(source: Node) -> String:
 	if source == null:
 		return ""
-	var identity := source.get_node_or_null("EntityIdentity") as EntityIdentity
-	if identity != null:
-		return identity.entity_id
-	return str(source.name)
+	return EntityContract.get_entity_id(source)
 
 
 func _resolve_source(source_id: String) -> Node:
@@ -201,7 +198,7 @@ func _resolve_source(source_id: String) -> Node:
 func _find_entity_by_id(node: Node, entity_id: String) -> Node:
 	if node == null:
 		return null
-	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(node)
 	if identity != null and identity.entity_id == entity_id:
 		return node
 	for child in node.get_children():

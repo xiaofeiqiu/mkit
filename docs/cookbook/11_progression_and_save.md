@@ -15,12 +15,12 @@
 |--------|------------|
 | 创建 `ExperienceCurve` (.tres) 定义升级阈值 | `ExperienceComponent.add_xp()` 累计、跨级、发 `level_up` |
 | 监听 `entity_died`，给玩家 `add_xp()` | — |
-| 写一个 `Saveable` 收集玩家的 `SaveableComponent` 们 | `SaveService` 遍历树收集所有 `Saveable`、序列化、写文件 |
+| 写一个 `Saveable` 收集玩家的 `SaveableComponent` 们 | `SaveService` 收集场景树 `Saveable`，并写入 scope 用于缺场景树恢复 |
 | 按键调 `save_game()` / `load_game()` | `GameBootstrap` 启动时若有存档自动 `load_game()` |
 
 ## 关键认知：两种存档基类，只有一种被自动收集
 
-- `Saveable`（`extends Node`）：`SaveService.save_game(root)` 会遍历整棵树，自动收集**所有 `Saveable`**，按 `get_save_id()` 存。`QuestService`、`ProgressionService`、`ExperienceComponent` 都是 `Saveable`，开箱即存。
+- `Saveable`（`extends Node`）：`SaveService.save_game(root)` 会收集场景树中的 `Saveable` 并按 `get_save_id()` 存；通过 scope 可在场景树缺失时恢复世界/奖励状态。`QuestService`、`ProgressionService`、`ExperienceComponent` 都是 `Saveable`，开箱即存。
 - `SaveableComponent`（`extends Node`）：`HealthComponent`、`AbilityController`、`InventoryController`、`StatsComponent` 等都是它。它**有相同的 `to_save_data()` 接口，但不会被 `SaveService` 自动收集**。要持久化它们，必须由一个 `Saveable`（通常是玩家存档代理）主动把它们收集进来。
 
 > 这是最常踩的坑：单独挂一个 `InventoryController` 不会进存档。下面步骤 4 给出标准收集模式。
@@ -118,7 +118,7 @@ func from_save_data(data: Dictionary) -> void:
 ```gdscript
 # 任意常驻脚本（如主场景）
 func _unhandled_input(event: InputEvent) -> void:
-    var save := ServiceRegistry.get_service("save") as SaveService
+    var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
     if save == null:
         return
     if event.is_action_pressed("quick_save"):
@@ -129,7 +129,7 @@ func _unhandled_input(event: InputEvent) -> void:
             print("已读档")
 ```
 
-`save_game(root)` 遍历 `root` 子树收集所有 `Saveable`（玩家代理、`QuestService`、`ProgressionService`、`ExperienceComponent`、`AudioService`…），写成 JSON 到 `save.save_path`（默认 `user://save.json`）。
+`save_game(root)` 收集 `root` 子树 `Saveable`（玩家代理、`QuestService`、`ProgressionService`、`ExperienceComponent`、`AudioService`…），并写入 `scopes` 字段（默认 `user://save.json`）。
 
 ### 步骤 6：启动自动载入
 

@@ -12,7 +12,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	if receiver == null:
 		return EffectResult.fail(effect_id, "Missing receiver")
 	var inventory := (
-		receiver.get_node_or_null("Controllers/InventoryController") as InventoryController
+		EntityContract.get_controller(receiver, "InventoryController") as InventoryController
 	)
 	if inventory == null:
 		return EffectResult.fail(effect_id, "Receiver has no InventoryController")

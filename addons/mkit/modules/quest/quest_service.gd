@@ -13,7 +13,7 @@ var _quest_contexts: Dictionary = {}
 func _ready() -> void:
 	if save_id == "":
 		save_id = "quest"
-	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	_connect_events()
 
 
@@ -167,7 +167,7 @@ func get_definition(quest_id: String) -> QuestDefinition:
 	if quest_id.strip_edges() == "":
 		return null
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(quest_id) as QuestDefinition
@@ -218,7 +218,7 @@ func _objective_matches(objective: QuestObjectiveDefinition, event: DomainEvent)
 func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
 	var payload := {"entity_id": entity_id}
 	if entity_ref != null:
-		var identity := entity_ref.get_node_or_null("EntityIdentity") as EntityIdentity
+		var identity := EntityContract.get_identity(entity_ref)
 		if identity != null:
 			payload["tags"] = identity.tags
 			payload["faction"] = identity.faction
@@ -245,7 +245,7 @@ func _run_reward_effects(definition: QuestDefinition, context: GameplayContext) 
 		return false
 	if definition.reward_effects.is_empty():
 		return true
-	var executor := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var executor := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		return false
 	var results := executor.execute_many(definition.reward_effects, context, true)
@@ -256,4 +256,4 @@ func _run_reward_effects(definition: QuestDefinition, context: GameplayContext) 
 
 
 func _get_events() -> EventService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService

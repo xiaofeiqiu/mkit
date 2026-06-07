@@ -12,7 +12,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	for id in starting_ability_ids:
 		if id.strip_edges() == "":
 			push_warning("AbilityController: ignoring empty starting ability id")
@@ -127,7 +127,7 @@ func get_definition(ability_id: String) -> AbilityDefinition:
 	if ability_id.strip_edges() == "":
 		return null
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(ability_id) as AbilityDefinition
@@ -200,7 +200,7 @@ func _start_cooldown(instance: AbilityInstance, definition: AbilityDefinition) -
 		return
 	var stats: StatsComponent = null
 	if owner != null:
-		stats = owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+		stats = EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 	var cdr := 0.0
 	if stats != null:
 		cdr = stats.get_stat_value("cooldown_reduction", 0.0)
@@ -239,7 +239,7 @@ func _start_cast_action(
 
 
 func _get_action_runner() -> ActionService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_ACTIONS) as ActionService
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
 
 
 func _has_enough_cost(definition: AbilityDefinition) -> bool:
@@ -250,7 +250,7 @@ func _has_enough_cost(definition: AbilityDefinition) -> bool:
 	if owner == null:
 		return false
 	var resources := (
-		owner.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+		EntityContract.get_component(owner, "ResourcePoolComponent") as ResourcePoolComponent
 	)
 	if resources == null:
 		return false
@@ -265,7 +265,7 @@ func _pay_cost(definition: AbilityDefinition) -> void:
 	if owner == null:
 		return
 	var resources := (
-		owner.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+		EntityContract.get_component(owner, "ResourcePoolComponent") as ResourcePoolComponent
 	)
 	if resources != null:
 		resources.spend(definition.cost_type, definition.cost_amount)

@@ -5,7 +5,7 @@ var player_group: String = "player"
 
 
 func apply_reward(option: RewardOption, run_id: String, tree: SceneTree) -> bool:
-	var reward_system := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_LOOT) as LootService
+	var reward_system := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
 	if reward_system == null:
 		return false
 	var player: Node = tree.get_first_node_in_group(player_group) if tree != null else null

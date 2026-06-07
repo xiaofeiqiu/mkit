@@ -10,8 +10,7 @@ var content: ContentService = null
 func _ready() -> void:
 	if save_id == "":
 		save_id = "progression"
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func add_currency(currency_id: String, amount: int) -> void:
@@ -83,8 +82,7 @@ func get_definition(upgrade_id: String) -> UpgradeDefinition:
 	if upgrade_id.strip_edges() == "":
 		return null
 	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(upgrade_id) as UpgradeDefinition
@@ -94,7 +92,7 @@ func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayCont
 	if definition.effects.is_empty():
 		return
 	var executor: EffectService = null
-	executor = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	executor = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		return
 	var ctx := GameplayContext.from_context(context)

@@ -9,7 +9,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func is_active() -> bool:
@@ -92,7 +92,7 @@ func get_definition(dialogue_id: String) -> DialogueDefinition:
 	if dialogue_id.strip_edges() == "":
 		return null
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(dialogue_id) as DialogueDefinition
@@ -133,11 +133,11 @@ func _run_effects(effects: Array[GameEffect]) -> void:
 		return
 	if runtime == null:
 		return
-	var executor := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var executor := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if executor == null:
 		return
 	executor.execute_many(effects, runtime.context, false)
 
 
 func _get_events() -> EventService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService

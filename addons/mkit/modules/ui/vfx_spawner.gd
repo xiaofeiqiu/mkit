@@ -31,7 +31,7 @@ func spawn(vfx_id: String, position: Vector2, direction: Vector2 = Vector2.ZERO)
 
 func _create_vfx_node(scene_path: String) -> Node:
 	if use_pool:
-		_pool = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_POOL) as PoolService
+		_pool = ServiceRegistry.get_port(ServiceRegistry.SERVICE_POOL) as PoolService
 		if _pool != null:
 			return _pool.acquire(scene_path, self)
 	_pool = null

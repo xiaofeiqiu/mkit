@@ -48,10 +48,10 @@ sequenceDiagram
 
 # 验证服务在线（在任意节点的 _ready 中）
 func _ready() -> void:
-    if not ServiceRegistry.has_service("content"):
+    if ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) == null:
         push_error("Bootstrap has not run yet")
         return
-    var content := ServiceRegistry.get_service("content") as ContentService
+    var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
     print("Registered content IDs: ", content.get_all_by_type("ability_definition"))
 ```
 
@@ -125,7 +125,7 @@ func enter(context: Dictionary = {}) -> void:
     _action.active_time = 0.2
     _action.recovery_time = 0.3
     _action.completed.connect(_on_attack_done)
-    var as_svc := ServiceRegistry.get_service("actions") as ActionService
+    var as_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
     var ctx := ActionContext.new()
     ctx.source = owner_entity
     as_svc.start_action(_action, ctx)
@@ -186,7 +186,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("attack"):
         var cmd := GameCommand.create("attack", "player_01", "player_01")
         cmd.payload["direction"] = get_global_mouse_position() - owner.global_position
-        var svc := ServiceRegistry.get_service("commands") as CommandService
+        var svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
         if not svc.dispatch(cmd):
             push_warning("attack command not handled")
 ```
@@ -791,22 +791,22 @@ sequenceDiagram
 
     Note over Caller,SV: 存档
     Caller->>SV: save_game(root)
-    SV->>N: find_children → 仅收集 is Saveable
+    SV->>N: find_children 收集 Saveable + scope 提供者
     N-->>SV: to_save_data() per node（按 get_save_id() 归档）
     SV->>SV: JSON.stringify → 写 save_path
 
     Note over Caller,SV: 读档
     Caller->>SV: load_game(root)
     SV->>SV: _migrate_data()（按 SaveMigration 链升级旧版本）
-    SV->>N: 对每个 Saveable 调 from_save_data(payload[id])
+    SV->>N: 优先按 scope 恢复，后回退 payload[from_save_data]
 ```
 
-> **关键：`SaveService` 只自动收集 `Saveable`。** `SaveableComponent`（HealthComponent、InventoryController…）需由一个 `Saveable` 代理主动收集——见 [cookbook/11](cookbook/11_progression_and_save.md) 步骤 4。
+> **关键：** `SaveService` 默认收集场景树 `Saveable`，并在 scope 注册情况下可按 scope 恢复；`SaveableComponent`（HealthComponent、InventoryController…）仍需由 `Saveable` 代理主动收集——见 [cookbook/11](cookbook/11_progression_and_save.md) 步骤 4。
 
 ### 关键代码
 
 ```gdscript
-var save := ServiceRegistry.get_service("save") as SaveService
+var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
 save.save_completed.connect(func(path: String): print("已存 → %s" % path))
 if not save.save_game(get_tree().root):
     push_error("存档失败")

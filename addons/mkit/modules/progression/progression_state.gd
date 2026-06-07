@@ -1,22 +1,22 @@
 class_name ProgressionState
 extends RefCounted
-var currencies: Dictionary = {}
+var wallet: Wallet = Wallet.new()
 var upgrade_levels: Dictionary = {}
 var unlocked_content_ids: Array[String] = []
 
 
 func get_currency(currency_id: String) -> int:
-	return int(currencies.get(currency_id, 0))
+	return wallet.get_balance(currency_id)
 
 
 func add_currency(currency_id: String, amount: int) -> void:
-	currencies[currency_id] = max(0, get_currency(currency_id) + amount)
+	wallet.add(currency_id, amount)
 
 
 func spend_currency(currency_id: String, amount: int) -> bool:
-	if get_currency(currency_id) < amount:
+	if not wallet.can_spend(currency_id, amount):
 		return false
-	currencies[currency_id] = get_currency(currency_id) - amount
+	wallet.spend(currency_id, amount)
 	return true
 
 
@@ -35,14 +35,16 @@ func unlock_content(content_id: String) -> void:
 
 func to_save_data() -> Dictionary:
 	return {
-		"currencies": currencies,
+		"currencies": wallet.to_save_data(),
 		"upgrade_levels": upgrade_levels,
 		"unlocked_content_ids": unlocked_content_ids
 	}
 
 
 func from_save_data(data: Dictionary) -> void:
-	currencies = data.get("currencies", {})
+	var raw_currencies := data.get("currencies", {})
+	if raw_currencies is Dictionary:
+		wallet.from_save_data(raw_currencies)
 	upgrade_levels = data.get("upgrade_levels", {})
 	var raw: Array = data.get("unlocked_content_ids", [])
 	unlocked_content_ids.assign(raw)

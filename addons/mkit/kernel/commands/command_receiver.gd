@@ -13,9 +13,7 @@ func _ready() -> void:
 	owner_entity = owner if owner != null else get_parent()
 	_resolve_state_machine()
 	if receiver_id == "":
-		var identity = (
-			owner_entity.get_node_or_null("EntityIdentity") if owner_entity != null else null
-		)
+		var identity := EntityContract.get_identity(owner_entity)
 		if identity != null and "entity_id" in identity:
 			receiver_id = str(identity.entity_id)
 	_register_with_router()
@@ -78,8 +76,9 @@ func _record_command(command: GameCommand) -> void:
 
 func _resolve_state_machine() -> void:
 	state_machine = null
-	if owner_entity != null:
-		state_machine = owner_entity.get_node_or_null("StateMachine") as StateMachine
+	if owner_entity == null:
+		return
+	state_machine = EntityContract.get_state_machine(owner_entity)
 
 
 func _register_with_router() -> void:
@@ -90,7 +89,7 @@ func _register_with_router() -> void:
 		push_warning("CommandReceiver auto_register skipped: receiver_id is empty")
 		set_process(true)
 		return
-	var router := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_COMMANDS) as CommandService
+	var router := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
 	if router == null:
 		set_process(true)
 		return

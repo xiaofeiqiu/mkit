@@ -6,8 +6,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func spawn_entity(
@@ -49,8 +48,7 @@ func _get_definition(definition_id: String) -> EntityDefinition:
 	if definition_id.strip_edges() == "":
 		return null
 	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(definition_id) as EntityDefinition
@@ -59,7 +57,7 @@ func _get_definition(definition_id: String) -> EntityDefinition:
 func _initialize_identity(entity: Node, definition: EntityDefinition, runtime_id: String) -> void:
 	if entity == null or definition == null:
 		return
-	var identity := entity.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(entity)
 	if identity == null:
 		return
 	identity.definition_id = definition.entity_definition_id
@@ -77,10 +75,10 @@ func _initialize_identity(entity: Node, definition: EntityDefinition, runtime_id
 func _initialize_command_receiver(entity: Node) -> void:
 	if entity == null:
 		return
-	var identity := entity.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(entity)
 	if identity == null or identity.entity_id == "":
 		return
-	var receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+	var receiver := EntityContract.get_command_receiver(entity)
 	if receiver == null:
 		return
 	receiver.configure_receiver_id(identity.entity_id)
@@ -89,7 +87,7 @@ func _initialize_command_receiver(entity: Node) -> void:
 func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:
 	if entity == null or definition == null:
 		return
-	var stats := entity.get_node_or_null("Components/StatsComponent") as StatsComponent
+	var stats := EntityContract.get_component(entity, "StatsComponent") as StatsComponent
 	if stats == null:
 		return
 	for stat_id in definition.base_stats.keys():
@@ -100,7 +98,7 @@ func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:
 func _initialize_abilities(entity: Node, definition: EntityDefinition) -> void:
 	if entity == null or definition == null:
 		return
-	var abilities := entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+	var abilities := EntityContract.get_controller(entity, "AbilityController") as AbilityController
 	if abilities == null:
 		return
 	for ability_id in definition.starting_ability_ids:

@@ -12,8 +12,8 @@ func _ready() -> void:
 	_label = Label.new()
 	add_child(_label)
 	visible = visible_on_start
-	if ServiceRegistry.has_service("events"):
-		_events = ServiceRegistry.get_service("events") as EventService
+	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
+		_events = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if not ServiceRegistry.has_service("debug"):
 		ServiceRegistry.register_service("debug", self)
 
@@ -29,20 +29,20 @@ func toggle() -> void:
 
 func _build_text() -> String:
 	var lines: Array[String] = []
-	if show_registered_services and ServiceRegistry.has_method("get_registered_service_ids"):
-		lines.append("Services: %s" % ", ".join(ServiceRegistry.get_registered_service_ids()))
+	if show_registered_services and ServiceRegistry.has_method("get_port_ids"):
+		lines.append("Services: %s" % ", ".join(ServiceRegistry.get_port_ids()))
 	_append_status_provider_lines(lines)
 	var entity := get_node_or_null(watch_entity_path)
 	if entity != null:
-		var sm := entity.get_node_or_null("StateMachine") as StateMachine
+		var sm := EntityContract.get_state_machine(entity)
 		if sm != null:
 			lines.append("State: %s" % sm.get_current_path())
 			if sm.last_failed_transition_reason != "":
 				lines.append("Last failed transition: %s" % sm.last_failed_transition_reason)
-		var receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+		var receiver := EntityContract.get_command_receiver(entity)
 		if receiver != null and not receiver.command_history.is_empty():
 			lines.append("Last command: %s" % receiver.command_history[-1].command_type)
-		var health = entity.get_node_or_null("Components/HealthComponent")
+		var health := EntityContract.get_component(entity, "HealthComponent")
 		if health != null and "current_hp" in health and health.has_method("get_max_hp"):
 			lines.append("HP: %.0f / %.0f" % [health.current_hp, health.get_max_hp()])
 	if _events != null and not _events.recent_events.is_empty():

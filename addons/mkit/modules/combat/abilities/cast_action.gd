@@ -32,7 +32,7 @@ func _on_complete() -> void:
 func _play_animation() -> void:
 	if _started_animation or context == null or context.source == null:
 		return
-	var anim := context.source.get_node_or_null("Presentation/AnimationPlayer") as AnimationPlayer
+	var anim := EntityContract.get_contract_node(context.source, "Presentation", "AnimationPlayer") as AnimationPlayer
 	if anim != null and animation_name != "":
 		anim.play(animation_name)
 	_started_animation = true

@@ -6,7 +6,8 @@
 
 ## 职责
 
-把旧版本存档升级到新版本的迁移单元。`SaveService` 在 `load_game` 时按 `from_version → to_version` 逐步串联迁移，直到达到当前 `save_version`。子类 override `_migrate_impl` 实现数据改写。
+把旧版本存档升级到新版本的迁移单元。`SaveService` 在 `load_game` 时按 `from_version → to_version` 逐步串联迁移，直到达到当前 `save_version`。  
+当前版本保留兼容：会同时维护 `payload` 与 `scopes`，旧存档可仅保留 `payload`。
 
 ## 字段
 

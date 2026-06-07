@@ -22,8 +22,7 @@ func _on_option_selected(option: RewardOption) -> void:
 	if run_director != null:
 		run_director.select_reward(option)
 	var ui: UIManager = null
-	if ServiceRegistry.has_service("ui"):
-		ui = ServiceRegistry.get_service("ui") as UIManager
+	ui = ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
 	if ui != null:
 		ui.close_screen("reward_selection")
 	else:

@@ -46,14 +46,14 @@ flowchart TB
 
 ```gdscript
 # 获取服务
-var combat := ServiceRegistry.get_service("combat") as CombatService
+var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
 if combat == null:
     push_error("CombatService not available")
     return
 
 # 检查服务是否存在
-if ServiceRegistry.has_service("save"):
-    var save := ServiceRegistry.get_service("save") as SaveService
+if ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) != null:
+    var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
 
 # 注册自定义服务（在 GameBootstrap 子类中 override _register_kernel_services）
 ServiceRegistry.register_service("my_service", MyService.new())
@@ -68,30 +68,31 @@ ServiceRegistry.register_service("my_service", MyService.new())
 
 ### 完整服务 ID 对照表
 
-| 服务 ID | 类型 | 说明 |
-|---------|------|------|
-| `"events"` | `EventService` | 领域事件广播与订阅 |
-| `"content"` | `ContentService` | ContentDefinition 注册与按 ID 查询 |
-| `"random"` | `RandomService` | 有种子随机数，支持复现 |
-| `"time"` | `TimeService` | delta / 帧管理 |
-| `"actions"` | `ActionService` | GameAction 生命周期管理 |
-| `"effects"` | `EffectService` | GameEffect 执行链，含 trace |
-| `"commands"` | `CommandService` | GameCommand 路由分发 |
-| `"combat"` | `CombatService` | 伤害结算（base → 暴击 → 防御 → final） |
-| `"scenes"` | `SceneService` | 场景切换封装 |
-| `"pool"` | `PoolService` | 对象池（Node 实例复用） |
-| `"save"` | `SaveService` | 存读档，遍历场景树收集所有 `Saveable` 节点并序列化 |
-| `"progression"` | `ProgressionService` | 经验、升级、货币 |
-| `"quest"` | `QuestService` | 任务接受 / 推进 / 完成 |
-| `"shop"` | `ShopService` | 商店购买 |
-| `"audio"` | `AudioService` | 音频播放 |
-| `"dialogue"` | `DialogueService` | 对话树运行时 |
-| `"world"` | `WorldService` | 世界区域 / Zone 管理 |
-| `"loot"` | `LootService` | 战利品掷骰与奖励分发 |
-| `"analytics"` | `AnalyticsServiceMock` | 数据统计（默认 Mock） |
-| `"ads"` | `AdServiceMock` | 广告（默认 Mock） |
-| `"iap"` | `IAPServiceMock` | 内购（默认 Mock） |
-| `"cloud_save"` | `CloudSaveServiceMock` | 云存档（默认 Mock） |
+| 常量名 | 服务 ID | 类型 | 说明 |
+|---------|----------|------|------|
+| `SERVICE_EVENTS` | `"events"` | `EventService` | 领域事件广播与订阅 |
+| `SERVICE_CONTENT` | `"content"` | `ContentService` | ContentDefinition 注册与按 ID 查询 |
+| `SERVICE_RANDOM` | `"random"` | `RandomService` | 有种子随机数，支持复现 |
+| `SERVICE_TIME` | `"time"` | `TimeService` | delta / 帧管理 |
+| `SERVICE_ACTIONS` | `"actions"` | `ActionService` | GameAction 生命周期管理 |
+| `SERVICE_EFFECTS` | `"effects"` | `EffectService` | GameEffect 执行链，含 trace |
+| `SERVICE_COMMANDS` | `"commands"` | `CommandService` | GameCommand 路由分发 |
+| `SERVICE_COMBAT` | `"combat"` | `CombatService` | 伤害结算（base → 暴击 → 防御 → final） |
+| `SERVICE_SCENES` | `"scenes"` | `SceneService` | 场景切换封装 |
+| `SERVICE_POOL` | `"pool"` | `PoolService` | 对象池（Node 实例复用） |
+| `SERVICE_SAVE` | `"save"` | `SaveService` | 存读档，收集场景树 `Saveable` 并写 `scopes`（支持无场景树恢复） |
+| `SERVICE_PROGRESSION` | `"progression"` | `ProgressionService` | 经验、升级、货币 |
+| `SERVICE_QUEST` | `"quest"` | `QuestService` | 任务接受 / 推进 / 完成 |
+| `SERVICE_SHOP` | `"shop"` | `ShopService` | 商店购买 |
+| `SERVICE_AUDIO` | `"audio"` | `AudioService` | 音频播放 |
+| `SERVICE_DIALOGUE` | `"dialogue"` | `DialogueService` | 对话树运行时 |
+| `SERVICE_WORLD` | `"world"` | `WorldService` | 世界区域 / Zone 管理 |
+| `SERVICE_LOOT` | `"loot"` | `LootService` | 战利品掷骰与奖励分发 |
+| `SERVICE_ANALYTICS` | `"analytics"` | `AnalyticsServiceMock` | 数据统计（默认 Mock） |
+| `SERVICE_ADS` | `"ads"` | `AdServiceMock` | 广告（默认 Mock） |
+| `SERVICE_IAP` | `"iap"` | `IAPServiceMock` | 内购（默认 Mock） |
+| `SERVICE_CLOUD_SAVE` | `"cloud_save"` | `CloudSaveServiceMock` | 云存档（默认 Mock） |
+| `SERVICE_UI` | `"ui"` | `UIManager` | UIManager.open_screen 与 UI 生命周期 |
 
 > `"random"`, `"time"`, `"effects"`, `"combat"` 这四个服务是 `RefCounted`，不在场景树中，其余为 `Node`（`ServiceRegistry` 的子节点）。
 
@@ -110,14 +111,14 @@ ServiceRegistry.register_service("my_service", MyService.new())
 
 ```gdscript
 # Definition — 编辑器创建，通过 ContentService 查询
-var def := ServiceRegistry.get_service("content") as ContentService
+var def := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 var ability_def := def.get_resource("fireball") as AbilityDefinition
 
 # Controller — 从实体节点树查找
 var ability_ctrl := owner.get_node("Controllers/AbilityController") as AbilityController
 
 # System — ServiceRegistry 获取
-var combat := ServiceRegistry.get_service("combat") as CombatService
+var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
 ```
 
 ---
@@ -174,3 +175,6 @@ func _register_kernel_services() -> void:
 ```
 
 > `super()` 必须在自定义服务注册前调用，否则内置服务尚未就绪。
+
+> 模块迁移与发布清单入口见：  
+> [`docs/phase5_migration_and_release_checklist.md`](phase5_migration_and_release_checklist.md)

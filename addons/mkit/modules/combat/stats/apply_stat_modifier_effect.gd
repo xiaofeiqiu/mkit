@@ -15,7 +15,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 	var receiver := context.source if apply_to_source else context.target
 	if receiver == null:
 		return EffectResult.fail(effect_id, "Missing receiver for stat modifier")
-	var stats := receiver.get_node_or_null("Components/StatsComponent") as StatsComponent
+	var stats := EntityContract.get_component(receiver, "StatsComponent") as StatsComponent
 	if stats == null:
 		return EffectResult.fail(effect_id, "Receiver has no StatsComponent")
 	var mod_def := StatModifierDefinition.new()

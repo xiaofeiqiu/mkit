@@ -7,7 +7,7 @@ extends GameEffect
 func _apply_impl(context: GameplayContext) -> EffectResult:
 	var source_id := _node_name(context.source)
 	var target_id := _node_name(context.target)
-	var events := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null:
 		events.emit_domain_event(
 			DomainEvent.create(event_type, source_id, target_id, {"message": message})

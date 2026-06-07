@@ -9,7 +9,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func open_shop(shop_id: String) -> bool:
@@ -129,7 +129,7 @@ func get_definition(shop_id: String) -> ShopDefinition:
 	if shop_id.strip_edges() == "":
 		return null
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(shop_id) as ShopDefinition
@@ -165,7 +165,7 @@ func _make_context(actor: Node) -> GameplayContext:
 
 
 func _run_effect(effect: GameEffect, ctx: GameplayContext) -> EffectResult:
-	var effects := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var effects := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
 	if effects != null:
 		return effects.execute(effect, ctx)
 	return effect.apply(ctx)
@@ -174,16 +174,16 @@ func _run_effect(effect: GameEffect, ctx: GameplayContext) -> EffectResult:
 func _get_inventory(node: Node) -> InventoryController:
 	if node == null:
 		return null
-	return node.get_node_or_null("Controllers/InventoryController") as InventoryController
+	return EntityContract.get_controller(node, "InventoryController") as InventoryController
 
 
 func _get_item_definition(item_id: String) -> ItemDefinition:
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(item_id) as ItemDefinition
 
 
 func _get_events() -> EventService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService

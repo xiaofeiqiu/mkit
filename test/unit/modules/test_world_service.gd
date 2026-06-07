@@ -37,6 +37,7 @@ class AudioProbe:
 var content: StubContent
 var scenes: StubSceneRouter
 var events: EventService
+var save_manager: SaveService
 
 
 func before_each() -> void:
@@ -46,9 +47,13 @@ func before_each() -> void:
 	add_child_autofree(scenes)
 	events = EventService.new()
 	add_child_autofree(events)
+	save_manager = SaveService.new()
+	add_child_autofree(save_manager)
+	save_manager.save_path = "/tmp/mkit_unit_world_scope.json"
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("scenes", scenes)
 	ServiceRegistry.register_service("events", events)
+	ServiceRegistry.register_service("save", save_manager)
 
 
 func after_each() -> void:
@@ -244,3 +249,19 @@ func test_tc_world_07_rebinding_scene_router_disconnects_old_one() -> void:
 
 	assert_false(scenes.scene_changed.is_connected(world._on_scene_changed))
 	assert_true(new_scenes.scene_changed.is_connected(world._on_scene_changed))
+
+
+func test_tc_world_08_scoped_zone_state_restores_without_scene_root() -> void:
+	var world := _make_world()
+	world.current_zone_id = "zone.saved"
+	world._pending_zone_id = "zone.pending"
+	world._pending_spawn_id = "spawn.pending"
+
+	assert_true(save_manager.save_game(null))
+	world.free()
+
+	var restored := _make_world()
+	assert_true(save_manager.load_game(null))
+	assert_eq(restored.current_zone_id, "zone.saved")
+	assert_eq(restored._pending_zone_id, "zone.pending")
+	assert_eq(restored._pending_spawn_id, "spawn.pending")

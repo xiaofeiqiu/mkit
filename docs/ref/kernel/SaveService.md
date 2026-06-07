@@ -7,7 +7,13 @@
 
 ## 职责
 
-存读档协调者。`save_game` 遍历树收集所有 `Saveable`、序列化为 JSON 写盘；`load_game` 读回、按 `SaveMigration` 链迁移旧版本、再逐个 `from_save_data`。`GameBootstrap` 启动时若存档存在会自动 `load_game`。
+存读档协调者。
+
+- `save_game` 会把场景树中的 `Saveable` 与已注册 scope 提供者一起序列化为 JSON。
+- `load_game` 在读取后先执行迁移链（`SaveMigration`），再按 scope（优先）与 legacy `payload` 恢复。
+- `GameBootstrap` 启动时若存档存在会自动 `load_game`。
+
+scope 写入用于“无完整场景树也能恢复”的关键状态（如世界 run / 房间 / 奖励等）。
 
 ## 字段
 
@@ -22,8 +28,13 @@
 
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
-| `save_game(root: Node) -> bool` | `bool` | 收集 `root` 下所有 `Saveable` → 写 `save_path` |
-| `load_game(root: Node) -> bool` | `bool` | 读文件 → 迁移 → 恢复所有 `Saveable` |
+| `save_game(root: Node) -> bool` | `bool` | 收集 `Saveable` 并写盘；`root == null` 时仍可通过注册 scope 保存 |
+| `load_game(root: Node) -> bool` | `bool` | 读文件 -> 迁移 -> scope 与 payload 回填 |
+| `register_saveable_scope(provider: Saveable) -> void` | `void` | 注册显式 scope 提供者（用于场景树缺失恢复） |
+| `unregister_saveable_scope(provider: Saveable) -> void` | `void` | 注销显式 scope 提供者 |
+| `get_registered_scope_snapshot() -> Dictionary` | `Dictionary` | 获取当前 scope 注册快照 |
+
+> 实际文件结构会包含 `payload`（兼容旧读取路径）以及 `scopes`/`scope_manifest`（新路径）。
 
 ## 信号
 
@@ -39,7 +50,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var save := ServiceRegistry.get_service("save") as SaveService
+var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
 save.save_game(get_tree().root)
 ```
 
@@ -50,7 +61,7 @@ save.save_game(get_tree().root)
 var _save: SaveService = null
 
 func _ready() -> void:
-    _save = ServiceRegistry.get_service("save") as SaveService
+    _save = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
     if _save == null:
         push_error("SaveService 未注册（Bootstrap 是否已运行？）")
         return
@@ -71,7 +82,8 @@ func _unhandled_input(event: InputEvent) -> void:
             print("没有存档可读")
 ```
 
-> 关键：只自动收集 [Saveable](Saveable.md)。组件（[SaveableComponent](SaveableComponent.md)）需由 Saveable 代理收集。
+> 关键：`SaveableComponent` 仍需由 `Saveable` 聚合后才会入档。
+> `scope` 路径在场景树缺失恢复时提供兜底。
 
 ## 相关
 

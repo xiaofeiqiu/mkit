@@ -1,5 +1,6 @@
 extends Node
 
+var _runtime_context: MkitRuntimeContext
 const SERVICE_EVENTS: String = "events"
 const SERVICE_CONTENT: String = "content"
 const SERVICE_RANDOM: String = "random"
@@ -22,6 +23,7 @@ const SERVICE_AUDIO: String = "audio"
 const SERVICE_DIALOGUE: String = "dialogue"
 const SERVICE_WORLD: String = "world"
 const SERVICE_LOOT: String = "loot"
+const SERVICE_UI: String = "ui"
 
 var _services: Dictionary = {}
 var _service_types: Dictionary = {}
@@ -42,6 +44,8 @@ func register_service(
 	_services[normalized_service_id] = service
 	if expected_class_name != "":
 		_service_types[normalized_service_id] = expected_class_name
+	if _runtime_context != null:
+		_runtime_context.register_port(normalized_service_id, service, expected_class_name)
 
 
 func has_service(service_id: String) -> bool:
@@ -104,8 +108,33 @@ func unregister_service(service_id: String) -> void:
 		return
 	_services.erase(service_id)
 	_service_types.erase(service_id)
+	if _runtime_context != null:
+		_runtime_context.unregister_port(service_id)
+
+
+func set_runtime_context(runtime_context: MkitRuntimeContext) -> void:
+	_runtime_context = runtime_context
+
+
+func get_runtime_context() -> MkitRuntimeContext:
+	return _runtime_context
+
+
+func get_port(service_id: String, expected_class_name: String = "") -> Object:
+	if _runtime_context == null:
+		if expected_class_name == "":
+			return get_service_or_null(service_id)
+		return get_typed(service_id, expected_class_name)
+	return _runtime_context.get_port_typed(service_id, expected_class_name)
+
+
+func get_port_ids() -> Array[String]:
+	if _runtime_context == null:
+		return get_registered_service_ids()
+	return _runtime_context.get_registered_ports()
 
 
 func clear() -> void:
 	_services.clear()
 	_service_types.clear()
+	_runtime_context = null

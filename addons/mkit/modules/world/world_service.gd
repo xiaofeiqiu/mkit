@@ -1,5 +1,5 @@
 class_name WorldService
-extends Node
+extends Saveable
 signal zone_changed(from_zone_id: String, to_zone_id: String)
 const _MAX_FINALIZE_RETRIES: int = 1
 @export var player_group: String = "player"
@@ -12,14 +12,58 @@ var content: ContentService = null
 
 
 func _ready() -> void:
+	if save_id == "":
+		save_id = "world"
 	_resolve_services()
+	_register_saveable_scope()
+
+
+func _exit_tree() -> void:
+	var save_service := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+	if save_service == null:
+		return
+	save_service.unregister_saveable_scope(self)
+
+
+func _register_saveable_scope() -> void:
+	var save_service := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+	if save_service == null:
+		return
+	save_service.register_saveable_scope(self)
+
+
+func get_save_scopes() -> Array[String]:
+	return ["world.zone"]
+
+
+func get_save_payload_for_scope(scope: String) -> Dictionary:
+	var normalized_scope := scope.strip_edges()
+	if normalized_scope != "world.zone":
+		return {}
+	return {
+		"current_zone_id": current_zone_id,
+		"pending_zone_id": _pending_zone_id,
+		"pending_spawn_id": _pending_spawn_id
+	}
+
+
+func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
+	var normalized_scope := scope.strip_edges()
+	if normalized_scope != "world.zone":
+		return false
+	if not (data is Dictionary):
+		return false
+	current_zone_id = str(data.get("current_zone_id", current_zone_id))
+	_pending_zone_id = str(data.get("pending_zone_id", _pending_zone_id))
+	_pending_spawn_id = str(data.get("pending_spawn_id", _pending_spawn_id))
+	return true
 
 
 func _resolve_services() -> void:
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if scene_router == null:
-		scene_router = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_SCENES) as SceneService
+		scene_router = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
 	_bind_scene_router()
 
 
@@ -62,7 +106,7 @@ func get_zone(zone_id: String) -> ZoneDefinition:
 	if zone_id.strip_edges() == "":
 		return null
 	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(zone_id) as ZoneDefinition
@@ -139,8 +183,8 @@ func _find_player() -> Node2D:
 
 
 func _get_events() -> EventService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 
 
 func _get_audio() -> AudioService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_AUDIO) as AudioService
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService

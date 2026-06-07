@@ -64,7 +64,7 @@ flowchart LR
 外加两个贯穿全程的概念：
 
 - **GameplayContext** —— 沿管线传递的**共享信使**（谁打谁、多少伤害）。详见 [第四节](#四gameplaycontext流水线上的信使)。
-- **Service** —— 上面那组干活的机器，`ServiceRegistry.get_service("id")` 取用。
+- **Service** —— 上面那组干活的机器，优先 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 取用；`get_service` 保留兼容。
 
 ---
 
@@ -254,7 +254,7 @@ var all_abilities := content.get_all_by_type("ability_definition")
 
 | 契约 | 基类 | 存档键 | 谁收集它 |
 |------|------|--------|----------|
-| `Saveable` | `Node` | `save_id`（空则回退到 `owner.name` / `name`） | **`SaveService` 自动遍历场景树收集** |
+| `Saveable` | `Node` | `save_id`（空则回退到 `owner.name` / `name`） | **`SaveService` 自动收集场景树节点，并支持 `save_scope` 场景外恢复** |
 | `SaveableComponent` | `Node` | 节点 `name`（实体内唯一） | **不自动收集**——由所属实体（一个 `Saveable`）负责收集并序列化 |
 
 两者接口相同，都只需实现序列化的两个方法：
@@ -271,7 +271,7 @@ func from_save_data(data: Dictionary) -> void:
     level = int(data.get("level", 1))
 ```
 
-> 关键区别：`SaveService.save_game(root)` 只遍历并收集 **`Saveable`** 节点。`SaveableComponent`（如 `AbilityController`）提供了相同的序列化接口，但要被持久化，必须由它所属的 `Saveable` 实体主动收集——单独挂一个 `SaveableComponent` 不会自动进存档。完整时序见 [ref/kernel/SaveService.md](ref/kernel/SaveService.md)。
+> 关键区别：`SaveService.save_game(root)` 会收集场景树中的 **`Saveable`** 节点，并保留 `save_scope` 字段用于场景树外恢复。`SaveableComponent`（如 `AbilityController`）提供了相同的序列化接口，但要被持久化，必须由它所属的 `Saveable` 实体主动收集——单独挂一个 `SaveableComponent` 不会自动进存档。完整时序见 [ref/kernel/SaveService.md](ref/kernel/SaveService.md)。
 
 ---
 

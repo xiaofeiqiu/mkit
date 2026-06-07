@@ -7,7 +7,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_service("content") as ContentService
+	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func can_equip(item: ItemInstance, slot_id: String) -> bool:
@@ -48,8 +48,7 @@ func get_equipped(slot_id: String) -> ItemInstance:
 
 func get_item_definition(item_id: String) -> ItemDefinition:
 	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
 		return null
 	return content.get_resource(item_id) as ItemDefinition
@@ -83,7 +82,7 @@ func from_save_data(data: Dictionary) -> void:
 
 
 func _apply_item_modifiers(item: ItemInstance) -> void:
-	var stats := owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+	var stats := EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 	if stats == null:
 		return
 	var definition := get_item_definition(item.definition_id)
@@ -97,6 +96,6 @@ func _apply_item_modifiers(item: ItemInstance) -> void:
 
 
 func _remove_item_modifiers(item: ItemInstance) -> void:
-	var stats := owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+	var stats := EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 	if stats != null:
 		stats.remove_modifiers_from_source(item.instance_id)

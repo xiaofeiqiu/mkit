@@ -9,7 +9,7 @@ var blackboard: Blackboard = Blackboard.new()
 
 
 func _ready() -> void:
-	command_router = ServiceRegistry.get_service("commands") as CommandService
+	command_router = ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
 
 
 func _process(delta: float) -> void:
@@ -34,5 +34,5 @@ func issue_command(command_type: String, payload: Dictionary = {}) -> bool:
 
 
 func _get_owner_id() -> String:
-	var identity := owner.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(owner)
 	return identity.entity_id if identity != null else owner.name

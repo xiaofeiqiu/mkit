@@ -8,7 +8,7 @@ func _evaluate_impl(context: GameplayContext) -> bool:
 	if id == "" or context.source == null:
 		return false
 	var controller := (
-		context.source.get_node_or_null("Controllers/AbilityController") as AbilityController
+		EntityContract.get_controller(context.source, "AbilityController") as AbilityController
 	)
 	if controller == null:
 		return false

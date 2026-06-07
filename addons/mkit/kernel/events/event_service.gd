@@ -149,7 +149,7 @@ func _emit_domain_event(
 func _get_entity_id(entity: Node) -> String:
 	if entity == null:
 		return ""
-	var identity = entity.get_node_or_null("EntityIdentity")
+	var identity := EntityContract.get_identity(entity)
 	if identity != null and "entity_id" in identity:
 		return str(identity.entity_id)
 	return str(entity.name)

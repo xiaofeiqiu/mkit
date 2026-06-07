@@ -24,7 +24,7 @@ func start_action(action: GameAction, context: ActionContext) -> GameAction:
 
 
 func _process(delta: float) -> void:
-	var time := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_TIME) as TimeService
+	var time := ServiceRegistry.get_port(ServiceRegistry.SERVICE_TIME) as TimeService
 	var scaled_delta := time.get_scaled_delta(delta) if time != null else delta
 	for action in active_actions.duplicate():
 		if action == null:

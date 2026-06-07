@@ -53,16 +53,16 @@ Game Content 属于具体项目内容层，通常放在 `res://game/`。它不�
 
 核心 runtime 管线：
 
-```text
-Input / AI / Script
-  -> GameCommand
-  -> CommandRouter / CommandReceiver
-  -> HFSM
-  -> GameAction
-  -> GameEffect
-  -> Domain System
-  -> EventRouter
-  -> UI / Audio / VFX / Analytics
+```mermaid
+flowchart LR
+  A["Input / AI / Script"] --> B["GameCommand"]
+  B --> C["CommandRouter /<br/>CommandReceiver"]
+  C --> D["HFSM"]
+  D --> E["GameAction"]
+  E --> F["GameEffect"]
+  F --> G["Domain System"]
+  G --> H["EventRouter"]
+  H --> I["UI / Audio /<br/>VFX / Analytics"]
 ```
 
 完整管线索引见 [Pipeline](pipeline.md)。

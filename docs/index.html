@@ -353,6 +353,28 @@
         font-size: 28px;
       }
     }
+
+    .mermaid {
+      margin: 18px 0;
+      text-align: center;
+    }
+
+    .mermaid svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .mermaid:not([data-processed]) {
+      white-space: pre;
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 13px;
+      background: var(--surface-2);
+      color: var(--muted);
+      padding: 14px 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
   </style>
 </head>
 <body>
@@ -377,6 +399,7 @@
     </main>
   </div>
 
+  <script src="vendor/mermaid.min.js"></script>
   <script>
     const refNames = [
       "AbilityController",
@@ -648,6 +671,25 @@
       };
     }
 
+    function renderCodeBlock(info, codeLines) {
+      const code = codeLines.join("\n");
+      if (info === "mermaid") {
+        return `<div class="mermaid">${escapeHtml(code)}</div>`;
+      }
+      return `<pre><code class="language-${escapeAttr(info)}">${escapeHtml(code)}</code></pre>`;
+    }
+
+    function renderMermaid() {
+      if (!window.mermaid) return;
+      const nodes = content.querySelectorAll(".mermaid:not([data-processed])");
+      if (!nodes.length) return;
+      try {
+        window.mermaid.run({ nodes });
+      } catch (error) {
+        console.error("mermaid render failed", error);
+      }
+    }
+
     function renderMarkdown(markdown, basePath) {
       const lines = markdown.replace(/\r\n/g, "\n").split("\n");
       let html = "";
@@ -675,7 +717,7 @@
 
         if (inCode) {
           if (trimmed.startsWith("```")) {
-            html += `<pre><code class="language-${escapeAttr(codeInfo)}">${escapeHtml(codeLines.join("\n"))}</code></pre>`;
+            html += renderCodeBlock(codeInfo, codeLines);
             inCode = false;
             codeInfo = "";
             codeLines = [];
@@ -763,7 +805,7 @@
       }
 
       if (inCode) {
-        html += `<pre><code class="language-${escapeAttr(codeInfo)}">${escapeHtml(codeLines.join("\n"))}</code></pre>`;
+        html += renderCodeBlock(codeInfo, codeLines);
       }
       flushParagraph();
       closeList();
@@ -819,6 +861,7 @@
         const markdown = await response.text();
         content.className = "content";
         content.innerHTML = renderMarkdown(markdown, currentDoc);
+        renderMermaid();
         const firstHeading = content.querySelector("h1");
         const title = firstHeading ? firstHeading.textContent.trim() : currentDoc;
         document.title = `${title} | Mkit Docs`;
@@ -854,6 +897,10 @@
     menuButton.addEventListener("click", () => {
       document.body.classList.toggle("nav-open");
     });
+
+    if (window.mermaid) {
+      window.mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
+    }
 
     renderNav();
     loadDoc(getHashDoc());

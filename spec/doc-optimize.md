@@ -6,6 +6,38 @@
 
 ---
 
+## 进度追踪（Progress Tracker）
+
+> 完成一项就把 `[ ]` 改成 `[x]`。详细说明见对应章节（第七章实施计划）。
+
+**基础设施**
+- [x] 文档站支持 Mermaid 渲染（`docs/index.html` + vendored `docs/vendor/mermaid.min.js`；`docs/readme.md` Runtime Pipeline 已作示范）
+
+**Phase 1 — 先让人能"跑通 + 看懂"**（易学 + 易理解）
+- [ ] P1.1 `docs/getting_started.md`（5 分钟跑通 + 学习地图 + 改一行 + cheat sheet）
+- [ ] P1.2 `docs/concepts.md`（主管线心智模型 + Resource/Instance/Node 三分 + service flavor + 存档契约 + 扩展点地图 + 反模式对照 + **动画两通道集成**，含 5 张图）
+- [ ] P1.3 `docs/glossary.md` + `docs/debugging.md`；`readme.md` 顶部新手入口；接入 `index.html` 的 `navGroups`（新增「新手入门」「Cookbook」两组）；根 `README.MD` 首链接指向 `docs/getting_started.md`
+- [ ] P1.4 给 `village_rpg` 关键脚本加文档锚注释
+- [ ] ✅ **P1 验收**：找一位没接触过 Mkit 的人 dry-run——30 分钟内跑通 demo + 改一行见效（不提问）；能复述"攻击→扣血"的分层与解耦原因；生词都能在 glossary 自助解决（详见第六章；卡点回灌文档后才可勾选）
+
+**Phase 2 — 让人能"照着改"**（易用）
+- [ ] P2.1 Cookbook 骨架 + recipe `01_run_the_demo` / `02_add_ability` / `03_add_enemy_in_room`
+- [ ] P2.2 recipe `04_custom_effect` / `05_add_quest`
+- [ ] P2.3 recipe `09_hook_up_animation`（核心动画机制落地：AnimationPlayer + 攻击/读条动画随 Action 时钟播放 + 受击 VFX 随事件触发）
+- [ ] ✅ **P2 验收**：同一人只靠 recipe `02` 独立加出新技能并在 demo 释放成功——不看 addon 源码、不提问；所有报错都能在"常见错误"表里找到
+
+**Phase 3 — 让人能"自己写"**（易用 + 易理解）
+- [ ] P3.1 pipeline P0/P1 六条 + Animation & Presentation 管线加 `### 代码示例` + concepts/cookbook 互链
+- [ ] P3.2 批次 A 的 14 个核心类补 3–4 例，同步修复 docreview D1–D5 / Q1
+- [ ] ✅ **P3 验收**：有 Godot 基础但没写过 Mkit 扩展的人，照 pipeline 示例 + 扩展点地图写出自定义 `GameEffect` 并通过 GUT 测试；并能只用 debugging 指南定位一个植入的 bug
+
+**Phase 4 — 补全与防腐（按需）**
+- [ ] 剩余 pipeline 示例、批次 B/C ref、cookbook `06`–`10`
+- [ ] `tools/check_docs_sync.py` + `make docs-check` + CI demo 冒烟
+- [ ] ✅ **P4 验收**：`make docs-check` 通过（无断链 / 无漏 ref / API 一致 / 新文档已接入 nav）；CI demo 冒烟通过；抽查 5 个示例均可粘贴运行
+
+---
+
 ## 〇、设计原则：围绕"学习者旅程"，而不是"补充示例"
 
 上一版规划把目标定为"每个 class / pipeline 多加几段代码"。但"代码示例多"不等于"容易学会"。一个新人真正的卡点不是某个方法怎么调，而是：
@@ -31,6 +63,7 @@
 - `docs/readme.md` 讲清了分层和数据模型，但停在"是什么"，没讲"一个请求进来后各层之间如何交接、为什么要这么拆"。
 - `pipeline.md` 的 30+ 条管线是 `text` 箭头伪代码，能看出步骤顺序，但看不出**数据如何在对象间流动**、**哪些是同步调用哪些是信号回调**。
 - 反复出现的核心词汇（Definition / Instance / Controller / System；Saveable vs SaveableComponent；三种 service flavor）散落在 CLAUDE.md 和各 ref 页，没有一处统一的**术语表**。
+- **动画 / 表现如何接入主管线**——Action 驱动 vs 事件反馈两条通道、`Presentation/AnimationPlayer` 约定、`facing` / `set_direction`——这条**核心机制完全没有文档**。读者只能自己逐个翻 `timed_attack_action.gd` / `cast_action.gd` / `feedback_system.gd` / `vfx_spawner.gd` 才能拼出全貌，是目前最大的机制盲区之一。
 
 ### ② 跑通——缺"新手入口"
 - 文档入口 `readme.md` 是参考手册式索引，不是"从这里开始"。新人面对 133 个 ref + 30 条 pipeline 不知先读哪篇。
@@ -84,7 +117,7 @@
 
 回答"整体怎么转、为什么这么设计"。这是上一版完全缺失、却对"理解机制"最关键的一层。
 
-包含六块，**每块用同一个贯穿例子**（玩家攻击 field_beast）讲，避免抽象：
+包含七块，**每块用同一个贯穿例子**（玩家攻击 field_beast）讲，避免抽象：
 
 1. **一条主管线的心智模型**：`Input → Command → HFSM → Action → Effect → Domain → Event → 表现`。逐段讲：每一步**产出什么对象、交给谁、为什么要这一跳**（命令为什么和效果解耦？为什么要 Action 这一层？）。配一张**时序图**（玩家、CommandRouter、StateMachine、CombatResolver、HealthComponent、EventRouter 之间的调用与信号）。
 2. **Resource / Instance / Node 三分**：为什么静态配置、运行时状态、场景行为要拆开；用 `AbilityDefinition → AbilityInstance → AbilityController` 走一遍。配**数据流图**。
@@ -92,10 +125,19 @@
 4. **两条存档契约**：`Saveable`（全局，按 save_id）vs `SaveableComponent`（实体内，按节点名）何时选哪个、谁来收集——这是最容易踩坑的机制。
 5. **扩展点地图（框架的接缝在哪）**：一张表讲清"哪些是固定主干、哪些地方插你自己的逻辑"。理解了"什么固定、什么可换"就抓住了机制本质。至少覆盖：自定义 `GameEffect` / `Condition` / `GameAction` / `State` / `Brain` / service 实现，以及 override 钩子（`GameBootstrap._initialize_runtime_systems` / `_load_profile`、`Interactable._interact_impl`、`SaveableComponent.to_save_data`）。每个扩展点标明：父类、要实现的方法、谁来调用它、对应的 cookbook recipe。
 6. **反模式与设计取舍（❌/✅ 对照）**：把 CLAUDE.md 里的硬规则转成"别这么做 / 应该这样 / 为什么"对照——如反向依赖 `game/`、把 RefCounted service 改成 Node、绕过 `ProgressionSystem` 直接改 `ProgressionState`、用裸 Dictionary 穿过核心 API。理解边界即理解机制。
+7. **动画与表现的两条集成通道（核心机制，当前零文档）**：讲清"动画到底接在管线哪里、何时用哪条"，配一张两通道对照图。
+   - **通道 A — Action 驱动（动画时机 = 玩法时机，同步）**：当动画节奏就是玩法节奏（攻击 startup/active/recovery、读条、冲刺 i-frame）时，由 **GameAction 拥有动画**。`TimedAttackAction._on_start()` 播 `"attack"`，**同一个 Action 时钟**在 active 窗口开关 Hitbox（`timed_attack_action.gd:13,17-28`）——动画与命中帧共用一个时钟，这是关键。`CastAction` 播 `animation_name` 持续 `duration`，结束/打断时回调 `source.on_cast_action_finished()`（`cast_action.gd:32-45`）。
+   - **通道 B — 事件驱动反馈（动画是对既成事实的反应，解耦）**：受击闪白、死亡特效、伤害数字走 `EventRouter` → `FeedbackSystem` → `VFXSpawner` / `AudioManager`。FeedbackSystem 监听 `damage_applied` / `entity_died` 后调 `VFXSpawner.spawn("hit", pos)` → `node.play()`（`feedback_system.gd`、`vfx_spawner.gd:9-29`）——战斗代码完全不知道有特效。
+   - **三个支撑约定**：① 节点路径接缝 `Presentation/AnimationPlayer`（Action 在此 `play()`，`has_animation` 检查后才播，找不到就静默跳过，所以无动画实体也能跑——demo player 当前是 `Visual` Polygon2D 占位）；② 朝向走 Blackboard 的 `facing`（move/idle/dash/attack 状态写，Hitbox 位置与精灵翻转读）；③ 生成体自定向 `set_direction(Vector2)`（投射物 / VFX 实现，`SpawnSceneEffect`、`VFXSpawner` 调用）。
+   - **选哪条（心智模型）**：动画节奏 = 玩法节奏 → A（同一时钟驱动逻辑与画面）；动画是事后反应 → B（保持战斗与表现解耦）。
 
 并在文档库内新增**术语表** `docs/glossary.md`：一句话定义所有反复出现的名词（Command / Action / Effect / Condition / Definition / Instance / Controller / System / Resolver / Service / Saveable / Blackboard / GameplayContext …），每条带一个跳转链接到主文档。让新人遇到生词随时能查。
 
-**图的标准**：用 Mermaid（`sequenceDiagram` / `flowchart`），纯文本可 diff、可在 `index.html` 与多数 Markdown 渲染器中显示。至少产出：主管线时序图、Resource/Instance/Node 数据流图、bootstrap 启动时序图、战斗伤害结算时序图。
+**图的标准（Mermaid 已支持 ✅）**：`docs/index.html` 已加入 Mermaid 渲染——` ```mermaid ` 代码块会被渲染成图。mermaid.js 已 vendored 在 `docs/vendor/mermaid.min.js`（本地引用、离线可用，`make docs-server` 无需联网）。因此：
+- **优先用 Mermaid**（`sequenceDiagram` / `flowchart`）画时序图与数据流图，纯文本可 diff。
+- 渲染兼容性：文档站已支持；GitHub 原生支持；多数 IDE 插件支持。万一某处渲染器不支持，文档站有**降级样式**（把图源显示为等宽代码块，仍可读），不会崩。
+- 至少产出：主管线时序图、Resource/Instance/Node 数据流图、bootstrap 启动时序图、战斗伤害结算时序图、**动画两通道对照图（Action 驱动 vs 事件反馈）**。
+- 参考示范：`docs/readme.md` 的 Runtime Pipeline 已改用 Mermaid flowchart。
 
 ### 产物 3：Pipeline 代码示例（服务"自己写"）— 扩充 `docs/pipeline.md`
 
@@ -106,6 +148,7 @@
 | P0 | Runtime Bootstrap / Main Gameplay | 入门必经、核心主干 |
 | P1 | Ability Cast / Damage Resolution / Effect Execution | 最复杂、最常调试、几乎所有系统都用 |
 | P2 | Entity Spawn / Event Notification / HFSM Transition | demo 基础、解耦关键、理解难点 |
+| P2 | **Animation & Presentation（新增管线）** | 核心机制、当前零文档；展示 Action 驱动 + 事件反馈两条通道如何挂到攻击/受击流程上 |
 | P3 | Quest / Save·Load / Loot Roll / Inventory | RPG·Roguelike 常用集成 |
 | P4 | 其余 20+ 条 | 按需补充 |
 
@@ -124,9 +167,12 @@ docs/cookbook/
   06_status_effect.md          # 加一个 DOT 状态效果（P2）
   07_loot_table.md             # 配一张带权重和条件的战利品表（P2，数据驱动范例）
   08_state_machine.md          # 为新实体定义 HFSM 状态树（P2，最难理解）
-  09_meta_upgrade.md           # 定义元升级、解锁内容、持久化（P3）
-  10_save_custom_system.md     # 给新系统加存档支持（P3）
+  09_hook_up_animation.md      # 给实体接上动画：Presentation/AnimationPlayer + 攻击/读条动画 + 受击 VFX（P1，核心机制）
+  10_meta_upgrade.md           # 定义元升级、解锁内容、持久化（P3）
+  11_save_custom_system.md     # 给新系统加存档支持（P3）
 ```
+
+> recipe `09_hook_up_animation` 尤其关键：demo player 当前用 `Visual` Polygon2D 占位、没有真正的 `AnimationPlayer`，这篇带读者从占位升级到"攻击/读条动画随 Action 时钟播放 + 受击特效随事件触发"，把两条通道一次性走通——是"易用 + 易理解"动画机制的落地闭环。
 
 每篇 recipe 固定结构（强制一致，降低学习成本）：
 
@@ -176,6 +222,7 @@ docs/cookbook/
 - **`CombatResolver` 的 trace**：看伤害结算每阶段中间值（base → 攻击力 → 暴击 → 防御 → final），调平衡和查"伤害数字不对"。
 - **`StateMachine.last_transition_reason` / `last_failed_transition_reason`**：查"为什么没切状态/切换被拒"。
 - **固定随机种子复现**：用 `RandomService` 固定 seed 复现一次战斗/掉落，把偶发 bug 变成可重放。
+- **动画不播 / 朝向不对**：查 `Presentation/AnimationPlayer` 是否存在、`has_animation(name)` 是否为真（Action 找不到会**静默跳过**，最易踩）、Blackboard 的 `facing` 有没有被状态写入、生成体是否实现 `set_direction`——这是动画两条通道最常见的断点。
 
 并给一张**"症状 → 先看哪个工具"速查表**（如"技能按了没反应"→先看 DebugOverlay 当前状态 + EffectExecutor trace）。这张表本身就是一份机制自检清单。
 
@@ -203,7 +250,7 @@ ref 是字典而非读物，定位下沉到产物 1-4 之后，但核心类仍�
 | `EventRouter` / `AbilityController` | 2 / 3 | 连 UI 监听、自定义 DomainEvent、多充能、条件失败 |
 | `CombatResolver` / `HealthComponent` / `StatsComponent` | 2 / 1 / 1 | 带状态附加的 DamageRequest、trace 调试、监听 died、临时 modifier 叠加 |
 
-**批次 B（P2）**：`EntitySpawner`、`EntityRoot`、`ActionRunner`、`DamageRequest`、`DungeonGenerator`、`LootSystem`、`InventoryController`、`QuestSystem`——各补 1–2 个 Level 2 场景示例。
+**批次 B（P2）**：`EntitySpawner`、`EntityRoot`、`ActionRunner`、`DamageRequest`、`DungeonGenerator`、`LootSystem`、`InventoryController`、`QuestSystem`，以及**动画相关的 `TimedAttackAction`、`CastAction`、`VFXSpawner`、`FeedbackSystem`**（重点写清 `Presentation/AnimationPlayer` 约定、Action 时钟与 active 帧的关系、`set_direction` / `facing`）——各补 1–2 个 Level 2 场景示例。
 
 **批次 C（P3/P4，有余力）**：Effect / Condition 子类、平台 mock 类——各补一个"在 .tres 配置 + 运行触发"示例。
 
@@ -226,23 +273,35 @@ ref 是字典而非读物，定位下沉到产物 1-4 之后，但核心类仍�
 3. **取服务统一**：`ServiceRegistry.get_service("id") as ClassName`，不直接持 autoload 引用。
 4. **有失败分支**：凡返回 bool 的方法（`can_cast` / `add_item` / `spend_currency`）必须演示失败处理。
 5. **注释只写 WHY**：解释"为什么用 CONNECT_ONE_SHOT"，不解释 GDScript 语法。
-6. **图能 diff**：所有图用 Mermaid 文本，不用截图。
+6. **图能 diff 且能渲染**：用 Mermaid 文本（文档站已支持渲染，GitHub / IDE 也支持），不用截图。
 
 ---
 
-## 六、验收标准（怎么算"真的更容易学了"）
+## 六、验收标准（每个 Phase 一条，标尺：易学 / 易用 / 易理解）
 
-产出页面 ≠ 达成目标。每阶段定义**可检验**的成功标准，避免"作者觉得显然、读者依旧卡住"：
+产出页面 ≠ 达成目标。**每个 Phase 必须通过验收才算完成**，验收靠**真人实操 dry-run**或**可运行的检查**，不靠作者自审——作者觉得显然的地方，恰恰是读者卡住的地方。
 
-| 阶段 | 验收标准（可检验） |
-|------|-------------------|
-| 跑通 | 没接触过 Mkit 的人只靠 getting_started，30 分钟内运行 demo + 完成"改一行"看到变化，全程不提问 |
-| 看懂 | 读完 concepts 能用自己的话复述"玩家攻击到扣血"经过哪些层、为什么命令与效果要解耦；生词都能用 glossary 自助解决 |
-| 照着改 | 只靠 recipe 02 能独立加出一个新技能并在 demo 里释放成功；遇到的报错都能在"常见错误"表里找到 |
-| 自己写 | 照 pipeline 代码示例 + 扩展点地图，能写出一个自定义 `GameEffect` 并通过一个 GUT 测试 |
-| 调试 | 任一 pipeline 行为不符预期时，能用 debugging 指南的工具（DebugOverlay / recent_events / trace）定位到出问题的那一跳 |
+### Phase 1 验收 —— 易学 + 易理解
+- **谁来验**：一位完全没接触过 Mkit 的开发者。
+- **怎么算过**（须全部满足）：
+  1. 只看 `getting_started`，**30 分钟内**跑起 `village_rpg` demo，并完成一处"改一行 .tres 数值"看到游戏内变化——全程不提问。
+  2. 看完 `concepts`，能用**自己的话**复述"玩家攻击 → 扣血"经过哪些层、为什么命令要和效果解耦。
+  3. 阅读中遇到的生词，都能在 `glossary` 自助查到，不需要问人。
 
-**验证方式：** 每完成一个 phase，请一位没参与该模块的人按文档实操一次（onboarding dry-run），记录卡点回灌文档。真人 dry-run 比作者自审更能暴露盲区。
+### Phase 2 验收 —— 易用
+- **谁来验**：通过了 Phase 1 验收的同一人。
+- **怎么算过**：只靠 recipe `02_add_ability`，**独立加出一个新技能并在 demo 里释放成功**；不看 addon 源码、不提问；过程中所有报错都能在该 recipe 的"常见错误"表里找到对应条目。
+
+### Phase 3 验收 —— 易用 + 易理解
+- **谁来验**：一位有 Godot 基础、但没写过 Mkit 扩展的开发者。
+- **怎么算过**（须全部满足）：
+  1. 照 pipeline 代码示例 + `concepts` 的扩展点地图，写出一个自定义 `GameEffect` 并**通过一个 GUT 测试**。
+  2. 给 demo 故意植入一个 bug（如"技能放了不生效"），该开发者**只用 `debugging` 指南的工具**（DebugOverlay / recent_events / EffectExecutor trace）就能定位到出问题的那一跳。
+
+### Phase 4 验收 —— 防腐（文档长期可信）
+- **怎么算过**：`make docs-check` 通过（无断链、无漏 ref、公共 API 与接口块一致、新文档已接入 `navGroups`）；CI 的 demo 冒烟通过；抽查 5 个示例均可直接粘贴运行。
+
+**通用规则**：每次 Phase 验收都记录 dry-run 的卡点，**回灌对应文档后才关闭该 Phase**。验收本身就是 tracker 里的一项任务，必须勾上才算 Phase 完成。
 
 ---
 
@@ -250,16 +309,17 @@ ref 是字典而非读物，定位下沉到产物 1-4 之后，但核心类仍�
 
 ### Phase 1：先让人能"跑通 + 看懂"（约 3 天，最高价值）
 - P1.1 新增 `docs/getting_started.md`（5 分钟跑通 + 学习地图 + 改一行 + cheat sheet）。
-- P1.2 新增 `docs/concepts.md`（主管线心智模型 + 三分 + service flavor + 存档契约 + 扩展点地图 + 反模式对照，含 4 张 Mermaid 图）。
-- P1.3 新增 `docs/glossary.md`、`docs/debugging.md`；改造 `readme.md` 顶部加新手入口；**把新文档接入 `index.html` 的 `navGroups`（新增「新手入门」「Cookbook」两组）**。
+- P1.2 新增 `docs/concepts.md`（主管线心智模型 + 三分 + service flavor + 存档契约 + 扩展点地图 + 反模式对照 + 动画两通道集成，含 5 张 Mermaid 图）。
+- P1.3 新增 `docs/glossary.md`、`docs/debugging.md`；改造 `docs/readme.md` 顶部加新手入口；**把新文档接入 `index.html` 的 `navGroups`（新增「新手入门」「Cookbook」两组）**；在**仓库根 `README.MD` 的 Getting Started 段落把首链接指向 `docs/getting_started.md`**（它当前只指向 `docs/readme.md`，是比文档站更上一级的入口）。
 - P1.4 给 `village_rpg` 关键脚本加文档锚注释，标注其演示的 pipeline / recipe。
 
 ### Phase 2：让人能"照着改"（约 3 天）
 - P2.1 Cookbook 骨架 + `01_run_the_demo`、`02_add_ability`、`03_add_enemy_in_room`（三篇打通"概念→改动→demo 实物"闭环）。
 - P2.2 `04_custom_effect`、`05_add_quest`。
+- P2.3 `09_hook_up_animation`（核心动画机制落地，把两条通道一次性走通）。
 
 ### Phase 3：让人能"自己写"（约 3 天）
-- P3.1 pipeline P0/P1 六条加 `### 代码示例`（Bootstrap / Main Gameplay / Ability Cast / Damage Resolution / Effect Execution / Event Notification），并加 concepts/cookbook 互链。
+- P3.1 pipeline P0/P1 六条 + Animation & Presentation 管线加 `### 代码示例`（Bootstrap / Main Gameplay / Ability Cast / Damage Resolution / Effect Execution / Event Notification / Animation），并加 concepts/cookbook 互链。
 - P3.2 批次 A 的 14 个核心类补 3–4 例，同步修复 docreview D1–D5 / Q1。
 
 ### Phase 4：补全与防腐（按需）

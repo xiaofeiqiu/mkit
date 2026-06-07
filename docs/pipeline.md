@@ -163,11 +163,14 @@ System has one or more effects
 
 ```text
 SpawnSceneEffect.apply(context)
-  -> load PackedScene and instantiate
-  -> add to SceneTree.current_scene
+  -> if use_pool and "pool" service exists
+       -> ObjectPool.acquire(scene_path, current_scene)
+     else
+       -> load PackedScene and instantiate
+       -> add to SceneTree.current_scene
   -> initialize Node2D position from target/source/context
   -> call set_direction(context.direction) when available
-  -> return EffectResult
+  -> return EffectResult (includes "pooled" flag)
 ```
 
 ## Object Pool Pipeline

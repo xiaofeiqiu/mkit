@@ -14,13 +14,13 @@ StateMachine 是当前行为状态和状态转换的拥有者。负责注册状�
 
 ## 字段说明
 
-- **initial_state_path**：资源或节点路径。例：用 initial_state_path 指向场景或节点，方便在 Inspector 中配置。
+- **initial_state_path**：HFSM 启动时进入的初始状态路径字符串，格式如 `"Player/Alive/Locomotion/Idle"`；`auto_start = true` 时在 `_ready()` 自动转入。
 - **auto_start**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **owner_entity**：拥有该组件或状态机的实体。例：PlayerMoveState 需要通过 owner_entity 读取 StatsComponent 并推动 CharacterBody2D。
 - **root_state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **current_leaf_state**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **blackboard**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
-- **previous_path**：资源或节点路径。例：用 previous_path 指向场景或节点，方便在 Inspector 中配置。
+- **previous_path**：上一个叶状态的路径字符串，由 `transition_to()` 在转换完成后写入；初始值为空字符串。
 - **last_transition_reason**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **last_failed_transition_reason**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 

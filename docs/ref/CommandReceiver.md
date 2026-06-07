@@ -19,7 +19,7 @@ CommandReceiver 是挂在实体上的命令接收端组件。负责将来自 Com
 - **owner_entity**：拥有该组件或状态机的实体。例：PlayerMoveState 需要通过 owner_entity 读取 StatsComponent 并推动 CharacterBody2D。
 - **state_machine**：所属状态机引用。例：AttackState 完成后通过 state_machine 请求回到 Idle。
 - **command_history**：最近命令历史。例：玩家卡住时可以看到最后收到的是 dash 还是 attack。
-- **max_history**：集合字段。例：保存多个配置或运行时对象，让系统可以逐个处理。
+- **max_history**：命令历史上限，默认 20；超出时自动丢弃最旧的记录。
 
 ## 接口
 

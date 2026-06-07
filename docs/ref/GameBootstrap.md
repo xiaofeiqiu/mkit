@@ -15,7 +15,7 @@ GameBootstrap 是 Mkit 的启动编排器。负责创建服务、注册服务、
 ## 字段说明
 
 - **resource_databases**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
-- **initial_scene_path**：资源或节点路径。例：用 initial_scene_path 指向场景或节点，方便在 Inspector 中配置。
+- **initial_scene_path**：初始场景资源路径，必须是可加载的 `PackedScene`。不得与挂载本 `GameBootstrap` 的场景相同，否则触发无限重载保护并 `push_error` 中止。空字符串时 `_enter_initial_scene()` 直接跳过。
 
 ## 接口
 
@@ -34,8 +34,8 @@ func boot() -> void
 - **_load_content()**：内部辅助。遍历 `resource_databases`，对每个 ResourceDatabase 调用 ContentRegistry.load_database。
 - **_validate_content()**：内部辅助。调用 ContentRegistry.validate_all，若失败则 push_error，防止带有重复 ID 的内容进入游戏。
 - **_initialize_runtime_systems()**：内部辅助。游戏特定的运行时初始化扩展点，默认为空。
-- **_load_profile()**：内部辅助。读档或创建默认 profile 的扩展点，默认为空。
-- **_enter_initial_scene()**：内部辅助。通过 SceneRouter 切换到 `initial_scene_path` 指定的初始场景。
+- **_load_profile()**：内部辅助。若 `"save"` 服务已注册且 `save_manager.save_path` 文件存在，则调用 `save_manager.load_game(get_tree().root)` 自动读档；否则跳过。子类可覆盖此方法在读档前后执行额外逻辑。
+- **_enter_initial_scene()**：内部辅助。验证 `initial_scene_path` 指向已存在的 `PackedScene` 且不与当前场景相同后，通过 SceneRouter（或 `get_tree().change_scene_to_file`）切换到初始场景。
 
 ## 使用示例
 

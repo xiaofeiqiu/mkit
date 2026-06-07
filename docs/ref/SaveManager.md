@@ -14,7 +14,7 @@ SaveManager 是存档读写协调器。它收集 Saveable 数据、写文件、�
 
 ## 字段说明
 
-- **save_path**：资源或节点路径。例：用 save_path 指向场景或节点，方便在 Inspector 中配置。
+- **save_path**：存档文件路径，默认 `user://save.json`；通过 `FileAccess` 读写，支持 Godot 的 `user://` 路径前缀。
 - **save_version**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **game_version**：代码字段。实际存在于当前实现中，供运行时或 Inspector 配置使用。
 - **migrations**：存档迁移规则。例：从 save_version 1 读到 3 时依次执行 1->2、2->3。

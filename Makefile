@@ -25,6 +25,7 @@ demo-test:
 	$(GODOT) --headless --log-file $(DEMO_LOG) --path . res://game/demo/bootstrap.tscn --demo-auto-run
 
 docs-server:
+	@lsof -ti tcp:$(DOCS_PORT) | xargs kill -9 2>/dev/null || true
 	python3 -m http.server $(DOCS_PORT) --directory docs
 
 .NOTPARALLEL:

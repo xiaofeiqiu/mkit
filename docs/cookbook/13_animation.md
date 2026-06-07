@@ -28,7 +28,7 @@ flowchart TB
     subgraph B["通道 B：事件反馈（被动、解耦）"]
         B1["EventService.damage_applied / entity_died"]:::mkitCore -->
         B2["FeedbackSystem"]:::mkitCore -->
-        B3["DamageNumberSystem / VFXSpawner / AudioService"]:::userOwned
+        B3["DamageNumberSystem / VFXSpawner\n+ 可选本地 AudioService NodePath"]:::userOwned
     end
     classDef mkitCore  fill:#4A90D9,color:#fff,stroke:#2C6FAC
     classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
@@ -86,7 +86,7 @@ Feedback  (Node)
 配置 `FeedbackSystem` 的路径导出：
 - `damage_number_system_path` = `"../DamageNumbers"`
 - `vfx_spawner_path` = `"../Vfx"`
-- `audio_manager_path` = 留空，或指向 `AudioService`（若你把它放进了树）
+- `audio_manager_path` = 留空，或指向一个同场景可访问的 `AudioService` 节点
 - `damage_screen_shake_strength` = `4.0`（可选，>0 时受击请求震屏）
 
 `FeedbackSystem._ready()` 自动连上 `events.damage_applied` 和 `events.entity_died`。
@@ -105,9 +105,9 @@ Feedback  (Node)
 
 ### 步骤 5：（可选）音效
 
-把一个 `AudioService` 放进场景树并指给 `FeedbackSystem.audio_manager_path`，配 `sfx_map = {"hit": <AudioStream>, "death": <AudioStream>}`。受击/死亡会 `play_sfx("hit"/"death")`。
+把一个 `AudioService` 节点指给 `FeedbackSystem.audio_manager_path`，配 `sfx_map = {"hit": <AudioStream>, "death": <AudioStream>}`。受击/死亡会 `play_sfx("hit"/"death")`。
 
-> `AudioService` 默认作为 `"audio"` 服务由 `GameBootstrap` 注册（不在场景树里），`play_sfx` 可用；`FeedbackSystem` 这里走的是节点路径引用，二选一即可。
+> `GameBootstrap` 会注册全局 `"audio"` 服务；`FeedbackSystem` 当前实现不自动从服务表取音频，而是读取导出的 `audio_manager_path`。如果你希望反馈系统使用全局音频服务，请在场景里提供可被该路径引用的 AudioService 节点或自定义桥接节点。
 
 ## 运行验证
 

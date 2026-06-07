@@ -58,6 +58,12 @@
 
 **DamageRequest**：向 `CombatService` 提交伤害计算请求的数据对象（source、target、base_damage、damage_type、tags）。→ [ref/modules/DamageRequest.md](ref/modules/DamageRequest.md)
 
+**DamageIntent**：`CombatService` 从 `DamageRequest` 转换出的伤害意图，承载可复用的攻击元数据、标签与命中状态配置。→ [ref/modules/DamageIntent.md](ref/modules/DamageIntent.md)
+
+**DamageResolution**：伤害结算中间结果，记录最终数值、闪避/暴击/格挡、命中状态和 trace。→ [ref/modules/DamageResolution.md](ref/modules/DamageResolution.md)
+
+**DamageApplication**：把 `DamageResolution` 装配为公开 `DamageResult` 的终态对象。→ [ref/modules/DamageApplication.md](ref/modules/DamageApplication.md)
+
 **DamageResult**：`CombatService` 返回的伤害结算结果（final_damage、is_crit、stat 中间值）。→ [ref/modules/DamageResult.md](ref/modules/DamageResult.md)
 
 **Definition**：四分模式中的静态配置层，继承 `ContentDefinition` 或 `Resource`，保存为 `.tres`，通过 `ContentService` 查询。
@@ -75,6 +81,8 @@
 **EffectService**：执行 `GameEffect` 并维护执行历史（trace）的 kernel 服务，通过 `"effects"` ID 获取。→ [ref/kernel/EffectService.md](ref/kernel/EffectService.md)
 
 **EntityIdentity**：挂在实体根节点下的组件，持有运行时唯一 `entity_id`（字符串）。→ [ref/modules/EntityIdentity.md](ref/modules/EntityIdentity.md)
+
+**EntityContract**：实体组件/控制器/身份/状态机的语义访问入口，优先替代散落的 `get_node("Components/...")`。→ [ref/modules/EntityContract.md](ref/modules/EntityContract.md)
 
 **EntityRoot**：实体根节点基类，持有实体约定的节点结构并提供快捷访问方法。→ [ref/modules/EntityRoot.md](ref/modules/EntityRoot.md)
 
@@ -126,6 +134,8 @@
 
 ## R
 
+**ResourceSet**：通用当前值/最大值资源池模型，用于 mana、stamina 等可恢复可消耗资源。→ [ref/modules/ResourceSet.md](ref/modules/ResourceSet.md)
+
 **ResourceDatabase**：批量打包 `ContentDefinition` 资源的容器资源（`.tres`），挂到 `GameBootstrap.resource_databases` 后在启动时由 `ContentService` 统一加载。→ [ref/kernel/ResourceDatabase.md](ref/kernel/ResourceDatabase.md)
 
 **RunDirector**：管理一次 roguelike Run 的节点——初始化 `RunState`、调用 `DungeonGenerator` 生成 `RoomGraph`、驱动 `RoomController` 序列推进。→ [ref/modules/RunDirector.md](ref/modules/RunDirector.md)
@@ -142,15 +152,23 @@
 
 **SaveService**：协调 `Saveable` 的 scene-scope 与 scope-scope 持久化；`SaveableComponent` 不被直接收集，需由所属 `Saveable` 实体主动序列化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
 
-**Service**：四分模式中的全局单例层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取（新代码优先）；`get_service` / `get_service_or_null` / `get_typed` 为历史脚本保留。
+**Service / Port**：四分模式中的全局流程层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取；运行期由 `MkitRuntimeContext` 持有端口，`get_service` / `get_service_or_null` / `get_typed` 为兼容入口。
 
-**ServiceRegistry**：唯一的框架 autoload（Node），持有所有服务的引用并提供 `register_service` / `get_service` / `has_service` 接口。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
+**ServiceRegistry**：唯一的框架 autoload（Node），持有兼容服务表并把服务同步进 `MkitRuntimeContext` ports。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
 
 **State**：HFSM 状态基类（`Node`），override `enter` / `exit` / `update` / `handle_command` / `can_enter` / `can_exit` 实现状态逻辑；通过 `request_transition(path)` 请求状态切换。→ [ref/kernel/State.md](ref/kernel/State.md)
 
 **StateMachine**：HFSM 根节点，管理状态树、执行 LCA 转换、按帧 tick 活跃状态链、分发 `GameCommand`。→ [ref/kernel/StateMachine.md](ref/kernel/StateMachine.md)
 
 **System / Service**：→ **Service**
+
+---
+
+## 架构图快速导航
+
+## W
+
+**Wallet**：离散货币余额模型，`ProgressionState` 通过它读写和序列化货币。→ [ref/modules/Wallet.md](ref/modules/Wallet.md)
 
 ---
 

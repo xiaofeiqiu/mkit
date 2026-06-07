@@ -2,8 +2,8 @@
 
 每条管线描述一个完整流程的调用序列——从触发点到最终输出。
 
-> 当前改版建议：服务获取统一走 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`。  
-> `ServiceRegistry.SERVICE_*` 常量用于避免硬编码服务 ID 字符串。
+> 当前实现：服务获取统一走 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`。  
+> `ServiceRegistry` 是唯一 autoload，`GameBootstrap` 会创建 `MkitRuntimeContext` 并把内置服务注册为 runtime ports。
 
 ---
 
@@ -19,16 +19,22 @@
 sequenceDiagram
     participant GB as GameBootstrap
     participant SR as ServiceRegistry
+    participant RT as MkitRuntimeContext
     participant CS as ContentService
     participant SS as SaveService
     participant SC as SceneService
 
     Note over GB: _ready() 自动调用 boot()
+    GB->>RT: new()
+    GB->>SR: set_runtime_context(RT)
     GB->>SR: register_service("events", EventService)
+    SR->>RT: register_port("events", EventService)
     GB->>SR: register_service("content", ContentService)
+    SR->>RT: register_port("content", ContentService)
     GB->>SR: register_service("actions", ActionService)
+    SR->>RT: register_port("actions", ActionService)
     GB->>SR: ... (所有内置服务)
-    Note over SR: [mkit 内部] 服务表建立完毕
+    Note over SR: [mkit 内部] 服务表 + runtime port 表建立完毕
     GB->>CS: load_database(db) × N
     CS->>CS: register_resource(def) per entry
     GB->>CS: validate_all()
@@ -69,7 +75,7 @@ func _register_kernel_services() -> void:
     ServiceRegistry.register_service("my_game", my_svc)
 ```
 
-> 可选：若你需要固定引用，建议先定义模块常量或封装注册入口，避免直接分散地引用服务 ID 字符串。
+> `UIManager` 不由 `GameBootstrap._build_kernel_services()` 创建；场景中存在 `UIManager` 节点时，它会自注册 `"ui"` 服务。
 
 ### 相关文档
 
@@ -464,8 +470,8 @@ effect.conditions = [cond]   # 目标超出 200px 时 effect 自动 skip
 
 ## P1-7：Damage Resolution
 
-**触发点：** `DealDamageEffect._apply_impl(context)` 构建 `DamageRequest` 并调用 `CombatService.resolve()`  
-**涉及系统：** `DealDamageEffect`、`CombatService`、`HealthComponent`、`EventService`  
+**触发点：** `DealDamageEffect._apply_impl(context)` 或 `HitboxComponent` 构建 `DamageRequest` 并调用 `CombatService.resolve()`  
+**涉及系统：** `DealDamageEffect` / `HitboxComponent`、`CombatService`、`DamageIntent`、`DamageResolution`、`DamageApplication`、`HealthComponent`、`EventService`  
 **输出：** HP 减少，`damage_applied` 信号，若 HP 归零则 `entity_died` 信号
 
 ### 流程
@@ -474,19 +480,22 @@ effect.conditions = [cond]   # 目标超出 200px 时 effect 自动 skip
 sequenceDiagram
     participant DDE as DealDamageEffect
     participant CS as CombatService
+    participant DI as DamageIntent
+    participant DR as DamageResolution
+    participant DA as DamageApplication
     participant HS as HealthComponent
     participant EV as EventService
 
     Note over DDE: [mkit modules] _apply_impl(ctx)
     DDE->>DDE: 构建 DamageRequest（base_amount、damage_type、can_crit…）
     DDE->>CS: resolve(request)
-    Note over CS: [mkit modules] 伤害计算管线
-    CS->>CS: base + attack_power
-    CS->>CS: × damage_multiplier
-    CS->>CS: 暴击判定（crit_chance / crit_damage）
-    CS->>CS: max(0, amount - defense)
-    CS->>CS: 闪避判定（evade_chance）
-    CS->>CS: _roll_on_hit_statuses (on_hit_statuses)
+    CS->>DI: from_request(request)
+    DI-->>CS: DamageIntent
+    CS->>DR: resolve_damage_resolution(intent)
+    Note over DR: 闪避 → base + attack_power → multiplier → crit → defense → on_hit_statuses
+    DR-->>CS: DamageResolution
+    CS->>DA: from_resolution(resolution)
+    DA-->>CS: DamageResult
     CS-->>DDE: DamageResult（final_amount、was_critical、was_evaded、trace）
     DDE->>HS: apply_damage(result)
     Note over HS: [mkit modules] current_hp -= final_amount
@@ -507,6 +516,7 @@ sequenceDiagram
   "after_damage_multiplier": 35.0,
   "after_crit": 52.5,          # was_critical = true 时
   "after_defense": 42.5,
+  "final": 42.5,
   "evaded": true                # was_evaded = true 时
 }
 ```
@@ -1081,7 +1091,7 @@ flowchart TB
     classDef mkitCore fill:#4A90D9,color:#fff,stroke:#2C6FAC
 ```
 
-**施加入口有两条：** `ApplyStatusEffect`（effect 链显式施加）或伤害的 `on_hit_statuses`（`CombatService` 掷骰 → `DamageResult.status_applications` → `HealthComponent` 转交）。两者最终都落到 `StatusEffectController.apply_status()`，按 `stack_rule` 叠加。
+**施加入口有两条：** `ApplyStatusEffect`（effect 链显式施加）或伤害的 `on_hit_statuses`（`DamageIntent.on_hit_statuses` → `DamageResolution.applied_status_effects` → `DamageResult.status_applications` → `HealthComponent` 转交）。两者最终都落到 `StatusEffectController.apply_status()`，按 `stack_rule` 叠加。
 
 ### 关键代码
 

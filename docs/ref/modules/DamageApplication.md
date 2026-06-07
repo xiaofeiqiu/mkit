@@ -1,7 +1,7 @@
 # DamageApplication
 
 **文件：** `addons/mkit/modules/combat/damage_application.gd`  
-**用途：** 伤害链路的终态装配对象，持有 `DamageResolution` 并可输出 `DamageResult`。
+**用途：** 伤害链路的终态装配对象，持有 `DamageResolution` 并可输出公开 `DamageResult`。当前实现只做结果映射，不直接扣血。
 
 ## 字段
 

@@ -6,7 +6,7 @@
 
 ## 职责
 
-游戏启动入口。在 `_ready` 时依次注册所有内置服务、加载内容数据库、校验内容、加载存档，最后切换到初始场景。
+游戏启动入口。在 `_ready` 时创建 `MkitRuntimeContext`，注册所有内置服务为 runtime ports，加载内容数据库、校验内容、加载存档，最后切换到初始场景。
 
 ## 字段（@export 和 public var）
 
@@ -19,8 +19,8 @@
 
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
-| `boot() -> void` | `void` | 启动入口，按序调用下面四个私有步骤 |
-| `_register_kernel_services() -> void` | `void` | 注册所有内置服务；**override 此方法添加自定义服务** |
+| `boot() -> void` | `void` | 启动入口，创建 runtime context 并按序调用下面步骤 |
+| `_register_kernel_services() -> void` | `void` | 注册所有内置服务并同步到 runtime context；**override 此方法添加自定义服务** |
 | `_load_content() -> void` | `void` | 遍历 `resource_databases`，调 `ContentService.load_database()` |
 | `_validate_content() -> void` | `void` | 调 `ContentService.validate_all()`；失败时 `push_error` |
 | `_load_profile() -> void` | `void` | 若存档文件存在，调 `SaveService.load_game(tree.root)` |
@@ -51,7 +51,7 @@ func _register_kernel_services() -> void:
     ServiceRegistry.register_service("my_analytics", my_svc)
 
     # 验证注册结果
-    if not ServiceRegistry.has_service("my_analytics"):
+    if ServiceRegistry.get_port("my_analytics") == null:
         push_error("MyBootstrap: my_analytics failed to register")
 
 

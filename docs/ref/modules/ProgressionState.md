@@ -6,13 +6,13 @@
 
 ## 职责
 
-全局进度的**纯数据**：货币、元升级等级、已解锁内容。`ProgressionService.state` 持有它并负责存档。
+全局进度的**纯数据**：货币钱包、元升级等级、已解锁内容。`ProgressionService.state` 持有它并负责存档。
 
 ## 字段
 
 | 字段名 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
-| `currencies` | `Dictionary` | `{}` | `currency_id → 数量` |
+| `wallet` | `Wallet` | `Wallet.new()` | `currency_id → 数量` 的货币模型 |
 | `upgrade_levels` | `Dictionary` | `{}` | `upgrade_id → 等级` |
 | `unlocked_content_ids` | `Array[String]` | `[]` | 已解锁内容 |
 
@@ -27,4 +27,4 @@
 
 ## 相关
 
-- → [ProgressionService](ProgressionService.md)
+- → [Wallet](Wallet.md) · [ProgressionService](ProgressionService.md)

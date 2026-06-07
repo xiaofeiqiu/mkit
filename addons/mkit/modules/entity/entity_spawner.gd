@@ -98,10 +98,15 @@ func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:
 func _initialize_abilities(entity: Node, definition: EntityDefinition) -> void:
 	if entity == null or definition == null:
 		return
+	var ability_ids: Array[String] = []
+	for ability_id in definition.starting_ability_ids:
+		var id := str(ability_id).strip_edges()
+		if id != "":
+			ability_ids.append(id)
+	if ability_ids.is_empty():
+		return
 	var abilities := EntityContract.get_controller(entity, "AbilityController") as AbilityController
 	if abilities == null:
 		return
-	for ability_id in definition.starting_ability_ids:
-		if str(ability_id).strip_edges() == "":
-			continue
+	for ability_id in ability_ids:
 		abilities.register_ability(ability_id)

@@ -1,7 +1,7 @@
 # DamageResolution
 
 **文件：** `addons/mkit/modules/combat/damage_resolution.gd`  
-**用途：** 伤害计算中间产物，携带命中判定与数值后的最终统计。
+**用途：** 伤害计算中间产物。由 `CombatService.resolve_damage_resolution()` 根据 `DamageIntent` 生成，携带命中判定、最终数值、状态应用与 trace。
 
 ## 字段
 
@@ -31,3 +31,4 @@
 
 - → [DamageIntent](DamageIntent.md)
 - → [DamageStatusApplication](DamageStatusApplication.md)
+- → [DamageApplication](DamageApplication.md)

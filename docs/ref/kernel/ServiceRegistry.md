@@ -6,7 +6,7 @@
 
 ## 职责
 
-全局服务定位器。唯一的 Autoload，持有所有服务的引用，供任何代码按 ID 获取。
+全局服务入口。唯一的 Autoload，持有兼容服务表，并在存在 `MkitRuntimeContext` 时把服务同步注册为 runtime ports。新代码通过 `get_port(ServiceRegistry.SERVICE_*)` 访问服务。
 
 ## 字段（public var）
 
@@ -16,7 +16,7 @@
 
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
-| `register_service(id: String, service: Object, class_name: String = "") -> void` | `void` | 注册服务；重复注册会替换并 warning |
+| `register_service(id: String, service: Object, class_name: String = "") -> void` | `void` | 注册服务；重复注册会替换并 warning；runtime context 存在时同步注册 port |
 | `has_service(id: String) -> bool` | `bool` | 检查服务是否已注册 |
 | `get_port(service_id: String, expected_class_name: String = "") -> Object` | `Object` | 优先入口。若 runtime_context 未就绪，退化为 `get_service_or_null` |
 | `get_port_ids() -> Array[String]` | `Array[String]` | 优先入口（从 runtime_context 读） |
@@ -25,7 +25,9 @@
 | `get_typed(id: String, class_name: String) -> Object` | `Object` | 同 get_service，附带类型名检查 |
 | `unregister_service(id: String) -> void` | `void` | 从注册表中移除（测试清理用）|
 | `clear() -> void` | `void` | 清空所有注册（仅测试用，**生产代码禁止调用**）|
-| `get_registered_service_ids() -> Array[String]` | `Array[String]` | 返回所有已注册 ID（按字母排序）|
+| `set_runtime_context(runtime_context: MkitRuntimeContext) -> void` | `void` | 注入当前 runtime context |
+| `get_runtime_context() -> MkitRuntimeContext` | `MkitRuntimeContext` | 读取当前 runtime context |
+| `get_registered_service_ids() -> Array[String]` | `Array[String]` | 返回兼容服务表 ID（按字母排序）|
 
 ## 使用模式
 
@@ -62,8 +64,9 @@ func _setup_test_registry() -> void:
 
 ## 说明
 
-- 新代码统一优先采用 `get_port(ServiceRegistry.SERVICE_*)`。
+- 新代码统一采用 `get_port(ServiceRegistry.SERVICE_*)`。
 - `get_service` / `get_service_or_null` / `get_typed` 保留历史兼容脚本，不作为默认入口。
+- `ui` 服务通常由场景里的 `UIManager` 自注册，不是 `GameBootstrap._build_kernel_services()` 的内置项。
 
 ## 相关
 

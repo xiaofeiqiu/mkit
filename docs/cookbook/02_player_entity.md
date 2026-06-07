@@ -13,7 +13,7 @@
 
 | 你写的 | mkit 处理的 |
 |--------|------------|
-| EntityRoot 场景树（固定布局） | `EntityRoot.get_component()` / `get_controller()` 快捷方法 |
+| EntityRoot 场景树（默认布局） | `EntityContract` / `EntityRoot.get_component()` / `get_controller()` 语义入口 |
 | `EntityIdentity` 设 `entity_id` | 自动生成唯一 ID（若留空）|
 | 继承 `State`，实现 `handle_command` / `enter` / `exit` / `update` | HFSM 层级路由、LCA transition |
 | 在 `StateMachine` 上设 `initial_state_path` | 自动在 `_ready` 时进入初始状态 |
@@ -26,7 +26,7 @@
 
 新建场景，根节点选 `EntityRoot`（或使用 CharacterBody2D 并附加 EntityRoot 脚本）。
 
-**固定布局（路径不能更改，模块通过此路径定位组件）：**
+**默认布局（模块通过 `EntityContract` 语义入口访问，布局仍应保持一致）：**
 
 ```
 PlayerEntity  (EntityRoot / CharacterBody2D)

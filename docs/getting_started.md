@@ -6,7 +6,7 @@
 
 ## 前置条件
 
-- Godot 4.4+
+- Godot 4.7-dev（本 repo 当前目标版本）
 - 一个空白 Godot 项目（或现有项目）
 
 ---
@@ -69,14 +69,14 @@ res://addons/mkit/
 Services online: ["actions", "ads", "analytics", "audio", "cloud_save",
   "commands", "combat", "content", "dialogue", "effects", "events",
   "iap", "loot", "pool", "progression", "quest", "random", "save",
-  "scenes", "shop", "time", "world", "ui"]
+  "scenes", "shop", "time", "world"]
 ```
 
-看到上述输出说明 Bootstrap 成功运行，所有服务在线。验证完成后删除临时代码即可。
+看到上述输出说明 Bootstrap 成功运行，内置服务在线。`ui` 服务由场景中的 `UIManager` 节点自注册，所以只有游戏场景包含 UIManager 且已进入该场景后才会出现。
 
-### 运行后建议的收口验证（阶段5）
+### 运行后建议的收口验证
 
-在改版收口阶段，建议额外跑三项门禁：
+改动 addon 代码或文档时，建议额外跑三项门禁：
 - `make ut`
 - `make int`
 - `make docs-check`
@@ -95,7 +95,7 @@ Services online: ["actions", "ads", "analytics", "audio", "cloud_save",
 
 ---
 
-## 5. 运行内置 Demo
+## 6. 运行内置 Demo
 
 mkit 附带一个可直接运行的 village RPG demo，覆盖了从战斗、技能、任务到存档的完整 RPG loop。
 
@@ -152,4 +152,4 @@ mkit 附带一个可直接运行的 village RPG demo，覆盖了从战斗、技�
 | 理解命令→状态→动作→效果管线 | [concepts.md](concepts.md) |
 | 按步骤构建完整 RPG | [cookbook/01_bootstrap.md](cookbook/01_bootstrap.md) |
 | 查术语定义 | [glossary.md](glossary.md) |
-| 查看阶段5收口计划 | `spec/implementation-plan.md` |
+| 对照大改架构目标 | `spec/architect.md` |

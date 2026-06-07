@@ -123,10 +123,10 @@ rng.set_seed(12345)    # 固定种子，每次运行结果相同
 | 技能按了没反应 | `AbilityController.get_cast_failure_reason(id, ctx)` | 冷却中、cost 不足、conditions 不满足、ability_id 未注册 |
 | Effect 执行了但没效果 | `EffectService.recent_results` 查失败条目 | `conditions` 未通过、`_apply_impl` 未 override、`context.target` 为 null |
 | 状态没切换 | `StateMachine.last_failed_transition_reason` | `can_enter()` 返回 false、路径拼错、HFSM 层级匹配不到 |
-| 动画不播 | `Presentation/AnimationPlayer` 是否存在；`anim.has_animation(name)` | 节点路径不符合实体约定；Action 中 `has_animation` 检查失败后静默跳过 |
+| 动画不播 | `Presentation/AnimationPlayer` 是否存在；`anim.has_animation(name)` | 默认表现节点缺失；Action 中 `has_animation` 检查失败后静默跳过 |
 | 存档读取后数据丢失 | `to_save_data()` 返回值；节点 `name` 与 save key 的匹配 | 忘记 override；`get_save_id()` 返回空串；节点 name 与存档 key 不匹配 |
-| 服务取到 null | `ServiceRegistry.has_service("id")` | Bootstrap 未运行；服务 ID 拼错；测试环境未注册 |
-| 实体组件找不到兄弟 | `owner.get_node_or_null("Components/XxxComponent")` | 节点路径不符合实体约定布局（EntityRoot / Components / Controllers / Presentation） |
+| 服务取到 null | `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` / `get_port_ids()` | Bootstrap 未运行；服务常量用错；测试环境未注册；UIManager 尚未进入场景自注册 |
+| 实体组件找不到兄弟 | `EntityContract.get_component(owner, "XxxComponent")` 的 warning | 默认布局缺少 `Components/` / `Controllers/` 成员，或节点不在 `EntityRoot` 下 |
 | Command 发出但无响应 | `CommandService.command_failed` 信号 | `target_id` 为空、接收方未注册、`receive_command` 返回 false |
 | Action 一直不结束 | `ActionService.active_actions` 列表 | `GameAction.complete()` 或 `cancel()` 未被调用；`_on_update` 判断条件有 bug |
 | ContentService 报 duplicate id | 启动日志 | 两个 `.tres` 的 `get_content_id()` 返回了相同字符串 |
@@ -142,4 +142,4 @@ rng.set_seed(12345)    # 固定种子，每次运行结果相同
 3. **状态响应**：打印 `sm.get_current_path()`，检查 `last_failed_transition_reason`
 4. **Effect 执行**：`EffectService.recent_results`，找 `success = false` 条目
 5. **事件发出**：`EventService.recent_events`，确认预期事件出现
-6. **表现层**：检查信号是否已连接，节点路径是否正确
+6. **表现层**：检查信号是否已连接，`EntityContract` / 导出 `NodePath` 是否正确

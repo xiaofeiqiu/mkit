@@ -1,6 +1,6 @@
 # 核心概念
 
-这一页只讲两件事：**mkit 长什么样（大局观）**，以及**一次操作如何在 kernel 里流动（管线）**。
+这一页讲三件事：**大改后的分层**、**mkit 长什么样（大局观）**，以及**一次操作如何在 kernel 里流动（管线）**。
 
 读完你能自信回答：「玩家按下一个键，到屏幕上掉血，中间发生了什么？我负责哪一段、mkit 负责哪一段？」
 
@@ -8,7 +8,45 @@
 
 ---
 
-## 一、大局观：mkit = 一条管线 + 一组服务
+## 一、大改后的分层
+
+当前代码已经落地了大改后的核心分层，但没有落地独立 `MkitModule` 声明文件或模块拓扑加载器。理解当前代码时按下面四层看：
+
+```mermaid
+flowchart TB
+    Game["🟢 Game Content\nres://game/\n场景、.tres 内容、具体任务/商店/房间/表现"]
+    Modules["🔵 Mkit Modules\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop、ui"]
+    Kernel["🔵 Kernel Runtime\naddons/mkit/kernel/\nMkitRuntimeContext、Command、StateMachine、Action、Effect、Event、Content、Save"]
+    Platform["⚙️ Platform Adapters\nAnalytics、Ads、IAP、CloudSave、Audio 后端/Mock"]
+
+    Game --> Modules
+    Game --> Kernel
+    Modules --> Kernel
+    Kernel --> Platform
+
+    classDef mkitCore fill:#4A90D9,color:#fff,stroke:#2C6FAC
+    classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
+    classDef platform fill:#6B7280,color:#fff,stroke:#4B5563
+    class Modules,Kernel mkitCore
+    class Game userOwned
+    class Platform platform
+```
+
+几条硬边界：
+
+| 主题 | 当前代码怎么做 |
+|------|----------------|
+| 服务访问 | `ServiceRegistry` 是唯一 autoload；`GameBootstrap` 创建 `MkitRuntimeContext`；新代码用 `get_port(ServiceRegistry.SERVICE_*)` |
+| 实体访问 | 默认仍有 `Components/` / `Controllers/`，但代码优先走 `EntityContract` |
+| 战斗 | 公开入口仍是 `DamageRequest` / `DamageResult`，内部已拆成 `DamageIntent` / `DamageResolution` / `DamageApplication` |
+| 可变数值 | 战斗资源用 `ResourceSet`，账号/货币用 `Wallet`，属性仍由 `StatsComponent` 管 modifier |
+| 存档 | `SaveService` 收集场景树 `Saveable`，也支持显式注册 save scope provider |
+
+不要把具体 boss、物品、任务、房间、商店价格或 demo 规则写进 `addons/mkit/`。这些属于 `game/`。
+
+---
+
+## 二、大局观：mkit = 一条管线 + 一组服务
 
 mkit 的核心只有一句话：
 
@@ -22,19 +60,20 @@ flowchart LR
         CMD["GameCommand\n「想做什么」"] --> ST["StateMachine\n「此刻能不能做」"]
         ST --> ACT["GameAction\n「带时序地做」"]
         ACT --> EFF["GameEffect\n「真正改变世界」"]
-        EFF --> EVT["DomainEvent\n「广播结果」"]
+        EFF --> DOM["Domain service / component\n「落到具体系统」"]
+        DOM --> EVT["DomainEvent\n「广播结果」"]
     end
     EVT --> OUT["🟢 UI / VFX / Audio"]
 
     classDef mkitCore fill:#4A90D9,color:#fff,stroke:#2C6FAC
     classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
-    class CMD,ST,ACT,EFF,EVT mkitCore
+    class CMD,ST,ACT,EFF,DOM,EVT mkitCore
     class IN,OUT userOwned
 ```
 
 两端是绿色——**意图从哪来、结果给谁看，都是你的代码**；中间整条管线是蓝色——**mkit 包办**。
 
-管线每一步都由一个对应的**服务（Service）**驱动，所有服务由唯一的 autoload `ServiceRegistry` 持有，按字符串 ID 随取随用：
+管线每一步都由一个对应的**服务（Service）**驱动。服务由唯一 autoload `ServiceRegistry` 暴露，实际运行期端口由 `MkitRuntimeContext` 持有；新代码用 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取，避免散落硬编码字符串：
 
 | 管线步骤 | 驱动它的服务 | 一句话 |
 |----------|-------------|--------|
@@ -64,7 +103,7 @@ flowchart LR
 外加两个贯穿全程的概念：
 
 - **GameplayContext** —— 沿管线传递的**共享信使**（谁打谁、多少伤害）。详见 [第四节](#四gameplaycontext流水线上的信使)。
-- **Service** —— 上面那组干活的机器，优先 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 取用；`get_service` 留给旧工程历史代码。
+- **Service / Port** —— 上面那组干活的机器，优先 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 取用；`get_service` 只作为兼容入口。
 
 ---
 
@@ -81,7 +120,7 @@ flowchart LR
    - 火球有 **前摇（`cast_time>0`）**→ 交给 `ActionService` 逐帧推进，前摇走完才继续；
    - 火球**即时**→ 同一帧 `start()` + `complete()`。
 5. `GameAction` 完成时，触发它的 `on_complete_effects`——也就是 `AbilityDefinition.effects` 里配好的那串 `GameEffect`。
-6. `EffectService` 逐个执行 effect。`DealDamageEffect` 读 `context`（谁打谁、多少），向 `CombatService` 提交 `DamageRequest`，拿回 `DamageResult`。
+6. `EffectService` 逐个执行 effect。`DealDamageEffect` 读 `context`（谁打谁、多少），向 `CombatService` 提交 `DamageRequest`；`CombatService` 内部转成 `DamageIntent`，结算出 `DamageResolution`，装配为 `DamageApplication`，最终返回 `DamageResult`。
 7. effect 通过 `EventService` 把结果广播成 `DomainEvent`（`damage_applied` / `entity_died`）。
 8. **你的 UI / 飘血数字 / 音效 / 镜头震动**订阅了这些信号 → 表现层响应。
 
@@ -121,6 +160,7 @@ sequenceDiagram
     ES->>GE: apply(ctx) → _apply_impl(ctx)
     Note over GE: 👇 你实现 _apply_impl
     GE->>Combat: resolve(DamageRequest)
+    Combat->>Combat: DamageIntent → DamageResolution → DamageApplication
     Combat-->>GE: DamageResult
     GE->>EV: emit_damage_applied(result)
     EV-->>You: damage_applied / entity_died 信号
@@ -139,7 +179,8 @@ sequenceDiagram
 | `cast()` → `GameAction` | 带时序的行为 | `ActionService` | 即时逻辑与有前摇/持续的行为统一成一个接口 |
 | `GameAction` 完成 → `_fire_effects` | effect 数组 | `EffectService` | **data-driven**：effects 在编辑器配置，无需写代码手动调用 |
 | `EffectService` → `_apply_impl` | `EffectResult` | 调用链 | 每个 effect 独立可测；condition 检查由 kernel 统一做 |
-| `GameEffect` → `EventService` | `DomainEvent` | 所有订阅者 | 执行（扣血）与表现（飘字/音效）彻底分离 |
+| `GameEffect` → domain component/service | typed result / state mutation | `HealthComponent`、`QuestService` 等 | effect 只负责把语义效果落到领域对象 |
+| domain component/service → `EventService` | `DomainEvent` / typed signal payload | 所有订阅者 | 执行（扣血）与表现（飘字/音效）彻底分离 |
 
 ### 3.4 即时 vs 前摇：为什么都包成 GameAction
 
@@ -248,7 +289,7 @@ var all_abilities := content.get_all_by_type("ability_definition")
 
 ---
 
-## 六、存档：两条契约
+## 六、存档：两条契约 + scope provider
 
 存档同样建立在「你只 override 两个方法，mkit 负责协调」之上。区别只在**谁来收集你**：
 
@@ -271,7 +312,7 @@ func from_save_data(data: Dictionary) -> void:
     level = int(data.get("level", 1))
 ```
 
-> 关键区别：`SaveService.save_game(root)` 会收集场景树中的 **`Saveable`** 节点，并保留 `save_scope` 字段用于场景树外恢复。`SaveableComponent`（如 `AbilityController`）提供了相同的序列化接口，但要被持久化，必须由它所属的 `Saveable` 实体主动收集——单独挂一个 `SaveableComponent` 不会自动进存档。完整时序见 [ref/kernel/SaveService.md](ref/kernel/SaveService.md)。
+> 关键区别：`SaveService.save_game(root)` 会收集场景树中的 **`Saveable`** 节点，并把它们写入 `payload` 与 `scopes`。`SaveableComponent`（如 `AbilityController`）提供相同序列化接口，但必须由所属 `Saveable` 实体主动收集。`RunDirector` / `WorldService` 这类需要脱离完整场景树恢复的对象，可以通过 `SaveService.register_saveable_scope(provider)` 显式注册 scope provider。完整时序见 [ref/kernel/SaveService.md](ref/kernel/SaveService.md)。
 
 ---
 

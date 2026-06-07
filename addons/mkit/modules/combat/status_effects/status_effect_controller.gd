@@ -198,7 +198,7 @@ func _resolve_source(source_id: String) -> Node:
 func _find_entity_by_id(node: Node, entity_id: String) -> Node:
 	if node == null:
 		return null
-	var identity := EntityContract.get_identity(node)
+	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
 	if identity != null and identity.entity_id == entity_id:
 		return node
 	for child in node.get_children():

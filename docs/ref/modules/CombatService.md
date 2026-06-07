@@ -7,13 +7,16 @@
 
 ## 职责
 
-伤害结算中枢。接收 `DamageRequest`，读取攻防双方 `StatsComponent`，按 `base → +攻击力 → ×伤害倍率 → 暴击 → -防御` 的顺序算出最终伤害，处理闪避与命中状态掷骰，返回带完整 `trace` 的 `DamageResult`。**只算数，不改血**（扣血由 `HealthComponent.apply_damage` 做）。
+伤害结算中枢。公开入口接收 `DamageRequest` 并返回 `DamageResult`；内部流程是 `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult`。结算会读取攻防双方 `StatsComponent`，处理闪避、暴击、防御和命中状态掷骰。**只算数，不改血**（扣血由 `HealthComponent.apply_damage` 做）。
 
 ## 方法
 
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
 | `resolve(request: DamageRequest) -> DamageResult` | `DamageResult` | 结算一次伤害，写满 `trace` 各阶段中间值 |
+| `resolve_damage_intent(request: DamageRequest) -> DamageIntent` | `DamageIntent` | 将公开请求转成内部意图 |
+| `resolve_damage_resolution(intent: DamageIntent) -> DamageResolution` | `DamageResolution` | 执行数值、闪避、暴击、防御和命中状态结算 |
+| `to_application(resolution: DamageResolution) -> DamageApplication` | `DamageApplication` | 将结算结果装配成可输出 `DamageResult` 的对象 |
 
 ## 结算公式（按序）
 
@@ -58,7 +61,7 @@ func _deal_custom_damage(attacker: Node, victim: Node) -> void:
     if result.was_evaded:
         print("闪避！")
         return
-    var health := victim.get_node_or_null("Components/HealthComponent") as HealthComponent
+    var health := EntityContract.get_component(victim, "HealthComponent") as HealthComponent
     if health != null:
         health.apply_damage(result)   # 这一步才真正扣血 + 发事件 + 挂中毒
     # 调试：看每阶段中间值
@@ -67,5 +70,5 @@ func _deal_custom_damage(attacker: Node, victim: Node) -> void:
 
 ## 相关
 
-- → [DamageRequest](DamageRequest.md) · [DamageResult](DamageResult.md) · [ref/modules/HealthComponent.md](HealthComponent.md)
+- → [DamageRequest](DamageRequest.md) · [DamageIntent](DamageIntent.md) · [DamageResolution](DamageResolution.md) · [DamageApplication](DamageApplication.md) · [DamageResult](DamageResult.md) · [ref/modules/HealthComponent.md](HealthComponent.md)
 - → [cookbook/03_health_and_stats.md](../../cookbook/03_health_and_stats.md) · [pipeline.md — Damage Resolution](../../pipeline.md#7-damage-resolution)

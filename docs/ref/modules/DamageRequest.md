@@ -6,7 +6,7 @@
 
 ## 职责
 
-一次伤害的**输入**。交给 `CombatService.resolve()` 得到 `DamageResult`。由 `HitboxComponent` / `DealDamageEffect` 构造，也可手动构造。
+一次伤害的公开**输入**。交给 `CombatService.resolve()` 后会先转成 `DamageIntent`，再结算为 `DamageResolution` / `DamageApplication`，最终得到 `DamageResult`。由 `HitboxComponent` / `DealDamageEffect` 构造，也可手动构造。
 
 ## 字段
 
@@ -39,3 +39,4 @@ var result := (ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as Comba
 ## 相关
 
 - → [CombatService](CombatService.md) · [DamageResult](DamageResult.md) · [DealDamageEffect](DealDamageEffect.md)
+- → [DamageIntent](DamageIntent.md) · [DamageResolution](DamageResolution.md) · [DamageApplication](DamageApplication.md)

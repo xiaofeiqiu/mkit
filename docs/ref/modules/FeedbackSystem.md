@@ -14,7 +14,7 @@
 |--------|------|--------|------|
 | `damage_number_system_path` | `NodePath`（@export）| 空 | `DamageNumberSystem` 路径 |
 | `vfx_spawner_path` | `NodePath`（@export）| 空 | `VFXSpawner` 路径 |
-| `audio_manager_path` | `NodePath`（@export）| 空 | `AudioService` 节点路径 |
+| `audio_manager_path` | `NodePath`（@export）| 空 | 可选的本地 `AudioService` 节点路径；不会自动从 `"audio"` 服务取 |
 | `ui_manager_path` | `NodePath`（@export）| 空 | `UIManager` 路径 |
 | `toast_screen_id` | `String`（@export）| `""` | toast screen id |
 | `damage_screen_shake_strength` | `float`（@export）| `0.0` | 伤害震动强度 |
@@ -59,4 +59,3 @@ func bind_feedback() -> void:
 
 - → [DamageNumberSystem](DamageNumberSystem.md) · [VFXSpawner](VFXSpawner.md) · [AudioService](../kernel/AudioService.md)
 - → [pipeline.md — Animation — 事件反馈通道](../../pipeline.md#11-animation--事件反馈通道) · [cookbook/13_animation.md](../../cookbook/13_animation.md)
-

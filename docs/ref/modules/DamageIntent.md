@@ -1,7 +1,7 @@
 # DamageIntent
 
 **文件：** `addons/mkit/modules/combat/damage_intent.gd`  
-**用途：** 伤害请求的中间意图模型，承载伤害前元数据与状态应用配置。
+**用途：** 伤害请求的中间意图模型。由 `CombatService.resolve_damage_intent()` 从 `DamageRequest` 生成，承载伤害前元数据与状态应用配置。
 
 ## 字段
 
@@ -29,3 +29,4 @@
 
 - → [DamageResolution](DamageResolution.md)
 - → [DamageApplication](DamageApplication.md)
+- → [DamageRequest](DamageRequest.md)

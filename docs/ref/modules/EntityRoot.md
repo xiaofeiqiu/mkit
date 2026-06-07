@@ -6,7 +6,7 @@
 
 ## 职责
 
-实体场景根节点的便捷基类。约定 `EntityIdentity` / `StateMachine` / `CommandReceiver` 为直接子节点，并提供 `get_component()` / `get_controller()` 快捷定位 `Components/` 与 `Controllers/` 下的兄弟节点。
+实体场景根节点的便捷基类。约定 `EntityIdentity` / `StateMachine` / `CommandReceiver` 为直接子节点，并提供 `get_component()` / `get_controller()` 定位 `Components/` 与 `Controllers/` 下的兄弟节点。跨模块代码优先通过 `EntityContract` 调用这些入口。
 
 ## 约定布局
 
@@ -33,8 +33,9 @@ EntityRoot
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
 | `get_entity_id() -> String` | `String` | `identity.entity_id`（无则节点名）|
-| `get_component(name) -> Node` | `Node` | `Components/<name>` |
-| `get_controller(name) -> Node` | `Node` | `Controllers/<name>` |
+| `get_component(name_or_script) -> Node` | `Node` | `Components/<name>` 或匹配脚本 |
+| `get_controller(name_or_script) -> Node` | `Node` | `Controllers/<name>` 或匹配脚本 |
+| `has_contract_node(container, member) -> bool` | `bool` | 检查默认契约容器内成员是否存在 |
 
 ## 使用模式
 
@@ -42,6 +43,7 @@ EntityRoot
 
 ```gdscript
 var hp := (entity as EntityRoot).get_component("HealthComponent") as HealthComponent
+var hp2 := EntityContract.get_component(entity, "HealthComponent") as HealthComponent
 ```
 
 ### 典型场景（Level 2）

@@ -13,7 +13,7 @@
 
 | 你写的 | mkit 处理的 |
 |--------|------------|
-| 新建 Bootstrap 场景，挂 `GameBootstrap` 节点 | 注册全部内置服务（events、actions、effects…）|
+| 新建 Bootstrap 场景，挂 `GameBootstrap` 节点 | 创建 `MkitRuntimeContext` 并注册全部内置 runtime ports（events、actions、effects…）|
 | 设 `resource_databases` 数组 | 加载并校验所有 ContentDefinition |
 | 设 `initial_scene_path` | 启动完成后切入游戏场景 |
 | （可选）继承 `GameBootstrap`，override `_register_kernel_services` 添加自定义服务 | 其余启动步骤 |
@@ -68,14 +68,14 @@ func _ready() -> void:
 
 
 func _verify_services() -> void:
-    var ids := ServiceRegistry.get_registered_service_ids()
+    var ids := ServiceRegistry.get_port_ids()
     print("=== mkit services online ===")
     for id in ids:
         print("  [OK] %s" % id)
     print("============================")
 
     # 如果需要在首屏显示服务列表：
-    if not ServiceRegistry.has_service("content"):
+    if ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) == null:
         push_error("ContentService missing — check GameBootstrap setup")
 ```
 

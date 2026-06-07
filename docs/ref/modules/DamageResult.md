@@ -6,7 +6,7 @@
 
 ## 职责
 
-一次伤害的**输出**。`CombatService.resolve()` 返回它，`HealthComponent.apply_damage()` 消费它并通过 `EventService.emit_damage_applied` 广播给表现层。
+一次伤害的公开**输出**。`CombatService.resolve()` 从 `DamageApplication.to_result()` 返回它，`HealthComponent.apply_damage()` 消费它并通过 `EventService.emit_damage_applied` 广播给表现层。
 
 ## 字段
 
@@ -42,4 +42,4 @@ events.damage_applied.connect(func(r: DamageResult):
 
 ## 相关
 
-- → [CombatService](CombatService.md) · [DamageRequest](DamageRequest.md) · [ref/kernel/EventService.md](../kernel/EventService.md)
+- → [CombatService](CombatService.md) · [DamageRequest](DamageRequest.md) · [DamageApplication](DamageApplication.md) · [ref/kernel/EventService.md](../kernel/EventService.md)

@@ -6,14 +6,14 @@
 
 ## 职责
 
-管理魔法/耐力等可消耗资源池，挂在 `Components/ResourcePoolComponent`。技能消耗（`AbilityController` 的 `cost_type`/`cost_amount`）走它。每个池的上限取自 `StatsComponent` 的 `max_<resource_id>`。
+管理魔法/耐力等可消耗资源池，挂在 `Components/ResourcePoolComponent`。内部用 `ResourceSet` 存当前值并通过 `StatsComponent.max_<resource_id>` 查询上限。技能消耗（`AbilityController` 的 `cost_type`/`cost_amount`）走它。
 
 ## 字段
 
 | 字段名 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
 | `starting_values` | `Dictionary`（@export）| `{}` | `resource_id → 初始值` |
-| `current_values` | `Dictionary` | `{}` | 当前各池值 |
+| `resources` | `ResourceSet` | `null` | 当前各池值与上限 provider |
 
 ## 方法
 
@@ -42,5 +42,5 @@ if pool.has_resource("mana", 20.0):
 
 ## 相关
 
-- → [ref/modules/AbilityController.md](AbilityController.md)（消耗它）· [ref/modules/StatsComponent.md](StatsComponent.md)（提供上限）
+- → [ResourceSet](ResourceSet.md) · [ref/modules/AbilityController.md](AbilityController.md)（消耗它）· [ref/modules/StatsComponent.md](StatsComponent.md)（提供上限）
 - → [cookbook/05_ability.md](../../cookbook/05_ability.md)

@@ -128,6 +128,15 @@ func test_tc_es_07_spawned_command_receiver_tracks_runtime_identity() -> void:
 	assert_false(router._receivers.has("scene.command.static"))
 
 
+func test_tc_es_08_spawned_entity_without_abilities_does_not_require_ability_controller() -> void:
+	_save_stats_scene()
+	var definition := _make_def("plain_entity", STATS_SCENE_PATH)
+	content._defs["plain_entity"] = definition
+	var entity := spawner.spawn_entity("plain_entity", parent_node)
+	assert_not_null(entity)
+	assert_false(entity.has_node("Controllers/AbilityController"))
+
+
 func _save_stats_scene() -> void:
 	var entity := EntityRoot.new()
 	entity.name = "StatsEntity"

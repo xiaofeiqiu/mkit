@@ -80,13 +80,13 @@ EnemyEntity
 
 ### 步骤 5：（替代路径）用伤害的 on_hit_statuses
 
-不想走技能 effect 链，也可以让普通攻击带毒。`DealDamageEffect` / `HitboxComponent` / `DamageRequest` 都有 `on_hit_statuses`（`Array[Dictionary]`）：
+不想走技能 effect 链，也可以让普通攻击带毒。`DealDamageEffect` / `HitboxComponent` / `DamageRequest` 都有 `on_hit_statuses`（`Array[Dictionary]`）。结算时它会进入 `DamageIntent.on_hit_statuses`：
 
 ```
 on_hit_statuses = [{"status_id": "status.poison", "chance": 0.5, "stacks": 1, "duration": -1.0}]
 ```
 
-`CombatService.resolve()` 按 `chance` 掷骰，命中则写进 `DamageResult.status_applications`，`HealthComponent.apply_damage()` 再转交 `StatusEffectController`。这条路适合"武器附带 X% 中毒"。
+`CombatService.resolve()` 按 `chance` 掷骰，命中则写进 `DamageResolution.applied_status_effects`，再映射到 `DamageResult.status_applications`，最后由 `HealthComponent.apply_damage()` 通过 `EntityContract.get_controller(..., "StatusEffectController")` 转交。这条路适合"武器附带 X% 中毒"。
 
 ## 运行验证
 

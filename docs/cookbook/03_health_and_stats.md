@@ -15,8 +15,8 @@
 |--------|------------|
 | 在 `Components/` 下添加 `StatsComponent` 节点，配置 `base_stats` | 属性修改器合并计算（flat / percent / override）|
 | 在 `Components/` 下添加 `HealthComponent` 节点，设 `current_hp` | 从 `StatsComponent.get_stat_value("max_hp")` 读上限；死亡后 `die()` |
-| 创建 `DealDamageEffect` 资源，配置 `base_amount` | 查找 `HealthComponent`，调用 `CombatService.resolve()` 计算最终伤害 |
-| 用 `EffectService.execute(effect, ctx)` 触发伤害 | 伤害结算、暴击、防御减免、广播 `damage_applied` 事件 |
+| 创建 `DealDamageEffect` 资源，配置 `base_amount` | 通过 `EntityContract` 查找 `HealthComponent`，调用 `CombatService.resolve()` 计算最终伤害 |
+| 用 `EffectService.execute(effect, ctx)` 触发伤害 | `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult`、暴击、防御、闪避、广播 `damage_applied` 事件 |
 | 订阅 `EventService.entity_died` 信号，处理死亡逻辑 | 广播 `entity_died` 事件 |
 
 ## 步骤
@@ -133,7 +133,7 @@ func _on_entity_died(entity_id: String, _entity_ref: Node) -> void:
 ```gdscript
 # 在玩家实体场景的 _ready 中
 func _ready() -> void:
-    var health := get_node("Components/HealthComponent") as HealthComponent
+    var health := EntityContract.get_component(self, "HealthComponent") as HealthComponent
     if health != null:
         health.died.connect(_on_player_died)
 
@@ -163,8 +163,8 @@ Entity died: player_12345               ← 10次后 HP 归零
 
 | 现象 | 原因 | 修复 |
 |------|------|------|
-| `DealDamageEffect` 执行失败，原因 `no_health_component` | `HealthComponent` 节点路径不对 | 确认节点路径为 `Components/HealthComponent` |
-| 伤害为 0 | `DamageResult.was_evaded = true` 或 base_amount = 0 | 检查 `DealDamageEffect.base_amount`；CombatService 默认不处理闪避 |
+| `DealDamageEffect` 执行失败，原因 `no_health_component` | `EntityContract` 找不到目标的 `HealthComponent` | 确认目标在 `EntityRoot` 下，且默认布局中存在 `Components/HealthComponent` |
+| 伤害为 0 | `DamageResult.was_evaded = true`、base_amount = 0 或防御抵消 | 检查 `DealDamageEffect.base_amount`、目标 `evade_chance` / `defense` 和 `DamageResult.trace` |
 | `entity_died` 未触发 | `HealthComponent.die()` 未被调用 | 确认 HP 确实降到 0；`die()` 内部有 `dead` 标记防止重复触发 |
 | `EventService` 为 null | Bootstrap 未运行 | 确认 Bootstrap 场景是第一个场景 |
 | 伤害一直相同，无暴击 | `StatsComponent` 中 `crit_chance` = 0 | 在 `base_stats` 里设 `"crit_chance": 0.3` |

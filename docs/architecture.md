@@ -1,17 +1,17 @@
 # Architecture
 
-Mkit 的三层模型、依赖规则、ServiceRegistry 模式、实体约定。读完能回答"我的代码放哪层、为什么"。
+Mkit 的当前分层模型、依赖规则、runtime port 模式、实体契约和启动边界。读完能回答"我的代码放哪层、为什么"。
 
 ---
 
-## 层模型
+## 当前层模型
 
 ```mermaid
 flowchart TB
     Game["**Game Content**\nres://game/\n你的场景、关卡、角色脚本\n.tres 配置资源"]
-    Modules["**Module Layer**\naddons/mkit/modules/\n战斗、任务、对话、房间、物品\nInventory、Progression、Shop…"]
-    Kernel["**Kernel Layer**\naddons/mkit/kernel/\nCommand / HFSM / Action / Effect / Event\nContentService / SaveService / ServiceRegistry…"]
-    Platform["**Platform Adapters**\n默认全部为 Mock\nAnalytics · IAP · Ads · CloudSave"]
+    Modules["**Mkit Modules**\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop…"]
+    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\nMkitRuntimeContext / Command / HFSM / Action / Effect / Event\nContentService / SaveService / ServiceRegistry"]
+    Platform["**Platform Adapters**\n默认 Mock，可替换后端\nAnalytics · IAP · Ads · CloudSave · Audio"]
 
     Game -->|"依赖"| Modules
     Game -->|"依赖"| Kernel
@@ -32,17 +32,34 @@ flowchart TB
 | 层 | 职责 | 路径 |
 |----|------|------|
 | **Game Content** | 你的游戏逻辑、场景、配置 | `res://game/` |
-| **Module Layer** | 可复用的游戏系统（战斗、任务、对话…） | `addons/mkit/modules/` |
-| **Kernel Layer** | 框架骨架（管线、服务注册、存档…） | `addons/mkit/kernel/` |
+| **Mkit Modules** | 可复用的游戏系统（战斗、任务、对话、世界、商店…） | `addons/mkit/modules/` |
+| **Kernel Runtime** | 框架骨架（runtime context、管线、服务注册、内容、存档…） | `addons/mkit/kernel/` |
 | **Platform Adapters** | 平台接口，开发期用 Mock | `addons/mkit/kernel/services/` |
 
 **依赖只能向下，不能反向。** kernel 不依赖任何 module；modules 不依赖 game。
 
 ---
 
-## ServiceRegistry 模式
+## 大改后已落地的核心边界
 
-`ServiceRegistry` 是整个框架唯一的 autoload。所有服务通过它注册和获取：
+当前实现已经从旧的"到处取字符串服务 + 直接找固定节点路径"收敛到以下边界：
+
+| 边界 | 当前实现 | 说明 |
+|------|----------|------|
+| Runtime port | `MkitRuntimeContext` + `ServiceRegistry.get_port(...)` | `ServiceRegistry` 仍是唯一 autoload，但服务访问优先走 runtime context |
+| 实体契约 | `EntityRoot` + `EntityContract` | `Components/`、`Controllers/` 是默认布局，模块代码优先通过契约入口取组件 |
+| 战斗结算 | `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult` | request/result 仍是公开入口，内部已拆成意图、结算、应用装配 |
+| 可变资源 | `ResourceSet` | mana/stamina 等当前值与上限查询统一为资源池模型 |
+| 货币 | `Wallet` | 货币从普通 Dictionary 语义收敛为离散余额模型 |
+| 存档 scope | `SaveService.register_saveable_scope(...)` + `Saveable.get_save_scopes()` | 场景树扫描仍可用，scope provider 支持无完整场景树恢复 |
+
+尚未落地：独立 `MkitModule` 声明文件、模块拓扑装配、拆分式 `EventBus` / `EventCatalog`。文档和代码不要把这些目标写成当前能力。
+
+---
+
+## ServiceRegistry / RuntimeContext 模式
+
+`ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 会创建 `MkitRuntimeContext`，并把内置服务注册为 runtime ports。新代码统一通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取服务：
 
 ```gdscript
 # 获取服务
@@ -92,20 +109,20 @@ ServiceRegistry.register_service("my_service", MyService.new())
 | `SERVICE_ADS` | `"ads"` | `AdServiceMock` | 广告（默认 Mock） |
 | `SERVICE_IAP` | `"iap"` | `IAPServiceMock` | 内购（默认 Mock） |
 | `SERVICE_CLOUD_SAVE` | `"cloud_save"` | `CloudSaveServiceMock` | 云存档（默认 Mock） |
-| `SERVICE_UI` | `"ui"` | `UIManager` | UIManager.open_screen 与 UI 生命周期 |
+| `SERVICE_UI` | `"ui"` | `UIManager` | UIManager.open_screen 与 UI 生命周期；由场景中的 UIManager 自注册 |
 
-> `"random"`, `"time"`, `"effects"`, `"combat"` 这四个服务是 `RefCounted`，不在场景树中，其余为 `Node`（`ServiceRegistry` 的子节点）。
+> `random`、`time`、`effects`、`combat`、`loot` 是 `RefCounted` 风格服务，不作为 `ServiceRegistry` 子节点加入场景树；大多数其他内置服务是 `Node` 并由 `GameBootstrap` 加到 `ServiceRegistry` 下。`ui` 不在 `GameBootstrap._build_kernel_services()` 中创建，通常由游戏场景里的 `UIManager` 节点自注册。
 
 ---
 
-## Definition / Instance / Controller / System 四分模式
+## Definition / Runtime / Component / Service 四分模式
 
 每个游戏系统的对象都遵循同一形状：
 
 | 角色 | 基类 | 生命周期 | 示例 |
 |------|------|----------|------|
 | **Definition** | `Resource` / `ContentDefinition` | 静态，编辑器配置，保存为 `.tres` | `AbilityDefinition` |
-| **Instance** | `RefCounted` | 运行时，每个实体持有一份 | `AbilityInstance` |
+| **Runtime / Instance** | `RefCounted` | 运行时，每个实体或系统持有一份 | `AbilityInstance`, `DamageIntent`, `Wallet` |
 | **Controller / Component** | `Node` / `SaveableComponent` | 挂在实体节点树上，生命周期绑定实体 | `AbilityController`, `HealthComponent` |
 | **System / Service** | `Node` / `RefCounted` | 全局单例，通过 ServiceRegistry 获取 | `CombatService`, `QuestService` |
 
@@ -114,8 +131,8 @@ ServiceRegistry.register_service("my_service", MyService.new())
 var def := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 var ability_def := def.get_resource("fireball") as AbilityDefinition
 
-# Controller — 从实体节点树查找
-var ability_ctrl := owner.get_node("Controllers/AbilityController") as AbilityController
+# Component / Controller — 从 EntityContract 语义入口查找
+var ability_ctrl := EntityContract.get_controller(owner, "AbilityController") as AbilityController
 
 # System — ServiceRegistry 获取
 var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
@@ -123,9 +140,9 @@ var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as Combat
 
 ---
 
-## 实体节点约定
+## 实体契约与默认节点布局
 
-每个游戏实体遵循固定的节点树结构，所有 module 组件都依赖此约定的路径：
+每个游戏实体仍建议遵循默认节点树结构，但模块间访问的语义入口是 `EntityContract`：
 
 ```
 EntityRoot                   ← 继承 EntityRoot，持有 entity_id
@@ -134,13 +151,11 @@ EntityRoot                   ← 继承 EntityRoot，持有 entity_id
     HealthComponent
     StatsComponent
     ResourcePoolComponent
-    StatusEffectController
     ExperienceComponent
     InventoryController
     AbilityController
     …
   Controllers/               ← 系统控制器（输入、AI、交互）
-    StateMachine
     InteractionComponent
     …
   Presentation/              ← 渲染与动画
@@ -148,15 +163,11 @@ EntityRoot                   ← 继承 EntityRoot，持有 entity_id
     Sprite2D / …
 ```
 
-**路径是合约**——module 组件默认通过固定布局约定访问，阶段性路径通过 `owner.get_node_or_null("Components/HealthComponent")` 等。  
-新接入代码优先通过 `EntityContract` 语义入口（`get_component` / `get_controller`）获取组件与控制器，避免直接依赖绝对路径。
+默认布局是可读约定，`EntityContract` 是代码访问合约。新接入代码优先通过 `EntityContract.get_component()` / `get_controller()` 获取组件与控制器，避免直接散落 `owner.get_node_or_null("Components/...")`。
 
 ```gdscript
-# 正确：通过 owner 按约定路径访问
-var health := owner.get_node_or_null("Components/HealthComponent") as HealthComponent
-
-# 推荐：通过 EntityContract 访问（可配置）
-var health2 := owner.get_component(HealthComponent)
+# 推荐：通过 EntityContract 访问
+var health := EntityContract.get_component(owner, "HealthComponent") as HealthComponent
 
 # 错误：硬编码绝对路径或依赖节点顺序
 var health := get_node("/root/World/Player/Components/HealthComponent")  # 脆弱
@@ -180,4 +191,4 @@ func _register_kernel_services() -> void:
 
 > `super()` 必须在自定义服务注册前调用，否则内置服务尚未就绪。
 
-> 模块迁移与发布说明统一收敛到本文与 [pipeline.md](pipeline.md)，并以 `spec/implementation-plan.md` 的里程碑完成记录为准。
+> 架构目标与当前实现差异以 `spec/architect.md` 为参考；本文描述的是当前代码已实现的运行时形态。

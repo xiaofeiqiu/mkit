@@ -1,6 +1,6 @@
 # Mkit
 
-Mkit 是一个面向 Godot 4.x 的可复用游戏运行时框架，专为 2D roguelike / RPG 设计——提供完整的命令→状态→动作→效果→事件管线，以及战斗、对话、任务、存档、房间等即插即用的游戏系统。
+Mkit 是一个面向 Godot 4.7-dev 的可复用游戏运行时框架，专为 2D roguelike / RPG 设计。它提供完整的命令→状态→动作→效果→事件管线，以及战斗、对话、任务、存档、房间、商店、世界与战利品等可复用游戏系统。
 
 ---
 
@@ -9,9 +9,9 @@ Mkit 是一个面向 Godot 4.x 的可复用游戏运行时框架，专为 2D rog
 ```mermaid
 flowchart TB
     Game["**Game Content**\nres://game/\n（你的关卡、角色、配置）"]
-    Modules["**Module Layer**\naddons/mkit/modules/\n（战斗、任务、对话、房间…）"]
-    Kernel["**Kernel Layer**\naddons/mkit/kernel/\n（命令、状态机、动作、效果、事件…）"]
-    Platform["**Platform Adapters**\nservices/mocks\n（Analytics、IAP、广告、云存档）"]
+    Modules["**Mkit Modules**\naddons/mkit/modules/\n（combat、quest、dialogue、world…）"]
+    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\n（runtime context、命令、状态机、动作、效果、事件、存档）"]
+    Platform["**Platform Adapters**\nservices mocks/backends\n（Analytics、IAP、Ads、CloudSave、Audio 后端）"]
 
     Game --> Modules
     Game --> Kernel
@@ -29,7 +29,9 @@ flowchart TB
 
 🟢 绿色 = 你实现 / 🔵 蓝色 = mkit 负责
 
-**依赖规则：** 依赖只能向下流动。`game/` 可以依赖 modules + kernel；modules 只依赖 kernel；kernel 不依赖任何上层。
+**依赖规则：** 依赖只能向下流动。`game/` 可以依赖 modules + kernel；modules 只依赖 kernel；kernel 不依赖任何上层。具体 boss、物品、房间、任务、商店价格、经济规则等内容必须留在 `game/`。
+
+当前代码已经完成大改后的核心分层：`ServiceRegistry` 是唯一 autoload，`GameBootstrap` 创建 `MkitRuntimeContext` 并把服务注册为 runtime ports；实体访问走 `EntityContract`；战斗结算拆成 `DamageIntent` / `DamageResolution` / `DamageApplication`；资源与货币分别由 `ResourceSet` / `Wallet` 承载；存档支持显式 save scope。
 
 ---
 
@@ -69,7 +71,7 @@ sequenceDiagram
     Note over FxSvc: kernel — 调度效果链，GameEffect 是抽象基类
 
     FxSvc->>CbtSvc: _apply_impl → resolve(DamageRequest)
-    Note over CbtSvc: module — 伤害结算<br/>DealDamageEffect._apply_impl【你实现】
+    Note over CbtSvc: module — DamageIntent → DamageResolution → DamageApplication<br/>DealDamageEffect._apply_impl【mkit 提供，可扩展】
 
     CbtSvc-->>FxSvc: EffectResult
 
@@ -80,7 +82,7 @@ sequenceDiagram
     Note over UI: module — 表现层响应【你实现订阅】
 ```
 
-**kernel 是管线的全部骨架**（Command / HFSM / Action / Effect / Event 均在 kernel）。`GameEffect._apply_impl` 是 kernel 穿透到 module 组件的唯一正规接缝，没有"Domain System"这层抽象——effects 直接通过节点路径或 ServiceRegistry 访问 module 组件。
+**kernel 是管线骨架**（Command / HFSM / Action / Effect / Event / RuntimeContext / Save 均在 kernel）。`GameEffect._apply_impl` 是 effect 落到具体领域的正规接缝；新代码优先通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`、`EntityContract`、typed context/result 对象访问领域系统，避免散落硬编码 service 字符串和绝对节点路径。
 
 ---
 
@@ -88,8 +90,9 @@ sequenceDiagram
 
 ```
 addons/mkit/
-  kernel/
+    kernel/
     bootstrap/        # GameBootstrap — 启动编排，注册所有服务
+    runtime/          # MkitRuntimeContext — runtime ports
     services/         # ServiceRegistry, TimeService, RandomService,
                       # SceneService, PoolService, AudioService,
                       # 平台适配器 (Analytics/IAP/Ads/CloudSave)
@@ -105,14 +108,15 @@ addons/mkit/
     debug/            # DebugOverlay
   modules/
     ai/               # Brain, SimpleAIEnemyBrain
-    combat/           # CombatService, DamageRequest, HealthComponent, StatsComponent,
+    combat/           # CombatService, DamageIntent/Resolution/Application,
+                      # ResourceSet, HealthComponent, StatsComponent,
                       # AbilityController, HitboxComponent, StatusEffectController…
-    entity/           # EntityRoot, EntityIdentity, EntitySpawner, EntityDefinition
+    entity/           # EntityRoot, EntityContract, EntityIdentity, EntitySpawner
     dialogue/         # DialogueService, DialogueDefinition, DialogueRuntime…
     quest/            # QuestService, QuestDefinition, QuestState…
     loot/             # LootService, LootTableDefinition, RewardSystem…
     inventory/        # InventoryController, InventoryModel, ItemDefinition…
-    progression/      # ProgressionService, ExperienceComponent, ExperienceCurve…
+    progression/      # ProgressionService, Wallet, ExperienceComponent, ExperienceCurve…
     shop/             # ShopService, ShopDefinition…
     world/            # WorldService, ZoneDefinition, DungeonGenerator, RunDirector…
     interaction/      # Interactable, InteractionComponent
@@ -130,7 +134,7 @@ res://game/           # 你的游戏内容（场景、配置 .tres、脚本）
 | 第一次接触，跑起来 | [getting_started.md](getting_started.md) |
 | 理解三层架构和依赖规则 | [architecture.md](architecture.md) |
 | 理解整条管线的"为什么" | [concepts.md](concepts.md) |
-| 了解阶段5收口路线图 | `spec/implementation-plan.md` |
+| 对照大改目标与当前实现 | `spec/architect.md` |
 | 查某个类的字段/方法 | [ref/kernel/](ref/kernel/GameBootstrap.md) 或 [ref/modules/](ref/modules/AbilityDefinition.md) |
 | 按步骤做一个完整 RPG | [cookbook/index.md](cookbook/index.md) |
 | 系统不按预期运行 | [debugging.md](debugging.md) |

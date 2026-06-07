@@ -265,9 +265,13 @@ func test_tc_svc_10_status_restore_rebinds_source_for_tick_effects() -> void:
 	(content._defs["status.mark"] as StatusEffectDefinition).effects_on_tick = [probe]
 	var source := _make_entity("Caster", "caster_001")
 	var entity := _make_entity("Target", "target_001")
+	_add_stats(entity)
 	var status := _add_status(entity)
+	var plain_node := Node.new()
+	plain_node.name = "PlainNode"
 	add_child_autofree(source)
 	add_child_autofree(entity)
+	add_child_autofree(plain_node)
 	assert_true(status.apply_status("status.mark", source, 1, 5.0))
 	var data := status.to_save_data()
 	var restored_entity := _make_entity("Restored", "target_002")

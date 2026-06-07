@@ -140,7 +140,7 @@ func _ready() -> void:
 
 func _on_player_died(_entity: Node) -> void:
     # 切到死亡状态、播放动画、显示 Game Over 等
-    var sm := get_node("StateMachine") as StateMachine
+    var sm := EntityContract.get_state_machine(self)
     if sm != null:
         sm.transition_to("Root/Dead")  # Recipe 04+ 再加 Dead 状态
 ```

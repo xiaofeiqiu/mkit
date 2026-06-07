@@ -33,7 +33,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var equip := player.get_node("Controllers/EquipmentController") as EquipmentController
+var equip := EntityContract.get_controller(player, "EquipmentController") as EquipmentController
 if equip.can_equip(sword, "weapon"):
     equip.equip(sword, "weapon")   # StatsComponent 自动加上武器词条
 ```

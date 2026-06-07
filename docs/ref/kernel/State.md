@@ -65,7 +65,7 @@ func _ready() -> void:
 
 func can_enter(_context: Dictionary = {}) -> bool:
     # 死亡时无法进入战斗状态
-    var health := owner_entity.get_node_or_null("Components/HealthComponent") as HealthComponent
+    var health := EntityContract.get_component(owner_entity, "HealthComponent") as HealthComponent
     return health != null and not health.dead
 
 

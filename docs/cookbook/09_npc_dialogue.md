@@ -108,7 +108,7 @@ PlayerEntity  (EntityRoot)
 func _process(_delta: float) -> void:
     # ...（移动/攻击输入）
     if Input.is_action_just_pressed("interact"):
-        var interaction := owner.get_node_or_null("InteractionComponent") as InteractionComponent
+        var interaction := EntityContract.get_controller(owner, "InteractionComponent") as InteractionComponent
         if interaction != null:
             if not interaction.try_interact():
                 # 附近没有可交互对象，或对方拒绝（conditions 不满足）

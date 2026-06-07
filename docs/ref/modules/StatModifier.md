@@ -33,7 +33,7 @@
 
 ```gdscript
 var mod := StatModifier.from_definition(mod_def, "buff.rage", 8.0)  # 8 秒后自动移除
-(entity.get_node("Components/StatsComponent") as StatsComponent).add_modifier(mod)
+(EntityContract.get_component(entity, "StatsComponent") as StatsComponent).add_modifier(mod)
 ```
 
 ## 相关

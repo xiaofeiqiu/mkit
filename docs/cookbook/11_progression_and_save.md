@@ -55,7 +55,7 @@
 ```gdscript
 # 挂在玩家实体上的脚本
 func _ready() -> void:
-    var xp := get_node_or_null("ExperienceComponent") as ExperienceComponent
+    var xp := EntityContract.get_component(self, "ExperienceComponent") as ExperienceComponent
     if xp == null:
         return
     xp.level_up.connect(func(old_level: int, new_level: int):
@@ -69,7 +69,7 @@ func _ready() -> void:
 
 
 func _on_entity_died(entity_id: String, entity_ref: Node, xp: ExperienceComponent) -> void:
-    var identity := entity_ref.get_node_or_null("EntityIdentity") as EntityIdentity if entity_ref != null else null
+    var identity := EntityContract.get_identity(entity_ref) if entity_ref != null else null
     # 只有敌人给经验
     if identity != null and identity.faction == "enemy":
         xp.add_xp(20)

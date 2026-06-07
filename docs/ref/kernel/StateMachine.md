@@ -57,7 +57,7 @@ func _on_dialogue_started(_dialogue_id: String) -> void:
     var player := get_tree().get_first_node_in_group("player")
     if player == null:
         return
-    var sm := player.get_node_or_null("StateMachine") as StateMachine
+    var sm := EntityContract.get_state_machine(player)
     if sm == null:
         return
 
@@ -71,7 +71,7 @@ func _on_dialogue_ended(_dialogue_id: String) -> void:
     var player := get_tree().get_first_node_in_group("player")
     if player == null:
         return
-    var sm := player.get_node_or_null("StateMachine") as StateMachine
+    var sm := EntityContract.get_state_machine(player)
     if sm == null:
         return
     sm.transition_to("Root/Idle")
@@ -92,7 +92,7 @@ func _is_player_in_combat() -> bool:
     var player := get_tree().get_first_node_in_group("player")
     if player == null:
         return false
-    var sm := player.get_node_or_null("StateMachine") as StateMachine
+    var sm := EntityContract.get_state_machine(player)
     if sm == null:
         return false
     return sm.get_current_path().begins_with("Root/Combat")

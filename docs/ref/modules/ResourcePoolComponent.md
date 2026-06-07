@@ -34,7 +34,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
+var pool := EntityContract.get_component(player, "ResourcePoolComponent") as ResourcePoolComponent
 # Inspector: starting_values = {"mana": 100.0}；StatsComponent.max_mana 决定上限
 if pool.has_resource("mana", 20.0):
     pool.spend("mana", 20.0)

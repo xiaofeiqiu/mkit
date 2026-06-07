@@ -32,7 +32,7 @@
 
 ```gdscript
 # 通常由 TimedAttackAction 控制；手动开关：
-var hitbox := player.get_node("Components/HitboxComponent") as HitboxComponent
+var hitbox := EntityContract.get_component(player, "HitboxComponent") as HitboxComponent
 hitbox.set_active(true)
 # ...active 窗口结束后
 hitbox.set_active(false)

@@ -34,7 +34,7 @@
 ```gdscript
 # 输入里触发
 if Input.is_action_just_pressed("interact"):
-    (player.get_node("InteractionComponent") as InteractionComponent).try_interact()
+    (EntityContract.get_controller(player, "InteractionComponent") as InteractionComponent).try_interact()
 ```
 
 ## 相关

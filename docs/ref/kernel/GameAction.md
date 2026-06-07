@@ -77,7 +77,7 @@ func _on_start() -> void:
     action_id = "spell_cast"
     cancel_tags = ["stun", "knockback", "death"]
     # 播放咏唱动画
-    var anim := context.source.get_node_or_null("Presentation/AnimationPlayer") as AnimationPlayer
+    var anim := EntityContract.get_contract_node(context.source, "Presentation", "AnimationPlayer") as AnimationPlayer
     if anim != null and anim.has_animation("cast"):
         anim.play("cast")
 
@@ -89,7 +89,7 @@ func _on_update(delta: float) -> void:
 
 func _on_cancel(reason: String) -> void:
     # 打断咏唱，停止动画
-    var anim := context.source.get_node_or_null("Presentation/AnimationPlayer") as AnimationPlayer
+    var anim := EntityContract.get_contract_node(context.source, "Presentation", "AnimationPlayer") as AnimationPlayer
     if anim != null:
         anim.stop()
 

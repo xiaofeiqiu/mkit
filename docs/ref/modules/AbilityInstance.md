@@ -34,7 +34,7 @@
 
 ```gdscript
 # 一般不直接构造，由 AbilityController.register_ability 创建并管理
-var ctrl := player.get_node("Controllers/AbilityController") as AbilityController
+var ctrl := EntityContract.get_controller(player, "AbilityController") as AbilityController
 print(ctrl.get_cooldown_remaining("fireball"))
 ```
 

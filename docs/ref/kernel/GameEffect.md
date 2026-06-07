@@ -56,7 +56,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
     if target == null:
         return EffectResult.fail(effect_id, "no_target")
 
-    var stats := target.get_node_or_null("Components/StatsComponent") as StatsComponent
+    var stats := EntityContract.get_component(target, "StatsComponent") as StatsComponent
     if stats == null:
         return EffectResult.fail(effect_id, "no_stats_component")
 

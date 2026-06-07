@@ -60,7 +60,7 @@
 
 ```gdscript
 func _ready() -> void:
-    var pool := get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
+    var pool := EntityContract.get_component(self, "ResourcePoolComponent") as ResourcePoolComponent
     if pool != null:
         pool.add_pool("mana", 100.0, 100.0)
 ```
@@ -94,7 +94,7 @@ func _try_cast_ability(command: GameCommand) -> bool:
     if ability_id == "":
         return false
 
-    var ctrl := owner_entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+    var ctrl := EntityContract.get_controller(owner_entity, "AbilityController") as AbilityController
     if ctrl == null:
         return false
 
@@ -130,7 +130,7 @@ if Input.is_action_just_pressed("ability_1"):
 
 ```gdscript
 # 在 AbilityController 信号连接处：
-var ctrl := get_node("Controllers/AbilityController") as AbilityController
+var ctrl := EntityContract.get_controller(self, "AbilityController") as AbilityController
 ctrl.ability_failed.connect(func(id: String, reason: String) -> void:
     print("Ability %s failed: %s" % [id, reason])
 )

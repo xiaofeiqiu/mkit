@@ -41,7 +41,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var ctrl := player.get_node("Controllers/AbilityController") as AbilityController
+var ctrl := EntityContract.get_controller(player, "AbilityController") as AbilityController
 var ctx := GameplayContext.new()
 ctx.source = player
 ctx.target = enemy
@@ -54,7 +54,7 @@ ctrl.cast("fireball", ctx)
 ```gdscript
 # 在 State 里施放，覆盖成功与失败两条路径
 func _try_cast(ability_id: String, target: Node) -> bool:
-    var ctrl := owner_entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+    var ctrl := EntityContract.get_controller(owner_entity, "AbilityController") as AbilityController
     if ctrl == null:
         return false
     var ctx := GameplayContext.new()
@@ -71,7 +71,7 @@ func _try_cast(ability_id: String, target: Node) -> bool:
 
 
 func _ready() -> void:
-    var ctrl := owner_entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+    var ctrl := EntityContract.get_controller(owner_entity, "AbilityController") as AbilityController
     if ctrl != null:
         ctrl.ability_failed.connect(func(id: String, reason: String):
             push_warning("%s 施放失败: %s" % [id, reason])

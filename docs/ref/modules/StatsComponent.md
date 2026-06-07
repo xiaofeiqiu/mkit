@@ -36,7 +36,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var stats := player.get_node("Components/StatsComponent") as StatsComponent
+var stats := EntityContract.get_component(player, "StatsComponent") as StatsComponent
 print(stats.get_stat_value("attack_power"))
 stats.set_base_stat("max_hp", 150.0)
 ```
@@ -46,7 +46,7 @@ stats.set_base_stat("max_hp", 150.0)
 ```gdscript
 # 临时 buff：限时加攻击力，结束自动回落
 func apply_rage(entity: Node, seconds: float) -> void:
-    var stats := entity.get_node_or_null("Components/StatsComponent") as StatsComponent
+    var stats := EntityContract.get_component(entity, "StatsComponent") as StatsComponent
     if stats == null:
         return
     var mod_def := StatModifierDefinition.new()

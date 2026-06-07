@@ -40,7 +40,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var hp := enemy.get_node("Components/HealthComponent") as HealthComponent
+var hp := EntityContract.get_component(enemy, "HealthComponent") as HealthComponent
 hp.died.connect(func(_e: Node): print("敌人死亡"))
 ```
 
@@ -49,7 +49,7 @@ hp.died.connect(func(_e: Node): print("敌人死亡"))
 ```gdscript
 # 监听血量做血条 + 死亡处理
 func _ready() -> void:
-    var hp := owner.get_node_or_null("Components/HealthComponent") as HealthComponent
+    var hp := EntityContract.get_component(owner, "HealthComponent") as HealthComponent
     if hp == null:
         return
     hp.health_changed.connect(_on_health_changed)
@@ -62,7 +62,7 @@ func _on_health_changed(current: float, max_value: float) -> void:
 
 func _on_died(_entity: Node) -> void:
     # destroy_on_death=false 时这里自己处理（播死亡动画后再 free）
-    var anim := owner.get_node_or_null("Presentation/AnimationPlayer") as AnimationPlayer
+    var anim := EntityContract.get_contract_node(owner, "Presentation", "AnimationPlayer") as AnimationPlayer
     if anim != null and anim.has_animation("death"):
         anim.play("death")
         await anim.animation_finished

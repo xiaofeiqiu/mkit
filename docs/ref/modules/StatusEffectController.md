@@ -26,7 +26,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var ctrl := enemy.get_node("Controllers/StatusEffectController") as StatusEffectController
+var ctrl := EntityContract.get_controller(enemy, "StatusEffectController") as StatusEffectController
 ctrl.apply_status("status.poison", attacker, 1, -1.0)
 ```
 
@@ -35,7 +35,7 @@ ctrl.apply_status("status.poison", attacker, 1, -1.0)
 ```gdscript
 # 施加状态并在结束时反馈；两条入口对照
 func poison_and_watch(target: Node, attacker: Node) -> void:
-    var ctrl := target.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+    var ctrl := EntityContract.get_controller(target, "StatusEffectController") as StatusEffectController
     if ctrl == null:
         push_warning("目标无 StatusEffectController")   # 失败路径
         return

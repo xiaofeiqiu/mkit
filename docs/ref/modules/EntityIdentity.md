@@ -31,7 +31,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var idn := entity.get_node("EntityIdentity") as EntityIdentity
+var idn := EntityContract.get_identity(entity)
 if idn.is_faction("enemy"):
     print("敌对：%s" % idn.entity_id)
 ```

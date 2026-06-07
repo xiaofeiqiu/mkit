@@ -34,7 +34,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var inv := player.get_node("Controllers/InventoryController") as InventoryController
+var inv := EntityContract.get_controller(player, "InventoryController") as InventoryController
 inv.add_item(ItemInstance.create("item.potion", 1))
 ```
 
@@ -43,7 +43,7 @@ inv.add_item(ItemInstance.create("item.potion", 1))
 ```gdscript
 # 加物品并处理"放不下"
 func give_item(player: Node, item_id: String, qty: int) -> bool:
-    var inv := player.get_node_or_null("Controllers/InventoryController") as InventoryController
+    var inv := EntityContract.get_controller(player, "InventoryController") as InventoryController
     if inv == null:
         return false
     var item := ItemInstance.create(item_id, qty)

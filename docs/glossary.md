@@ -12,7 +12,7 @@
 
 **AbilityInstance**：运行时每个实体持有的技能状态对象（冷却计时器、当前 charges），由 `AbilityController` 管理。→ [ref/modules/AbilityInstance.md](ref/modules/AbilityInstance.md)
 
-**AbilityController**：挂在实体 `Components/` 下的节点，管理该实体所有技能的注册、cast 触发、冷却 tick。→ [ref/modules/AbilityController.md](ref/modules/AbilityController.md)
+**AbilityController**：挂在实体 `Controllers/` 下的节点，管理该实体所有技能的注册、cast 触发、冷却 tick。→ [ref/modules/AbilityController.md](ref/modules/AbilityController.md)
 
 **ActionContext**：`GameAction` 运行期间持有的上下文对象（source 实体、target、关联 `GameplayContext`）。→ [ref/kernel/ActionContext.md](ref/kernel/ActionContext.md)
 
@@ -128,7 +128,7 @@
 
 **Platform Adapter**：隔离平台相关服务的接口层（`AnalyticsService`、`IAPService`、`AdService`、`CloudSaveService`），开发期默认注册 Mock 实现，发布时替换为真实 SDK。
 
-**Presentation/AnimationPlayer**：实体节点树中 `Presentation/` 下的固定路径节点，是 `GameAction` 驱动动画的接缝——Action 通过 `owner.get_node_or_null("Presentation/AnimationPlayer")` 访问它。
+**Presentation/AnimationPlayer**：实体节点树中 `Presentation/` 下的默认动画接缝节点，是 `GameAction` 驱动动画的接缝——新代码通过 `EntityContract.get_contract_node(entity, "Presentation", "AnimationPlayer")` 访问它。
 
 ---
 

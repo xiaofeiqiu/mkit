@@ -269,7 +269,7 @@ class_name DashState
 extends State
 
 func can_enter(context: Dictionary = {}) -> bool:
-    var health := owner_entity.get_node_or_null("Components/HealthComponent") as HealthComponent
+    var health := EntityContract.get_component(owner_entity, "HealthComponent") as HealthComponent
     if health == null or health.current_hp <= 0.0:
         return false   # 死亡时不能进入 Dash
     return true
@@ -283,7 +283,7 @@ func exit(context: Dictionary = {}) -> void:
 
 ```gdscript
 # 监听 transition 失败
-var sm := entity.get_node("StateMachine") as StateMachine
+var sm := EntityContract.get_state_machine(entity)
 sm.transition_failed.connect(func(from: String, to: String, reason: String) -> void:
     print("TRANSITION FAILED: %s → %s  [%s]" % [from, to, reason])
 )
@@ -358,7 +358,7 @@ func handle_command(command: GameCommand) -> bool:
     if command.command_type != "cast_ability":
         return false
     var ability_id := command.get_string("ability_id")
-    var ac := owner_entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+    var ac := EntityContract.get_controller(owner_entity, "AbilityController") as AbilityController
     if ac == null:
         return false
     var ctx := GameplayContext.from_command(command, owner_entity, null)
@@ -371,7 +371,7 @@ func handle_command(command: GameCommand) -> bool:
 
 ```gdscript
 # 监听技能失败原因
-var ac := entity.get_node("Controllers/AbilityController") as AbilityController
+var ac := EntityContract.get_controller(entity, "AbilityController") as AbilityController
 ac.ability_failed.connect(func(id: String, reason: String) -> void:
     print("ability FAILED: %s  reason=%s" % [id, reason])
     # 常见 reason：on_cooldown、insufficient_mana、not_registered
@@ -432,7 +432,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
     var source := context.source
     if source == null:
         return EffectResult.fail(effect_id, "no_source")
-    var health := source.get_node_or_null("Components/HealthComponent") as HealthComponent
+    var health := EntityContract.get_component(source, "HealthComponent") as HealthComponent
     if health == null:
         return EffectResult.fail(effect_id, "no_health_component")
     health.heal(25.0)
@@ -644,7 +644,7 @@ spawner.entity_spawn_failed.connect(func(def_id: String, reason: String) -> void
 )
 var enemy := spawner.spawn_entity("enemy.field_beast", $Enemies, Vector2(120, 80))
 if enemy != null:
-    print("spawned: %s" % (enemy.get_node("EntityIdentity") as EntityIdentity).entity_id)
+    print("spawned: %s" % EntityContract.get_entity_id(enemy))
 ```
 
 ### 相关文档
@@ -686,7 +686,7 @@ extends GameAction
 
 func _on_start() -> void:
     action_id = "spin"
-    var anim := context.source.get_node_or_null("Presentation/AnimationPlayer") as AnimationPlayer
+    var anim := EntityContract.get_contract_node(context.source, "Presentation", "AnimationPlayer") as AnimationPlayer
     if anim != null and anim.has_animation("spin"):
         anim.play("spin")
 ```
@@ -999,7 +999,7 @@ flowchart TB
 ```gdscript
 # 击杀给 XP（自己接线）
 events.entity_died.connect(func(_id: String, ref: Node) -> void:
-    var idn := ref.get_node_or_null("EntityIdentity") as EntityIdentity if ref != null else null
+    var idn := EntityContract.get_identity(ref) if ref != null else null
     if idn != null and idn.faction == "enemy":
         ($Player/ExperienceComponent as ExperienceComponent).add_xp(20)
 )
@@ -1097,7 +1097,7 @@ flowchart TB
 
 ```gdscript
 # 直接施加（绕过技能）
-var ctrl := $Enemy/Controllers/StatusEffectController as StatusEffectController
+var ctrl := EntityContract.get_controller($Enemy, "StatusEffectController") as StatusEffectController
 ctrl.apply_status("status.poison", $Player, 1, -1.0)   # source, stacks, duration_override
 ctrl.status_removed.connect(func(id: String): print("状态结束: %s" % id))
 ```

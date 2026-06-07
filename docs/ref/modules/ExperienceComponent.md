@@ -34,7 +34,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var xp := player.get_node("ExperienceComponent") as ExperienceComponent
+var xp := EntityContract.get_component(player, "ExperienceComponent") as ExperienceComponent
 xp.level_up.connect(func(o: int, n: int): print("升级 %d→%d" % [o, n]))
 xp.add_xp(50)
 ```

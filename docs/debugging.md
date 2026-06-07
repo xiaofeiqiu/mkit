@@ -86,7 +86,7 @@ print(result.trace)
 ### StateMachine 诊断
 
 ```gdscript
-var sm := entity.get_node("StateMachine") as StateMachine
+var sm := EntityContract.get_state_machine(entity)
 
 # 当前状态完整路径
 print(sm.get_current_path())           # "Root/Combat/Attack"
@@ -137,7 +137,7 @@ rng.set_seed(12345)    # 固定种子，每次运行结果相同
 
 遇到"系统不动"时，按顺序检查：
 
-1. **服务在线**：`ServiceRegistry.has_service("xxx")` → 若 false，Bootstrap 未运行或服务 ID 拼错
+1. **服务在线**：`ServiceRegistry.get_port(ServiceRegistry.SERVICE_*) != null` → 若为 null，Bootstrap 未运行或服务常量用错
 2. **命令到达**：订阅 `CommandService.command_dispatched` / `command_failed`，确认命令被发出且被路由
 3. **状态响应**：打印 `sm.get_current_path()`，检查 `last_failed_transition_reason`
 4. **Effect 执行**：`EffectService.recent_results`，找 `success = false` 条目

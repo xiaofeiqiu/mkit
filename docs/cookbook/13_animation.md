@@ -65,12 +65,12 @@ PlayerEntity  (EntityRoot)
 # PlayerMoveState.enter 里
 func enter(context: Dictionary = {}) -> void:
     _direction = context.get("direction", Vector2.ZERO)
-    var anim := owner_entity.get_node_or_null("Presentation/AnimationPlayer") as AnimationPlayer
+    var anim := EntityContract.get_contract_node(owner_entity, "Presentation", "AnimationPlayer") as AnimationPlayer
     if anim != null and anim.has_animation("move"):
         anim.play("move")
 ```
 
-> 自定义动作也一样：在你的 `GameAction._on_start()` 里 `context.source.get_node_or_null("Presentation/AnimationPlayer")` 然后 `play()`。
+> 自定义动作也一样：在你的 `GameAction._on_start()` 里用 `EntityContract.get_contract_node(context.source, "Presentation", "AnimationPlayer")` 取动画节点然后 `play()`。
 
 ### 步骤 3：通道 B — 搭 FeedbackSystem + 子系统
 

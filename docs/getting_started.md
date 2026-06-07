@@ -55,7 +55,7 @@ res://addons/mkit/
 
    ```gdscript
    func _ready() -> void:
-       var ids := ServiceRegistry.get_registered_service_ids()
+       var ids := ServiceRegistry.get_port_ids()
        print("Services online: ", ids)
    ```
 

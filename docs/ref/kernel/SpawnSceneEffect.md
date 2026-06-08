@@ -20,7 +20,7 @@
 
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
-| `_apply_impl(context) -> EffectResult` | `EffectResult` | 生成实例；若实例有 `set_direction` 且 `context.direction != 0` 则调用之 |
+| `_apply_impl(context) -> EffectResult` | `EffectResult` | 生成实例；若实例有 `set_direction` 且 `context.direction != 0` 则调用之；成功 payload 含 `spawned`、`pooled`、`instance` |
 
 ## 使用模式
 

@@ -44,4 +44,4 @@ if not scenes.change_scene("res://game/scenes/level_2.tscn"):
 ## 相关
 
 - → [GameBootstrap](GameBootstrap.md)（进入初始场景）· [ref/modules/WorldService.md](../modules/WorldService.md)
-- → [pipeline.md — Scene / Zone Transition](../../pipeline.md#20-scene--zone-transition)
+- → [pipeline.md — Scene / Zone Transition](../../pipeline.md#20-scene--zone-transition) · [cookbook/15_world_zone_transition.md](../../cookbook/15_world_zone_transition.md)

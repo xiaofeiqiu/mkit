@@ -15,10 +15,11 @@
 | `zone_id` | `String` | `""` | 唯一 id |
 | `display_name` | `String` | `""` | 显示名 |
 | `scene_path` | `String` | `""` | 区域场景 |
-| `bgm_id` | `String` | `""` | 进入时播放的音乐 id（`AudioService.music_map`）|
+| `bgm_id` | `String` | `""` | 进入时播放的音乐 id；通常匹配 `AudioDefinition.audio_id` |
 | `default_spawn_id` | `String` | `"default"` | 默认出生点 |
 | `tags` | `Array[String]` | `[]` | 标签 |
 
 ## 相关
 
-- → [WorldService](WorldService.md) · [SpawnPoint](SpawnPoint.md)
+- → [WorldService](WorldService.md) · [SpawnPoint](SpawnPoint.md) · [AudioDefinition](../kernel/AudioDefinition.md)
+- → [cookbook/15_world_zone_transition.md](../../cookbook/15_world_zone_transition.md)

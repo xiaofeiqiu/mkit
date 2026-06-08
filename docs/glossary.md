@@ -18,6 +18,10 @@
 
 **ActionService**：管理所有 `GameAction` 生命周期的 kernel 服务，通过 `"actions"` ID 获取。→ [ref/kernel/ActionService.md](ref/kernel/ActionService.md)
 
+**AudioDefinition**：音频内容定义资源，把 `audio_id` 绑定到 `AudioStream`，并声明它是 SFX 还是 BGM；随 `ResourceDatabase` 加载后由 `GameBootstrap` 注册到 `AudioService`。→ [ref/kernel/AudioDefinition.md](ref/kernel/AudioDefinition.md)
+
+**AudioService**：全局音频服务，播放一次性音效和背景音乐，并持久化音频总线音量。→ [ref/kernel/AudioService.md](ref/kernel/AudioService.md)
+
 ---
 
 ## B

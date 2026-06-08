@@ -3,6 +3,7 @@ extends GutTest
 
 const SCENE_TARGET_PATH := "res://test/integration/tmp_mkit_int_scene_router_target.tscn"
 const MODAL_SCREEN_PATH := "res://test/integration/tmp_mkit_int_modal_screen.tscn"
+const SAVE_PATH := "/tmp/mkit_ui_interaction_ai_scene_integration_save.json"
 
 
 class RecordingReceiver:
@@ -39,6 +40,7 @@ func after_each() -> void:
 	_cleanup_current_scene()
 	IntTestHelpers.remove_file(SCENE_TARGET_PATH)
 	IntTestHelpers.remove_file(MODAL_SCREEN_PATH)
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -185,6 +187,7 @@ func test_tc_int_ui_05_ui_manager_registers_ui_service() -> void:
 
 func _boot_runtime() -> GameBootstrap:
 	var bootstrap := GameBootstrap.new()
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 	return bootstrap
 

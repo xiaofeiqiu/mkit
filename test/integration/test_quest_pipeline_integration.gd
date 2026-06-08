@@ -12,6 +12,7 @@ func after_each() -> void:
 func test_tc_int_quest_01_bootstrap_combat_reward_and_save_roundtrip() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [IntTestHelpers.make_quest_pipeline_database()]
+	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
 
 	var quest := ServiceRegistry.get_service("quest") as QuestService

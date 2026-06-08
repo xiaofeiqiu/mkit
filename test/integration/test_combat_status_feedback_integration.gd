@@ -1,6 +1,9 @@
 extends GutTest
 
 
+const SAVE_PATH := "/tmp/mkit_combat_status_feedback_integration_save.json"
+
+
 class FixedRandom:
 	extends RandomService
 	var fixed_value: float = 0.0
@@ -59,6 +62,7 @@ const STATUS_ID := "status.int.defense_down"
 
 
 func after_each() -> void:
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -231,6 +235,7 @@ func test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target()
 func _boot_with_database(database: ResourceDatabase) -> GameBootstrap:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [database]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 	return bootstrap
 

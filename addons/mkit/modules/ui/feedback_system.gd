@@ -18,7 +18,7 @@ var ui: UIManager
 func _ready() -> void:
 	damage_numbers = get_node_or_null(damage_number_system_path) as DamageNumberSystem
 	vfx = get_node_or_null(vfx_spawner_path) as VFXSpawner
-	audio = get_node_or_null(audio_manager_path) as AudioService
+	audio = _resolve_audio()
 	ui = get_node_or_null(ui_manager_path) as UIManager
 	var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
 	if events != null:
@@ -35,6 +35,14 @@ func show_toast(message: String) -> Node:
 
 func request_screen_shake(strength: float = 1.0) -> void:
 	screen_shake_requested.emit(strength)
+
+
+func _resolve_audio() -> AudioService:
+	if str(audio_manager_path) != "":
+		var local_audio := get_node_or_null(audio_manager_path) as AudioService
+		if local_audio != null:
+			return local_audio
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
 
 
 func _on_damage_applied(result) -> void:

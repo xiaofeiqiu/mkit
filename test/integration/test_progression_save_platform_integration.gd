@@ -227,6 +227,7 @@ func _boot_with_database(database: ResourceDatabase) -> GameBootstrap:
 	var bootstrap := GameBootstrap.new()
 	var databases: Array[ResourceDatabase] = [database]
 	bootstrap.resource_databases = databases
+	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
 	return bootstrap
 

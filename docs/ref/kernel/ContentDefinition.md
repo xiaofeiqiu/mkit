@@ -6,7 +6,7 @@
 
 ## 职责
 
-所有"可配置内容"的基类。任何要被 `ContentService` 按 id 查询的 `.tres`（技能、物品、房间、任务、对话…）都继承它，并 override `get_content_id()` 返回唯一字符串。
+所有"可配置内容"的基类。任何要被 `ContentService` 按 id 查询的 `.tres`（技能、物品、房间、任务、对话、音频…）都继承它，并 override `get_content_id()` 返回唯一字符串。
 
 ## 方法
 

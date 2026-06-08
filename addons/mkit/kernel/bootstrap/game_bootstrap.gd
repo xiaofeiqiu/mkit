@@ -2,6 +2,7 @@ class_name GameBootstrap
 extends Node
 @export var resource_databases: Array[ResourceDatabase] = []
 @export var initial_scene_path: String = ""
+@export var save_path: String = ""
 var _runtime_context: MkitRuntimeContext = null
 
 
@@ -13,6 +14,7 @@ func boot() -> void:
 	_runtime_context = MkitRuntimeContext.new()
 	_register_kernel_services()
 	_load_content()
+	_configure_content_services()
 	_validate_content()
 	_load_profile()
 	_enter_initial_scene.call_deferred()
@@ -211,6 +213,18 @@ func _load_content() -> void:
 			registry.load_database(db)
 
 
+func _configure_content_services() -> void:
+	_register_audio_definitions()
+
+
+func _register_audio_definitions() -> void:
+	var registry := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var audio := ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
+	if registry == null or audio == null:
+		return
+	audio.register_audio_definitions(registry.get_all_by_type(AudioDefinition.TYPE_NAME))
+
+
 func _validate_content() -> void:
 	var registry := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if registry == null:
@@ -225,6 +239,8 @@ func _load_profile() -> void:
 	var save_manager := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
 	if save_manager == null:
 		return
+	if save_path != "":
+		save_manager.save_path = save_path
 	var tree := get_tree()
 	if tree != null and FileAccess.file_exists(save_manager.save_path):
 		save_manager.load_game(tree.root)

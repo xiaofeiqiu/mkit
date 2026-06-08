@@ -28,10 +28,14 @@ const PLATFORM_REVIVE_PLACEMENT := "revive"
 const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.demo.gold_pack"
 const PLATFORM_CLOUD_SLOT := "demo_profile"
 const GOLD_PACK_AMOUNT := 25
+const SCENE8_BOOT_SAVE_PATH := "/tmp/mkit_scene8_bootstrap_save.json"
 const SCENE8_S7_SAVE_PATH := "/tmp/mkit_scene8_s7_save.json"
 const SCENE8_PLATFORM_SAVE_PATH := "/tmp/mkit_scene8_platform_save.json"
 const DAMAGE_NUMBER_SCENE := "res://game/ui/damage_number.tscn"
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
+const ATTACK_SFX_ID := "sfx.demo.attack"
+const ATTACK_SFX_PATH := "res://game/audio/pixel_attack_sound.wav"
+const DEMO_BGM_PATH := "res://game/audio/snowy_sunny_village_campfire_loop.wav"
 const TOAST_SCREEN_ID := "demo.toast"
 
 var _previous_current_scene: Node = null
@@ -102,6 +106,7 @@ func after_each() -> void:
 		_current_scene_override.free()
 	_current_scene_override = null
 	_previous_current_scene = null
+	IntTestHelpers.remove_file(SCENE8_BOOT_SAVE_PATH)
 	IntTestHelpers.remove_file(SCENE8_S7_SAVE_PATH)
 	IntTestHelpers.remove_file(SCENE8_PLATFORM_SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
@@ -115,14 +120,26 @@ func after_each() -> void:
 func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var router := ServiceRegistry.get_service("commands") as CommandService
 	var actions := ServiceRegistry.get_service("actions") as ActionService
 	var events := ServiceRegistry.get_service("events") as EventService
+	var audio := ServiceRegistry.get_service("audio") as AudioService
+	var content := ServiceRegistry.get_service("content") as ContentService
 	assert_not_null(router)
 	assert_not_null(actions)
 	assert_not_null(events)
+	assert_not_null(audio)
+	assert_not_null(content)
+	audio.sfx_bus = "Master"
+	var attack_definition := content.get_resource(ATTACK_SFX_ID) as AudioDefinition
+	assert_not_null(attack_definition)
+	var attack_stream := audio.sfx_map[ATTACK_SFX_ID] as AudioStream
+	assert_not_null(attack_stream)
+	assert_eq(attack_definition.stream, attack_stream)
+	assert_eq(attack_stream.resource_path, ATTACK_SFX_PATH)
 
 	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
 	player.global_position = Vector2.ZERO
@@ -171,9 +188,14 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	await get_tree().physics_frame
 
 	# --- ATTACK 1: command -> Attack state -> TimedAttackAction -> hitbox -> CombatService ---
+	var audio_child_count := audio.get_child_count()
 	assert_true(router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, PLAYER_ID, PLAYER_ID, {})))
 	assert_eq(state_machine.get_current_path(), "Player/Attack")
 	assert_eq(actions.active_actions.size(), 1)
+	assert_eq(audio.get_child_count(), audio_child_count + 1)
+	var attack_player := audio.get_child(audio.get_child_count() - 1) as AudioStreamPlayer
+	assert_not_null(attack_player)
+	assert_eq(attack_player.stream, attack_stream)
 	var action := actions.active_actions[0]
 	assert_true(action is TimedAttackAction)
 	# ActionContext carries the swinging entity and its facing
@@ -213,6 +235,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var actions := ServiceRegistry.get_service("actions") as ActionService
@@ -225,10 +248,8 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	var ability := player.get_node("Controllers/AbilityController") as AbilityController
 	var input_reader := player.get_node("InputReader")
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
-	# the shared player scene stays generic; Scene8 registers firebolt from live content.
+	# the shared player scene starts with firebolt from live content for the demo loop.
 	assert_eq(str(input_reader.get("cast_ability_id")), "")
-	assert_false(ability.has_ability(FIREBOLT))
-	assert_true(ability.register_ability(FIREBOLT))
 	assert_true(ability.has_ability(FIREBOLT))
 	assert_eq(pool.get_current("mana"), 50.0)
 
@@ -290,6 +311,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_attack() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var content := ServiceRegistry.get_service("content") as ContentService
@@ -398,6 +420,7 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_round_trips() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var content := ServiceRegistry.get_service("content") as ContentService
@@ -479,6 +502,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var content := ServiceRegistry.get_service("content") as ContentService
@@ -574,6 +598,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
@@ -647,6 +672,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var content := ServiceRegistry.get_service("content") as ContentService
@@ -773,6 +799,7 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var save := ServiceRegistry.get_service("save") as SaveService
@@ -863,6 +890,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes
 func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_save() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var save := ServiceRegistry.get_service("save") as SaveService
@@ -938,6 +966,7 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debug_runtime() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var scene_root := _make_current_scene_root("Scene8S9World")
@@ -958,6 +987,25 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	var damage_numbers := feedback.get_node("DamageNumbers") as DamageNumberSystem
 	var vfx := feedback.get_node("VFX") as VFXSpawner
 	var overlay := demo.get_node("DebugOverlay") as DebugOverlay
+	var audio := ServiceRegistry.get_service("audio") as AudioService
+	var content := ServiceRegistry.get_service("content") as ContentService
+	assert_not_null(audio)
+	assert_not_null(content)
+	assert_eq(feedback.audio, audio)
+	assert_true(content.get_resource(ATTACK_SFX_ID) is AudioDefinition)
+	assert_true(content.get_resource("bgm.demo.village") is AudioDefinition)
+	assert_true(audio.sfx_map.has(ATTACK_SFX_ID))
+	assert_eq((audio.sfx_map[ATTACK_SFX_ID] as AudioStream).resource_path, ATTACK_SFX_PATH)
+	assert_eq((audio.music_map["bgm.demo.village"] as AudioStream).resource_path, DEMO_BGM_PATH)
+	assert_eq((audio.music_map["bgm.demo.room"] as AudioStream).resource_path, DEMO_BGM_PATH)
+	assert_eq((audio.music_map["bgm.demo.field"] as AudioStream).resource_path, DEMO_BGM_PATH)
+	assert_eq((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_mode, AudioStreamWAV.LOOP_FORWARD)
+	assert_eq((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_begin, 0)
+	assert_gt((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_end, 0)
+	assert_eq(audio.current_music_id, "bgm.demo.village")
+	assert_not_null(audio.music_player)
+	assert_true(audio.music_player.playing)
+	assert_eq(audio.music_player.stream, audio.music_map["bgm.demo.village"])
 	assert_eq(int(ProjectSettings.get_setting("display/window/size/viewport_width")), 1280)
 	assert_eq(int(ProjectSettings.get_setting("display/window/size/viewport_height")), 720)
 	assert_eq(str(ProjectSettings.get_setting("display/window/stretch/mode")), "canvas_items")
@@ -1009,20 +1057,28 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	assert_true(bool(demo.get("_spawn_scene_effect_succeeded")))
 	var spawned_hit := scene_root.get_node_or_null("DemoHitVFX") as Node2D
 	assert_not_null(spawned_hit)
+	assert_true(spawned_hit.visible)
 	assert_eq(spawned_hit.global_position, beast.global_position)
 
 	await _wait_scene8_seconds(0.25)
 	assert_true(first_number.visible)
 	assert_true(first_vfx.visible)
+	assert_true(spawned_hit.visible)
 	await _wait_scene8_seconds(0.35)
 	assert_false(first_number.visible)
 	assert_false(first_vfx.visible)
+	assert_false(spawned_hit.visible)
 	var number_pool: Array = pool._pools.get(DAMAGE_NUMBER_SCENE, [])
 	var vfx_pool: Array = pool._pools.get(HIT_VFX_SCENE, [])
 	assert_true(number_pool.has(first_number))
 	assert_true(vfx_pool.has(first_vfx))
+	assert_true(vfx_pool.has(spawned_hit))
 	assert_eq(damage_numbers.show_number(Vector2(40.0, 50.0), 7.0, false), first_number)
-	assert_eq(vfx.spawn("hit", Vector2(60.0, 70.0)), first_vfx)
+	var reused_vfx := vfx.spawn("hit", Vector2(60.0, 70.0))
+	assert_not_null(reused_vfx)
+	if reused_vfx != null:
+		assert_true(reused_vfx == first_vfx or reused_vfx == spawned_hit)
+		assert_eq((reused_vfx as Node2D).global_position, Vector2(60.0, 70.0))
 
 	var lethal := DealDamageEffect.new()
 	lethal.effect_id = "effect.test.scene8.s9_lethal"
@@ -1055,6 +1111,7 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
@@ -1135,6 +1192,57 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	actions._process(0.20)
 	assert_eq(actions.active_actions.size(), 0)
 	assert_eq(state_machine.get_current_path(), "Player/Idle")
+
+
+func test_tc_int_scene8_11_trial_cave_shortcuts_close_room_without_zone_mismatch() -> void:
+	var bootstrap := GameBootstrap.new()
+	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
+	add_child_autofree(bootstrap)
+
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
+	add_child_autofree(demo)
+	await _settle_scene8_world()
+
+	var world := ServiceRegistry.get_service("world") as WorldService
+	assert_not_null(world)
+	await _focus_demo_interactable(demo, "ToField/Interactable")
+	demo.call("_toggle_field_portal")
+	await _settle_scene8_world()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+
+	var room_root := demo.get_node("RoomRoot") as Node2D
+	var run_director := demo.get_node("RunDirector") as RunDirector
+	assert_not_null(room_root)
+	assert_not_null(run_director)
+
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_true(room_root.visible)
+	assert_gt(room_root.get_child_count(), 0)
+	assert_eq(run_director.run_state.status, "active")
+
+	demo.call("_toggle_field_portal")
+	await _settle_scene8_world()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+	assert_eq((demo.call("_current_zone_root") as Node).name, "Field")
+	assert_false(room_root.visible)
+	assert_eq(room_root.get_child_count(), 0)
+	assert_eq(run_director.run_state.status, "failed")
+	assert_eq(str(demo.get("_trial_run_finished_result")), "failed:field_gate")
+	assert_true((demo.get_node("HUD/StatsPanel/ZoneInfo") as Label).text.contains("Field"))
+
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_true(room_root.visible)
+	assert_eq(run_director.run_state.status, "active")
+
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+	assert_false(room_root.visible)
+	assert_eq(run_director.run_state.status, "failed")
+	assert_eq(str(demo.get("_trial_run_finished_result")), "failed:cave_toggle")
 
 
 func _resolve_damage(source: Node, target: Node) -> float:

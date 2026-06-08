@@ -130,7 +130,49 @@ func test_tc_audio_07_save_load_roundtrips_bus_volumes() -> void:
 	assert_almost_eq(float(bus_data.get("Master", 0.0)), -5.0, 0.001)
 
 
+func test_tc_audio_08_feedback_system_uses_registered_audio_when_path_empty() -> void:
+	ServiceRegistry.register_service(ServiceRegistry.SERVICE_AUDIO, audio)
+	var feedback := FeedbackSystem.new()
+	add_child_autofree(feedback)
+	feedback._ready()
+
+	assert_eq(feedback.audio, audio)
+
+
+func test_tc_audio_09_register_audio_definitions_maps_sfx_and_looping_music() -> void:
+	var sfx := AudioDefinition.new()
+	sfx.audio_id = "sfx.test.hit"
+	sfx.stream = _make_stream()
+	var music_stream := _make_wav_stream(64)
+	var music := AudioDefinition.new()
+	music.audio_id = "music.test.theme"
+	music.stream = music_stream
+	music.kind = AudioDefinition.AudioKind.MUSIC
+	music.loop = true
+	var invalid := AudioDefinition.new()
+
+	assert_eq(audio.register_audio_definitions([sfx, music, invalid]), 2)
+	assert_eq(audio.sfx_map["sfx.test.hit"], sfx.stream)
+	assert_false(audio.music_map.has("sfx.test.hit"))
+	assert_eq(audio.music_map["music.test.theme"], music_stream)
+	assert_false(audio.sfx_map.has("music.test.theme"))
+	assert_eq(music_stream.loop_mode, AudioStreamWAV.LOOP_FORWARD)
+	assert_eq(music_stream.loop_begin, 0)
+	assert_gt(music_stream.loop_end, 0)
+
+
 func _make_stream() -> AudioStream:
 	var stream := AudioStreamGenerator.new()
 	stream.mix_rate = 44100.0
+	return stream
+
+
+func _make_wav_stream(sample_count: int) -> AudioStreamWAV:
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = 22050
+	stream.stereo = false
+	var data := PackedByteArray()
+	data.resize(sample_count * 2)
+	stream.data = data
 	return stream

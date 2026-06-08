@@ -86,7 +86,7 @@ Feedback  (Node)
 配置 `FeedbackSystem` 的路径导出：
 - `damage_number_system_path` = `"../DamageNumbers"`
 - `vfx_spawner_path` = `"../Vfx"`
-- `audio_manager_path` = 留空，或指向一个同场景可访问的 `AudioService` 节点
+- `audio_manager_path` = 留空使用全局 `"audio"` 服务，或指向一个同场景可访问的 `AudioService` 节点
 - `damage_screen_shake_strength` = `4.0`（可选，>0 时受击请求震屏）
 
 `FeedbackSystem._ready()` 自动连上 `events.damage_applied` 和 `events.entity_died`。
@@ -105,9 +105,9 @@ Feedback  (Node)
 
 ### 步骤 5：（可选）音效
 
-把一个 `AudioService` 节点指给 `FeedbackSystem.audio_manager_path`，配 `sfx_map = {"hit": <AudioStream>, "death": <AudioStream>}`。受击/死亡会 `play_sfx("hit"/"death")`。
+给 `ResourceDatabase` 加两个 `AudioDefinition(kind=SFX)`，`audio_id` 分别是 `"hit"` 和 `"death"`，`stream` 指向你的音效文件。`GameBootstrap` 会把它们注册到全局 `"audio"` 服务；受击/死亡时 `FeedbackSystem` 会 `play_sfx("hit"/"death")`。
 
-> `GameBootstrap` 会注册全局 `"audio"` 服务；`FeedbackSystem` 当前实现不自动从服务表取音频，而是读取导出的 `audio_manager_path`。如果你希望反馈系统使用全局音频服务，请在场景里提供可被该路径引用的 AudioService 节点或自定义桥接节点。
+如果你把 `audio_manager_path` 指向本地 `AudioService` 节点，也可以直接在那个本地服务上配置 `sfx_map`，但项目级音效推荐走 `AudioDefinition`。
 
 ## 运行验证
 

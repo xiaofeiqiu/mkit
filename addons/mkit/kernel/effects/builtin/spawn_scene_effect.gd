@@ -28,7 +28,14 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 		(instance as Node2D).global_position = spawn_pos
 		if context.direction != Vector2.ZERO and instance.has_method("set_direction"):
 			instance.call("set_direction", context.direction)
-	return EffectResult.ok(effect_id, {"spawned": instance.name, "pooled": pool != null})
+	return EffectResult.ok(
+		effect_id,
+		{
+			"spawned": instance.name,
+			"pooled": pool != null,
+			"instance": instance,
+		}
+	)
 
 
 func _create_spawn_instance(parent: Node, pool: PoolService) -> Node:

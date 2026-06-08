@@ -53,9 +53,11 @@ func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
 		return false
 	if not (data is Dictionary):
 		return false
+	var previous_zone_id := current_zone_id
 	current_zone_id = str(data.get("current_zone_id", current_zone_id))
 	_pending_zone_id = str(data.get("pending_zone_id", _pending_zone_id))
 	_pending_spawn_id = str(data.get("pending_spawn_id", _pending_spawn_id))
+	_restore_loaded_zone_scene(previous_zone_id, current_zone_id)
 	return true
 
 
@@ -146,6 +148,32 @@ func _finalize_zone_entry(retries_left: int) -> void:
 	var to_zone_id := _pending_zone_id
 	_pending_zone_id = ""
 	_pending_spawn_id = ""
+	_publish_zone_entry(from_zone_id, to_zone_id)
+
+
+func _restore_loaded_zone_scene(from_zone_id: String, to_zone_id: String) -> void:
+	if to_zone_id == "":
+		return
+	_resolve_services()
+	if scene_router == null or scene_router.current_scene_path == "":
+		return
+	var definition := get_zone(to_zone_id)
+	if definition == null or definition.scene_path == "":
+		return
+	if scene_router.current_scene_path == definition.scene_path:
+		return
+	var saved_pending_zone_id := _pending_zone_id
+	var saved_pending_spawn_id := _pending_spawn_id
+	_pending_zone_id = ""
+	_pending_spawn_id = ""
+	if not scene_router.change_scene(definition.scene_path):
+		_pending_zone_id = saved_pending_zone_id
+		_pending_spawn_id = saved_pending_spawn_id
+		return
+	_publish_zone_entry(from_zone_id, to_zone_id)
+
+
+func _publish_zone_entry(from_zone_id: String, to_zone_id: String) -> void:
 	current_zone_id = to_zone_id
 	zone_changed.emit(from_zone_id, to_zone_id)
 	var events := _get_events()

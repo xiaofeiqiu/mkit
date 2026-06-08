@@ -30,6 +30,9 @@ const PLATFORM_REVIVE_PLACEMENT := "revive"
 const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.demo.gold_pack"
 const PLATFORM_CLOUD_SLOT := "demo_profile"
 const GOLD_PACK_AMOUNT := 25
+const ATTACK_SFX_ID := "sfx.demo.attack"
+const AUTO_RUN_EXPECTED_POTION_BUYS := 2
+const HIT_VFX_AUTO_RELEASE_SECONDS := 0.55
 const MELEE_RANGE := 30.0
 const FIREBOLT_RANGE := 100.0
 const TRIAL_SEED := 8606
@@ -104,6 +107,8 @@ var _field_beast_looted: bool = false
 var _field_beast_defeated: bool = false
 var _shop_purchase_completed: bool = false
 var _shop_sale_completed: bool = false
+var _shop_purchase_verifications: int = 0
+var _shop_sale_currency_verified: bool = false
 var _auto_run_enabled: bool = false
 var _auto_run_started: bool = false
 var _firebolt_cast_succeeded: bool = false
@@ -113,11 +118,16 @@ var _command_combat_succeeded: bool = false
 var _field_blade_equipped: bool = false
 var _revive_ad_pending: bool = false
 var _rewarded_revive_completed: bool = false
+var _rewarded_revive_health_verified: bool = false
 var _gold_pack_purchase_pending: bool = false
 var _gold_pack_purchase_completed: bool = false
+var _gold_pack_currency_verified: bool = false
+var _gold_before_pack_purchase: int = -1
+var _gold_after_pack_purchase: int = -1
 var _cloud_busy: bool = false
 var _cloud_save_completed: bool = false
 var _cloud_load_completed: bool = false
+var _cloud_payload_verified: bool = false
 var _cloud_last_loaded_data: Dictionary = {}
 var _pending_trial_rewards: Array[RewardOption] = []
 var _trial_room_entries: Array[String] = []
@@ -126,14 +136,19 @@ var _trial_run_finished_result: String = ""
 var _trial_upgrade_reward_selected: bool = false
 var _reward_screen: RewardSelectionUI = null
 var _demo_save_roundtrip_succeeded: bool = false
+var _demo_save_payload_verified: bool = false
 var _runtime_seconds: float = 0.0
 var _feedback_toast_observed: bool = false
 var _feedback_shake_observed: bool = false
 var _spawn_scene_effect_succeeded: bool = false
+var _hit_vfx_cleanup_verified: bool = false
+var _active_hit_vfx: Array[Node] = []
+var _debug_overlay_verified: bool = false
 var _interaction_focus_observed: bool = false
 var _portal_interaction_succeeded: bool = false
 var _manual_quest_completed: bool = false
 var _dash_succeeded: bool = false
+var _potion_use_completed: bool = false
 
 
 func _ready() -> void:
@@ -213,6 +228,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _exit_tree() -> void:
+	_clear_hit_vfx()
 	_cleanup_audio_players()
 	if ServiceRegistry.has_service("scenes"):
 		var current := ServiceRegistry.get_service("scenes") as SceneService
@@ -289,17 +305,24 @@ func _reset_demo_state() -> void:
 	_field_beast_defeated = false
 	_shop_purchase_completed = false
 	_shop_sale_completed = false
+	_shop_purchase_verifications = 0
+	_shop_sale_currency_verified = false
 	_firebolt_cast_succeeded = false
 	_burn_tick_observed = false
 	_elder_blessing_received = false
 	_command_combat_succeeded = false
 	_revive_ad_pending = false
 	_rewarded_revive_completed = false
+	_rewarded_revive_health_verified = false
 	_gold_pack_purchase_pending = false
 	_gold_pack_purchase_completed = false
+	_gold_pack_currency_verified = false
+	_gold_before_pack_purchase = -1
+	_gold_after_pack_purchase = -1
 	_cloud_busy = false
 	_cloud_save_completed = false
 	_cloud_load_completed = false
+	_cloud_payload_verified = false
 	_cloud_last_loaded_data.clear()
 	_runtime_seconds = 0.0
 	if _time != null:
@@ -307,12 +330,17 @@ func _reset_demo_state() -> void:
 	_feedback_toast_observed = false
 	_feedback_shake_observed = false
 	_spawn_scene_effect_succeeded = false
+	_hit_vfx_cleanup_verified = false
+	_active_hit_vfx.clear()
+	_debug_overlay_verified = false
 	_interaction_focus_observed = false
 	_portal_interaction_succeeded = false
 	_manual_quest_completed = false
 	_dash_succeeded = false
+	_potion_use_completed = false
 	_reset_trial_state()
 	_demo_save_roundtrip_succeeded = false
+	_demo_save_payload_verified = false
 
 
 func _configure_audio() -> void:
@@ -320,30 +348,6 @@ func _configure_audio() -> void:
 		return
 	_audio.music_bus = "Master"
 	_audio.sfx_bus = "Master"
-	if _auto_run_enabled:
-		return
-	_audio.music_map = {
-		"bgm.demo.village": _make_audio_stream(),
-		"bgm.demo.room": _make_audio_stream(),
-		"bgm.demo.field": _make_audio_stream()
-	}
-	_audio.sfx_map = {
-		"sfx.demo.dialogue": _make_audio_stream(),
-		"sfx.demo.quest": _make_audio_stream(),
-		"sfx.demo.loot": _make_audio_stream(),
-		"sfx.demo.shop": _make_audio_stream()
-	}
-
-
-func _make_audio_stream() -> AudioStreamWAV:
-	var stream := AudioStreamWAV.new()
-	stream.format = AudioStreamWAV.FORMAT_16_BITS
-	stream.mix_rate = 22050
-	stream.stereo = false
-	var data := PackedByteArray()
-	data.resize(4410)
-	stream.data = data
-	return stream
 
 
 func _bind_ui() -> void:
@@ -456,6 +460,9 @@ func _toggle_room_portal() -> void:
 
 func _toggle_field_portal() -> void:
 	if _world == null:
+		return
+	if _is_trial_cave_open():
+		_leave_trial_cave("field_gate")
 		return
 	if _world.current_zone_id == ZONE_VILLAGE:
 		_interact_portal("ToField")
@@ -741,6 +748,9 @@ func _wait_for_beast_burn_tick(beast: Node2D) -> void:
 
 
 func _enter_trial_cave() -> void:
+	if _is_trial_cave_open():
+		_leave_trial_cave("cave_toggle")
+		return
 	if _world == null or _world.current_zone_id != ZONE_FIELD:
 		_log("[TRIAL] enter the field first")
 		return
@@ -759,6 +769,30 @@ func _enter_trial_cave() -> void:
 	_run_director.first_floor_room_pool = [ROOM_TRIAL_01, ROOM_TRIAL_02, ROOM_TRIAL_03]
 	_run_director.run_length = 3
 	_run_director.start_run(TRIAL_SEED)
+
+
+func _is_trial_cave_open() -> bool:
+	return _room_root != null and _room_root.visible
+
+
+func _leave_trial_cave(reason: String) -> void:
+	if not _is_trial_cave_open():
+		return
+	if _run_director != null and _run_director.run_state != null and not _is_trial_terminal():
+		_run_director.fail_run(reason)
+	else:
+		_close_trial_room()
+	_place_player_at_trial_cave_exit()
+	_log("[TRIAL] left cave")
+
+
+func _place_player_at_trial_cave_exit() -> void:
+	var root := _current_zone_root()
+	if root == null:
+		return
+	var marker := root.get_node_or_null("TrialCave") as Node2D
+	if marker != null:
+		_player.global_position = marker.global_position
 
 
 func _run_trial_auto() -> void:
@@ -848,11 +882,17 @@ func _reset_trial_state() -> void:
 	_trial_rooms_cleared = 0
 	_trial_run_finished_result = ""
 	_trial_upgrade_reward_selected = false
+	_close_trial_room()
+
+
+func _close_trial_room() -> void:
 	_clear_trial_reward_screen()
 	if _room_root != null:
 		for child in _room_root.get_children():
 			child.queue_free()
 		_room_root.visible = false
+	if _run_director != null:
+		_run_director.current_room_controller = null
 
 
 func _clear_trial_reward_screen() -> void:
@@ -880,7 +920,14 @@ func _approach(target: Node2D, stop_distance: float) -> void:
 func _buy_potion() -> void:
 	if not _ensure_shop_open():
 		return
+	var gold_before := _gold()
+	var potion_count_before := _item_count(ITEM_POTION)
+	var price := _shop.get_buy_price(ITEM_POTION)
 	if _shop.buy(ITEM_POTION, 1, _player):
+		var gold_after := _gold()
+		var potion_count_after := _item_count(ITEM_POTION)
+		if gold_after == gold_before - price and potion_count_after == potion_count_before + 1:
+			_shop_purchase_verifications += 1
 		_play_sfx("sfx.demo.shop")
 
 
@@ -894,7 +941,15 @@ func _sell_claw() -> void:
 	if claw == null:
 		_log("[SHOP] no beast claw to sell")
 		return
+	var gold_before := _gold()
+	var claw_count_before := _item_count(ITEM_CLAW)
+	var price := _shop.get_sell_price(ITEM_CLAW)
 	if _shop.sell(claw.instance_id, 1, _player):
+		var gold_after := _gold()
+		var claw_count_after := _item_count(ITEM_CLAW)
+		_shop_sale_currency_verified = (
+			gold_after == gold_before + price and claw_count_after == claw_count_before - 1
+		)
 		_play_sfx("sfx.demo.shop")
 
 
@@ -931,10 +986,14 @@ func _use_potion() -> void:
 		return
 	var health := _player_health()
 	var before := health.current_hp if health != null else 0.0
+	var potion_count_before := _item_count(ITEM_POTION)
 	var ctx := GameplayContext.new().with_source(_player).with_target(_player)
 	_effects.execute_many(definition.use_effects, ctx, true)
-	inventory.remove_item_by_instance_id(potion.instance_id, 1)
+	var removed := inventory.remove_item_by_instance_id(potion.instance_id, 1)
 	var after := health.current_hp if health != null else 0.0
+	_potion_use_completed = (
+		removed and after > before and _item_count(ITEM_POTION) == potion_count_before - 1
+	)
 	_log("[ITEM] used herb potion HP %.0f -> %.0f" % [before, after])
 
 
@@ -953,8 +1012,12 @@ func _load_demo_state() -> bool:
 	if _save_manager == null:
 		_log("[SAVE] service missing")
 		return false
+	_close_trial_room()
+	_clear_hit_vfx()
 	if _save_manager.load_game(get_tree().root):
 		_sync_loaded_state_flags()
+		_close_trial_room()
+		_clear_hit_vfx()
 		_log("[SAVE] loaded demo state")
 		return true
 	_log("[SAVE] load failed")
@@ -1009,6 +1072,7 @@ func _purchase_gold_pack() -> void:
 		_log("[IAP] gold pack purchase already pending")
 		return
 	_gold_pack_purchase_pending = true
+	_gold_before_pack_purchase = _gold()
 	_log("[IAP] purchasing %s" % PLATFORM_GOLD_PACK_PRODUCT)
 	_iap.purchase(PLATFORM_GOLD_PACK_PRODUCT)
 
@@ -1079,6 +1143,198 @@ func _write_demo_save_data(data: Dictionary) -> bool:
 	return true
 
 
+func _validate_demo_save_data(data: Dictionary, label: String) -> bool:
+	var missing := _demo_save_data_missing_requirements(data)
+	if missing.is_empty():
+		return true
+	_log("[%s] payload missing: %s" % [label, ", ".join(missing)])
+	return false
+
+
+func _demo_save_data_missing_requirements(data: Dictionary) -> Array[String]:
+	var missing: Array[String] = []
+	if data.is_empty():
+		missing.append("save_data")
+		return missing
+	if int(data.get("save_version", 0)) <= 0:
+		missing.append("save_version")
+	var save_scopes := _array_value(data, "save_scopes")
+	if (
+		not _array_has_string(save_scopes, "global")
+		or not _array_has_string(save_scopes, "world.run")
+		or not _array_has_string(save_scopes, "world.room")
+		or not _array_has_string(save_scopes, "world.reward")
+	):
+		missing.append("save_scopes")
+	var payload := _dict_value(data, "payload")
+	if payload.is_empty():
+		missing.append("payload")
+	var scopes := _dict_value(data, "scopes")
+	var global_scope := _dict_value(scopes, "global")
+	if (
+		not global_scope.has("demo_player")
+		or not global_scope.has("player_experience")
+		or not global_scope.has("progression")
+		or not global_scope.has("quest")
+	):
+		missing.append("global_scope")
+	_append_saved_player_requirements(payload, missing)
+	_append_saved_quest_requirements(payload, missing)
+	_append_saved_progression_requirements(payload, missing)
+	_append_saved_trial_scope_requirements(scopes, missing)
+	return missing
+
+
+func _append_saved_player_requirements(payload: Dictionary, missing: Array[String]) -> void:
+	var player_payload := _dict_value(payload, "demo_player")
+	var components := _dict_value(player_payload, "components")
+	var inventory_payload := _dict_value(components, "InventoryController")
+	var saved_items := _array_value(inventory_payload, "items")
+	if int(inventory_payload.get("capacity", 0)) < 20:
+		missing.append("saved_inventory_capacity")
+	if _saved_item_count(saved_items, ITEM_CHARM) < 1:
+		missing.append("saved_charm")
+	if _saved_item_count(saved_items, ITEM_FIELD_BLADE) < 1:
+		missing.append("saved_field_blade")
+	if _saved_item_count(saved_items, ITEM_POTION) < 1:
+		missing.append("saved_potion")
+	if _saved_item_count(saved_items, ITEM_CLAW) > 0:
+		missing.append("saved_claw_sold")
+	var equipment_payload := _dict_value(components, "EquipmentController")
+	var slots := _dict_value(equipment_payload, "slots")
+	var weapon := _dict_value(slots, WEAPON_SLOT)
+	if str(weapon.get("definition_id", "")) != ITEM_FIELD_BLADE:
+		missing.append("saved_equipped_weapon")
+	var ability_payload := _dict_value(components, "AbilityController")
+	if not _array_has_string(_array_value(ability_payload, "learned"), ABILITY_FIREBOLT):
+		missing.append("saved_firebolt")
+	if float(_dict_value(ability_payload, "charges").get(ABILITY_FIREBOLT, 0.0)) < 1.0:
+		missing.append("saved_firebolt_charge")
+	var resource_payload := _dict_value(components, "ResourcePoolComponent")
+	if float(resource_payload.get("mana", 0.0)) <= 0.0:
+		missing.append("saved_mana")
+	var health_payload := _dict_value(components, "HealthComponent")
+	if bool(health_payload.get("dead", true)):
+		missing.append("saved_alive")
+	if float(health_payload.get("current_hp", 0.0)) <= 50.0:
+		missing.append("saved_potion_heal")
+	var stats_payload := _dict_value(components, "StatsComponent")
+	var modifiers := _array_value(stats_payload, "persistent_modifiers")
+	if _saved_modifier_count(modifiers, "effect.demo.trial_attack_upgrade") < 3:
+		missing.append("saved_trial_attack_modifiers")
+	if _saved_modifier_count(modifiers, "effect.demo.elder_blessing_attack") < 1:
+		missing.append("saved_elder_blessing")
+	var experience_payload := _dict_value(payload, "player_experience")
+	if int(experience_payload.get("current_level", 0)) < 2:
+		missing.append("saved_level")
+
+
+func _append_saved_quest_requirements(payload: Dictionary, missing: Array[String]) -> void:
+	var quest_payload := _dict_value(payload, "quest")
+	var states := _dict_value(quest_payload, "states")
+	if _saved_quest_status(states, QUEST_ID) != "turned_in":
+		missing.append("saved_field_report")
+	if _saved_quest_status(states, QUEST_MANUAL_ID) != "turned_in":
+		missing.append("saved_manual_quest")
+	var field_state := _dict_value(states, QUEST_ID)
+	var field_progress := _dict_value(field_state, "objective_progress")
+	if int(field_progress.get(QUEST_OBJECTIVE_ID, 0)) < 1:
+		missing.append("saved_field_objective")
+	var manual_state := _dict_value(states, QUEST_MANUAL_ID)
+	var manual_progress := _dict_value(manual_state, "objective_progress")
+	if int(manual_progress.get(QUEST_MANUAL_OBJECTIVE_ID, 0)) < 1:
+		missing.append("saved_manual_objective")
+
+
+func _append_saved_progression_requirements(payload: Dictionary, missing: Array[String]) -> void:
+	var progression_payload := _dict_value(payload, "progression")
+	var currencies := _dict_value(progression_payload, "currencies")
+	var saved_gold := int(currencies.get("gold", -1))
+	if _gold_after_pack_purchase >= 0:
+		if saved_gold != _gold_after_pack_purchase:
+			missing.append("saved_gold")
+	elif saved_gold < GOLD_PACK_AMOUNT:
+		missing.append("saved_gold")
+
+
+func _append_saved_trial_scope_requirements(scopes: Dictionary, missing: Array[String]) -> void:
+	var world_run := _dict_value(_dict_value(scopes, "world.run"), "run_director")
+	var run_state := _dict_value(world_run, "run_state")
+	if str(run_state.get("status", "")) != "completed":
+		missing.append("saved_trial_completed")
+	if int(run_state.get("seed", 0)) != TRIAL_SEED:
+		missing.append("saved_trial_seed")
+	if _array_value(run_state, "room_history").size() != 3:
+		missing.append("saved_trial_rooms")
+	var reward_history := _array_value(run_state, "reward_history")
+	if reward_history.size() != 3 or _array_string_count(reward_history, REWARD_TRIAL_ATTACK) != 3:
+		missing.append("saved_trial_rewards")
+	if not _array_has_string(_array_value(run_state, "temporary_upgrade_ids"), UPGRADE_TRIAL_ATTACK):
+		missing.append("saved_trial_upgrade")
+	var world_reward := _dict_value(_dict_value(scopes, "world.reward"), "run_director")
+	var scoped_rewards := _array_value(world_reward, "reward_history")
+	if scoped_rewards.size() != 3 or _array_string_count(scoped_rewards, REWARD_TRIAL_ATTACK) != 3:
+		missing.append("saved_reward_scope")
+	var world_room := _dict_value(_dict_value(scopes, "world.room"), "run_director")
+	var room_runtime := _dict_value(world_room, "current_room_runtime")
+	if not bool(room_runtime.get("cleared", false)):
+		missing.append("saved_room_scope")
+
+
+func _dict_value(data: Dictionary, key: String) -> Dictionary:
+	var value: Variant = data.get(key, {})
+	if value is Dictionary:
+		return value
+	return {}
+
+
+func _array_value(data: Dictionary, key: String) -> Array:
+	var value: Variant = data.get(key, [])
+	if value is Array:
+		return value
+	return []
+
+
+func _array_has_string(values: Array, expected: String) -> bool:
+	for value in values:
+		if str(value) == expected:
+			return true
+	return false
+
+
+func _array_string_count(values: Array, expected: String) -> int:
+	var count := 0
+	for value in values:
+		if str(value) == expected:
+			count += 1
+	return count
+
+
+func _saved_item_count(items: Array, definition_id: String) -> int:
+	var total := 0
+	for raw in items:
+		if raw is Dictionary:
+			var item_data: Dictionary = raw
+			if str(item_data.get("definition_id", "")) == definition_id:
+				total += int(item_data.get("quantity", 0))
+	return total
+
+
+func _saved_modifier_count(modifiers: Array, modifier_id: String) -> int:
+	var total := 0
+	for raw in modifiers:
+		if raw is Dictionary:
+			var modifier_data: Dictionary = raw
+			if str(modifier_data.get("modifier_id", "")) == modifier_id:
+				total += 1
+	return total
+
+
+func _saved_quest_status(states: Dictionary, quest_id: String) -> String:
+	var state := _dict_value(states, quest_id)
+	return str(state.get("status", ""))
+
+
 func _track_analytics_event(event_name: String, properties: Dictionary = {}) -> void:
 	if _analytics == null:
 		return
@@ -1142,6 +1398,7 @@ func _on_transaction_failed(item_id: String, reason: String) -> void:
 
 
 func _on_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
+	_clear_hit_vfx()
 	var interaction := _interaction_component()
 	if interaction != null:
 		interaction.current_interactable = null
@@ -1190,6 +1447,80 @@ func _spawn_hit_effect(target: Node) -> void:
 	var result := _effects.execute(effect, context)
 	if result.success:
 		_spawn_scene_effect_succeeded = true
+		var spawned := result.payload.get("instance", null) as Node
+		if spawned != null:
+			_track_hit_vfx(spawned)
+
+
+func _track_hit_vfx(node: Node) -> void:
+	if node == null:
+		return
+	if not _active_hit_vfx.has(node):
+		_active_hit_vfx.append(node)
+	get_tree().create_timer(HIT_VFX_AUTO_RELEASE_SECONDS).timeout.connect(_release_hit_vfx.bind(node))
+
+
+func _release_hit_vfx(node: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		_active_hit_vfx.erase(node)
+		return
+	if not _active_hit_vfx.has(node):
+		return
+	_active_hit_vfx.erase(node)
+	var pool := ServiceRegistry.get_service_or_null("pool") as PoolService
+	if pool != null:
+		pool.release(HIT_VFX_SCENE, node)
+	else:
+		node.queue_free()
+
+
+func _release_active_hit_vfx() -> void:
+	for node in _active_hit_vfx.duplicate():
+		_release_hit_vfx(node)
+
+
+func _clear_hit_vfx() -> void:
+	_release_active_hit_vfx()
+	var root := get_tree().current_scene if get_tree() != null else null
+	if root == null:
+		root = self
+	_release_visible_hit_vfx(root)
+
+
+func _release_visible_hit_vfx(node: Node) -> void:
+	if node.name.begins_with("DemoHitVFX") and node is CanvasItem and (node as CanvasItem).visible:
+		_release_untracked_hit_vfx(node)
+	for child in node.get_children():
+		_release_visible_hit_vfx(child)
+
+
+func _release_untracked_hit_vfx(node: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		return
+	if _active_hit_vfx.has(node):
+		_release_hit_vfx(node)
+		return
+	var pool := ServiceRegistry.get_service_or_null("pool") as PoolService
+	if pool != null:
+		pool.release(HIT_VFX_SCENE, node)
+	else:
+		node.queue_free()
+
+
+func _visible_hit_vfx_count() -> int:
+	var root := get_tree().current_scene if get_tree() != null else null
+	if root == null:
+		root = self
+	return _count_visible_hit_vfx(root)
+
+
+func _count_visible_hit_vfx(node: Node) -> int:
+	var count := 0
+	if node.name.begins_with("DemoHitVFX") and node is CanvasItem and (node as CanvasItem).visible:
+		count += 1
+	for child in node.get_children():
+		count += _count_visible_hit_vfx(child)
+	return count
 
 
 func _on_feedback_toast_requested(message: String) -> void:
@@ -1255,6 +1586,8 @@ func _on_trial_run_finished(result: String) -> void:
 	_clear_trial_reward_screen()
 	if result == "completed" and _room_root != null:
 		_room_root.visible = false
+	elif result.begins_with("failed"):
+		_close_trial_room()
 	_log("[TRIAL] finished %s" % result)
 
 
@@ -1364,6 +1697,12 @@ func _on_rewarded_ad_completed(placement_id: String) -> void:
 	if health != null and health.dead:
 		health.revive(0.5)
 	_rewarded_revive_completed = health != null and not health.dead
+	_rewarded_revive_health_verified = (
+		health != null
+		and not health.dead
+		and health.current_hp >= health.get_max_hp() * 0.49
+		and health.current_hp <= health.get_max_hp()
+	)
 	_log("[AD] rewarded revive completed")
 
 
@@ -1380,6 +1719,11 @@ func _on_iap_purchase_completed(product_id: String) -> void:
 	_gold_pack_purchase_pending = false
 	if _progression != null:
 		_progression.add_currency("gold", GOLD_PACK_AMOUNT)
+		_gold_after_pack_purchase = _progression.get_currency("gold")
+		_gold_pack_currency_verified = (
+			_gold_before_pack_purchase >= 0
+			and _gold_after_pack_purchase == _gold_before_pack_purchase + GOLD_PACK_AMOUNT
+		)
 	_gold_pack_purchase_completed = true
 	_log("[IAP] gold pack completed +%d gold" % GOLD_PACK_AMOUNT)
 
@@ -1411,7 +1755,9 @@ func _on_cloud_load_completed(slot: String, data: Dictionary) -> void:
 		return
 	_cloud_busy = false
 	_cloud_last_loaded_data = data.duplicate(true)
+	var payload_verified := _validate_demo_save_data(data, "CloudSave")
 	if _write_demo_save_data(data) and _load_demo_state():
+		_cloud_payload_verified = payload_verified and _demo_save_roundtrip_restored()
 		_cloud_load_completed = true
 		_log("[CloudSave] loaded %s" % slot)
 	else:
@@ -1615,6 +1961,21 @@ func _player_mana() -> float:
 	return pool.get_current("mana") if pool != null else 0.0
 
 
+func _gold() -> int:
+	return _progression.get_currency("gold") if _progression != null else 0
+
+
+func _item_count(definition_id: String) -> int:
+	var inventory := _inventory()
+	if inventory == null:
+		return 0
+	var total := 0
+	for item in inventory.model.get_items():
+		if item.definition_id == definition_id:
+			total += item.quantity
+	return total
+
+
 func _experience() -> ExperienceComponent:
 	return _player.get_node_or_null("Components/ExperienceComponent") as ExperienceComponent
 
@@ -1663,8 +2024,6 @@ func _cleanup_audio_players() -> void:
 		player.free()
 	_audio.music_player = null
 	_audio.current_music_id = ""
-	_audio.music_map.clear()
-	_audio.sfx_map.clear()
 
 
 func _log(line: String) -> void:
@@ -1681,6 +2040,7 @@ func _run_auto_loop() -> void:
 		return
 	_auto_run_started = true
 	await _settle_world()
+	await _verify_debug_overlay_for_auto_run()
 	await _focus_zone_interactable("ToRoom/Interactable")
 	_toggle_room_portal()
 	await _settle_world()
@@ -1708,6 +2068,7 @@ func _run_auto_loop() -> void:
 	await _focus_zone_interactable("ToVillage/Interactable")
 	_toggle_field_portal()
 	await _settle_world()
+	await _wait_for_hit_vfx_cleanup()
 	await _focus_zone_interactable("ToRoom/Interactable")
 	_toggle_room_portal()
 	await _settle_world()
@@ -1728,10 +2089,14 @@ func _run_auto_loop() -> void:
 	await _settle_world()
 	_buy_potion()
 	await get_tree().process_frame
+	_buy_potion()
+	await get_tree().process_frame
 	_sell_claw()
 	await get_tree().process_frame
 	_trigger_rewarded_revive_demo()
 	await _wait_for_rewarded_revive()
+	_use_potion()
+	await get_tree().process_frame
 	_purchase_gold_pack()
 	await _wait_for_gold_pack_purchase()
 	await _roundtrip_demo_save_for_auto_run()
@@ -1739,14 +2104,15 @@ func _run_auto_loop() -> void:
 	await _wait_for_cloud_save()
 	_load_demo_from_cloud()
 	await _wait_for_cloud_load()
-	if _demo_loop_complete():
+	var complete := _demo_loop_complete()
+	if complete:
 		_log("[AUTO] demo RPG loop complete")
 	else:
 		_log("[AUTO] missing: %s" % ", ".join(_demo_missing_requirements()))
 		_log("[AUTO] demo RPG loop incomplete")
 	_cleanup_audio_players()
 	await get_tree().process_frame
-	get_tree().quit()
+	get_tree().quit(0 if complete else 1)
 
 
 func _settle_world() -> void:
@@ -1754,6 +2120,38 @@ func _settle_world() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+
+
+func _verify_debug_overlay_for_auto_run() -> void:
+	if _debug_overlay == null:
+		return
+	_debug_overlay.visible = true
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var label: Label = null
+	if _debug_overlay.get_child_count() > 0:
+		label = _debug_overlay.get_child(0) as Label
+	var text := label.text if label != null else ""
+	_debug_overlay_verified = (
+		text.contains("Zone:")
+		and text.contains("Run:")
+		and text.contains("Runtime:")
+		and text.contains("State:")
+		and text.contains("HP:")
+	)
+	if _debug_overlay_verified:
+		_log("[AUTO] debug overlay status verified")
+	_debug_overlay.visible = false
+
+
+func _wait_for_hit_vfx_cleanup() -> void:
+	var elapsed := 0.0
+	while elapsed < 1.0 and _visible_hit_vfx_count() > 0:
+		await get_tree().process_frame
+		elapsed += get_process_delta_time()
+	_hit_vfx_cleanup_verified = _visible_hit_vfx_count() == 0
+	if _hit_vfx_cleanup_verified:
+		_log("[AUTO] hit VFX cleanup verified")
 
 
 func _wait_for_rewarded_revive() -> void:
@@ -1786,12 +2184,17 @@ func _wait_for_cloud_load() -> void:
 
 func _roundtrip_demo_save_for_auto_run() -> void:
 	_demo_save_roundtrip_succeeded = false
+	_demo_save_payload_verified = false
 	if not _save_demo_state():
 		return
+	var saved_data := _read_demo_save_data()
+	_demo_save_payload_verified = _validate_demo_save_data(saved_data, "SAVE")
 	_scramble_demo_saved_state()
 	await get_tree().process_frame
 	if _load_demo_state():
-		_demo_save_roundtrip_succeeded = _demo_save_roundtrip_restored()
+		_demo_save_roundtrip_succeeded = (
+			_demo_save_payload_verified and _demo_save_roundtrip_restored()
+		)
 		if _demo_save_roundtrip_succeeded:
 			_log("[SAVE] round-trip restored demo state")
 		else:
@@ -1895,8 +2298,12 @@ func _demo_missing_requirements() -> Array[String]:
 		missing.append("dash")
 	if not _field_blade_equipped:
 		missing.append("field_blade")
+	if not _debug_overlay_verified:
+		missing.append("debug_overlay")
 	if not _demo_save_roundtrip_succeeded:
 		missing.append("save_roundtrip")
+	if not _demo_save_payload_verified:
+		missing.append("save_payload")
 	if not _is_trial_completed():
 		missing.append("trial_completed")
 	if _trial_run_finished_result != "completed":
@@ -1919,18 +2326,58 @@ func _demo_missing_requirements() -> Array[String]:
 		missing.append("attack_power")
 	if not _shop_purchase_completed or not _shop_sale_completed:
 		missing.append("shop")
+	if _shop_purchase_verifications < AUTO_RUN_EXPECTED_POTION_BUYS:
+		missing.append("shop_buy_delta")
+	if not _shop_sale_currency_verified:
+		missing.append("shop_sell_delta")
 	if not _rewarded_revive_completed:
 		missing.append("revive")
+	if not _rewarded_revive_health_verified:
+		missing.append("revive_health")
+	if not _potion_use_completed:
+		missing.append("potion_use")
 	if not _gold_pack_purchase_completed:
 		missing.append("gold_pack")
+	if not _gold_pack_currency_verified:
+		missing.append("gold_pack_currency")
 	if not _cloud_save_completed or not _cloud_load_completed:
 		missing.append("cloud")
+	if not _cloud_payload_verified:
+		missing.append("cloud_payload")
 	if _runtime_seconds <= 0.0:
 		missing.append("time")
 	if not _feedback_shake_observed or not _feedback_toast_observed:
 		missing.append("feedback")
 	if not _spawn_scene_effect_succeeded:
 		missing.append("spawn_scene")
+	if not _hit_vfx_cleanup_verified or _visible_hit_vfx_count() > 0:
+		missing.append("hit_vfx_cleanup")
 	if _progression == null or _progression.get_currency("gold") < 30:
 		missing.append("gold")
+	elif _gold_after_pack_purchase >= 0 and _progression.get_currency("gold") != _gold_after_pack_purchase:
+		missing.append("gold_restored")
+	missing.append_array(_demo_ui_missing_requirements())
+	return missing
+
+
+func _demo_ui_missing_requirements() -> Array[String]:
+	var missing: Array[String] = []
+	_update_hud()
+	if _zone_label == null or not _zone_label.text.contains("Village"):
+		missing.append("ui_zone")
+	if _quest_label == null or not _quest_label.text.contains("turned_in"):
+		missing.append("ui_quest")
+	if (
+		_inventory_label == null
+		or not _inventory_label.text.contains("village_charm")
+		or not _inventory_label.text.contains("field_blade")
+		or not _inventory_label.text.contains("herb_potion")
+	):
+		missing.append("ui_inventory")
+	if _shop_label == null or not _shop_label.text.contains("potion"):
+		missing.append("ui_shop")
+	if _trial_label == null or not _trial_label.text.contains("completed"):
+		missing.append("ui_trial")
+	if _player_label == null or not _player_label.text.contains("gold"):
+		missing.append("ui_player")
 	return missing

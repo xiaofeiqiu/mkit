@@ -196,9 +196,60 @@ func test_tc_int_boot_05_audio_bus_volume_saves_and_loads_through_bootstrap() ->
 	assert_almost_eq(AudioServer.get_bus_volume_db(_master_bus_index), -6.0, 0.001)
 
 
-func _boot_with_databases(databases: Array[ResourceDatabase] = []) -> GameBootstrap:
+func test_tc_int_boot_06_configured_save_path_loads_profile() -> void:
+	var writer_progression := ProgressionService.new()
+	writer_progression.save_id = "progression"
+	add_child_autofree(writer_progression)
+	writer_progression.add_currency("gold", 11)
+	var writer_save := SaveService.new()
+	writer_save.save_path = _save_path
+	assert_true(writer_save.save_game(self))
+	writer_save.free()
+	remove_child(writer_progression)
+	writer_progression.queue_free()
+	await get_tree().process_frame
+
+	_boot_with_databases([], _save_path)
+
+	var save := ServiceRegistry.get_service("save") as SaveService
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	assert_not_null(save)
+	assert_not_null(progression)
+	assert_eq(save.save_path, _save_path)
+	assert_eq(progression.get_currency("gold"), 11)
+
+
+func test_tc_int_boot_07_boot_registers_audio_definitions_from_content() -> void:
+	var sfx_stream := AudioStreamGenerator.new()
+	var sfx := AudioDefinition.new()
+	sfx.audio_id = "sfx.int.boot"
+	sfx.stream = sfx_stream
+	var music_stream := _make_wav_stream(96)
+	var music := AudioDefinition.new()
+	music.audio_id = "music.int.boot"
+	music.stream = music_stream
+	music.kind = AudioDefinition.AudioKind.MUSIC
+	music.loop = true
+	var resources: Array[Resource] = [sfx, music]
+	var database := IntTestHelpers.make_resource_database("runtime_audio_int", resources)
+
+	_boot_with_databases([database])
+
+	var audio := ServiceRegistry.get_service("audio") as AudioService
+	assert_not_null(audio)
+	assert_eq(audio.sfx_map["sfx.int.boot"], sfx_stream)
+	assert_eq(audio.music_map["music.int.boot"], music_stream)
+	assert_eq(music_stream.loop_mode, AudioStreamWAV.LOOP_FORWARD)
+	assert_eq(music_stream.loop_begin, 0)
+	assert_gt(music_stream.loop_end, 0)
+
+
+func _boot_with_databases(
+	databases: Array[ResourceDatabase] = [], profile_save_path: String = ""
+) -> GameBootstrap:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = databases
+	bootstrap.save_path = profile_save_path if profile_save_path != "" else _save_path
 	add_child_autofree(bootstrap)
 	return bootstrap
 
@@ -208,3 +259,14 @@ func _capture_master_volume() -> void:
 	if _master_bus_index >= 0:
 		_master_original_db = AudioServer.get_bus_volume_db(_master_bus_index)
 		_master_volume_captured = true
+
+
+func _make_wav_stream(sample_count: int) -> AudioStreamWAV:
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = 22050
+	stream.stereo = false
+	var data := PackedByteArray()
+	data.resize(sample_count * 2)
+	stream.data = data
+	return stream

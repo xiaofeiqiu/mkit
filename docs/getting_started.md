@@ -36,12 +36,13 @@ res://addons/mkit/
 
 1. 新建场景，根节点选 **Node**，保存为 `res://bootstrap.tscn`
 2. 添加子节点，类型选 **GameBootstrap**
-3. 在 Inspector 中配置 `GameBootstrap` 的两个属性：
+3. 在 Inspector 中配置 `GameBootstrap` 的常用属性：
 
    | 属性 | 说明 | 示例值 |
    |------|------|--------|
    | `resource_databases` | 存放你的 `.tres` 内容数据库数组 | 暂时留空 |
    | `initial_scene_path` | 启动完成后跳转的场景路径 | `"res://game/main.tscn"` |
+   | `save_path` | 可选存档文件路径；留空使用 `SaveService` 默认值 | `""` |
 
 4. 将此场景设为项目主场景：**Project → Project Settings → Application → Run → Main Scene** → 选 `bootstrap.tscn`
 

@@ -15,6 +15,7 @@ const REWARD_ITEM_ID := "item.int.reward"
 const REWARD_GOOD_ID := "reward.int.good"
 const REWARD_FILTERED_ID := "reward.int.filtered"
 const SPAWN_PROBE_SCRIPT := preload("res://test/integration/int_spawn_probe.gd")
+const SAVE_PATH := "/tmp/mkit_content_spawn_room_run_integration_save.json"
 
 var _current_scene_root: Node = null
 var _previous_current_scene: Node = null
@@ -38,6 +39,7 @@ func after_each() -> void:
 	IntTestHelpers.remove_file("%s.uid" % ENTITY_SCENE_PATH)
 	IntTestHelpers.remove_file(ROOM_SCENE_PATH)
 	IntTestHelpers.remove_file("%s.uid" % ROOM_SCENE_PATH)
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 	_current_scene_root = null
 	_previous_current_scene = null
@@ -47,6 +49,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 	_save_spawn_probe_scene()
 	var world := _make_current_scene_root("SpawnWorld")
 	var bootstrap := GameBootstrap.new()
+	bootstrap.save_path = SAVE_PATH
 	world.add_child(bootstrap)
 
 	var source := Node2D.new()
@@ -73,6 +76,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 
 	assert_true(source_result.success)
 	assert_not_null(source_spawn)
+	assert_eq(source_result.payload.get("instance", null), source_spawn)
 	assert_eq(source_spawn.global_position, source.global_position)
 	assert_eq(source_spawn.get("direction"), Vector2.RIGHT)
 
@@ -86,6 +90,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 
 	assert_true(target_result.success)
 	assert_not_null(target_spawn)
+	assert_eq(target_result.payload.get("instance", null), target_spawn)
 	assert_eq(target_spawn.global_position, target.global_position)
 	assert_eq(target_spawn.get("direction"), Vector2.DOWN)
 
@@ -97,6 +102,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 
 	assert_true(position_result.success)
 	assert_not_null(position_spawn)
+	assert_eq(position_result.payload.get("instance", null), position_spawn)
 	assert_eq(position_spawn.global_position, position_context.position)
 
 
@@ -106,6 +112,7 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	var world := _make_current_scene_root("RunWorld")
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [_make_content_database()]
+	bootstrap.save_path = SAVE_PATH
 	world.add_child(bootstrap)
 	_replace_random_service()
 
@@ -209,6 +216,7 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 func test_tc_int_spawn_room_run_03_object_pool_acquire_release_roundtrip() -> void:
 	_save_spawn_probe_scene()
 	var bootstrap := GameBootstrap.new()
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 	var pool := ServiceRegistry.get_service("pool") as PoolService
 	assert_not_null(pool)

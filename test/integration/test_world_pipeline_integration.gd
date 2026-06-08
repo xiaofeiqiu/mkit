@@ -11,6 +11,7 @@ const REWARD_ITEM_ID := "item.int.world_reward"
 const VILLAGE_GATE_POS := Vector2(50.0, 50.0)
 const VILLAGE_RETURN_POS := Vector2(70.0, 70.0)
 const FIELD_ENTRY_POS := Vector2(300.0, 120.0)
+const SAVE_PATH := "/tmp/mkit_world_pipeline_integration_save.json"
 
 
 class TestSceneRouter:
@@ -47,6 +48,7 @@ func after_each() -> void:
 	IntTestHelpers.remove_file("%s.uid" % VILLAGE_SCENE_PATH)
 	IntTestHelpers.remove_file(FIELD_SCENE_PATH)
 	IntTestHelpers.remove_file("%s.uid" % FIELD_SCENE_PATH)
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -56,6 +58,7 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var content := ServiceRegistry.get_service("content") as ContentService

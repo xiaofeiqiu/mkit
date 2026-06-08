@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="2_identity"]
@@ -21,6 +21,8 @@
 [ext_resource type="Script" path="res://addons/mkit/modules/combat/hurtbox_component.gd" id="19_hurtbox"]
 [ext_resource type="Script" path="res://game/entities/states/player_dash_state.gd" id="20_dash"]
 [ext_resource type="Script" path="res://addons/mkit/modules/interaction/interaction_component.gd" id="21_interaction"]
+[ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_component.gd" id="22_exp"]
+[ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_curve.gd" id="23_curve"]
 
 [sub_resource type="RectangleShape2D" id="RectShape_hit"]
 size = Vector2(36, 36)
@@ -30,6 +32,10 @@ size = Vector2(32, 32)
 
 [sub_resource type="CircleShape2D" id="CircleShape_interaction"]
 radius = 48.0
+
+[sub_resource type="Resource" id="Resource_player_xp_curve"]
+script = ExtResource("23_curve")
+xp_thresholds = Array[int]([50, 100, 150])
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_root")
@@ -109,6 +115,11 @@ shape = SubResource("RectShape_hurt")
 script = ExtResource("13_pool")
 starting_values = {"mana": 50.0}
 
+[node name="ExperienceComponent" type="Node" parent="Components"]
+script = ExtResource("22_exp")
+save_id = "player_experience"
+curve = SubResource("Resource_player_xp_curve")
+
 [node name="InteractionComponent" type="Area2D" parent="Components"]
 collision_mask = 2
 script = ExtResource("21_interaction")
@@ -120,6 +131,7 @@ shape = SubResource("CircleShape_interaction")
 
 [node name="AbilityController" type="Node" parent="Controllers"]
 script = ExtResource("14_ability")
+starting_ability_ids = Array[String](["ability.demo.firebolt"])
 
 [node name="StatusEffectController" type="Node" parent="Controllers"]
 script = ExtResource("15_status")

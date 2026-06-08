@@ -197,6 +197,7 @@ const NAV = [
     { label: '12 · Status Effects',     href: 'cookbook/12_status_effects.md' },
     { label: '13 · Animation',          href: 'cookbook/13_animation.md' },
     { label: '14 · Shop',               href: 'cookbook/14_shop.md' },
+    { label: '15 · World / Zone',       href: 'cookbook/15_world_zone_transition.md' },
   ]},
   { group: 'Kernel Ref', collapsed: true, items: [
     'GameBootstrap','ServiceRegistry','GameCommand','CommandService',
@@ -210,7 +211,7 @@ const NAV = [
     'State','StateMachine','Condition','ConditionEvaluator',
     'TargetInRangeCondition',
     'TimeService','RandomService','SceneService','PoolService',
-    'AudioService','AnalyticsService','AnalyticsServiceMock',
+    'AudioDefinition','AudioService','AnalyticsService','AnalyticsServiceMock',
     'AdService','AdServiceMock','IAPService','IAPServiceMock',
     'CloudSaveService','CloudSaveServiceMock','DebugOverlay',
     'MkitRuntimeContext',
@@ -329,7 +330,84 @@ function setActiveLink(href) {
 }
 
 // ── Content rendering ─────────────────────────────────────────────────────────
-async function loadPage(href) {
+function splitRoute(route) {
+  const value = (route || '').trim()
+  const hashIndex = value.indexOf('#')
+  if (hashIndex === -1) return { path: value, anchor: '' }
+  return {
+    path: value.slice(0, hashIndex),
+    anchor: decodeURIComponent(value.slice(hashIndex + 1)),
+  }
+}
+
+function normalizePath(path, basePath = '') {
+  if (!path) return basePath || 'readme.md'
+
+  const baseParts = basePath ? basePath.split('/').slice(0, -1) : []
+  const parts = path.startsWith('/') ? [] : baseParts
+
+  path.split('/').forEach(part => {
+    if (!part || part === '.') return
+    if (part === '..') {
+      parts.pop()
+      return
+    }
+    parts.push(part)
+  })
+
+  return parts.join('/')
+}
+
+function normalizeRoute(raw, basePath = '') {
+  const { path, anchor } = splitRoute(raw)
+  const normalizedPath = normalizePath(path, basePath)
+  return anchor ? `${normalizedPath}#${anchor}` : normalizedPath
+}
+
+function slugifyHeading(text) {
+  const pipelineMatch = text.trim().match(/^P\d+-(\d+)[：:](.*)$/i)
+  if (pipelineMatch) {
+    return `${pipelineMatch[1]}-${slugifyHeading(pipelineMatch[2])}`
+  }
+
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[：:，,。.!！?？、"'`（）()[\]{}]/g, '')
+    .replace(/[\/+—–]/g, '')
+}
+
+function addHeadingAnchors(content) {
+  const seen = new Map()
+  content.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(heading => {
+    const base = slugifyHeading(heading.textContent || '')
+    if (!base) return
+
+    const count = seen.get(base) || 0
+    seen.set(base, count + 1)
+    heading.id = count === 0 ? base : `${base}-${count + 1}`
+  })
+}
+
+function scrollToAnchor(anchor) {
+  if (!anchor) {
+    document.getElementById('content-wrap').scrollTop = 0
+    return
+  }
+
+  const target = document.getElementById(anchor)
+  if (!target) {
+    document.getElementById('content-wrap').scrollTop = 0
+    return
+  }
+
+  target.scrollIntoView({ block: 'start' })
+}
+
+async function loadPage(route) {
+  const { path, anchor } = splitRoute(normalizeRoute(route))
+  const href = path || 'readme.md'
   const content = document.getElementById('content')
   const status = document.createElement('div')
   status.id = 'status'
@@ -357,6 +435,7 @@ async function loadPage(href) {
   // Render markdown
   const html = marked.parse(md)
   content.innerHTML = html
+  addHeadingAnchors(content)
 
   // Convert mermaid code blocks
   content.querySelectorAll('pre code.language-mermaid').forEach(el => {
@@ -373,16 +452,19 @@ async function loadPage(href) {
   // Intercept internal .md links
   content.querySelectorAll('a[href]').forEach(a => {
     const h = a.getAttribute('href')
-    if (h && h.endsWith('.md') && !h.startsWith('http')) {
+    if (h && !h.startsWith('http')) {
+      const { path } = splitRoute(h)
+      const isMarkdownRoute = h.startsWith('#') || path.endsWith('.md')
+      if (!isMarkdownRoute) return
+
       a.addEventListener('click', e => {
         e.preventDefault()
-        window.location.hash = h
+        window.location.hash = normalizeRoute(h, href)
       })
     }
   })
 
-  // Scroll to top
-  document.getElementById('content-wrap').scrollTop = 0
+  scrollToAnchor(anchor)
 }
 
 // ── Mermaid lightbox ─────────────────────────────────────────────────────────

@@ -1,6 +1,8 @@
 class_name PlayerAttackState
 extends State
 
+const ATTACK_SFX_ID := "sfx.demo.attack"
+
 var current_action: GameAction = null
 
 
@@ -14,6 +16,8 @@ func enter(context: Dictionary = {}) -> void:
 	var hitbox := owner_entity.get_node_or_null("Components/HitboxComponent") as HitboxComponent
 	if hitbox != null:
 		hitbox.position = facing.normalized() * 28.0
+
+	_play_attack_sfx()
 
 	var ctx := ActionContext.new()
 	ctx.source = owner_entity
@@ -35,6 +39,12 @@ func exit(context: Dictionary = {}) -> void:
 	if current_action != null and not current_action.is_finished():
 		current_action.cancel("state_exit")
 	current_action = null
+
+
+func _play_attack_sfx() -> void:
+	var audio := ServiceRegistry.get_service_or_null("audio") as AudioService
+	if audio != null:
+		audio.play_sfx(ATTACK_SFX_ID)
 
 
 func _on_action_completed(_action: GameAction) -> void:

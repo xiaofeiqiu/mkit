@@ -57,6 +57,9 @@ func before_each() -> void:
 
 
 func after_each() -> void:
+	var path := save_manager.save_path if save_manager != null else ""
+	if path != "" and FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
 	ServiceRegistry.clear()
 
 
@@ -265,3 +268,34 @@ func test_tc_world_08_scoped_zone_state_restores_without_scene_root() -> void:
 	assert_eq(restored.current_zone_id, "zone.saved")
 	assert_eq(restored._pending_zone_id, "zone.pending")
 	assert_eq(restored._pending_spawn_id, "spawn.pending")
+	assert_eq(scenes.changed_paths.size(), 0)
+
+
+func test_tc_world_09_scoped_zone_restore_changes_active_scene_to_saved_zone() -> void:
+	_make_zone("zone.village", "res://village.tscn", "village_center", "bgm.village")
+	_make_zone("zone.field", "res://field.tscn", "field_entry", "bgm.field")
+	var audio := AudioProbe.new()
+	add_child_autofree(audio)
+	ServiceRegistry.register_service("audio", audio)
+	var world := _make_world()
+	world.current_zone_id = "zone.village"
+	scenes.current_scene_path = "res://village.tscn"
+
+	assert_true(save_manager.save_game(null))
+	world.current_zone_id = "zone.field"
+	scenes.current_scene_path = "res://field.tscn"
+	scenes.changed_paths.clear()
+
+	watch_signals(world)
+	watch_signals(events)
+	assert_true(save_manager.load_game(null))
+
+	assert_eq(world.current_zone_id, "zone.village")
+	assert_eq(world._pending_zone_id, "")
+	assert_eq(world._pending_spawn_id, "")
+	assert_eq(scenes.changed_paths, ["res://village.tscn"])
+	assert_eq(scenes.current_scene_path, "res://village.tscn")
+	assert_signal_emitted_with_parameters(world, "zone_changed", ["zone.field", "zone.village"])
+	assert_signal_emitted_with_parameters(events, "zone_changed", ["zone.field", "zone.village"])
+	assert_eq(audio.played.size(), 1)
+	assert_eq(audio.played[0], "bgm.village")

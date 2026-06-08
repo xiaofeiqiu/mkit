@@ -6,7 +6,7 @@
 
 ## 职责
 
-游戏启动入口。在 `_ready` 时创建 `MkitRuntimeContext`，注册所有内置服务为 runtime ports，加载内容数据库、校验内容、加载存档，最后切换到初始场景。
+游戏启动入口。在 `_ready` 时创建 `MkitRuntimeContext`，注册所有内置服务为 runtime ports，加载内容数据库，把内容驱动的服务配置（如 `AudioDefinition`）注册到对应服务，校验内容、加载存档，最后切换到初始场景。
 
 ## 字段（@export 和 public var）
 
@@ -14,6 +14,7 @@
 |--------|------|--------|------|
 | `resource_databases` | `Array[ResourceDatabase]` | `[]` | 要加载的内容数据库列表；`_load_content` 时遍历注册 |
 | `initial_scene_path` | `String` | `""` | 启动完成后切入的场景路径（`res://` 或 `uid://`）；留空则不切换 |
+| `save_path` | `String` | `""` | 可选存档路径；非空时启动自动读档前写入 `SaveService.save_path` |
 
 ## 方法
 
@@ -22,6 +23,8 @@
 | `boot() -> void` | `void` | 启动入口，创建 runtime context 并按序调用下面步骤 |
 | `_register_kernel_services() -> void` | `void` | 注册所有内置服务并同步到 runtime context；**override 此方法添加自定义服务** |
 | `_load_content() -> void` | `void` | 遍历 `resource_databases`，调 `ContentService.load_database()` |
+| `_configure_content_services() -> void` | `void` | 内容入库后配置内容驱动的服务 |
+| `_register_audio_definitions() -> void` | `void` | 将 `ContentService` 中的 `AudioDefinition` 注册到 `AudioService` |
 | `_validate_content() -> void` | `void` | 调 `ContentService.validate_all()`；失败时 `push_error` |
 | `_load_profile() -> void` | `void` | 若存档文件存在，调 `SaveService.load_game(tree.root)` |
 | `_enter_initial_scene() -> void` | `void` | `call_deferred` 后调用，切换到 `initial_scene_path` 场景 |
@@ -69,5 +72,6 @@ func _load_profile() -> void:
 - → [ServiceRegistry](ServiceRegistry.md)
 - → [ResourceDatabase](ResourceDatabase.md)
 - → [ContentService](ContentService.md)
+- → [AudioDefinition](AudioDefinition.md)
 - → [pipeline.md — Runtime Bootstrap](../../pipeline.md#1-runtime-bootstrap)
 - → [cookbook/01_bootstrap.md](../../cookbook/01_bootstrap.md)

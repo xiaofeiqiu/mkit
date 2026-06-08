@@ -34,6 +34,9 @@
 [ext_resource type="Script" uid="uid://ch20kmyopdq6o" path="res://addons/mkit/modules/progression/upgrade_definition.gd" id="30_upgrade"]
 [ext_resource type="Script" uid="uid://cqvxlidri7hpe" path="res://addons/mkit/modules/quest/advance_objective_effect.gd" id="31_advance"]
 [ext_resource type="Script" uid="uid://crr0gatus60l6" path="res://addons/mkit/modules/quest/complete_quest_effect.gd" id="32_complete"]
+[ext_resource type="Script" uid="uid://eo04ded81h5e" path="res://addons/mkit/kernel/services/audio_definition.gd" id="33_audio"]
+[ext_resource type="AudioStream" uid="uid://c32sdwplrcocv" path="res://game/audio/pixel_attack_sound.wav" id="34_attack_sfx"]
+[ext_resource type="AudioStream" uid="uid://fmpqmc5qm4mx" path="res://game/audio/snowy_sunny_village_campfire_loop.wav" id="35_village_bgm"]
 
 [sub_resource type="Resource" id="Resource_heal_potion_effect"]
 script = ExtResource("3_heal")
@@ -273,6 +276,32 @@ bgm_id = "bgm.demo.field"
 default_spawn_id = "field_entry"
 tags = Array[String](["field", "combat"])
 
+[sub_resource type="Resource" id="Resource_audio_attack"]
+script = ExtResource("33_audio")
+audio_id = "sfx.demo.attack"
+stream = ExtResource("34_attack_sfx")
+
+[sub_resource type="Resource" id="Resource_audio_bgm_village"]
+script = ExtResource("33_audio")
+audio_id = "bgm.demo.village"
+stream = ExtResource("35_village_bgm")
+kind = 1
+loop = true
+
+[sub_resource type="Resource" id="Resource_audio_bgm_room"]
+script = ExtResource("33_audio")
+audio_id = "bgm.demo.room"
+stream = ExtResource("35_village_bgm")
+kind = 1
+loop = true
+
+[sub_resource type="Resource" id="Resource_audio_bgm_field"]
+script = ExtResource("33_audio")
+audio_id = "bgm.demo.field"
+stream = ExtResource("35_village_bgm")
+kind = 1
+loop = true
+
 [sub_resource type="Resource" id="Resource_entity_field_beast"]
 script = ExtResource("27_entity")
 entity_definition_id = "entity.demo.field_beast"
@@ -450,4 +479,4 @@ tags = Array[String](["demo", "trial", "run_reward"])
 [resource]
 script = ExtResource("1_db")
 database_id = "village_rpg_content"
-resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_item_field_blade"), SubResource("Resource_stat_max_hp"), SubResource("Resource_stat_attack_power"), SubResource("Resource_stat_defense"), SubResource("Resource_loot_field_beast"), SubResource("Resource_loot_field_blade"), SubResource("Resource_quest_field_report"), SubResource("Resource_quest_manual"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field"), SubResource("Resource_entity_field_beast"), SubResource("Resource_entity_trial_beast"), SubResource("Resource_trial_room_01"), SubResource("Resource_trial_room_02"), SubResource("Resource_trial_room_03"), SubResource("Resource_ability_firebolt"), SubResource("Resource_status_burn"), SubResource("Resource_reward_trial_attack"), SubResource("Resource_reward_trial_vitality"), SubResource("Resource_reward_trial_gold"), SubResource("Resource_upgrade_trial_attack")])
+resources = Array[Resource]([SubResource("Resource_item_potion"), SubResource("Resource_item_claw"), SubResource("Resource_item_charm"), SubResource("Resource_item_field_blade"), SubResource("Resource_stat_max_hp"), SubResource("Resource_stat_attack_power"), SubResource("Resource_stat_defense"), SubResource("Resource_loot_field_beast"), SubResource("Resource_loot_field_blade"), SubResource("Resource_quest_field_report"), SubResource("Resource_quest_manual"), SubResource("Resource_dialogue_elder"), SubResource("Resource_shop_village"), SubResource("Resource_zone_village"), SubResource("Resource_zone_room"), SubResource("Resource_zone_field"), SubResource("Resource_audio_attack"), SubResource("Resource_audio_bgm_village"), SubResource("Resource_audio_bgm_room"), SubResource("Resource_audio_bgm_field"), SubResource("Resource_entity_field_beast"), SubResource("Resource_entity_trial_beast"), SubResource("Resource_trial_room_01"), SubResource("Resource_trial_room_02"), SubResource("Resource_trial_room_03"), SubResource("Resource_ability_firebolt"), SubResource("Resource_status_burn"), SubResource("Resource_reward_trial_attack"), SubResource("Resource_reward_trial_vitality"), SubResource("Resource_reward_trial_gold"), SubResource("Resource_upgrade_trial_attack")])

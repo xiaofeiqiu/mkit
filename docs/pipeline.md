@@ -10,8 +10,8 @@
 ## P0-1：Runtime Bootstrap
 
 **触发点：** `GameBootstrap._ready()`  
-**涉及系统：** `GameBootstrap`、`ServiceRegistry`、`ContentService`、`SaveService`、`SceneService`  
-**输出：** 所有服务在线，内容已注册，存档已加载，初始场景已切换
+**涉及系统：** `GameBootstrap`、`ServiceRegistry`、`ContentService`、`AudioService`、`SaveService`、`SceneService`
+**输出：** 所有服务在线，内容已注册，内容驱动的服务配置已应用，存档已加载，初始场景已切换
 
 ### 流程
 
@@ -21,6 +21,7 @@ sequenceDiagram
     participant SR as ServiceRegistry
     participant RT as MkitRuntimeContext
     participant CS as ContentService
+    participant AS as AudioService
     participant SS as SaveService
     participant SC as SceneService
 
@@ -37,6 +38,7 @@ sequenceDiagram
     Note over SR: [mkit 内部] 服务表 + runtime port 表建立完毕
     GB->>CS: load_database(db) × N
     CS->>CS: register_resource(def) per entry
+    GB->>AS: register_audio_definitions(audio_definition[])
     GB->>CS: validate_all()
     CS-->>GB: ContentValidationResult
     Note over GB: 若 result.success == false → push_error
@@ -54,6 +56,7 @@ sequenceDiagram
 # Inspector：
 #   resource_databases = [res://game/content/content_db.tres]
 #   initial_scene_path = "res://game/scenes/main.tscn"
+#   save_path = ""  # 留空使用 SaveService 默认 user://save.json
 
 # 验证服务在线（在任意节点的 _ready 中）
 func _ready() -> void:
@@ -729,7 +732,9 @@ sequenceDiagram
 # FeedbackSystem 全部在 Inspector 配路径，无需写代码：
 #   damage_number_system_path = "../DamageNumbers"
 #   vfx_spawner_path          = "../Vfx"
+#   audio_manager_path        = ""  # 留空使用全局 "audio" 服务
 # VFXSpawner.vfx_scene_map = {"hit": "...", "death": "..."}
+# ResourceDatabase.resources 里加入 AudioDefinition("hit"/"death", kind=SFX)
 
 # 想自己监听做别的表现：
 var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
@@ -815,7 +820,7 @@ sequenceDiagram
     SV->>N: 优先按 scope 恢复，后回退 payload[from_save_data]
 ```
 
-> **关键：** `SaveService` 默认收集场景树 `Saveable`，并在 scope 注册情况下可按 scope 恢复；`SaveableComponent`（HealthComponent、InventoryController…）仍需由 `Saveable` 代理主动收集——见 [cookbook/11](cookbook/11_progression_and_save.md) 步骤 4。
+> **关键：** `SaveService` 默认收集场景树 `Saveable`，并在 scope 注册情况下可按 scope 恢复；`WorldService` 的 `world.zone` scope 会在运行中读档时把活动场景切回存档区域的 `ZoneDefinition.scene_path`。`SaveableComponent`（HealthComponent、InventoryController…）仍需由 `Saveable` 代理主动收集——见 [cookbook/11](cookbook/11_progression_and_save.md) 步骤 4。
 
 ### 关键代码
 
@@ -1149,3 +1154,4 @@ if not scenes.change_scene("res://game/scenes/forest.tscn"):
 ### 相关文档
 
 → [ref/kernel/SceneService.md](ref/kernel/SceneService.md) · [ref/modules/WorldService.md](ref/modules/WorldService.md) · [ref/modules/Portal.md](ref/modules/Portal.md) · [ref/modules/SpawnPoint.md](ref/modules/SpawnPoint.md)
+→ [cookbook/15_world_zone_transition.md](cookbook/15_world_zone_transition.md)

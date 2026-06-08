@@ -2,12 +2,12 @@
 
 **层：** Module  
 **文件：** `addons/mkit/modules/world/world_service.gd`  
-**继承：** `extends Node`  
+**继承：** `extends Saveable`
 **服务 ID：** `"world"`
 
 ## 职责
 
-区域（Zone）切换协调者。`go_to_zone` 通过 `SceneService` 换场景，场景就绪后把玩家放到匹配的 `SpawnPoint`，发 `zone_changed` 并播放区域 BGM。
+区域（Zone）切换协调者。`go_to_zone` 通过 `SceneService` 换场景，场景就绪后把玩家放到匹配的 `SpawnPoint`，发 `zone_changed` 并播放区域 BGM。作为 `Saveable` scope provider，它会把当前区域写入 `world.zone`；运行中读档时，如果 `SceneService.current_scene_path` 已指向一个活动场景，读档会把活动场景切回存档区域的 `ZoneDefinition.scene_path`。
 
 ## 字段
 
@@ -40,4 +40,4 @@ world.go_to_zone("zone.forest", "from_village")
 ## 相关
 
 - → [ZoneDefinition](ZoneDefinition.md) · [SpawnPoint](SpawnPoint.md) · [Portal](Portal.md) · [ref/kernel/SceneService.md](../kernel/SceneService.md)
-- → [pipeline.md — Scene / Zone Transition](../../pipeline.md#20-scene--zone-transition)
+- → [pipeline.md — Scene / Zone Transition](../../pipeline.md#20-scene--zone-transition) · [cookbook/15_world_zone_transition.md](../../cookbook/15_world_zone_transition.md)

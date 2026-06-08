@@ -30,3 +30,4 @@
 ## 相关
 
 - → [WorldService](WorldService.md) · [ZoneDefinition](ZoneDefinition.md) · [Portal](Portal.md)
+- → [cookbook/15_world_zone_transition.md](../../cookbook/15_world_zone_transition.md)

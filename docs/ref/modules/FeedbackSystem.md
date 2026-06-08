@@ -14,7 +14,7 @@
 |--------|------|--------|------|
 | `damage_number_system_path` | `NodePath`（@export）| 空 | `DamageNumberSystem` 路径 |
 | `vfx_spawner_path` | `NodePath`（@export）| 空 | `VFXSpawner` 路径 |
-| `audio_manager_path` | `NodePath`（@export）| 空 | 可选的本地 `AudioService` 节点路径；不会自动从 `"audio"` 服务取 |
+| `audio_manager_path` | `NodePath`（@export）| 空 | 可选的本地 `AudioService` 节点路径；为空或路径无效时回退到全局 `"audio"` 服务 |
 | `ui_manager_path` | `NodePath`（@export）| 空 | `UIManager` 路径 |
 | `toast_screen_id` | `String`（@export）| `""` | toast screen id |
 | `damage_screen_shake_strength` | `float`（@export）| `0.0` | 伤害震动强度 |

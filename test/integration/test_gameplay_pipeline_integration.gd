@@ -1,6 +1,9 @@
 extends GutTest
 
 
+const SAVE_PATH := "/tmp/mkit_gameplay_pipeline_integration_save.json"
+
+
 class PassingCondition:
 	extends Condition
 
@@ -141,6 +144,7 @@ class PipelineCastState:
 
 
 func after_each() -> void:
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -402,6 +406,7 @@ func test_tc_int_game_06_equip_applies_and_unequip_reverts_stat_modifier() -> vo
 func _boot_gameplay() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
 

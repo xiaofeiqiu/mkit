@@ -18,6 +18,27 @@ func _ready() -> void:
 	_apply_bus_volumes()
 
 
+func register_audio_definition(definition: AudioDefinition) -> bool:
+	if definition == null or definition.audio_id == "" or definition.stream == null:
+		return false
+	var stream := _prepare_stream(definition.stream, definition.loop)
+	if definition.kind == AudioDefinition.AudioKind.MUSIC:
+		music_map[definition.audio_id] = stream
+		sfx_map.erase(definition.audio_id)
+	else:
+		sfx_map[definition.audio_id] = stream
+		music_map.erase(definition.audio_id)
+	return true
+
+
+func register_audio_definitions(definitions: Array) -> int:
+	var count := 0
+	for raw in definitions:
+		if register_audio_definition(raw as AudioDefinition):
+			count += 1
+	return count
+
+
 func play_sfx(audio_id: String, volume_db: float = 0.0) -> void:
 	if not sfx_map.has(audio_id):
 		return
@@ -123,6 +144,15 @@ func _start_music_stream(stream: AudioStream, music_id: String, volume_db: float
 	music_player.volume_db = volume_db
 	music_player.play()
 	current_music_id = music_id
+
+
+func _prepare_stream(stream: AudioStream, loop: bool) -> AudioStream:
+	var wav := stream as AudioStreamWAV
+	if wav != null and loop:
+		wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		wav.loop_begin = 0
+		wav.loop_end = maxi(1, int(wav.get_length() * float(wav.mix_rate)))
+	return stream
 
 
 func _stop_music_tween() -> void:

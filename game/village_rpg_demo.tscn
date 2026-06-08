@@ -1,65 +1,42 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene format=3 uid="uid://c3trrdb4njbk1"]
 
-[ext_resource type="Script" path="res://game/village_rpg_demo.gd" id="1_slice"]
+[ext_resource type="Script" uid="uid://dal4uydhytsqr" path="res://game/village_rpg_demo.gd" id="1_slice"]
 [ext_resource type="PackedScene" path="res://game/entities/player.tscn" id="2_player"]
-[ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_component.gd" id="3_experience"]
-[ext_resource type="Script" path="res://addons/mkit/modules/progression/experience_curve.gd" id="4_curve"]
-[ext_resource type="Script" path="res://addons/mkit/modules/ui/dialogue_ui.gd" id="5_dialogue_ui"]
-[ext_resource type="Script" path="res://addons/mkit/modules/ui/quest_log_ui.gd" id="6_quest_log_ui"]
-[ext_resource type="Script" path="res://addons/mkit/modules/ui/shop_ui.gd" id="7_shop_ui"]
-[ext_resource type="Script" path="res://addons/mkit/modules/world/dungeon/run_director.gd" id="8_run"]
-[ext_resource type="Script" path="res://addons/mkit/modules/ui/ui_manager.gd" id="9_ui_manager"]
-[ext_resource type="Script" path="res://addons/mkit/modules/ui/feedback_system.gd" id="10_feedback"]
-[ext_resource type="Script" path="res://addons/mkit/modules/ui/damage_number_system.gd" id="11_damage_numbers"]
-[ext_resource type="Script" path="res://addons/mkit/modules/ui/vfx_spawner.gd" id="12_vfx"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/debug/debug_overlay.gd" id="13_debug"]
-[ext_resource type="Script" path="res://game/player_saveable.gd" id="14_player_saveable"]
+[ext_resource type="Script" uid="uid://cdohg87jgcapc" path="res://addons/mkit/modules/ui/dialogue_ui.gd" id="5_dialogue_ui"]
+[ext_resource type="Script" uid="uid://brwuoh1gyint0" path="res://addons/mkit/modules/ui/quest_log_ui.gd" id="6_quest_log_ui"]
+[ext_resource type="Script" uid="uid://donnrufgotwx2" path="res://addons/mkit/modules/ui/shop_ui.gd" id="7_shop_ui"]
+[ext_resource type="Script" uid="uid://ce8mkuh3cogbw" path="res://addons/mkit/modules/world/dungeon/run_director.gd" id="8_run"]
+[ext_resource type="Script" uid="uid://dq3e8cvfxf5xe" path="res://addons/mkit/modules/ui/ui_manager.gd" id="9_ui_manager"]
+[ext_resource type="Script" uid="uid://uswnbxuta8t6" path="res://addons/mkit/modules/ui/feedback_system.gd" id="10_feedback"]
+[ext_resource type="Script" uid="uid://ticj2gby3di0" path="res://addons/mkit/modules/ui/damage_number_system.gd" id="11_damage_numbers"]
+[ext_resource type="Script" uid="uid://4q7tl2ksc527" path="res://addons/mkit/modules/ui/vfx_spawner.gd" id="12_vfx"]
+[ext_resource type="Script" uid="uid://c0ubv5dhkqofk" path="res://addons/mkit/kernel/debug/debug_overlay.gd" id="13_debug"]
+[ext_resource type="Script" uid="uid://g0xrotivu2ky" path="res://game/player_saveable.gd" id="14_player_saveable"]
 
-[sub_resource type="Resource" id="Resource_demo_curve"]
-script = ExtResource("4_curve")
-base_xp = 40
-growth_factor = 1.4
-max_level = 8
-
-[node name="VillageRpgDemo" type="Node2D"]
+[node name="VillageRpgDemo" type="Node2D" unique_id=2133037375]
 script = ExtResource("1_slice")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1102675826]
 position = Vector2(360, 245)
-zoom = Vector2(0.78, 0.78)
 
-[node name="WorldHost" type="Node2D" parent="."]
+[node name="WorldHost" type="Node2D" parent="." unique_id=1591182115]
 
-[node name="RoomRoot" type="Node2D" parent="."]
+[node name="RoomRoot" type="Node2D" parent="." unique_id=367173916]
 visible = false
 
-[node name="RunDirector" type="Node" parent="."]
+[node name="RunDirector" type="Node" parent="." unique_id=282006503]
 script = ExtResource("8_run")
 first_floor_room_pool = Array[String](["room.demo.trial_01", "room.demo.trial_02", "room.demo.trial_03"])
-room_scene_container_path = NodePath("../RoomRoot")
-player_entity_id = "player_001"
-run_length = 3
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
+[node name="Player" parent="." unique_id=176143253 instance=ExtResource("2_player")]
 position = Vector2(160, 260)
 
-[node name="AbilityController" parent="Player/Controllers"]
-starting_ability_ids = Array[String](["ability.demo.firebolt"])
-
-[node name="InputReader" parent="Player"]
-cast_ability_id = "ability.demo.firebolt"
-
-[node name="ExperienceComponent" type="Node" parent="Player/Components"]
-script = ExtResource("3_experience")
-save_id = "player_experience"
-curve = SubResource("Resource_demo_curve")
-
-[node name="PlayerSaveable" type="Node" parent="."]
+[node name="PlayerSaveable" type="Node" parent="." unique_id=589456787]
 script = ExtResource("14_player_saveable")
-save_id = "demo_player"
 target_path = NodePath("../Player")
+save_id = "demo_player"
 
-[node name="FeedbackSystem" type="Node" parent="."]
+[node name="FeedbackSystem" type="Node" parent="." unique_id=904721405]
 script = ExtResource("10_feedback")
 damage_number_system_path = NodePath("DamageNumbers")
 vfx_spawner_path = NodePath("VFX")
@@ -68,28 +45,32 @@ toast_screen_id = "demo.toast"
 damage_screen_shake_strength = 0.25
 death_toast_template = "Defeated %s"
 
-[node name="DamageNumbers" type="Node" parent="FeedbackSystem"]
+[node name="DamageNumbers" type="Node" parent="FeedbackSystem" unique_id=936643887]
 script = ExtResource("11_damage_numbers")
 damage_number_scene_path = "res://game/ui/damage_number.tscn"
 use_pool = true
 auto_release_seconds = 0.55
 
-[node name="VFX" type="Node" parent="FeedbackSystem"]
+[node name="VFX" type="Node" parent="FeedbackSystem" unique_id=388657764]
 script = ExtResource("12_vfx")
-vfx_scene_map = {"death": "res://game/ui/hit_vfx.tscn", "hit": "res://game/ui/hit_vfx.tscn"}
+vfx_scene_map = {
+"death": "res://game/ui/hit_vfx.tscn",
+"hit": "res://game/ui/hit_vfx.tscn"
+}
 auto_free_seconds = 0.55
 use_pool = true
 
-[node name="DebugOverlay" type="CanvasLayer" parent="."]
+[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1151122461]
 script = ExtResource("13_debug")
 watch_entity_path = NodePath("../Player")
 status_provider_path = NodePath("..")
 visible_on_start = false
 show_registered_services = false
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=238890030]
 
-[node name="Instructions" type="Label" parent="HUD"]
+[node name="Instructions" type="Label" parent="HUD" unique_id=651626077]
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -99,9 +80,9 @@ offset_right = -24.0
 offset_bottom = -24.0
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
-text = ""
 
-[node name="StatsPanel" type="VBoxContainer" parent="HUD"]
+[node name="StatsPanel" type="VBoxContainer" parent="HUD" unique_id=1791937573]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -390.0
@@ -110,128 +91,137 @@ offset_right = -24.0
 offset_bottom = 330.0
 grow_horizontal = 0
 
-[node name="ZoneInfo" type="Label" parent="HUD/StatsPanel"]
+[node name="ZoneInfo" type="Label" parent="HUD/StatsPanel" unique_id=1391634783]
+layout_mode = 2
 theme_override_font_sizes/font_size = 18
-autowrap_mode = 3
 text = "Zone: --"
-
-[node name="QuestInfo" type="Label" parent="HUD/StatsPanel"]
-theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
+
+[node name="QuestInfo" type="Label" parent="HUD/StatsPanel" unique_id=1338730397]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
 text = "Quest: --"
-
-[node name="PlayerInfo" type="Label" parent="HUD/StatsPanel"]
-theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
+
+[node name="PlayerInfo" type="Label" parent="HUD/StatsPanel" unique_id=616072854]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
 text = "Player: --"
-
-[node name="CombatInfo" type="Label" parent="HUD/StatsPanel"]
-theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
+
+[node name="CombatInfo" type="Label" parent="HUD/StatsPanel" unique_id=1093318807]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
 text = "Beast: --"
-
-[node name="InventoryInfo" type="Label" parent="HUD/StatsPanel"]
-theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
+
+[node name="InventoryInfo" type="Label" parent="HUD/StatsPanel" unique_id=2071053818]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
 text = "Bag: empty"
-
-[node name="ShopInfo" type="Label" parent="HUD/StatsPanel"]
-theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
+
+[node name="ShopInfo" type="Label" parent="HUD/StatsPanel" unique_id=1395355995]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
 text = "Shop: closed"
-
-[node name="TrialInfo" type="Label" parent="HUD/StatsPanel"]
-theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
+
+[node name="TrialInfo" type="Label" parent="HUD/StatsPanel" unique_id=1965509332]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
 text = "Trial: ready"
+autowrap_mode = 3
 
-[node name="EventLog" type="Label" parent="HUD/StatsPanel"]
+[node name="EventLog" type="Label" parent="HUD/StatsPanel" unique_id=2136057051]
+layout_mode = 2
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
-text = ""
 
-[node name="UIManager" type="Node" parent="HUD"]
+[node name="UIManager" type="Node" parent="HUD" unique_id=1498283995]
 script = ExtResource("9_ui_manager")
-screen_root_path = NodePath("ScreenRoot")
-screen_scene_map = {"demo.toast": "res://game/ui/toast_screen.tscn"}
+screen_scene_map = {
+"demo.toast": "res://game/ui/toast_screen.tscn"
+}
 
-[node name="ScreenRoot" type="Node" parent="HUD/UIManager"]
+[node name="ScreenRoot" type="Node" parent="HUD/UIManager" unique_id=1897501370]
 
-[node name="DialoguePanel" type="Control" parent="HUD"]
+[node name="DialoguePanel" type="Control" parent="HUD" unique_id=1326494756]
 visible = false
+layout_mode = 3
+anchors_preset = 0
 offset_left = 24.0
 offset_top = 330.0
 offset_right = 620.0
 offset_bottom = 510.0
 script = ExtResource("5_dialogue_ui")
 
-[node name="SpeakerLabel" type="Label" parent="HUD/DialoguePanel"]
-offset_left = 0.0
-offset_top = 0.0
+[node name="SpeakerLabel" type="Label" parent="HUD/DialoguePanel" unique_id=877657061]
+layout_mode = 0
 offset_right = 596.0
 offset_bottom = 24.0
 theme_override_font_sizes/font_size = 18
-text = ""
 
-[node name="TextLabel" type="Label" parent="HUD/DialoguePanel"]
-offset_left = 0.0
+[node name="TextLabel" type="Label" parent="HUD/DialoguePanel" unique_id=537501302]
+layout_mode = 0
 offset_top = 28.0
 offset_right = 596.0
 offset_bottom = 84.0
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
-text = ""
 
-[node name="ChoiceContainer" type="VBoxContainer" parent="HUD/DialoguePanel"]
-offset_left = 0.0
+[node name="ChoiceContainer" type="VBoxContainer" parent="HUD/DialoguePanel" unique_id=1438745162]
+layout_mode = 0
 offset_top = 92.0
 offset_right = 596.0
 offset_bottom = 180.0
 
-[node name="QuestLogPanel" type="Control" parent="HUD"]
+[node name="QuestLogPanel" type="Control" parent="HUD" unique_id=2109934545]
+layout_mode = 3
+anchors_preset = 0
 offset_left = 24.0
 offset_top = 24.0
 offset_right = 380.0
 offset_bottom = 178.0
 script = ExtResource("6_quest_log_ui")
 
-[node name="EmptyLabel" type="Label" parent="HUD/QuestLogPanel"]
-offset_left = 0.0
-offset_top = 0.0
+[node name="EmptyLabel" type="Label" parent="HUD/QuestLogPanel" unique_id=1754243306]
+layout_mode = 0
 offset_right = 356.0
 offset_bottom = 24.0
 theme_override_font_sizes/font_size = 18
 text = "No active quests"
 
-[node name="QuestContainer" type="VBoxContainer" parent="HUD/QuestLogPanel"]
-offset_left = 0.0
+[node name="QuestContainer" type="VBoxContainer" parent="HUD/QuestLogPanel" unique_id=1350954737]
+layout_mode = 0
 offset_top = 28.0
 offset_right = 356.0
 offset_bottom = 144.0
 
-[node name="ShopPanel" type="Control" parent="HUD"]
+[node name="ShopPanel" type="Control" parent="HUD" unique_id=1377952604]
 visible = false
+layout_mode = 3
+anchors_preset = 0
 offset_left = 24.0
 offset_top = 190.0
 offset_right = 380.0
 offset_bottom = 320.0
 script = ExtResource("7_shop_ui")
 
-[node name="ShopTitle" type="Label" parent="HUD/ShopPanel"]
-offset_left = 0.0
-offset_top = 0.0
+[node name="ShopTitle" type="Label" parent="HUD/ShopPanel" unique_id=46595458]
+layout_mode = 0
 offset_right = 356.0
 offset_bottom = 24.0
 theme_override_font_sizes/font_size = 18
 text = "Village Supply"
 
-[node name="EntryContainer" type="VBoxContainer" parent="HUD/ShopPanel"]
-offset_left = 0.0
+[node name="EntryContainer" type="VBoxContainer" parent="HUD/ShopPanel" unique_id=1848424248]
+layout_mode = 0
 offset_top = 30.0
 offset_right = 356.0
 offset_bottom = 130.0
 
-[node name="RewardLayer" type="Control" parent="HUD"]
+[node name="RewardLayer" type="Control" parent="HUD" unique_id=640910891]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

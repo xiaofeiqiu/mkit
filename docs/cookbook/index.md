@@ -1,6 +1,6 @@
 # Cookbook
 
-Cookbook 是一条**单一项目的累进构建主线**。每篇 Recipe 在上一篇已有场景的基础上新增一层，做完 Recipe 01–11 就得到一个完整可玩的 RPG loop。Recipe 12–14 是独立扩展，可按需选做。
+Cookbook 是一条**单一项目的累进构建主线**。每篇 Recipe 在上一篇已有场景的基础上新增一层，做完 Recipe 01–11 就得到一个完整可玩的 RPG loop。Recipe 12–15 是独立扩展，可按需选做。
 
 ---
 
@@ -65,6 +65,7 @@ Recipe 11  → 击杀/完成任务获得 XP，升级，全局存读档     ★�
 Recipe 12  → 为技能添加状态效果（DOT / buff）            ★★☆  约 20 min  [扩展]
 Recipe 13  → 为实体接入动画（Action 驱动 + 事件 VFX）   ★★☆  约 20 min  [扩展]
 Recipe 14  → 在房间之间开放商店购买物品                 ★★☆  约 20 min  [扩展]
+Recipe 15  → 用 Portal 在世界区域之间跳转               ★★☆  约 25 min  [扩展]
 ```
 
 ---

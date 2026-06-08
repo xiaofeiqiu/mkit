@@ -68,6 +68,7 @@ func _load_dlc_content(dlc_db_path: String) -> void:
 | `data/item_db.tres` | ItemDefinition、LootTableDefinition |
 | `data/quest_db.tres` | QuestDefinition |
 | `data/world_db.tres` | RoomDefinition、ZoneDefinition |
+| `data/audio_db.tres` | AudioDefinition |
 
 ## 相关
 

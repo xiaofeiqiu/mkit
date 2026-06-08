@@ -9,15 +9,18 @@ const NPC_GUIDE_ID := "npc.int.guide"
 const NPC_ELDER_ID := "npc.int.elder"
 const REWARD_CURRENCY_ID := "gold"
 const REWARD_AMOUNT := 25
+const SAVE_PATH := "/tmp/mkit_dialogue_pipeline_integration_save.json"
 
 
 func after_each() -> void:
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
 func test_tc_int_dialogue_01_interact_choice_accepts_quest_then_talk_completes() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService

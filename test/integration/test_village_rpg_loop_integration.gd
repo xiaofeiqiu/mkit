@@ -78,6 +78,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	# boot the real kernel + modules against the loop content database
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
 
 	var content := ServiceRegistry.get_service("content") as ContentService
@@ -236,6 +237,20 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_signal_emitted_with_parameters(events, "item_sold", [SHOP_ID, ITEM_CLAW, 1])
 	var expected_gold := STARTER_GOLD + REWARD_GOLD - POTION_VALUE + CLAW_SELL_PRICE
 	assert_eq(progression.get_currency(CURRENCY), expected_gold)
+
+	assert_true(save.save_game(get_tree().root))
+	var reload_to_field := host.get_child(0).get_node_or_null("ToField") as Portal
+	assert_not_null(reload_to_field)
+	assert_true(reload_to_field.interact(GameplayContext.new().with_source(player)))
+	await _settle()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+	assert_eq(router.current_scene_path, FIELD_SCENE_PATH)
+
+	assert_true(save.load_game(get_tree().root))
+	await _settle()
+	assert_eq(world.current_zone_id, ZONE_VILLAGE)
+	assert_eq(router.current_scene_path, VILLAGE_SCENE_PATH)
+	assert_eq(host.get_child(0).name, "Village")
 
 	# --- HOP 6: persist the run and round-trip it through save/load ---
 	assert_true(save.save_game(ServiceRegistry))

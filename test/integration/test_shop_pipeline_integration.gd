@@ -1,13 +1,18 @@
 extends GutTest
 
 
+const SAVE_PATH := "/tmp/mkit_shop_pipeline_integration_save.json"
+
+
 func after_each() -> void:
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
 func test_tc_int_shop_01_open_buy_sell_and_stock_pipeline() -> void:
 	var bootstrap := GameBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var shop := ServiceRegistry.get_service("shop") as ShopService

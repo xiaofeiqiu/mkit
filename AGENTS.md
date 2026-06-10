@@ -33,13 +33,23 @@ The main scene is `res://game/bootstrap.tscn`. That scene hosts `GameBootstrap`,
 loads `game/resources/village_rpg_content.tres`, and enters
 `res://game/village_rpg_demo.tscn`.
 
-`GameBootstrap` registers these services at boot:
+`GameBootstrap` registers the kernel services at boot:
 
 ```text
-events, content, random, time, actions, effects, commands, combat, scenes, pool,
-save, progression, analytics, ads, iap, cloud_save, quest, shop, audio,
-dialogue, world, loot
+events, content, random, time, actions, effects, commands, scenes, pool, save,
+audio, analytics, ads, iap, cloud_save
 ```
+
+`ModuleBootstrap` (used by `game/bootstrap.tscn`) extends it and appends the
+built-in module services:
+
+```text
+combat, progression, quest, shop, dialogue, world, loot
+```
+
+Each directory under `addons/mkit/modules/` declares its id, cross-module deps,
+service ids, and event catalog class in a `module.cfg` manifest; `make
+module-deps` validates the declarations against actual references.
 
 It then loads configured `ResourceDatabase` assets into `ContentService`,
 validates content ids, loads a save if `SaveService.save_path` exists, and enters
@@ -146,6 +156,8 @@ make int           # GUT tests under test/integration
 make demo-test     # run game/bootstrap.tscn with --demo-auto-run
 make docs-server   # serve docs/ on DOCS_PORT, default 8060
 make docs-check    # check docs links, ref coverage, nav sync, cookbook sections
+make layering      # enforce kernel/modules/game layering rules
+make module-deps   # validate module.cfg manifests against actual references
 ```
 
 Focused GUT examples:

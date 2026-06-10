@@ -40,6 +40,18 @@ flowchart TB
 
 模块服务的接入走**组合根**：`GameBootstrap` 只注册 kernel 服务，`ModuleBootstrap`（`addons/mkit/modules/module_bootstrap.gd`）继承它并追加 7 个内置模块服务，游戏模板默认用后者。同样，`EventService` 只提供通用总线，业务事件的类型常量与构造函数住在各模块的事件目录（`CombatEvents`、`QuestEvents`、`WorldEvents`、`DialogueEvents`、`ShopEvents`、`InventoryEvents`、`LootEvents`）。
 
+模块间的横向依赖由**模块清单**显式声明：每个模块目录下有一份 `module.cfg`，声明 `id`、依赖模块列表 `deps`、注册的服务 id `services` 和事件目录类 `events`。例如 `shop` 依赖 `inventory` 与 `progression`：
+
+```ini
+[module]
+id="shop"
+deps=["inventory", "progression"]
+services=["shop"]
+events="ShopEvents"
+```
+
+清单由 `make module-deps`（`tools/check_module_deps.py`）强制校验：实际跨模块引用必须与声明完全一致（不允许未声明的引用，也不允许声明了却不存在的依赖），依赖图必须无环，并输出拓扑加载顺序。裁剪模块时按清单反向排除依赖方即可。
+
 ---
 
 ## 大改后已落地的核心边界
@@ -55,7 +67,7 @@ flowchart TB
 | 货币 | `Wallet` | 货币从普通 Dictionary 语义收敛为离散余额模型 |
 | 存档 scope | `SaveService.register_saveable_scope(...)` + `Saveable.get_save_scopes()` | 场景树扫描仍可用，scope provider 支持无完整场景树恢复 |
 
-尚未落地：独立 `MkitModule` 声明文件、模块拓扑装配、拆分式 `EventBus` / `EventCatalog`。文档和代码不要把这些目标写成当前能力。
+尚未落地：运行时按清单拓扑装配模块（`ModuleBootstrap` 仍显式列出 7 个内置服务，`module.cfg` 目前只做声明与 CI 校验）。文档和代码不要把这个目标写成当前能力。
 
 ---
 

@@ -31,9 +31,15 @@ The current implementation has landed the large architecture cleanup around:
 - reusable mutable models such as `ResourceSet` and `Wallet`
 - `SaveService` scope data and explicit scope provider registration
 
-Not yet implemented: standalone `MkitModule` declaration files, topological
-module loading, or a split `EventBus` / `EventCatalog`. Keep docs and game code
-aligned with the implemented shape above.
+Each module directory carries a `module.cfg` manifest declaring its `id`,
+cross-module `deps`, registered service ids, and event catalog class.
+`tools/check_module_deps.py` (`make module-deps`) enforces that actual
+cross-module references match the declarations and that the graph stays
+acyclic.
+
+Not yet implemented: runtime topological module loading from the manifests
+(`ModuleBootstrap` still lists the built-in services explicitly). Keep docs and
+game code aligned with the implemented shape above.
 
 ## Layout
 

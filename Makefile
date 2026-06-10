@@ -10,7 +10,7 @@ reimport:
 	@rm -f test/integration/tmp_mkit_int_*.tscn
 	$(GODOT) --headless --import
 
-ut: layering ut-kernel ut-modules
+ut: layering module-deps ut-kernel ut-modules
 
 ut-kernel: reimport
 	$(GODOT) --headless --log-file $(KERNEL_LOG) -s $(GUT) -gdir=res://test/unit/kernel -gexit
@@ -18,7 +18,7 @@ ut-kernel: reimport
 ut-modules: reimport
 	$(GODOT) --headless --log-file $(MODULE_LOG) -s $(GUT) -gdir=res://test/unit/modules -gexit
 
-int: layering reimport
+int: layering module-deps reimport
 	$(GODOT) --headless --log-file $(INT_LOG) -s $(GUT) -gdir=res://test/integration -gexit
 
 demo-test:
@@ -34,5 +34,8 @@ docs-check:
 layering:
 	python3 tools/check_layering.py
 
+module-deps:
+	python3 tools/check_module_deps.py
+
 .NOTPARALLEL:
-.PHONY: reimport ut ut-kernel ut-modules int demo-test docs-server docs-check layering
+.PHONY: reimport ut ut-kernel ut-modules int demo-test docs-server docs-check layering module-deps

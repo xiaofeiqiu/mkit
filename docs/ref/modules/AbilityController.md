@@ -78,7 +78,7 @@ func _ready() -> void:
         )
 ```
 
-> 存档：`AbilityController` 是 `SaveableComponent`，`to_save_data` 存已学技能与冷却，但需由 `Saveable` 代理收集（见 [SaveableComponent](../kernel/SaveableComponent.md)）。
+> 存档：`AbilityController` 是 `SaveableComponent`，`to_save_data` 存已学技能与冷却，但需由实体下的 `EntitySaveAgent` 收集（见 [SaveableComponent](../kernel/SaveableComponent.md)）。
 
 ## 相关
 

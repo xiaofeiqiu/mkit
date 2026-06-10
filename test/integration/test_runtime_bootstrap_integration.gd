@@ -8,6 +8,20 @@ var _master_original_db: float = 0.0
 var _master_volume_captured: bool = false
 
 
+class EntityDuckComponent:
+	extends Node
+	var value: int = 0
+
+	func get_save_key() -> String:
+		return name
+
+	func to_save_data() -> Dictionary:
+		return {"value": value}
+
+	func from_save_data(data: Dictionary) -> void:
+		value = int(data.get("value", value))
+
+
 func after_each() -> void:
 	if _master_volume_captured and _master_bus_index >= 0:
 		AudioServer.set_bus_volume_db(_master_bus_index, _master_original_db)
@@ -44,8 +58,10 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 
 	var events := ServiceRegistry.get_service("events") as EventService
 	watch_signals(events)
-	events.emit_room_cleared("room.int.bootstrap")
-	assert_signal_emitted_with_parameters(events, "room_cleared", ["room.int.bootstrap"])
+	events.emit_domain_event(WorldEvents.room_cleared("room.int.bootstrap"))
+	var evt_room_cleared_1 := DomainEventAsserts.last_event(events, "room_cleared")
+	assert_not_null(evt_room_cleared_1)
+	assert_eq(evt_room_cleared_1.source_id, "room.int.bootstrap")
 	assert_eq(events.recent_events[-1].event_type, "room_cleared")
 
 	var content := ServiceRegistry.get_service("content") as ContentService
@@ -244,10 +260,57 @@ func test_tc_int_boot_07_boot_registers_audio_definitions_from_content() -> void
 	assert_gt(music_stream.loop_end, 0)
 
 
+func test_tc_int_boot_08_save_service_roots_entities_roundtrip() -> void:
+	_boot_with_databases()
+	var save := ServiceRegistry.get_service("save") as SaveService
+	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	assert_not_null(save)
+	assert_not_null(progression)
+	save.save_path = _save_path
+
+	var entity := IntTestHelpers.make_health_entity("SaveEntity", "entity.int.save", 50.0)
+	add_child_autofree(entity)
+	var health := entity.get_node("Components/HealthComponent") as HealthComponent
+	var duck := EntityDuckComponent.new()
+	duck.name = "RuntimeDuck"
+	duck.value = 17
+	duck.add_to_group(EntitySaveAgent.ENTITY_SAVE_PARTICIPANT_GROUP)
+	entity.get_node("Components").add_child(duck)
+	var agent := EntitySaveAgent.new()
+	agent.entity_id = "entity.int.save"
+	agent.scene_path = "res://game/entities/save_entity.tscn"
+	agent.zone_id = "zone.int.save"
+	entity.add_child(agent)
+
+	progression.add_currency("gold", 19)
+	assert_true(save.save_game(get_tree().root))
+	var saved: Dictionary = _read_json(_save_path)
+	assert_eq(int(saved.get("schema_version", 0)), 2)
+	var roots: Dictionary = saved.get("roots", {})
+	var entities: Dictionary = saved.get("entities", {})
+	assert_true(roots.has("progression"))
+	assert_true(entities.has("entity.int.save"))
+	var record: Dictionary = entities["entity.int.save"]
+	assert_eq(record["scene_path"], "res://game/entities/save_entity.tscn")
+	assert_eq(record["zone_id"], "zone.int.save")
+	var components: Dictionary = record["components"]
+	assert_true(components.has("HealthComponent"))
+	assert_true(components.has("StatsComponent"))
+	assert_eq(int(components["RuntimeDuck"]["value"]), 17)
+
+	progression.state = ProgressionState.new()
+	health.current_hp = 1.0
+	duck.value = 0
+	assert_true(save.load_game(get_tree().root))
+	assert_eq(progression.get_currency("gold"), 19)
+	assert_eq(health.current_hp, 50.0)
+	assert_eq(duck.value, 17)
+
+
 func _boot_with_databases(
 	databases: Array[ResourceDatabase] = [], profile_save_path: String = ""
-) -> GameBootstrap:
-	var bootstrap := GameBootstrap.new()
+) -> ModuleBootstrap:
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = databases
 	bootstrap.save_path = profile_save_path if profile_save_path != "" else _save_path
 	add_child_autofree(bootstrap)
@@ -270,3 +333,17 @@ func _make_wav_stream(sample_count: int) -> AudioStreamWAV:
 	data.resize(sample_count * 2)
 	stream.data = data
 	return stream
+
+
+func _read_json(path: String) -> Dictionary:
+	var file := FileAccess.open(path, FileAccess.READ)
+	assert_not_null(file)
+	if file == null:
+		return {}
+	var text := file.get_as_text()
+	file.close()
+	var parsed: Variant = JSON.parse_string(text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return {}
+	var data: Dictionary = parsed
+	return data

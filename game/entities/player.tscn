@@ -1,7 +1,7 @@
 [gd_scene load_steps=27 format=3]
 
-[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_root.gd" id="1_root"]
-[ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_identity.gd" id="2_identity"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/entity/entity_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/entity/entity_identity.gd" id="2_identity"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="3_recv"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="4_sm"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state.gd" id="5_state"]

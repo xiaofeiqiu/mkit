@@ -89,7 +89,7 @@ Feedback  (Node)
 - `audio_manager_path` = 留空使用全局 `"audio"` 服务，或指向一个同场景可访问的 `AudioService` 节点
 - `damage_screen_shake_strength` = `4.0`（可选，>0 时受击请求震屏）
 
-`FeedbackSystem._ready()` 自动连上 `events.damage_applied` 和 `events.entity_died`。
+`FeedbackSystem._ready()` 自动订阅 `CombatEvents.DAMAGE_APPLIED` 和 `CombatEvents.ENTITY_DIED`。
 
 ### 步骤 4：配 DamageNumberSystem 与 VFXSpawner
 
@@ -121,7 +121,7 @@ Feedback  (Node)
 | 现象 | 原因 | 修复 |
 |------|------|------|
 | 攻击不播动画 | 没有 `Presentation/AnimationPlayer` 或没有名为 `attack` 的动画 | 补节点与同名动画；`has_animation` 失败会静默跳过 |
-| 伤害数字不出现 | `FeedbackSystem` 路径没配，或没连上事件 | 检查 `damage_number_system_path`；确认伤害走了 `EventService.emit_damage_applied` |
+| 伤害数字不出现 | `FeedbackSystem` 路径没配，或没连上事件 | 检查 `damage_number_system_path`；确认伤害广播了 `CombatEvents.damage_applied` 领域事件 |
 | 特效不出现 | `vfx_scene_map` 缺对应 id | 键必须是 `"hit"` / `"death"`（或你在代码里 spawn 的 id）|
 | 数字位置不对 | `result.target` 不是 Node2D | 浮动数字用 `target.global_position`，目标需是 2D 节点 |
 | 动画与逻辑不同步 | 想用通道 B 驱动逻辑 | 命中判定走通道 A（动作时序），通道 B 只做表现 |

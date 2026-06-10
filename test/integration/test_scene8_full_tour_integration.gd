@@ -118,7 +118,7 @@ func after_each() -> void:
 # and ATTACK commands run a TimedAttackAction whose HitboxComponent overlaps the field
 # beast HurtboxComponent, feeding CombatService until the beast dies.
 func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -207,7 +207,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	# 35 - (hitbox base 12 + StatsComponent attack_power 10), no crit/defense
 	assert_eq(beast_health.current_hp, 13.0)
 	assert_signal_emitted(beast_health, "damaged")
-	assert_signal_emitted(events, "damage_applied")
+	assert_not_null(DomainEventAsserts.last_event(events, "damage_applied"))
 
 	# finish the swing; the state machine returns to Idle and the action drains
 	actions._process(0.25)
@@ -221,7 +221,10 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	assert_true(beast_health.dead)
 	assert_eq(beast_health.current_hp, 0.0)
 	assert_signal_emitted(beast_health, "died")
-	assert_signal_emitted_with_parameters(events, "entity_died", [BEAST_ID, beast])
+	var evt_entity_died_1 := DomainEventAsserts.last_event(events, "entity_died")
+	assert_not_null(evt_entity_died_1)
+	assert_eq(evt_entity_died_1.source_id, BEAST_ID)
+	assert_eq(evt_entity_died_1.payload.get("entity_ref"), beast)
 
 	actions._process(0.25)
 	assert_eq(state_machine.get_current_path(), "Player/Idle")
@@ -233,7 +236,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 # cooldown starts. TargetInRangeCondition gates an out-of-range cast and CooldownReadyCondition
 # blocks the immediate re-cast.
 func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -309,7 +312,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 # when duration expires, and the elder dialogue exposes an ApplyStatModifierEffect
 # blessing that CombatService reads through StatsComponent.
 func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_attack() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -418,7 +421,7 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 # CombatService damage; unequipping restores both; and a Saveable round-trip on the controller
 # re-applies the equipped item and its modifier.
 func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_round_trips() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -500,7 +503,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 # EntityDefinition in live content, enters the field, and creates the beast through
 # EntitySpawner so identity, tags and base stats all come from data.
 func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -597,7 +600,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 
 
 func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -665,13 +668,13 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	assert_lt(player_health.current_hp, hp_before)
 	assert_eq(player_health.current_hp, hp_before - 8.0)
 	assert_signal_emitted(player_health, "damaged")
-	assert_signal_emitted(events, "damage_applied")
+	assert_not_null(DomainEventAsserts.last_event(events, "damage_applied"))
 	actions._process(0.25)
 	assert_eq(state_machine.get_current_path(), "Enemy/Idle")
 
 
 func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -745,7 +748,10 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	assert_true(run_director.room_graph.boss_node is RoomNode)
 	assert_eq(run_director.run_state.room_history.size(), 1)
 	assert_signal_emitted(run_director, "run_started")
-	assert_signal_emitted_with_parameters(events, "run_started", [run_director.run_state.run_id, 8606])
+	var evt_run_started_2 := DomainEventAsserts.last_event(events, "run_started")
+	assert_not_null(evt_run_started_2)
+	assert_eq(evt_run_started_2.source_id, run_director.run_state.run_id)
+	assert_eq(evt_run_started_2.payload.get("seed"), 8606)
 
 	for _room_index in range(3):
 		var room := run_director.current_room_controller
@@ -796,15 +802,16 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	assert_eq(int(demo.get("_trial_rooms_cleared")), 3)
 	assert_signal_emit_count(run_director, "room_enter_requested", 3)
 	assert_signal_emit_count(run_director, "choosing_reward", 3)
-	assert_signal_emit_count(events, "reward_selected", 3)
+	assert_eq(DomainEventAsserts.find_events(events, "reward_selected").size(), 3)
 	assert_signal_emitted_with_parameters(run_director, "run_finished", ["completed"])
-	assert_signal_emitted_with_parameters(
-		events, "run_finished", [run_director.run_state.run_id, "completed"]
-	)
+	var evt_run_finished_6 := DomainEventAsserts.last_event(events, "run_finished")
+	assert_not_null(evt_run_finished_6)
+	assert_eq(evt_run_finished_6.source_id, run_director.run_state.run_id)
+	assert_eq(evt_run_finished_6.payload.get("result"), "completed")
 
 
 func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -895,7 +902,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes
 	assert_eq(stats.get_stat_value("attack_power"), 20.0)
 
 func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_save() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -972,7 +979,7 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 
 
 func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debug_runtime() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -1117,7 +1124,7 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 
 
 func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -1203,7 +1210,7 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 
 
 func test_tc_int_scene8_11_trial_cave_shortcuts_close_room_without_zone_mismatch() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)

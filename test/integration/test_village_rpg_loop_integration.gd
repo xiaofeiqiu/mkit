@@ -76,7 +76,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	_save_field_scene()
 
 	# boot the real kernel + modules against the loop content database
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
 	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
@@ -157,11 +157,15 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_true(elder_interactable.interact(talk_ctx))
 	assert_true(dialogue.is_active())
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", [DIALOGUE_ELDER])
-	assert_signal_emitted_with_parameters(events, "npc_talked", [NPC_ELDER])
+	var evt_npc_talked_1 := DomainEventAsserts.last_event(events, "npc_talked")
+	assert_not_null(evt_npc_talked_1)
+	assert_eq(evt_npc_talked_1.source_id, NPC_ELDER)
 
 	dialogue.choose(0)
 	assert_false(dialogue.is_active())
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", [DIALOGUE_ELDER])
+	var evt_dialogue_ended_2 := DomainEventAsserts.last_event(events, "dialogue_ended")
+	assert_not_null(evt_dialogue_ended_2)
+	assert_eq(evt_dialogue_ended_2.source_id, DIALOGUE_ELDER)
 	assert_eq(quest.get_state(QUEST_ID).status, "active")
 	assert_signal_emitted_with_parameters(quest, "quest_accepted", [QUEST_ID])
 	assert_eq(quest.get_state(QUEST_ID).get_progress(OBJECTIVE_ID), 0)
@@ -187,7 +191,10 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	var strike_ctx := GameplayContext.new().with_source(player).with_target(beast)
 	assert_true(effects.execute(strike, strike_ctx).success)
 	assert_true(beast_health.dead)
-	assert_signal_emitted_with_parameters(events, "entity_died", [BEAST_ID, beast])
+	var evt_entity_died_3 := DomainEventAsserts.last_event(events, "entity_died")
+	assert_not_null(evt_entity_died_3)
+	assert_eq(evt_entity_died_3.source_id, BEAST_ID)
+	assert_eq(evt_entity_died_3.payload.get("entity_ref"), beast)
 	assert_signal_emitted_with_parameters(
 		quest, "objective_advanced", [QUEST_ID, OBJECTIVE_ID, 1, 1]
 	)
@@ -229,12 +236,20 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_true(shop.buy(ITEM_POTION, 1, player))
 	assert_eq(progression.get_currency(CURRENCY), STARTER_GOLD + REWARD_GOLD - POTION_VALUE)
 	assert_not_null(inventory.find_item_by_definition(ITEM_POTION))
-	assert_signal_emitted_with_parameters(events, "item_purchased", [SHOP_ID, ITEM_POTION, 1])
+	var evt_item_purchased_4 := DomainEventAsserts.last_event(events, "item_purchased")
+	assert_not_null(evt_item_purchased_4)
+	assert_eq(evt_item_purchased_4.source_id, SHOP_ID)
+	assert_eq(evt_item_purchased_4.target_id, ITEM_POTION)
+	assert_eq(evt_item_purchased_4.payload.get("quantity"), 1)
 
 	assert_eq(shop.get_sell_price(ITEM_CLAW), CLAW_SELL_PRICE)
 	assert_true(shop.sell(claw.instance_id, 1, player))
 	assert_null(inventory.find_item_by_definition(ITEM_CLAW))
-	assert_signal_emitted_with_parameters(events, "item_sold", [SHOP_ID, ITEM_CLAW, 1])
+	var evt_item_sold_5 := DomainEventAsserts.last_event(events, "item_sold")
+	assert_not_null(evt_item_sold_5)
+	assert_eq(evt_item_sold_5.source_id, SHOP_ID)
+	assert_eq(evt_item_sold_5.target_id, ITEM_CLAW)
+	assert_eq(evt_item_sold_5.payload.get("quantity"), 1)
 	var expected_gold := STARTER_GOLD + REWARD_GOLD - POTION_VALUE + CLAW_SELL_PRICE
 	assert_eq(progression.get_currency(CURRENCY), expected_gold)
 

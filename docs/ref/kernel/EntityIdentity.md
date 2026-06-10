@@ -1,7 +1,7 @@
 # EntityIdentity
 
-**层：** Module  
-**文件：** `addons/mkit/modules/entity/entity_identity.gd`  
+**层：** Kernel  
+**文件：** `addons/mkit/kernel/entity/entity_identity.gd`  
 **继承：** `extends Node`
 
 ## 职责
@@ -38,5 +38,5 @@ if idn.is_faction("enemy"):
 
 ## 相关
 
-- → [EntityRoot](EntityRoot.md) · [EntityDefinition](EntityDefinition.md)
-- → [ref/modules/QuestService.md](QuestService.md)（按 faction/tags/definition_id 匹配击杀）
+- → [EntityRoot](EntityRoot.md) · [EntityDefinition](../modules/EntityDefinition.md)
+- → [ref/modules/QuestService.md](../modules/QuestService.md)（按 faction/tags/definition_id 匹配击杀）

@@ -111,7 +111,7 @@ else:
     print("买不了：钱不够 / 缺货 / 背包满")
 ```
 
-`buy()` 流程：算总价 → `SpendCurrencyEffect` 扣 `gold`（失败即终止）→ `InventoryController.add_item()`（失败则**自动退款**）→ 扣库存 → 发 `item_purchased` + `EventService.emit_item_purchased`。
+`buy()` 流程：算总价 → `SpendCurrencyEffect` 扣 `gold`（失败即终止）→ `InventoryController.add_item()`（失败则**自动退款**）→ 扣库存 → 发 `item_purchased` 信号 + `ShopEvents.item_purchased` 领域事件。
 
 卖出（按物品**实例 id**）：
 

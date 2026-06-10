@@ -15,7 +15,7 @@ func _interact_impl(context: GameplayContext) -> bool:
 	if npc_id != "":
 		var events := EventService.find()
 		if events != null:
-			events.emit_npc_talked(npc_id)
+			events.emit_domain_event(DialogueEvents.npc_talked(npc_id))
 	return true
 
 

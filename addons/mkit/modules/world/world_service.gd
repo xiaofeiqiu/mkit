@@ -155,7 +155,7 @@ func _publish_zone_entry(from_zone_id: String, to_zone_id: String) -> void:
 	zone_changed.emit(from_zone_id, to_zone_id)
 	var events := EventService.find()
 	if events != null:
-		events.emit_zone_changed(from_zone_id, to_zone_id)
+		events.emit_domain_event(WorldEvents.zone_changed(from_zone_id, to_zone_id))
 		events.emit_domain_event(
 			DomainEvent.create("zone_entered", to_zone_id, "", {"zone_id": to_zone_id})
 		)

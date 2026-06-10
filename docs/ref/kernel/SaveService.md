@@ -7,13 +7,13 @@
 
 ## 职责
 
-存读档协调者。
+存读档协调者，也是项目里唯一的存读档 facade。
 
-- `save_game` 会把场景树中的 `Saveable` 与已注册 scope 提供者一起序列化为 JSON。
-- `load_game` 按 `scopes` 优先、再按 `payload` 回填，恢复场景树和注册 provider 状态。
+- `save_game` 会把场景树中的 `Saveable` 写入 `roots`，把 `EntitySaveAgent` 写入 `entities`。
+- `load_game` 先恢复 `roots` / `scopes`，再恢复 `entities` 下的实体组件。
 - `GameBootstrap` 启动时若存档存在会自动 `load_game`。
 
-scope 写入用于“无完整场景树也能恢复”的关键状态（如世界 run / 房间 / 奖励等）。
+scope 写入用于“无完整场景树也能恢复”的关键状态（如世界 run / 区域等）。`payload` 仍会作为 `roots` 的兼容别名写入，用于旧存档与旧工具迁移。
 
 ## 字段
 
@@ -21,19 +21,44 @@ scope 写入用于“无完整场景树也能恢复”的关键状态（如世�
 |--------|------|--------|------|
 | `save_path` | `String`（@export）| `"user://save.json"` | 存档文件路径 |
 | `save_version` | `int`（@export）| `1` | 当前存档版本 |
+| `schema_version` | `int`（@export）| `2` | 存档 envelope schema 版本 |
 | `game_version` | `String`（@export）| `"0.1.0"` | 写入存档的游戏版本号 |
 
 ## 方法
 
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
-| `save_game(root: Node) -> bool` | `bool` | 收集 `Saveable` 并写盘；`root == null` 时仍可通过注册 scope 保存 |
-| `load_game(root: Node) -> bool` | `bool` | 读文件并按 scope + payload 回填 |
+| `save_game(root: Node) -> bool` | `bool` | 收集 `Saveable` / `EntitySaveAgent` 并写盘；`root == null` 时仍可通过注册 scope 保存 root 状态 |
+| `load_game(root: Node) -> bool` | `bool` | 读文件并按 scope + roots + entities 回填 |
 | `register_saveable_scope(provider: Saveable) -> void` | `void` | 注册显式 scope 提供者（用于场景树缺失恢复） |
 | `unregister_saveable_scope(provider: Saveable) -> void` | `void` | 注销显式 scope 提供者 |
 | `get_registered_scope_snapshot() -> Dictionary` | `Dictionary` | 获取当前 scope 注册快照 |
 
-> 文件结构包含 `payload`、`scopes` 与 `scope_manifest`，用于场景树恢复与 scope 恢复。
+文件结构包含 `schema_version`、`roots`、`entities`、`payload`、`scopes` 与 `scope_manifest`：
+
+```json
+{
+  "schema_version": 2,
+  "roots": {
+    "progression": {}
+  },
+  "entities": {
+    "player": {
+      "scene_path": "res://game/entities/player.tscn",
+      "zone_id": "village",
+      "components": {
+        "HealthComponent": {}
+      }
+    }
+  },
+  "payload": {
+    "progression": {}
+  },
+  "scopes": {}
+}
+```
+
+`roots` 内的 `save_id` 必须唯一，`entities` 内的 `entity_id` 必须唯一。同一个实体下的 component `get_save_key()` 也必须唯一；重复会让 `save_game` 返回 `false` 并发 `save_failed`。
 
 ## 信号
 
@@ -81,10 +106,9 @@ func _unhandled_input(event: InputEvent) -> void:
             print("没有存档可读")
 ```
 
-> 关键：`SaveableComponent` 仍需由 `Saveable` 聚合后才会入档。
-> `scope` 路径在场景树缺失恢复时提供兜底。
+> 关键：`SaveableComponent` 不会作为全局 root 保存。实体组件走 [EntitySaveAgent](EntitySaveAgent.md)，全局服务/系统状态走 [Saveable](Saveable.md)。`scope` 路径在场景树缺失恢复时提供兜底。
 
 ## 相关
 
-- → [Saveable](Saveable.md) · [SaveableComponent](SaveableComponent.md)
+- → [Saveable](Saveable.md) · [EntitySaveAgent](EntitySaveAgent.md) · [SaveableComponent](SaveableComponent.md)
 - → [pipeline.md — Save / Load](../../pipeline.md#13-save--load) · [cookbook/11_progression_and_save.md](../../cookbook/11_progression_and_save.md)

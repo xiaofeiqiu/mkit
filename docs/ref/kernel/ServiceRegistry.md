@@ -63,7 +63,7 @@ func _setup_test_registry() -> void:
 
 - 新代码统一采用 `get_port(ServiceRegistry.SERVICE_*)`。
 - `get_service` / `get_service_or_null` 保留历史兼容脚本，不作为默认入口。
-- `ui` 服务通常由场景里的 `UIManager` 自注册，不是 `GameBootstrap._build_kernel_services()` 的内置项。
+- `ui` 服务通常由场景里的 `UIManager` 自注册，不是 `GameBootstrap._build_services()` / `ModuleBootstrap` 的内置项。
 
 ## 相关
 

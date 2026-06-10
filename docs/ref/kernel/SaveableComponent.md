@@ -8,7 +8,7 @@
 
 **组件级存档契约**。与 `Saveable` 同接口，键由节点 `name` 决定（实体内唯一）。`HealthComponent`、`StatsComponent`、`AbilityController`、`InventoryController`、`EquipmentController`、`ResourcePoolComponent`、`StatusEffectController` 都继承它。
 
-> ⚠️ **`SaveService` 不会自动收集 `SaveableComponent`。** 要持久化它，必须由所属实体上的一个 [Saveable](Saveable.md) 代理主动收集（见该页 Level 2）。单独挂一个 SaveableComponent 不会进存档——这是最常见的"背包没存上"坑。
+> ⚠️ **`SaveService` 不会把 `SaveableComponent` 当成全局 root 收集。** 要持久化实体组件，在实体下挂 [EntitySaveAgent](EntitySaveAgent.md)，由 agent 收集组件并写入 `entities[entity_id].components`。单独挂一个 SaveableComponent 不会进存档。
 
 ## 方法
 
@@ -39,5 +39,5 @@ func from_save_data(data: Dictionary) -> void:
 
 ## 相关
 
-- → [Saveable](Saveable.md)（全局契约，负责收集 SaveableComponent）· [SaveService](SaveService.md)
-- → [cookbook/11_progression_and_save.md](../../cookbook/11_progression_and_save.md)（步骤 4：收集模式）
+- → [EntitySaveAgent](EntitySaveAgent.md)（实体组件聚合）· [Saveable](Saveable.md)（全局/root 契约）· [SaveService](SaveService.md)
+- → [cookbook/11_progression_and_save.md](../../cookbook/11_progression_and_save.md)（步骤 4：实体存档 agent）

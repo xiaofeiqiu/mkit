@@ -84,11 +84,13 @@
 
 **EffectService**：执行 `GameEffect` 并维护执行历史（trace）的 kernel 服务，通过 `"effects"` ID 获取。→ [ref/kernel/EffectService.md](ref/kernel/EffectService.md)
 
-**EntityIdentity**：挂在实体根节点下的组件，持有运行时唯一 `entity_id`（字符串）。→ [ref/modules/EntityIdentity.md](ref/modules/EntityIdentity.md)
+**EntityIdentity**：挂在实体根节点下的组件，持有运行时唯一 `entity_id`（字符串）。→ [ref/kernel/EntityIdentity.md](ref/kernel/EntityIdentity.md)
 
-**EntityContract**：实体组件/控制器/身份/状态机的语义访问入口，优先替代散落的 `get_node("Components/...")`。→ [ref/modules/EntityContract.md](ref/modules/EntityContract.md)
+**EntityContract**：实体组件/控制器/身份/状态机的语义访问入口，优先替代散落的 `get_node("Components/...")`。→ [ref/kernel/EntityContract.md](ref/kernel/EntityContract.md)
 
-**EntityRoot**：实体根节点基类，持有实体约定的节点结构并提供快捷访问方法。→ [ref/modules/EntityRoot.md](ref/modules/EntityRoot.md)
+**EntityRoot**：实体根节点基类，持有实体约定的节点结构并提供快捷访问方法。→ [ref/kernel/EntityRoot.md](ref/kernel/EntityRoot.md)
+
+**EntitySaveAgent**：实体级存档聚合器（`Node`），用稳定 `entity_id` 把实体下的 `SaveableComponent` 和显式 opt-in duck participant 写入 `entities[entity_id].components`。→ [ref/kernel/EntitySaveAgent.md](ref/kernel/EntitySaveAgent.md)
 
 **EntitySpawner**：按 `EntityDefinition` 或 `PackedScene` 实例化实体、注入 `EntityIdentity` 并挂入场景树的工具类。→ [ref/modules/EntitySpawner.md](ref/modules/EntitySpawner.md)
 
@@ -146,15 +148,13 @@
 
 **RunState**：`RunDirector` 持有的当前 Run 数据对象（当前房间、房间历史、随机种子、run-level 统计）。→ [ref/modules/RunState.md](ref/modules/RunState.md)
 
----
-
 ## S
 
-**Saveable**：全局级存档节点基类（`Node`），override `to_save_data() -> Dictionary` 和 `from_save_data(data)` 实现序列化；键由 `save_id` 属性决定，并可声明 `save_scope` 分片以支持场景树缺失恢复。→ [ref/kernel/Saveable.md](ref/kernel/Saveable.md)
+**Saveable**：全局/root 级存档节点基类（`Node`），override `to_save_data() -> Dictionary` 和 `from_save_data(data)` 实现序列化；键由 `save_id` 属性决定，并可声明 `save_scope` 分片以支持场景树缺失恢复。→ [ref/kernel/Saveable.md](ref/kernel/Saveable.md)
 
-**SaveableComponent**：实体内组件级存档基类（`Node`），与 `Saveable` 同接口，键由节点 `name` 决定（实体内唯一）。→ [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)
+**SaveableComponent**：实体内组件级存档基类（`Node`），与 `Saveable` 同接口，键由节点 `name` 决定（实体内唯一），通常由 `EntitySaveAgent` 收集。→ [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)
 
-**SaveService**：协调 `Saveable` 的 scene-scope 与 scope-scope 持久化；`SaveableComponent` 不被直接收集，需由所属 `Saveable` 实体主动序列化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
+**SaveService**：唯一存读档 facade，协调 `roots`（`Saveable`）、`entities`（`EntitySaveAgent`）与 scope-scope 持久化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
 
 **Service / Port**：四分模式中的全局流程层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取；`get_service` / `get_service_or_null` 为兼容入口。
 

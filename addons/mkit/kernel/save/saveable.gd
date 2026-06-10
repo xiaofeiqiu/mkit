@@ -2,6 +2,7 @@ class_name Saveable
 extends Node
 @export var save_id: String = ""
 @export var save_scope: String = ""
+@export var restore_order: int = 0
 
 
 func get_save_scope() -> String:

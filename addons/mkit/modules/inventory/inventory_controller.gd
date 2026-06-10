@@ -163,8 +163,10 @@ func _emit_inventory_changed(
 	var events: EventService = null
 	events = EventService.find()
 	if events != null:
-		events.emit_inventory_changed(
-			_get_owner_id(), item.definition_id if item != null else "", quantity, change_type
+		events.emit_domain_event(
+			InventoryEvents.inventory_changed(
+				_get_owner_id(), item.definition_id if item != null else "", quantity, change_type
+			)
 		)
 
 

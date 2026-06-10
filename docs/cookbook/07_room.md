@@ -125,9 +125,9 @@ func _ready() -> void:
 
 ### 步骤 6：房间清空如何推进（无需写代码，理解时序）
 
-1. 玩家击杀房间里的敌人 → `HealthComponent.die()` → `EventService.emit_entity_died()`
+1. 玩家击杀房间里的敌人 → `HealthComponent.die()` → 广播 `CombatEvents.entity_died` 领域事件
 2. `RoomController._on_entity_died()` 从 `active_enemies` 移除该敌人 → `check_clear_condition()`
-3. `active_enemies` 空了 → `runtime.cleared = true` → `generate_reward()`（reward 池空 → 空数组）→ `room_cleared.emit()` + `EventService.emit_room_cleared()`
+3. `active_enemies` 空了 → `runtime.cleared = true` → `generate_reward()`（reward 池空 → 空数组）→ `room_cleared.emit()` + `WorldEvents.room_cleared` 领域事件
 4. `RunDirector.on_room_cleared()` 发现 reward 选项为空 → `current_room_index += 1` → `enter_next_room()`
 5. 走完最后一个房间 → `enter_next_room()` 取不到房间 → `complete_run()` → `run_finished("completed")`
 

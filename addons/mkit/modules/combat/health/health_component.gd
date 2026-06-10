@@ -36,7 +36,7 @@ func apply_damage(result: DamageResult) -> void:
 	health_changed.emit(current_hp, get_max_hp())
 	var events := EventService.find()
 	if events != null:
-		events.emit_damage_applied(result)
+		events.emit_domain_event(CombatEvents.damage_applied(result))
 	if current_hp <= 0.0:
 		die(result.source)
 
@@ -84,7 +84,7 @@ func die(killer: Node = null) -> void:
 	var entity_id: String = identity.entity_id if identity != null else str(owner.name)
 	var events := EventService.find()
 	if events != null:
-		events.emit_entity_died(entity_id, owner)
+		events.emit_domain_event(CombatEvents.entity_died(entity_id, owner))
 	if destroy_on_death:
 		owner.queue_free()
 

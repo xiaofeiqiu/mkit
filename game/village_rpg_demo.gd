@@ -403,9 +403,9 @@ func _connect_signals() -> void:
 		_world.zone_changed.connect(_on_zone_changed)
 	if _events != null:
 		_events.domain_event_emitted.connect(_on_domain_event)
-		_events.reward_selected.connect(_on_reward_selected)
-		_events.entity_died.connect(_on_entity_died)
-		_events.damage_applied.connect(_on_damage_applied)
+		_events.subscribe(LootEvents.REWARD_SELECTED, _on_reward_selected)
+		_events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
+		_events.subscribe(CombatEvents.DAMAGE_APPLIED, _on_damage_applied)
 	if _run_director != null:
 		_run_director.run_started.connect(_on_trial_run_started)
 		_run_director.room_enter_requested.connect(_on_trial_room_enter_requested)
@@ -1511,7 +1511,8 @@ func _on_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
 	_log("[WORLD] %s -> %s" % [from_zone_id if from_zone_id != "" else "start", to_zone_id])
 
 
-func _on_damage_applied(result) -> void:
+func _on_damage_applied(event: DomainEvent) -> void:
+	var result: DamageResult = event.payload.get("result")
 	if result == null:
 		return
 	_log(
@@ -1758,8 +1759,8 @@ func _on_domain_event(event: DomainEvent) -> void:
 	_log("[STATUS] %s" % str(event.payload.get("message", "burn tick")))
 
 
-func _on_reward_selected(reward_id: String) -> void:
-	if reward_id != REWARD_TRIAL_ATTACK:
+func _on_reward_selected(event: DomainEvent) -> void:
+	if str(event.payload.get("reward_id", "")) != REWARD_TRIAL_ATTACK:
 		return
 	if _run_director == null or _run_director.run_state == null:
 		return
@@ -1813,12 +1814,14 @@ func _show_trial_rewards(options: Array[RewardOption]) -> void:
 	_reward_screen.setup({"options": options, "run_director": _run_director})
 
 
-func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
+func _on_entity_died(event: DomainEvent) -> void:
+	var entity_id := str(event.payload.get("entity_id", event.source_id))
 	_log("[COMBAT] defeated %s" % entity_id)
+	var entity_ref := event.payload.get("entity_ref") as Node
 	if entity_ref == null or _field_beast_looted:
 		return
-	var identity := entity_ref.get_node_or_null("EntityIdentity") as EntityIdentity
-	if identity == null or not identity.tags.has("field_beast"):
+	var tags: Array = event.payload.get("tags", [])
+	if not tags.has("field_beast"):
 		return
 	_field_beast_looted = true
 	_field_beast_defeated = true

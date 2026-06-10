@@ -207,7 +207,9 @@ func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 	)
 	assert_signal_emitted(inventory, "item_added")
 	assert_signal_emitted(inventory, "inventory_changed")
-	assert_signal_emitted_with_parameters(events, "inventory_changed", ["player.int"])
+	var evt_inventory_changed_1 := DomainEventAsserts.last_event(events, "inventory_changed")
+	assert_not_null(evt_inventory_changed_1)
+	assert_eq(evt_inventory_changed_1.source_id, "player.int")
 	assert_eq(_latest_event(events).event_type, "inventory_changed")
 	assert_eq(_latest_event(events).payload.get("item_id", ""), "item.int.reward")
 
@@ -404,7 +406,7 @@ func test_tc_int_game_06_equip_applies_and_unequip_reverts_stat_modifier() -> vo
 
 
 func _boot_gameplay() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)

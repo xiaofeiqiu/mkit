@@ -36,7 +36,9 @@ flowchart TB
 | **Kernel Runtime** | 框架骨架（runtime context、管线、服务注册、内容、存档…） | `addons/mkit/kernel/` |
 | **Platform Adapters** | 平台接口，开发期用 Mock | `addons/mkit/kernel/services/` |
 
-**依赖只能向下，不能反向。** kernel 不依赖任何 module；modules 不依赖 game。
+**依赖只能向下，不能反向。** kernel 不依赖任何 module；modules 不依赖 game。该规则由 `make layering`（`tools/check_layering.py`）在 CI 中强制：kernel 引用任何 module 类即失败。
+
+模块服务的接入走**组合根**：`GameBootstrap` 只注册 kernel 服务，`ModuleBootstrap`（`addons/mkit/modules/module_bootstrap.gd`）继承它并追加 7 个内置模块服务，游戏模板默认用后者。同样，`EventService` 只提供通用总线，业务事件的类型常量与构造函数住在各模块的事件目录（`CombatEvents`、`QuestEvents`、`WorldEvents`、`DialogueEvents`、`ShopEvents`、`InventoryEvents`、`LootEvents`）。
 
 ---
 
@@ -59,7 +61,7 @@ flowchart TB
 
 ## ServiceRegistry / RuntimeContext 模式
 
-`ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 会把所有内置服务注册进它。新代码统一通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取服务：
+`ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 注册 kernel 内置服务，`ModuleBootstrap.boot()` 在此之上追加内置模块服务。新代码统一通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取服务：
 
 ```gdscript
 # 获取服务
@@ -72,12 +74,12 @@ if combat == null:
 if ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) != null:
     var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
 
-# 注册自定义服务（在 GameBootstrap 子类中 override _register_kernel_services）
+# 注册自定义服务（在 GameBootstrap/ModuleBootstrap 子类中 override _build_services）
 ServiceRegistry.register_service("my_service", MyService.new())
 ```
 
-`GameBootstrap._ready()` 在启动时自动注册所有内置服务，顺序：
-1. `_register_kernel_services()` — 创建并注册所有服务
+`GameBootstrap._ready()` 在启动时自动注册内置服务，顺序：
+1. `_register_kernel_services()` — 按 `_build_services()` 服务表创建并注册服务
 2. `_load_content()` — 将 `resource_databases` 加载进 ContentService
 3. `_validate_content()` — 校验所有 ContentDefinition 的合法性
 4. `_load_profile()` — 若存档文件存在则自动 load
@@ -94,24 +96,25 @@ ServiceRegistry.register_service("my_service", MyService.new())
 | `SERVICE_ACTIONS` | `"actions"` | `ActionService` | GameAction 生命周期管理 |
 | `SERVICE_EFFECTS` | `"effects"` | `EffectService` | GameEffect 执行链，含 trace |
 | `SERVICE_COMMANDS` | `"commands"` | `CommandService` | GameCommand 路由分发 |
-| `SERVICE_COMBAT` | `"combat"` | `CombatService` | 伤害结算（base → 暴击 → 防御 → final） |
+| `SERVICE_COMBAT`* | `"combat"` | `CombatService` | 伤害结算（base → 暴击 → 防御 → final） |
 | `SERVICE_SCENES` | `"scenes"` | `SceneService` | 场景切换封装 |
 | `SERVICE_POOL` | `"pool"` | `PoolService` | 对象池（Node 实例复用） |
 | `SERVICE_SAVE` | `"save"` | `SaveService` | 存读档，收集场景树 `Saveable` 并写 `scopes`（支持无场景树恢复） |
-| `SERVICE_PROGRESSION` | `"progression"` | `ProgressionService` | 经验、升级、货币 |
-| `SERVICE_QUEST` | `"quest"` | `QuestService` | 任务接受 / 推进 / 完成 |
-| `SERVICE_SHOP` | `"shop"` | `ShopService` | 商店购买 |
+| `SERVICE_PROGRESSION`* | `"progression"` | `ProgressionService` | 经验、升级、货币 |
+| `SERVICE_QUEST`* | `"quest"` | `QuestService` | 任务接受 / 推进 / 完成 |
+| `SERVICE_SHOP`* | `"shop"` | `ShopService` | 商店购买 |
 | `SERVICE_AUDIO` | `"audio"` | `AudioService` | 音频播放 |
-| `SERVICE_DIALOGUE` | `"dialogue"` | `DialogueService` | 对话树运行时 |
-| `SERVICE_WORLD` | `"world"` | `WorldService` | 世界区域 / Zone 管理 |
-| `SERVICE_LOOT` | `"loot"` | `LootService` | 战利品掷骰与奖励分发 |
+| `SERVICE_DIALOGUE`* | `"dialogue"` | `DialogueService` | 对话树运行时 |
+| `SERVICE_WORLD`* | `"world"` | `WorldService` | 世界区域 / Zone 管理 |
+| `SERVICE_LOOT`* | `"loot"` | `LootService` | 战利品掷骰与奖励分发 |
 | `SERVICE_ANALYTICS` | `"analytics"` | `AnalyticsServiceMock` | 数据统计（默认 Mock） |
 | `SERVICE_ADS` | `"ads"` | `AdServiceMock` | 广告（默认 Mock） |
 | `SERVICE_IAP` | `"iap"` | `IAPServiceMock` | 内购（默认 Mock） |
 | `SERVICE_CLOUD_SAVE` | `"cloud_save"` | `CloudSaveServiceMock` | 云存档（默认 Mock） |
 | `SERVICE_UI` | `"ui"` | `UIManager` | UIManager.open_screen 与 UI 生命周期；由场景中的 UIManager 自注册 |
 
-> `random`、`time`、`effects`、`combat`、`loot` 是 `RefCounted` 风格服务，不作为 `ServiceRegistry` 子节点加入场景树；大多数其他内置服务是 `Node` 并由 `GameBootstrap` 加到 `ServiceRegistry` 下。`ui` 不在 `GameBootstrap._build_kernel_services()` 中创建，通常由游戏场景里的 `UIManager` 节点自注册。
+> 带 `*` 的是模块服务，由 `ModuleBootstrap` 注册；其余 kernel 服务由 `GameBootstrap` 注册。
+> `random`、`time`、`effects`、`combat`、`loot` 是 `RefCounted` 风格服务，不作为 `ServiceRegistry` 子节点加入场景树；大多数其他内置服务是 `Node` 并由 `GameBootstrap` 加到 `ServiceRegistry` 下。`ui` 不在 `GameBootstrap._build_services()` / `ModuleBootstrap` 中创建，通常由游戏场景里的 `UIManager` 节点自注册。
 
 ---
 
@@ -177,18 +180,18 @@ var health := get_node("/root/World/Player/Components/HealthComponent")  # 脆�
 
 ## 扩展 Bootstrap
 
-需要注册自定义服务时，继承 `GameBootstrap` 并 override `_register_kernel_services`：
+需要注册自定义服务时，继承 `ModuleBootstrap`（或只要 kernel 服务时继承 `GameBootstrap`）并 override `_build_services`：
 
 ```gdscript
 class_name MyBootstrap
-extends GameBootstrap
+extends ModuleBootstrap
 
-func _register_kernel_services() -> void:
-    super._register_kernel_services()          # 先注册所有内置服务
-    var my_svc := MyCustomService.new()
-    ServiceRegistry.register_service("my_service", my_svc)
+func _build_services() -> Dictionary:
+    var services := super()                    # 先拿内置服务表
+    services["my_service"] = MyCustomService.new()
+    return services
 ```
 
-> `super()` 必须在自定义服务注册前调用，否则内置服务尚未就绪。
+> 服务表有序：`super()` 的表在前，自定义服务追加在后注册。
 
 > 架构目标与当前实现差异以 `spec/architect.md` 为参考；本文描述的是当前代码已实现的运行时形态。

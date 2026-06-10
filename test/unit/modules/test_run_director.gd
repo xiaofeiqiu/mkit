@@ -119,7 +119,7 @@ func test_tc_rd_05_start_run_emits_event_router_run_started() -> void:
 	add_child_autofree(safe)
 	watch_signals(events)
 	safe.start_run(12)
-	assert_signal_emitted(events, "run_started")
+	assert_not_null(DomainEventAsserts.last_event(events, "run_started"))
 
 
 # --- complete_run / fail_run ---
@@ -142,7 +142,7 @@ func test_tc_rd_08_complete_run_fires_event_router() -> void:
 	director.run_state = RunState.create(1)
 	watch_signals(events)
 	director.complete_run()
-	assert_signal_emitted(events, "run_finished")
+	assert_not_null(DomainEventAsserts.last_event(events, "run_finished"))
 
 
 func test_tc_rd_09_fail_run_sets_failed_and_emits() -> void:
@@ -177,7 +177,7 @@ func test_tc_rd_12_player_death_triggers_fail_run() -> void:
 	watch_signals(director)
 	var dummy := Node.new()
 	add_child_autofree(dummy)
-	events.emit_entity_died("player_001", dummy)
+	events.emit_domain_event(CombatEvents.entity_died("player_001", dummy))
 	assert_signal_emitted(director, "run_finished")
 	var params: Array = get_signal_parameters(director, "run_finished", 0)
 	assert_true(str(params[0]).contains("player_died"))
@@ -189,7 +189,7 @@ func test_tc_rd_13_non_player_death_does_not_affect_run() -> void:
 	watch_signals(director)
 	var dummy := Node.new()
 	add_child_autofree(dummy)
-	events.emit_entity_died("enemy_001", dummy)
+	events.emit_domain_event(CombatEvents.entity_died("enemy_001", dummy))
 	assert_signal_not_emitted(director, "run_finished")
 	assert_eq(director.run_state.status, "active")
 
@@ -200,7 +200,7 @@ func test_tc_rd_14_entity_died_ignored_when_run_failed() -> void:
 	watch_signals(director)
 	var dummy := Node.new()
 	add_child_autofree(dummy)
-	events.emit_entity_died("player_001", dummy)
+	events.emit_domain_event(CombatEvents.entity_died("player_001", dummy))
 	assert_signal_not_emitted(director, "run_finished")
 
 
@@ -210,7 +210,7 @@ func test_tc_rd_15_entity_died_ignored_when_run_completed() -> void:
 	watch_signals(director)
 	var dummy := Node.new()
 	add_child_autofree(dummy)
-	events.emit_entity_died("player_001", dummy)
+	events.emit_domain_event(CombatEvents.entity_died("player_001", dummy))
 	assert_signal_not_emitted(director, "run_finished")
 
 
@@ -285,6 +285,8 @@ func test_tc_rd_20_select_reward_applies_advances_and_continues() -> void:
 
 
 func test_tc_rd_21_scoped_save_restore_without_scene_root() -> void:
+	director.free()
+	director = null
 	var source := _ProbeRunDirector.new()
 	source.first_floor_room_pool = ["room_a", "room_b"]
 	source.run_length = 2

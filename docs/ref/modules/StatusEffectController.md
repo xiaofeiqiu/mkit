@@ -47,7 +47,7 @@ func poison_and_watch(target: Node, attacker: Node) -> void:
         print("已中毒，当前 %d 层" % 2)
 ```
 
-> 也可不直接调用：伤害的 `on_hit_statuses` 命中后由 `HealthComponent` 自动转交到这里。存档时是 `SaveableComponent`，需由 `Saveable` 代理收集。
+> 也可不直接调用：伤害的 `on_hit_statuses` 命中后由 `HealthComponent` 自动转交到这里。存档时是 `SaveableComponent`，需由实体下的 `EntitySaveAgent` 收集。
 
 ## 相关
 

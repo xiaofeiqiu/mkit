@@ -56,7 +56,7 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	_save_village_scene()
 	_save_field_scene()
 
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -117,7 +117,10 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 	assert_eq(player.global_position, FIELD_ENTRY_POS)
 	assert_signal_emitted_with_parameters(world, "zone_changed", [ZONE_VILLAGE, ZONE_FIELD])
-	assert_signal_emitted_with_parameters(events, "zone_changed", [ZONE_VILLAGE, ZONE_FIELD])
+	var evt_zone_changed_1 := DomainEventAsserts.last_event(events, "zone_changed")
+	assert_not_null(evt_zone_changed_1)
+	assert_eq(evt_zone_changed_1.payload.get("from_zone_id"), ZONE_VILLAGE)
+	assert_eq(evt_zone_changed_1.payload.get("to_zone_id"), ZONE_FIELD)
 	assert_eq(audio.played.size(), 2)
 	assert_eq(audio.played[1], "bgm.field")
 

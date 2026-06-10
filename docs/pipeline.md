@@ -72,7 +72,7 @@ func _register_kernel_services() -> void:
     ServiceRegistry.register_service("my_game", my_svc)
 ```
 
-> `UIManager` 不由 `GameBootstrap._build_kernel_services()` 创建；场景中存在 `UIManager` 节点时，它会自注册 `"ui"` 服务。
+> `UIManager` 不由 `GameBootstrap._build_services()` / `ModuleBootstrap` 创建；场景中存在 `UIManager` 节点时，它会自注册 `"ui"` 服务。
 
 ### 相关文档
 
@@ -497,10 +497,10 @@ sequenceDiagram
     DDE->>HS: apply_damage(result)
     Note over HS: [mkit modules] current_hp -= final_amount
     alt hp <= 0
-        HS->>EV: emit_entity_died(entity_id, entity_ref)
+        HS->>EV: CombatEvents.entity_died(entity_id, entity_ref)
         EV-->>: entity_died 信号
     end
-    HS->>EV: emit_damage_applied(result)
+    HS->>EV: CombatEvents.damage_applied(result)
     EV-->>: damage_applied 信号
 ```
 
@@ -523,16 +523,17 @@ sequenceDiagram
 ```gdscript
 # 订阅伤害事件（UI / VFX / 任务推进等）
 var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
-events.damage_applied.connect(func(result: DamageResult) -> void:
+events.subscribe(CombatEvents.DAMAGE_APPLIED, func(event: DomainEvent) -> void:
+    var result: DamageResult = event.payload.get("result")
     if result.was_critical:
         spawn_crit_vfx(result.target)
     update_damage_number_ui(result.final_amount, result.target)
 )
-events.entity_died.connect(func(entity_id: String, entity_ref: Node) -> void:
+events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
     # 推进击杀任务、触发掉落……
     var quest := ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
-    quest.advance_objective_for_entity(entity_id)
-))
+    quest.advance_objective_for_entity(str(event.payload.get("entity_id")))
+)
 ```
 
 ```gdscript
@@ -570,7 +571,7 @@ sequenceDiagram
     participant Sub as 订阅方<br/>(FeedbackSystem/QuestService/UI)
 
     Note over Caller,ES: [mkit 内部]
-    Caller->>ES: emit_damage_applied(result)
+    Caller->>ES: CombatEvents.damage_applied(result)
     ES->>ES: damage_applied.emit(result)  (类型化信号)
     ES->>ES: emit_domain_event(DomainEvent)
     ES->>ES: recent_events.append(event)  (上限 100)
@@ -586,7 +587,8 @@ sequenceDiagram
 ```gdscript
 # 精确订阅：只关心伤害
 var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
-events.damage_applied.connect(func(result: DamageResult) -> void:
+events.subscribe(CombatEvents.DAMAGE_APPLIED, func(event: DomainEvent) -> void:
+    var result: DamageResult = event.payload.get("result")
     print("命中 %.0f（暴击=%s）" % [result.final_amount, result.was_critical])
 )
 
@@ -712,7 +714,7 @@ sequenceDiagram
     participant VFX as VFXSpawner
 
     Note over H,ES: [mkit 内部]
-    H->>ES: emit_damage_applied(result)
+    H->>ES: CombatEvents.damage_applied(result)
     ES->>FS: damage_applied 信号
     Note over FS,VFX: [模块] FeedbackSystem 在 _ready 连接了事件
     FS->>DN: show_number(target.global_position, final_amount, was_critical)
@@ -732,7 +734,8 @@ sequenceDiagram
 
 # 想自己监听做别的表现：
 var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
-events.entity_died.connect(func(_id: String, ref: Node) -> void:
+events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
+    var ref := event.payload.get("entity_ref") as Node
     if ref is Node2D:
         ($Vfx as VFXSpawner).spawn("death", (ref as Node2D).global_position)
 )
@@ -762,14 +765,14 @@ sequenceDiagram
     Note over Eff,QS: [你] 在对话选项 / effect 链触发
     Eff->>QS: accept_quest("quest.cull_beasts", ctx)
     QS->>QS: can_accept? → QuestState(active)
-    QS->>ES: emit_quest_accepted
+    QS->>ES: QuestEvents.quest_accepted
     Note over ES,QS: [mkit 内部] 自动推进
     ES->>QS: entity_died → 合成 "enemy_killed" 事件
     QS->>QS: notify_event() 匹配目标 → _advance_progress (+1)
-    QS->>ES: emit_quest_objective_advanced
+    QS->>ES: QuestEvents.quest_objective_advanced
     QS->>QS: 集满 + auto_complete → complete_quest → turn_in_quest
     QS->>QS: _run_reward_effects(reward_effects)
-    QS->>ES: emit_quest_completed / emit_quest_turned_in
+    QS->>ES: QuestEvents.quest_completed / quest_turned_in
 ```
 
 ### 关键代码
@@ -792,8 +795,8 @@ quest.advance_objective("quest.talk_villagers", "talk", 1)
 ## P3-13：Save / Load
 
 **触发点：** `SaveService.save_game(root)` / `load_game(root)`  
-**涉及系统：** `SaveService`、`Saveable`、`SaveableComponent`
-**输出：** 所有 `Saveable` 序列化为 JSON 写盘 / 反序列化恢复
+**涉及系统：** `SaveService`、`Saveable`、`EntitySaveAgent`、`SaveableComponent`
+**输出：** root 状态与 entity component 状态序列化为 JSON 写盘 / 反序列化恢复
 
 ### 流程
 
@@ -801,20 +804,28 @@ quest.advance_objective("quest.talk_villagers", "talk", 1)
 sequenceDiagram
     participant Caller as 调用方
     participant SV as SaveService
-    participant N as Saveable 节点们
+    participant R as Saveable roots
+    participant A as EntitySaveAgent
+    participant C as SaveableComponent
 
     Note over Caller,SV: 存档
     Caller->>SV: save_game(root)
-    SV->>N: find_children 收集 Saveable + scope 提供者
-    N-->>SV: to_save_data() per node（按 get_save_id() 归档）
+    SV->>R: find_children 收集 Saveable + scope 提供者
+    R-->>SV: roots[get_save_id()] = to_save_data()
+    SV->>A: find_children 收集 EntitySaveAgent
+    A->>C: 收集实体根下组件
+    C-->>A: components[get_save_key()] = to_save_data()
+    A-->>SV: entities[get_entity_id()] = record
     SV->>SV: JSON.stringify → 写 save_path
 
     Note over Caller,SV: 读档
     Caller->>SV: load_game(root)
-    SV->>N: 优先按 scope 恢复，后回退 payload[from_save_data]
+    SV->>R: 优先按 scope 恢复，后按 roots/payload 回填
+    SV->>A: 按 entities 恢复实体组件
+    A->>C: from_save_data(component_data)
 ```
 
-> **关键：** `SaveService` 默认收集场景树 `Saveable`，并在 scope 注册情况下可按 scope 恢复；`WorldService` 的 `world.zone` scope 会在运行中读档时把活动场景切回存档区域的 `ZoneDefinition.scene_path`。`SaveableComponent`（HealthComponent、InventoryController…）仍需由 `Saveable` 代理主动收集——见 [cookbook/11](cookbook/11_progression_and_save.md) 步骤 4。
+> **关键：** `SaveService` 默认收集场景树 `Saveable` 到 `roots`，收集 `EntitySaveAgent` 到 `entities`；在 scope 注册情况下可按 scope 恢复。`WorldService` 的 `world.zone` scope 会在运行中读档时把活动场景切回存档区域的 `ZoneDefinition.scene_path`。`SaveableComponent`（HealthComponent、InventoryController…）不作为全局 root 保存，需由实体下的 `EntitySaveAgent` 聚合。
 
 ### 关键代码
 
@@ -827,8 +838,8 @@ if not save.save_game(get_tree().root):
 
 ### 相关文档
 
-→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md) · [ref/kernel/Saveable.md](ref/kernel/Saveable.md) · [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)  
-→ [concepts.md — 模型 4：两条存档契约](concepts.md#模型-4两条存档契约) · [cookbook/11_progression_and_save.md](cookbook/11_progression_and_save.md)
+→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md) · [ref/kernel/Saveable.md](ref/kernel/Saveable.md) · [ref/kernel/EntitySaveAgent.md](ref/kernel/EntitySaveAgent.md) · [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)
+→ [concepts.md — 存档](concepts.md#六存档roots--entities--scope-provider) · [cookbook/11_progression_and_save.md](cookbook/11_progression_and_save.md)
 
 ---
 
@@ -945,7 +956,7 @@ sequenceDiagram
             SH-->>Caller: transaction_failed
         else 成功
             SH->>SH: entry.stock -= quantity
-            SH-->>Caller: item_purchased + emit_item_purchased
+            SH-->>Caller: item_purchased + ShopEvents.item_purchased
         end
     else 钱不够
         SH-->>Caller: transaction_failed("Insufficient currency")
@@ -997,9 +1008,8 @@ flowchart TB
 
 ```gdscript
 # 击杀给 XP（自己接线）
-events.entity_died.connect(func(_id: String, ref: Node) -> void:
-    var idn := EntityContract.get_identity(ref) if ref != null else null
-    if idn != null and idn.faction == "enemy":
+events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
+    if event.payload.get("faction", "") == "enemy":
         ($Player/ExperienceComponent as ExperienceComponent).add_xp(20)
 )
 
@@ -1128,7 +1138,7 @@ sequenceDiagram
     SC->>SC: get_tree().change_scene_to_file → scene_changed
     Note over WS: 监听 scene_changed → _finalize_zone_entry（call_deferred）
     WS->>WS: place_player_at_spawn(spawn_id)（找 SpawnPoint）
-    WS->>WS: zone_changed.emit + emit_zone_changed + 播 BGM
+    WS->>WS: zone_changed.emit + WorldEvents.zone_changed + 播 BGM
 ```
 
 > 纯换场景用 `SceneService.change_scene`（带 `transition_locked` 防重入）；带"区域 + 出生点 + BGM"语义用 `WorldService.go_to_zone`，目标场景里要有 `spawn_id` 匹配的 `SpawnPoint`。

@@ -107,7 +107,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 
 	assert_eq(health.current_hp, 26.0)
 	assert_signal_emitted(health, "damaged")
-	assert_signal_emitted(events, "damage_applied")
+	assert_not_null(DomainEventAsserts.last_event(events, "damage_applied"))
 	assert_signal_emitted_with_parameters(status, "status_applied", [STATUS_ID, 1])
 	assert_true(status.has_status(STATUS_ID))
 	assert_eq(target_stats.get_stat_value("defense"), 0.0)
@@ -168,7 +168,10 @@ func test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_feedback() -> void
 	assert_true(health.dead)
 	assert_eq(health.current_hp, 0.0)
 	assert_signal_emitted(health, "died")
-	assert_signal_emitted_with_parameters(events, "entity_died", ["entity.int.target", target])
+	var evt_entity_died_1 := DomainEventAsserts.last_event(events, "entity_died")
+	assert_not_null(evt_entity_died_1)
+	assert_eq(evt_entity_died_1.source_id, "entity.int.target")
+	assert_eq(evt_entity_died_1.payload.get("entity_ref"), target)
 	assert_eq(vfx.calls[0].vfx_id, "hit")
 	assert_eq(vfx.calls[1].vfx_id, "death")
 	assert_eq(audio.played[0], "hit")
@@ -232,8 +235,8 @@ func test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target()
 	assert_true(text.contains("Recent events: debug_probe"))
 
 
-func _boot_with_database(database: ResourceDatabase) -> GameBootstrap:
-	var bootstrap := GameBootstrap.new()
+func _boot_with_database(database: ResourceDatabase) -> ModuleBootstrap:
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [database]
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)

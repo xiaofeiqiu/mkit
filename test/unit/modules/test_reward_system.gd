@@ -187,7 +187,9 @@ func test_tc_rwd_14_option_no_effects_returns_true_emits_reward_selected() -> vo
 	option.effects = []
 	var result := system.apply_selected(option, ctx)
 	assert_true(result)
-	assert_signal_emitted_with_parameters(events, "reward_selected", ["speed_up"])
+	var evt_reward_selected_1 := DomainEventAsserts.last_event(events, "reward_selected")
+	assert_not_null(evt_reward_selected_1)
+	assert_eq(evt_reward_selected_1.payload.get("reward_id"), "speed_up")
 
 
 func test_tc_rwd_15_option_with_failing_effect_returns_false() -> void:

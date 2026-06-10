@@ -177,7 +177,7 @@ func test_tc_rc_11_room_cleared_fires_event_router() -> void:
 	ctrl.setup("combat_01")
 	watch_signals(events)
 	ctrl.check_clear_condition()
-	assert_signal_emitted(events, "room_cleared")
+	assert_not_null(DomainEventAsserts.last_event(events, "room_cleared"))
 
 
 # --- _on_entity_died integration ---
@@ -189,7 +189,7 @@ func test_tc_rc_12_entity_died_tracked_enemy_removes_and_triggers_clear() -> voi
 	ctrl.active_enemies["e01"] = fake_enemy
 	ctrl.runtime.active_enemy_ids.append("e01")
 	watch_signals(ctrl)
-	events.emit_entity_died("e01", fake_enemy)
+	events.emit_domain_event(CombatEvents.entity_died("e01", fake_enemy))
 	assert_false(ctrl.active_enemies.has("e01"))
 	assert_true(ctrl.runtime.cleared)
 	assert_signal_emitted(ctrl, "room_cleared")
@@ -200,7 +200,7 @@ func test_tc_rc_13_entity_died_untracked_entity_ignored() -> void:
 	var tracked := _make_enemy()
 	ctrl.active_enemies["e01"] = tracked
 	var unrelated := _make_enemy()
-	events.emit_entity_died("unrelated", unrelated)
+	events.emit_domain_event(CombatEvents.entity_died("unrelated", unrelated))
 	assert_true(ctrl.active_enemies.has("e01"))
 
 

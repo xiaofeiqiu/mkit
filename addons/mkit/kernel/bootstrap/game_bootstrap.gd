@@ -25,7 +25,7 @@ func _register_kernel_services() -> void:
 	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
 		print("[mkit] GameBootstrap: services already registered, skipping")
 		return
-	var services := _build_kernel_services()
+	var services := _build_services()
 	for service_id in services:
 		_register_service_entry(service_id, services[service_id])
 	print("[mkit] GameBootstrap runtime services: %s" % ", ".join(ServiceRegistry.get_registered_service_ids()))
@@ -33,7 +33,8 @@ func _register_kernel_services() -> void:
 
 ## Ordered id -> service instance table. Override to add or replace services;
 ## Node services are added as children of ServiceRegistry, RefCounted ones are not.
-func _build_kernel_services() -> Dictionary:
+## Kernel-only: gameplay module services are appended by ModuleBootstrap.
+func _build_services() -> Dictionary:
 	return {
 		ServiceRegistry.SERVICE_EVENTS: EventService.new(),
 		ServiceRegistry.SERVICE_CONTENT: ContentService.new(),
@@ -42,21 +43,14 @@ func _build_kernel_services() -> Dictionary:
 		ServiceRegistry.SERVICE_ACTIONS: ActionService.new(),
 		ServiceRegistry.SERVICE_EFFECTS: EffectService.new(),
 		ServiceRegistry.SERVICE_COMMANDS: CommandService.new(),
-		ServiceRegistry.SERVICE_COMBAT: CombatService.new(),
 		ServiceRegistry.SERVICE_SCENES: SceneService.new(),
 		ServiceRegistry.SERVICE_POOL: PoolService.new(),
 		ServiceRegistry.SERVICE_SAVE: SaveService.new(),
-		ServiceRegistry.SERVICE_PROGRESSION: ProgressionService.new(),
+		ServiceRegistry.SERVICE_AUDIO: AudioService.new(),
 		ServiceRegistry.SERVICE_ANALYTICS: AnalyticsServiceMock.new(),
 		ServiceRegistry.SERVICE_ADS: AdServiceMock.new(),
 		ServiceRegistry.SERVICE_IAP: IAPServiceMock.new(),
 		ServiceRegistry.SERVICE_CLOUD_SAVE: CloudSaveServiceMock.new(),
-		ServiceRegistry.SERVICE_QUEST: QuestService.new(),
-		ServiceRegistry.SERVICE_SHOP: ShopService.new(),
-		ServiceRegistry.SERVICE_AUDIO: AudioService.new(),
-		ServiceRegistry.SERVICE_DIALOGUE: DialogueService.new(),
-		ServiceRegistry.SERVICE_WORLD: WorldService.new(),
-		ServiceRegistry.SERVICE_LOOT: LootService.new(),
 	}
 
 

@@ -33,5 +33,5 @@ spawner.spawn_entity("enemy.field_beast", $Enemies, Vector2(100, 0))
 
 ## 相关
 
-- → [EntitySpawner](EntitySpawner.md) · [EntityIdentity](EntityIdentity.md)
+- → [EntitySpawner](EntitySpawner.md) · [EntityIdentity](../kernel/EntityIdentity.md)
 - → [cookbook/07_room.md](../../cookbook/07_room.md)

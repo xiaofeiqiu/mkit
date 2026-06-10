@@ -25,7 +25,7 @@
 ```mermaid
 flowchart LR
     A["敌人 HealthComponent.die()"]:::mkitCore -->
-    B["EventService.emit_entity_died"]:::mkitCore -->
+    B["CombatEvents.entity_died 领域事件"]:::mkitCore -->
     C["QuestService._on_entity_died\n合成 enemy_killed 事件"]:::mkitCore -->
     D["notify_event 匹配活跃任务目标"]:::mkitCore -->
     E["objective_advanced (+1)"]:::mkitCore -->

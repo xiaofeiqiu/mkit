@@ -6,19 +6,21 @@
 
 ## 职责
 
-**全局存档契约**。
+**全局/root 级存档契约**。
 
-`SaveService.save_game` 会收集 `Saveable` 节点；阶段性地通过 `get_save_scopes()` 写入结构化 scope 字段（用于无场景树恢复）。
+`SaveService.save_game` 会收集 `Saveable` 节点并写入 `roots`；阶段性地通过 `get_save_scopes()` 写入结构化 scope 字段（用于无场景树恢复）。
 
-可用于全局状态：玩家状态根、`QuestService`、`ProgressionService`、`ExperienceComponent` 等。
+可用于全局状态：`QuestService`、`ProgressionService`、`ExperienceComponent`、`WorldService`、`AudioService` 等。
 
-> 对比 [SaveableComponent](SaveableComponent.md)：后者**不会**被 `SaveService` 自动收集。
+> 对比 [EntitySaveAgent](EntitySaveAgent.md)：实体内的 `SaveableComponent` 应落在 `entities[entity_id].components`，不要把组件平铺成全局 `roots` key。
 
 ## 字段
 
 | 字段名 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
 | `save_id` | `String`（@export）| `""` | 存档键，**全局唯一**；空则回退到 `owner.name`/`name` |
+| `save_scope` | `String`（@export）| `""` | scope 名；空则为 `"global"` |
+| `restore_order` | `int`（@export）| `0` | 读档排序；数值小的先恢复 |
 
 ## 方法
 
@@ -49,41 +51,26 @@ func from_save_data(data: Dictionary) -> void:
     day = int(data.get("day", 1))
 ```
 
-### 典型场景（Level 2）
+### Scope 恢复（Level 2）
 
 ```gdscript
-# 玩家存档代理：把实体里的 SaveableComponent 收集进同一份 "player" 存档
-class_name PlayerSaveAgent
+class_name WorldSnapshot
 extends Saveable
-# Inspector: save_id = "player"
 
 func _ready() -> void:
-    # 可选：声明这个玩家存档属于 scene/state 域
-    save_scope = "player"
+    save_id = "world"
+    save_scope = "world.zone"
 
 func to_save_data() -> Dictionary:
-    var data: Dictionary = {}
-    # owner = 玩家场景根；遍历其下所有 SaveableComponent
-    var root := owner if owner != null else get_parent()
-    for node in root.find_children("*", "", true, false):
-        if node is SaveableComponent:
-            var comp := node as SaveableComponent
-            data[comp.get_save_key()] = comp.to_save_data()
-    return data
+    return {"zone_id": "village"}
 
 func from_save_data(data: Dictionary) -> void:
-    var root := owner if owner != null else get_parent()
-    for node in root.find_children("*", "", true, false):
-        if node is SaveableComponent:
-            var comp := node as SaveableComponent
-            var key := comp.get_save_key()  # 默认是节点 name
-            if data.has(key):
-                comp.from_save_data(data[key])
+    print("restore zone: %s" % str(data.get("zone_id", "")))
 ```
 
 `get_save_scopes()` 与 `get_save_payload_for_scope(...)` 在需要“场景树未恢复也要还原状态”的模块里使用，当前世界流程（`RunDirector`/`WorldService`）就是典型用例。
 
 ## 相关
 
-- → [SaveableComponent](SaveableComponent.md)（组件级契约，需被收集）· [SaveService](SaveService.md)
+- → [EntitySaveAgent](EntitySaveAgent.md)（实体级聚合器）· [SaveableComponent](SaveableComponent.md)（组件级契约）· [SaveService](SaveService.md)
 - → [concepts.md — 存档：两条契约](../../concepts.md#六、存档：两条契约) · [cookbook/11_progression_and_save.md](../../cookbook/11_progression_and_save.md)

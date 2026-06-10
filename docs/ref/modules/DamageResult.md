@@ -6,7 +6,7 @@
 
 ## 职责
 
-一次伤害的公开**输出**。`CombatService.resolve()` 从 `DamageApplication.to_result()` 返回它，`HealthComponent.apply_damage()` 消费它并通过 `EventService.emit_damage_applied` 广播给表现层。
+一次伤害的公开**输出**。`CombatService.resolve()` 从 `DamageApplication.to_result()` 返回它，`HealthComponent.apply_damage()` 消费它并经 `EventService` 广播 `CombatEvents.damage_applied` 领域事件给表现层。
 
 ## 字段
 
@@ -35,7 +35,8 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-events.damage_applied.connect(func(r: DamageResult):
+events.subscribe(CombatEvents.DAMAGE_APPLIED, func(event: DomainEvent):
+    var r: DamageResult = event.payload.get("result")
     print("%.0f%s" % [r.final_amount, " 暴击!" if r.was_critical else ""])
 )
 ```

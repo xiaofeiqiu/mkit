@@ -43,7 +43,11 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 			return false
 	var events := EventService.find()
 	if events != null:
-		events.emit_reward_selected(option.reward_id, ctx.source.name if ctx.source != null else "")
+		events.emit_domain_event(
+			LootEvents.reward_selected(
+				option.reward_id, ctx.source.name if ctx.source != null else ""
+			)
+		)
 	return true
 
 

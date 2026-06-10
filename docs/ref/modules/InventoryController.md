@@ -6,7 +6,7 @@
 
 ## 职责
 
-背包控制器，挂在 `Controllers/InventoryController`。增删查物品、处理堆叠与容量、发 `inventory_changed` 与 `EventService.emit_inventory_changed`（任务系统靠它统计"获得物品"）。
+背包控制器，挂在 `Controllers/InventoryController`。增删查物品、处理堆叠与容量、发 `inventory_changed` 信号并经 `EventService` 广播 `InventoryEvents.inventory_changed` 领域事件（任务系统靠它统计"获得物品"）。
 
 ## 字段
 
@@ -54,7 +54,7 @@ func give_item(player: Node, item_id: String, qty: int) -> bool:
     return inv.add_item(item)
 ```
 
-> 存档：是 `SaveableComponent`，`to_save_data` 存所有格子，需由 `Saveable` 代理收集（见 [cookbook/11](../../cookbook/11_progression_and_save.md)）。
+> 存档：是 `SaveableComponent`，`to_save_data` 存所有格子，需由实体下的 `EntitySaveAgent` 收集（见 [cookbook/11](../../cookbook/11_progression_and_save.md)）。
 
 ## 相关
 

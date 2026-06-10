@@ -123,7 +123,7 @@ func test_tc_int_prog_03_analytics_probe_records_runtime_event() -> void:
 			service.track_event(event.event_type, event.payload)
 	)
 
-	events.emit_run_started("run.int.analytics", 7331)
+	events.emit_domain_event(WorldEvents.run_started("run.int.analytics", 7331))
 	analytics.set_user_property("profile", "integration")
 
 	assert_eq(analytics.tracked_events.size(), 1)
@@ -223,8 +223,8 @@ func test_tc_int_prog_06_cloud_save_roundtrip_dictionary() -> void:
 	assert_eq(loaded["payload"]["progression"]["currencies"]["crystal"], 9)
 
 
-func _boot_with_database(database: ResourceDatabase) -> GameBootstrap:
-	var bootstrap := GameBootstrap.new()
+func _boot_with_database(database: ResourceDatabase) -> ModuleBootstrap:
+	var bootstrap := ModuleBootstrap.new()
 	var databases: Array[ResourceDatabase] = [database]
 	bootstrap.resource_databases = databases
 	bootstrap.save_path = _save_path

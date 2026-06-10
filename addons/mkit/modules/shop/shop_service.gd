@@ -76,7 +76,7 @@ func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	item_purchased.emit(item_id, quantity, total_cost)
 	var events := EventService.find()
 	if events != null:
-		events.emit_item_purchased(current_shop.shop_id, item_id, quantity)
+		events.emit_domain_event(ShopEvents.item_purchased(current_shop.shop_id, item_id, quantity))
 	return true
 
 
@@ -116,7 +116,7 @@ func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	item_sold.emit(item_id, quantity, total_gain)
 	var events := EventService.find()
 	if events != null:
-		events.emit_item_sold(current_shop.shop_id, item_id, quantity)
+		events.emit_domain_event(ShopEvents.item_sold(current_shop.shop_id, item_id, quantity))
 	return true
 
 

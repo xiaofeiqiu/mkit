@@ -6,7 +6,7 @@
 
 ## 职责
 
-生命值组件，挂在 `Components/HealthComponent`。消费 `DamageResult` 扣血、发 `damaged`/`died` 信号与 `EventService.emit_damage_applied`/`emit_entity_died`，并把命中附带状态转交 `StatusEffectController`。最大血量取自同实体 `StatsComponent` 的 `max_hp`。
+生命值组件，挂在 `Components/HealthComponent`。消费 `DamageResult` 扣血、发 `damaged`/`died` 信号并经 `EventService` 广播 `CombatEvents.damage_applied` / `CombatEvents.entity_died` 领域事件，并把命中附带状态转交 `StatusEffectController`。最大血量取自同实体 `StatsComponent` 的 `max_hp`。
 
 ## 字段
 
@@ -69,7 +69,7 @@ func _on_died(_entity: Node) -> void:
     owner.queue_free()
 ```
 
-> 存档：`HealthComponent` 是 `SaveableComponent`，`to_save_data` 存 `current_hp`/`dead`，需由 `Saveable` 代理收集。
+> 存档：`HealthComponent` 是 `SaveableComponent`，`to_save_data` 存 `current_hp`/`dead`，需由实体下的 `EntitySaveAgent` 收集。
 
 ## 相关
 

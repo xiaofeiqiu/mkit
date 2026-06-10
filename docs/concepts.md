@@ -40,7 +40,7 @@ flowchart TB
 | 实体访问 | 默认仍有 `Components/` / `Controllers/`，但代码优先走 `EntityContract` |
 | 战斗 | 公开入口仍是 `DamageRequest` / `DamageResult`，内部已拆成 `DamageIntent` / `DamageResolution` / `DamageApplication` |
 | 可变数值 | 战斗资源用 `ResourceSet`，账号/货币用 `Wallet`，属性仍由 `StatsComponent` 管 modifier |
-| 存档 | `SaveService` 收集场景树 `Saveable`，也支持显式注册 save scope provider |
+| 存档 | `SaveService` 收集场景树 `Saveable` 到 `roots`，收集 `EntitySaveAgent` 到 `entities`，也支持显式注册 save scope provider |
 
 不要把具体 boss、物品、任务、房间、商店价格或 demo 规则写进 `addons/mkit/`。这些属于 `game/`。
 
@@ -162,7 +162,7 @@ sequenceDiagram
     GE->>Combat: resolve(DamageRequest)
     Combat->>Combat: DamageIntent → DamageResolution → DamageApplication
     Combat-->>GE: DamageResult
-    GE->>EV: emit_damage_applied(result)
+    GE->>EV: CombatEvents.damage_applied(result)
     EV-->>You: damage_applied / entity_died 信号
     Note over You: 👆 你订阅：UI / VFX / Audio
 ```
@@ -289,16 +289,17 @@ var all_abilities := content.get_all_by_type("ability_definition")
 
 ---
 
-## 六、存档：两条契约 + scope provider
+## 六、存档：roots / entities + scope provider
 
 存档同样建立在「你只 override 两个方法，mkit 负责协调」之上。区别只在**谁来收集你**：
 
 | 契约 | 基类 | 存档键 | 谁收集它 |
 |------|------|--------|----------|
-| `Saveable` | `Node` | `save_id`（空则回退到 `owner.name` / `name`） | **`SaveService` 自动收集场景树节点，并支持 `save_scope` 场景外恢复** |
-| `SaveableComponent` | `Node` | 节点 `name`（实体内唯一） | **不自动收集**——由所属实体（一个 `Saveable`）负责收集并序列化 |
+| `Saveable` | `Node` | `save_id`（空则回退到 `owner.name` / `name`） | **`SaveService` 自动收集到 `roots`，并支持 `save_scope` 场景外恢复** |
+| `EntitySaveAgent` | `Node` | `entity_id` | **`SaveService` 自动收集到 `entities`，负责聚合该实体下的组件** |
+| `SaveableComponent` | `Node` | 节点 `name`（实体内唯一） | **不作为全局 root 收集**——由所属实体的 `EntitySaveAgent` 收集到 `components` |
 
-两者接口相同，都只需实现序列化的两个方法：
+`Saveable` 和 `SaveableComponent` 都只需实现序列化的两个方法：
 
 ```gdscript
 class_name PlayerSave
@@ -312,7 +313,7 @@ func from_save_data(data: Dictionary) -> void:
     level = int(data.get("level", 1))
 ```
 
-> 关键区别：`SaveService.save_game(root)` 会收集场景树中的 **`Saveable`** 节点，并把它们写入 `payload` 与 `scopes`。`SaveableComponent`（如 `AbilityController`）提供相同序列化接口，但必须由所属 `Saveable` 实体主动收集。`RunDirector` / `WorldService` 这类需要脱离完整场景树恢复的对象，可以通过 `SaveService.register_saveable_scope(provider)` 显式注册 scope provider。完整时序见 [ref/kernel/SaveService.md](ref/kernel/SaveService.md)。
+> 关键区别：`SaveService.save_game(root)` 会收集场景树中的 **`Saveable`** 节点写入 `roots`，收集 **`EntitySaveAgent`** 写入 `entities`。`SaveableComponent`（如 `AbilityController`）提供相同序列化接口，但必须挂在某个 entity agent 的实体根下。`RunDirector` / `WorldService` 这类需要脱离完整场景树恢复的对象，可以通过 `SaveService.register_saveable_scope(provider)` 显式注册 scope provider。完整时序见 [ref/kernel/SaveService.md](ref/kernel/SaveService.md)。
 
 ---
 

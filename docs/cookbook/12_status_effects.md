@@ -104,7 +104,7 @@ on_hit_statuses = [{"status_id": "status.poison", "chance": 0.5, "stacks": 1, "d
 | 中毒不掉血 | `effects_on_tick` 里的 `DealDamageEffect` 找不到 `HealthComponent` | 目标需有 `Components/HealthComponent` |
 | buff 不生效/不回落 | 没有 `StatsComponent`，或 `tick_interval` 设错 | buff 走 `stat_modifiers`，需 `StatsComponent`；纯 buff 设 `tick_interval=0` |
 | 叠加不符合预期 | `stack_rule` 选错 | DOT 常用 `ADD_STACK`，buff 常用 `REFRESH_DURATION` |
-| 读档后状态丢了 | `StatusEffectController` 是 `SaveableComponent` | 用 [Recipe 11](11_progression_and_save.md) 步骤 4 的代理收集它 |
+| 读档后状态丢了 | `StatusEffectController` 是 `SaveableComponent` | 用 [Recipe 11](11_progression_and_save.md) 步骤 4 的 `EntitySaveAgent` 收集它 |
 
 ## 延伸阅读
 

@@ -1,6 +1,7 @@
 # EntityContract
 
-**文件：** `addons/mkit/modules/entity/entity_contract.gd`  
+**层：** Kernel  
+**文件：** `addons/mkit/kernel/entity/entity_contract.gd`  
 **用途：** 实体契约入口，统一通过 `EntityRoot` 访问组件、控制器、身份、状态机和命令接收器，含缺失告警。它是新代码优先使用的语义入口，默认布局仍是 `Components/` / `Controllers/`。
 
 ## 静态方法
@@ -24,4 +25,4 @@
 ## 相关
 
 - → [EntityRoot](EntityRoot.md)
-- → [EntitySpawner](EntitySpawner.md)
+- → [EntitySpawner](../modules/EntitySpawner.md)

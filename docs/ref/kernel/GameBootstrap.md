@@ -6,7 +6,9 @@
 
 ## 职责
 
-游戏启动入口。在 `_ready` 时注册所有内置服务，加载内容数据库，把内容驱动的服务配置（如 `AudioDefinition`）注册到对应服务，校验内容、加载存档，最后切换到初始场景。
+游戏启动入口。在 `_ready` 时注册 **kernel 内置服务**，加载内容数据库，把内容驱动的服务配置（如 `AudioDefinition`）注册到对应服务，校验内容、加载存档，最后切换到初始场景。
+
+> kernel 层只注册 kernel 自己的服务。需要内置玩法模块（combat / quest / shop / dialogue / world / loot / progression）时用 [ModuleBootstrap](../modules/ModuleBootstrap.md)（组合根），或继承它再叠加自定义服务。
 
 ## 字段（@export 和 public var）
 
@@ -21,7 +23,8 @@
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
 | `boot() -> void` | `void` | 启动入口，按序调用下面步骤 |
-| `_register_kernel_services() -> void` | `void` | 注册所有内置服务；**override 此方法或 `_build_kernel_services` 添加自定义服务** |
+| `_register_kernel_services() -> void` | `void` | 注册服务表；**override `_build_services()` 添加或替换服务** |
+| `_build_services() -> Dictionary` | `Dictionary` | 有序 id → 服务实例表（仅 kernel 服务）；子类 override 后 `super()` 再追加 |
 | `_load_content() -> void` | `void` | 遍历 `resource_databases`，调 `ContentService.load_database()` |
 | `_configure_content_services() -> void` | `void` | 内容入库后配置内容驱动的服务 |
 | `_register_audio_definitions() -> void` | `void` | 将 `ContentService` 中的 `AudioDefinition` 注册到 `AudioService` |
@@ -43,19 +46,15 @@
 ```gdscript
 # res://game/bootstrap/my_bootstrap.gd
 class_name MyBootstrap
-extends GameBootstrap
+extends ModuleBootstrap   # 含内置模块服务；只要 kernel 服务则 extends GameBootstrap
 
 
-func _register_kernel_services() -> void:
-    super._register_kernel_services()   # 先注册所有内置服务
+func _build_services() -> Dictionary:
+    var services := super()             # 先拿内置服务表
 
     # 添加自定义服务
-    var my_svc := MyAnalyticsService.new()
-    ServiceRegistry.register_service("my_analytics", my_svc)
-
-    # 验证注册结果
-    if ServiceRegistry.get_port("my_analytics") == null:
-        push_error("MyBootstrap: my_analytics failed to register")
+    services["my_analytics"] = MyAnalyticsService.new()
+    return services
 
 
 func _load_profile() -> void:

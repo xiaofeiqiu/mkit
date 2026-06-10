@@ -22,8 +22,8 @@ func _ready() -> void:
 	ui = get_node_or_null(ui_manager_path) as UIManager
 	var events := EventService.find()
 	if events != null:
-		events.damage_applied.connect(_on_damage_applied)
-		events.entity_died.connect(_on_entity_died)
+		events.subscribe(CombatEvents.DAMAGE_APPLIED, _on_damage_applied)
+		events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 
 
 func show_toast(message: String) -> Node:
@@ -45,7 +45,8 @@ func _resolve_audio() -> AudioService:
 	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
 
 
-func _on_damage_applied(result) -> void:
+func _on_damage_applied(event: DomainEvent) -> void:
+	var result: DamageResult = event.payload.get("result")
 	if result == null or result.target == null:
 		return
 	if damage_numbers != null:
@@ -60,7 +61,9 @@ func _on_damage_applied(result) -> void:
 		request_screen_shake(damage_screen_shake_strength)
 
 
-func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
+func _on_entity_died(event: DomainEvent) -> void:
+	var entity_id := str(event.payload.get("entity_id", event.source_id))
+	var entity_ref := event.payload.get("entity_ref") as Node
 	if entity_ref == null:
 		return
 	if vfx != null:

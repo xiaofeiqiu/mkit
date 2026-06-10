@@ -63,7 +63,7 @@ func apply_rage(entity: Node, seconds: float) -> void:
 # 需要每帧推进限时修饰器：在某处 stats.tick_modifiers(delta)
 ```
 
-> 存档：`StatsComponent` 是 `SaveableComponent`，存的是相对 `mark_save_baseline()` 的覆盖与持久修饰器，需由 `Saveable` 代理收集。
+> 存档：`StatsComponent` 是 `SaveableComponent`，存的是相对 `mark_save_baseline()` 的覆盖与持久修饰器，需由实体下的 `EntitySaveAgent` 收集。
 
 ## 相关
 

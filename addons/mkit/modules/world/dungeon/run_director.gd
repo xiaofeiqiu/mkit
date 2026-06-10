@@ -32,7 +32,7 @@ func _connect_events() -> void:
 		return
 	var events := EventService.find()
 	if events != null:
-		events.entity_died.connect(_on_entity_died)
+		events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 		_events_connected = true
 
 
@@ -278,15 +278,15 @@ func start_run(seed: int = 0) -> void:
 	run_started.emit(run_state)
 	var events := EventService.find()
 	if events != null:
-		events.emit_run_started(run_state.run_id, seed)
+		events.emit_domain_event(WorldEvents.run_started(run_state.run_id, seed))
 	_connect_events()
 	enter_next_room()
 
 
-func _on_entity_died(entity_id: String, _entity_ref: Node) -> void:
+func _on_entity_died(event: DomainEvent) -> void:
 	if run_state == null or run_state.status == "failed" or run_state.status == "completed":
 		return
-	if entity_id == player_entity_id:
+	if str(event.payload.get("entity_id", event.source_id)) == player_entity_id:
 		fail_run("player_died")
 
 
@@ -350,7 +350,7 @@ func complete_run() -> void:
 	run_finished.emit("completed")
 	var events := EventService.find()
 	if events != null:
-		events.emit_run_finished(run_state.run_id, "completed")
+		events.emit_domain_event(WorldEvents.run_finished(run_state.run_id, "completed"))
 
 
 func fail_run(reason: String) -> void:
@@ -364,8 +364,10 @@ func fail_run(reason: String) -> void:
 	run_finished.emit("failed:%s" % reason)
 	var events := EventService.find()
 	if events != null:
-		events.emit_run_finished(
-			run_state.run_id if run_state != null else "", "failed:%s" % reason
+		events.emit_domain_event(
+			WorldEvents.run_finished(
+				run_state.run_id if run_state != null else "", "failed:%s" % reason
+			)
 		)
 
 

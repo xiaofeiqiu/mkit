@@ -21,8 +21,7 @@ func _connect_events() -> void:
 		return
 	if not events.domain_event_emitted.is_connected(notify_event):
 		events.domain_event_emitted.connect(notify_event)
-	if not events.entity_died.is_connected(_on_entity_died):
-		events.entity_died.connect(_on_entity_died)
+	events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 
 
 func can_accept(quest_id: String, context: GameplayContext) -> bool:
@@ -62,7 +61,7 @@ func accept_quest(quest_id: String, context: GameplayContext) -> bool:
 	quest_accepted.emit(quest_id)
 	var events := EventService.find()
 	if events != null:
-		events.emit_quest_accepted(quest_id)
+		events.emit_domain_event(QuestEvents.quest_accepted(quest_id))
 	return true
 
 
@@ -132,7 +131,7 @@ func complete_quest(quest_id: String, context: GameplayContext) -> bool:
 	quest_completed.emit(quest_id)
 	var events := EventService.find()
 	if events != null:
-		events.emit_quest_completed(quest_id)
+		events.emit_domain_event(QuestEvents.quest_completed(quest_id))
 	var definition := get_definition(quest_id)
 	if definition != null and definition.auto_complete:
 		return turn_in_quest(quest_id, context)
@@ -157,7 +156,7 @@ func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 	quest_turned_in.emit(quest_id)
 	var events := EventService.find()
 	if events != null:
-		events.emit_quest_turned_in(quest_id)
+		events.emit_domain_event(QuestEvents.quest_turned_in(quest_id))
 	return true
 
 
@@ -188,8 +187,10 @@ func _advance_progress(state: QuestState, objective: QuestObjectiveDefinition, a
 	)
 	var events := EventService.find()
 	if events != null:
-		events.emit_quest_objective_advanced(
-			state.quest_id, objective.objective_id, updated, objective.required_count
+		events.emit_domain_event(
+			QuestEvents.quest_objective_advanced(
+				state.quest_id, objective.objective_id, updated, objective.required_count
+			)
 		)
 	return true
 
@@ -207,15 +208,15 @@ func _objective_matches(objective: QuestObjectiveDefinition, event: DomainEvent)
 	return str(actual) == objective.match_value
 
 
-func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
+func _on_entity_died(event: DomainEvent) -> void:
+	if event == null:
+		return
+	var entity_id := str(event.payload.get("entity_id", event.source_id))
 	var payload := {"entity_id": entity_id}
-	if entity_ref != null:
-		var identity := EntityContract.get_identity(entity_ref)
-		if identity != null:
-			payload["tags"] = identity.tags
-			payload["faction"] = identity.faction
-			payload["definition_id"] = identity.definition_id
-	notify_event(DomainEvent.create("enemy_killed", entity_id, "", payload))
+	for key in ["tags", "faction", "definition_id"]:
+		if event.payload.has(key):
+			payload[key] = event.payload[key]
+	notify_event(DomainEvent.create(QuestEvents.ENEMY_KILLED, entity_id, "", payload))
 
 
 func _notify_item_acquired(event: DomainEvent) -> void:

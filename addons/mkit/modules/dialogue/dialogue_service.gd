@@ -23,7 +23,7 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 	dialogue_started.emit(dialogue_id)
 	var events := EventService.find()
 	if events != null:
-		events.emit_dialogue_started(dialogue_id)
+		events.emit_domain_event(DialogueEvents.dialogue_started(dialogue_id))
 	_enter_node(definition.start_node_id)
 	return is_active()
 
@@ -80,7 +80,7 @@ func end() -> void:
 	dialogue_ended.emit(ended_id)
 	var events := EventService.find()
 	if events != null:
-		events.emit_dialogue_ended(ended_id)
+		events.emit_domain_event(DialogueEvents.dialogue_ended(ended_id))
 
 
 func get_definition(dialogue_id: String) -> DialogueDefinition:

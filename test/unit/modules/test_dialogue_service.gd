@@ -127,7 +127,9 @@ func test_tc_dlg_01_start_enters_start_node_and_runs_enter_effects() -> void:
 	assert_eq(enter_fx.contexts[0], ctx)
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", ["dlg.intro"])
 	assert_signal_emitted(dialogue, "node_entered")
-	assert_signal_emitted_with_parameters(events, "dialogue_started", ["dlg.intro"])
+	var evt_dialogue_started_1 := DomainEventAsserts.last_event(events, "dialogue_started")
+	assert_not_null(evt_dialogue_started_1)
+	assert_eq(evt_dialogue_started_1.source_id, "dlg.intro")
 
 
 # --- choices filtered by conditions ---
@@ -201,7 +203,9 @@ func test_tc_dlg_04_linear_advance_until_end_emits_ended() -> void:
 	dialogue.advance()
 	assert_false(dialogue.is_active())
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_ended", ["dlg.linear"])
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", ["dlg.linear"])
+	var evt_dialogue_ended_2 := DomainEventAsserts.last_event(events, "dialogue_ended")
+	assert_not_null(evt_dialogue_ended_2)
+	assert_eq(evt_dialogue_ended_2.source_id, "dlg.linear")
 
 	# advancing with no active session is a safe no-op
 	dialogue.advance()
@@ -246,4 +250,6 @@ func test_tc_dlg_06_invalid_start_node_reports_failure() -> void:
 	assert_false(dialogue.is_active())
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", ["dlg.broken"])
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_ended", ["dlg.broken"])
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", ["dlg.broken"])
+	var evt_dialogue_ended_3 := DomainEventAsserts.last_event(events, "dialogue_ended")
+	assert_not_null(evt_dialogue_ended_3)
+	assert_eq(evt_dialogue_ended_3.source_id, "dlg.broken")

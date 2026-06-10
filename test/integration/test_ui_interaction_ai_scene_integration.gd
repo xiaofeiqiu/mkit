@@ -185,8 +185,8 @@ func test_tc_int_ui_05_ui_manager_registers_ui_service() -> void:
 	assert_eq(ServiceRegistry.get_service("ui"), ui)
 
 
-func _boot_runtime() -> GameBootstrap:
-	var bootstrap := GameBootstrap.new()
+func _boot_runtime() -> ModuleBootstrap:
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 	return bootstrap

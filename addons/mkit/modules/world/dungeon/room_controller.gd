@@ -16,8 +16,8 @@ var entity_spawner: EntitySpawner = null
 func _ready() -> void:
 	entity_spawner = get_node_or_null(entity_spawner_path) as EntitySpawner
 	var events := EventService.find()
-	if events != null and not events.entity_died.is_connected(_on_entity_died):
-		events.entity_died.connect(_on_entity_died)
+	if events != null:
+		events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 
 
 func setup(definition_id: String) -> void:
@@ -84,7 +84,7 @@ func check_clear_condition() -> void:
 		room_cleared.emit(runtime.room_runtime_id)
 		var events := EventService.find()
 		if events != null:
-			events.emit_room_cleared(runtime.room_runtime_id)
+			events.emit_domain_event(WorldEvents.room_cleared(runtime.room_runtime_id))
 
 
 func generate_reward() -> void:
@@ -114,9 +114,10 @@ func get_definition() -> RoomDefinition:
 	return ContentService.find_resource(room_definition_id) as RoomDefinition
 
 
-func _on_entity_died(entity_id: String, _entity_ref: Node) -> void:
+func _on_entity_died(event: DomainEvent) -> void:
 	if runtime == null:
 		return
+	var entity_id := str(event.payload.get("entity_id", event.source_id))
 	if not active_enemies.has(entity_id):
 		return
 	active_enemies.erase(entity_id)

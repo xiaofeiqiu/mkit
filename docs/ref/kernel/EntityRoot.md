@@ -1,7 +1,7 @@
 # EntityRoot
 
-**层：** Module  
-**文件：** `addons/mkit/modules/entity/entity_root.gd`  
+**层：** Kernel  
+**文件：** `addons/mkit/kernel/entity/entity_root.gd`  
 **继承：** `extends CharacterBody2D`
 
 ## 职责
@@ -66,5 +66,5 @@ func _ready() -> void:
 
 ## 相关
 
-- → [EntityIdentity](EntityIdentity.md) · [EntityDefinition](EntityDefinition.md) · [EntitySpawner](EntitySpawner.md)
+- → [EntityIdentity](EntityIdentity.md) · [EntityDefinition](../modules/EntityDefinition.md) · [EntitySpawner](../modules/EntitySpawner.md)
 - → [architecture.md — 实体节点约定](../../architecture.md) · [cookbook/02_player_entity.md](../../cookbook/02_player_entity.md)

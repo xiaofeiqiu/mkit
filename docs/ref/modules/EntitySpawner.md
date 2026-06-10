@@ -47,5 +47,5 @@ func spawn_wave(ids: Array[String]) -> void:
 
 ## 相关
 
-- → [EntityDefinition](EntityDefinition.md) · [EntityIdentity](EntityIdentity.md) · [ref/modules/RoomController.md](RoomController.md)
+- → [EntityDefinition](EntityDefinition.md) · [EntityIdentity](../kernel/EntityIdentity.md) · [ref/modules/RoomController.md](RoomController.md)
 - → [pipeline.md — Entity Spawn](../../pipeline.md#9-entity-spawn) · [cookbook/07_room.md](../../cookbook/07_room.md)

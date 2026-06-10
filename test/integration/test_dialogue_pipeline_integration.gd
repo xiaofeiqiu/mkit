@@ -18,7 +18,7 @@ func after_each() -> void:
 
 
 func test_tc_int_dialogue_01_interact_choice_accepts_quest_then_talk_completes() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
@@ -51,7 +51,9 @@ func test_tc_int_dialogue_01_interact_choice_accepts_quest_then_talk_completes()
 	assert_true(interactor.try_interact())
 	assert_true(dialogue.is_active())
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", [DIALOGUE_GUIDE_ID])
-	assert_signal_emitted_with_parameters(events, "npc_talked", [NPC_GUIDE_ID])
+	var evt_npc_talked_1 := DomainEventAsserts.last_event(events, "npc_talked")
+	assert_not_null(evt_npc_talked_1)
+	assert_eq(evt_npc_talked_1.source_id, NPC_GUIDE_ID)
 	assert_null(quest.get_state(QUEST_ID))
 
 	# 2) choose the accept option -> AcceptQuestEffect makes the quest active; guide dialogue ends
@@ -59,12 +61,16 @@ func test_tc_int_dialogue_01_interact_choice_accepts_quest_then_talk_completes()
 	assert_false(dialogue.is_active())
 	assert_eq(quest.get_state(QUEST_ID).status, "active")
 	assert_signal_emitted_with_parameters(quest, "quest_accepted", [QUEST_ID])
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", [DIALOGUE_GUIDE_ID])
+	var evt_dialogue_ended_2 := DomainEventAsserts.last_event(events, "dialogue_ended")
+	assert_not_null(evt_dialogue_ended_2)
+	assert_eq(evt_dialogue_ended_2.source_id, DIALOGUE_GUIDE_ID)
 
 	# 3) interact with the elder -> npc_talked(elder) advances + auto-completes + rewards
 	interactor.current_interactable = elder.get_node("Interactable") as DialogueInteractable
 	assert_true(interactor.try_interact())
-	assert_signal_emitted_with_parameters(events, "npc_talked", [NPC_ELDER_ID])
+	var evt_npc_talked_3 := DomainEventAsserts.last_event(events, "npc_talked")
+	assert_not_null(evt_npc_talked_3)
+	assert_eq(evt_npc_talked_3.source_id, NPC_ELDER_ID)
 	assert_signal_emitted_with_parameters(
 		quest, "objective_advanced", [QUEST_ID, OBJ_TALK_ELDER, 1, 1]
 	)
@@ -76,7 +82,9 @@ func test_tc_int_dialogue_01_interact_choice_accepts_quest_then_talk_completes()
 	assert_true(dialogue.is_active())
 	dialogue.advance()
 	assert_false(dialogue.is_active())
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", [DIALOGUE_ELDER_ID])
+	var evt_dialogue_ended_4 := DomainEventAsserts.last_event(events, "dialogue_ended")
+	assert_not_null(evt_dialogue_ended_4)
+	assert_eq(evt_dialogue_ended_4.source_id, DIALOGUE_ELDER_ID)
 
 
 func _make_database() -> ResourceDatabase:

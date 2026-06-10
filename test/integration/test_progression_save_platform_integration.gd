@@ -89,12 +89,13 @@ func test_tc_int_prog_01_xp_level_up_progression_unlock_and_save() -> void:
 	assert_true(save.save_game(get_tree().root))
 	assert_signal_emitted_with_parameters(save, "save_completed", [_save_path])
 	var saved := _read_json(_save_path)
-	var payload: Dictionary = saved.get("payload", {})
-	assert_true(payload.has("experience"))
-	assert_true(payload.has("progression"))
-	assert_false(payload.has("InventoryController"))
-	assert_eq(int(payload["experience"]["current_level"]), 3)
-	assert_eq(int(payload["progression"]["currencies"]["crystal"]), 70)
+	var roots: Dictionary = saved.get("roots", {})
+	assert_true(roots.has("experience"))
+	assert_true(roots.has("progression"))
+	assert_false(roots.has("InventoryController"))
+	assert_false(saved.has("payload"))
+	assert_eq(int(roots["experience"]["current_level"]), 3)
+	assert_eq(int(roots["progression"]["currencies"]["crystal"]), 70)
 
 	experience.current_level = 1
 	experience.current_xp = 0
@@ -199,7 +200,7 @@ func test_tc_int_prog_06_cloud_save_roundtrip_dictionary() -> void:
 	var data := {
 		"save_version": 1,
 		"profile_id": "profile.int",
-		"payload": {
+		"roots": {
 			"progression": {
 				"currencies": {
 					"crystal": 9,
@@ -208,7 +209,7 @@ func test_tc_int_prog_06_cloud_save_roundtrip_dictionary() -> void:
 		},
 	}
 	cloud.save_to_cloud("slot.int.progression", data)
-	data["payload"]["progression"]["currencies"]["crystal"] = 0
+	data["roots"]["progression"]["currencies"]["crystal"] = 0
 	assert_true(await wait_for_signal(cloud.cloud_save_completed, 1.0, "cloud save"))
 	assert_signal_emitted_with_parameters(
 		cloud, "cloud_save_completed", ["slot.int.progression"]
@@ -220,7 +221,7 @@ func test_tc_int_prog_06_cloud_save_roundtrip_dictionary() -> void:
 	var load_params: Array = get_signal_parameters(cloud, "cloud_load_completed")
 	assert_eq(load_params[0], "slot.int.progression")
 	var loaded: Dictionary = load_params[1]
-	assert_eq(loaded["payload"]["progression"]["currencies"]["crystal"], 9)
+	assert_eq(loaded["roots"]["progression"]["currencies"]["crystal"], 9)
 
 
 func _boot_with_database(database: ResourceDatabase) -> ModuleBootstrap:

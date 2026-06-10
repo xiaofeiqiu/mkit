@@ -13,7 +13,7 @@
 - `load_game` 先恢复 `roots` / `scopes`，再恢复 `entities` 下的实体组件。
 - `GameBootstrap` 启动时若存档存在会自动 `load_game`。
 
-scope 写入用于“无完整场景树也能恢复”的关键状态（如世界 run / 区域等）。`payload` 仍会作为 `roots` 的兼容别名写入，用于旧存档与旧工具迁移。
+scope 写入用于“无完整场景树也能恢复”的关键状态（如世界 run / 区域等）。当前 schema 只支持 `roots` / `entities` / `scopes`；旧版 `payload` / `scope_manifest` / `save_scopes` 字段不再写入，也不再读旧档迁移。
 
 ## 字段
 
@@ -34,11 +34,14 @@ scope 写入用于“无完整场景树也能恢复”的关键状态（如世�
 | `unregister_saveable_scope(provider: Saveable) -> void` | `void` | 注销显式 scope 提供者 |
 | `get_registered_scope_snapshot() -> Dictionary` | `Dictionary` | 获取当前 scope 注册快照 |
 
-文件结构包含 `schema_version`、`roots`、`entities`、`payload`、`scopes` 与 `scope_manifest`：
+文件结构包含 `schema_version`、版本头、`roots`、`entities` 与 `scopes`：
 
 ```json
 {
   "schema_version": 2,
+  "save_version": 1,
+  "game_version": "0.1.0",
+  "profile_id": "profile_001",
   "roots": {
     "progression": {}
   },
@@ -51,10 +54,11 @@ scope 写入用于“无完整场景树也能恢复”的关键状态（如世�
       }
     }
   },
-  "payload": {
-    "progression": {}
-  },
-  "scopes": {}
+  "scopes": {
+    "global": {
+      "progression": {}
+    }
+  }
 }
 ```
 

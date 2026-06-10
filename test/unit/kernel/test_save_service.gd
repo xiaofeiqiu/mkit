@@ -99,11 +99,12 @@ func test_tc_save_01_writes_roots_entities_and_roundtrips_components() -> void:
 	assert_eq(int(data.get("schema_version", 0)), 2)
 	assert_true(data.has("roots"))
 	assert_true(data.has("entities"))
-	assert_true(data.has("payload"))
+	assert_true(data.has("scopes"))
+	assert_false(data.has("payload"))
+	assert_false(data.has("scope_manifest"))
+	assert_false(data.has("save_scopes"))
 	var roots: Dictionary = data["roots"]
 	var entities: Dictionary = data["entities"]
-	var legacy_payload: Dictionary = data["payload"]
-	assert_eq(legacy_payload, roots)
 	assert_eq(int(roots["root.probe"]["value"]), 7)
 	assert_true(entities.has("player"))
 	var player_record: Dictionary = entities["player"]
@@ -169,7 +170,7 @@ func test_tc_save_04_duplicate_component_keys_fail_save() -> void:
 	assert_push_error("duplicate component save key")
 
 
-func test_tc_save_05_legacy_payload_can_restore_entity_components() -> void:
+func test_tc_save_05_legacy_payload_only_save_is_rejected() -> void:
 	var scene := Node.new()
 	add_child_autofree(scene)
 	var parts := _add_entity(scene, "player")
@@ -180,6 +181,7 @@ func test_tc_save_05_legacy_payload_can_restore_entity_components() -> void:
 	_write_json(
 		_save_path,
 		{
+			"schema_version": 2,
 			"save_version": 1,
 			"payload": {
 				"player": {
@@ -190,10 +192,14 @@ func test_tc_save_05_legacy_payload_can_restore_entity_components() -> void:
 		}
 	)
 	var save := _make_save_service()
+	watch_signals(save)
 
-	assert_true(save.load_game(scene))
-	assert_eq(component.value, 31)
-	assert_eq(duck.value, 32)
+	assert_false(save.load_game(scene))
+	assert_signal_emitted_with_parameters(
+		save, "load_failed", [_save_path, "Save file contains legacy field: payload"]
+	)
+	assert_eq(component.value, 0)
+	assert_eq(duck.value, 0)
 
 
 func test_tc_save_06_load_restores_roots_before_entities() -> void:
@@ -226,6 +232,7 @@ func test_tc_save_06_load_restores_roots_before_entities() -> void:
 					"components": {"OrderedComponent": {}},
 				},
 			},
+			"scopes": {},
 		}
 	)
 	var save := _make_save_service()

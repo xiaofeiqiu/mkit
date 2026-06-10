@@ -820,7 +820,7 @@ sequenceDiagram
 
     Note over Caller,SV: 读档
     Caller->>SV: load_game(root)
-    SV->>R: 优先按 scope 恢复，后按 roots/payload 回填
+    SV->>R: 优先按 scope 恢复，后按 roots 回填
     SV->>A: 按 entities 恢复实体组件
     A->>C: from_save_data(component_data)
 ```

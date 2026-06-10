@@ -1244,7 +1244,7 @@ func _validate_demo_save_data(data: Dictionary, label: String) -> bool:
 	var missing := _demo_save_data_missing_requirements(data)
 	if missing.is_empty():
 		return true
-	_log("[%s] payload missing: %s" % [label, ", ".join(missing)])
+	_log("[%s] save data missing: %s" % [label, ", ".join(missing)])
 	return false
 
 
@@ -1255,18 +1255,17 @@ func _demo_save_data_missing_requirements(data: Dictionary) -> Array[String]:
 		return missing
 	if int(data.get("save_version", 0)) <= 0:
 		missing.append("save_version")
-	var save_scopes := _array_value(data, "save_scopes")
-	if (
-		not _array_has_string(save_scopes, "global")
-		or not _array_has_string(save_scopes, "world.run")
-		or not _array_has_string(save_scopes, "world.room")
-		or not _array_has_string(save_scopes, "world.reward")
-	):
-		missing.append("save_scopes")
-	var payload := _dict_value(data, "payload")
-	if payload.is_empty():
-		missing.append("payload")
+	var roots := _dict_value(data, "roots")
+	if roots.is_empty():
+		missing.append("roots")
 	var scopes := _dict_value(data, "scopes")
+	if (
+		not scopes.has("global")
+		or not scopes.has("world.run")
+		or not scopes.has("world.room")
+		or not scopes.has("world.reward")
+	):
+		missing.append("scopes")
 	var global_scope := _dict_value(scopes, "global")
 	if (
 		not global_scope.has("demo_player")
@@ -1275,9 +1274,9 @@ func _demo_save_data_missing_requirements(data: Dictionary) -> Array[String]:
 		or not global_scope.has("quest")
 	):
 		missing.append("global_scope")
-	_append_saved_player_requirements(payload, missing)
-	_append_saved_quest_requirements(payload, missing)
-	_append_saved_progression_requirements(payload, missing)
+	_append_saved_player_requirements(roots, missing)
+	_append_saved_quest_requirements(roots, missing)
+	_append_saved_progression_requirements(roots, missing)
 	_append_saved_trial_scope_requirements(scopes, missing)
 	return missing
 

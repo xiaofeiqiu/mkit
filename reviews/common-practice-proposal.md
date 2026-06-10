@@ -18,7 +18,7 @@ mkit 的**骨架选型基本都站在业界主流做法这一边**：节点组�
 | 3 | 字符串 Service Locator 返回 `Object`，到处 `as` + 判空；且 `get_service` / `get_port` / `find()` 三套访问习惯并存 | 🟡 中 | 类型化静态访问器，一条 blessed path |
 | 4 | 框架 addon 里内置了具体游戏 UI 和成品玩法系统 | 🟡 中 | 框架与示例内容分离（examples/ 或独立插件） |
 | 5 | 模块间横向依赖隐式存在，无声明、无约束 | 🟡 中 | 显式模块依赖声明（清单/拓扑） |
-| 6 | 若干实现细节：`is_class` 对脚本类无效、存档冗余写 legacy 字段、`get_all_by_type` 用文件名做 key、`GameplayContext` 弱类型字段袋 | 🟢 低 | 见各节 |
+| 6 | 若干实现细节：`is_class` 对脚本类无效、`get_all_by_type` 用文件名做 key、`GameplayContext` 弱类型字段袋；6(b) 存档冗余 legacy 字段已处理 | 🟢 低 | 见各节 |
 
 ---
 
@@ -138,7 +138,7 @@ ai/quest  → entity (EntityContract)
 
 **(a) `ContentService.get_all_by_type` 用脚本文件名做类型 key**（`ability_definition.gd` → `"ability_definition"`，文档特意警告"不是 class_name"）。需要文档特意警告的 API 就是反惯例的 API。业界做法要么用类型本身（Unity `LoadAll<T>`、Unreal `GetAssetsByClass`），要么用显式注册的 type id。建议改用 `Script.get_global_name()`（即 class_name）做 key，或接受 `Script` 参数：`get_all_by_script(AbilityDefinition)`。
 
-**(b) 存档每次都写 legacy 字段**。`save_service.gd:64` 把 `"payload": roots` 与 `"roots": roots` 同时写入，还有 `scope_manifest`/`save_scopes` 三处冗余索引。业界惯例是**读旧写新**（migration on read），新档只写当前 schema；旧 key 永久双写会让档案体积翻倍且后续 schema 演进越来越乱。建议：写入只留 `roots`/`entities`/`scopes` + 版本头，`_migrate_save_payload` 继续负责读旧档。另外迁移建议演进为链式（v1→v2→v3 各一个函数），这是存档系统的标准做法。
+**(b) ✅ 已处理：存档不再写 legacy 字段**。`SaveService` 现在只写当前 envelope：版本头 + `roots` / `entities` / `scopes`。项目决策是不支持加载旧档，因此旧版 `payload` 兼容读取、legacy entity fallback、`scope_manifest` 与 `save_scopes` 都已移除；旧档会作为非当前 schema/非当前 envelope 被拒绝，而不是迁移。
 
 **(c) `_is_inactive_service_registry_child`（`save_service.gd:304`）是修补生命周期问题的 hack**。SaveService 需要知道"ServiceRegistry 下挂着已注销服务的尸体节点"才能正确扫描，说明 `ServiceRegistry.clear()` 注销时不清理子节点（你们的集成测试陷阱记录也踩过这个坑）。常规做法是注销即清理：`unregister_service`/`clear()` 时对 Node 型服务 `queue_free()` 或移出树，让扫描方不需要这种特判。
 

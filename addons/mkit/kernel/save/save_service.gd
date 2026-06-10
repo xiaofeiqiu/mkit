@@ -17,7 +17,6 @@ func save_game(root: Node) -> bool:
 	var roots: Dictionary = {}
 	var saveables := _collect_saveables(root)
 	var scope_data: Dictionary = {}
-	var scope_manifest: Dictionary = {}
 	for saveable in saveables:
 		var save_id := saveable.get_save_id()
 		if save_id == "":
@@ -31,16 +30,6 @@ func save_game(root: Node) -> bool:
 			var scoped_data: Dictionary = scope_data.get(normalized_scope, {})
 			scoped_data[save_id] = saveable.get_save_payload_for_scope(normalized_scope)
 			scope_data[normalized_scope] = scoped_data
-			var scope_members: Array = scope_manifest.get(normalized_scope, [])
-			if not scope_members.has(save_id):
-				scope_members.append(save_id)
-			scope_manifest[normalized_scope] = scope_members
-	for scope_name in scope_manifest.keys():
-		var ids: Array = scope_manifest[scope_name]
-		ids.sort()
-		scope_manifest[scope_name] = ids
-	var scope_names: Array = scope_data.keys()
-	scope_names.sort()
 	var entities: Dictionary = {}
 	for agent in _collect_entity_agents(root):
 		var entity_id := agent.get_entity_id()
@@ -61,10 +50,7 @@ func save_game(root: Node) -> bool:
 		"profile_id": "profile_001",
 		"roots": roots,
 		"entities": entities,
-		"payload": roots,
 		"scopes": scope_data,
-		"scope_manifest": scope_manifest,
-		"save_scopes": scope_names,
 	}
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
@@ -89,18 +75,19 @@ func load_game(root: Node) -> bool:
 	if typeof(parsed) != TYPE_DICTIONARY:
 		load_failed.emit(save_path, "Invalid JSON")
 		return false
-	var data := _migrate_save_payload(parsed)
+	var data: Dictionary = parsed
+	var envelope_error := _validate_save_envelope(data)
+	if envelope_error != "":
+		load_failed.emit(save_path, envelope_error)
+		return false
 	var roots := _dictionary_value(data, "roots")
-	var legacy_payload := _dictionary_value(data, "payload")
-	if roots.is_empty() and not legacy_payload.is_empty():
-		roots = legacy_payload
 	var entities := _dictionary_value(data, "entities")
 	var scopes := _dictionary_value(data, "scopes")
 	var root_error := _restore_saveables(root, roots, scopes)
 	if root_error != "":
 		load_failed.emit(save_path, root_error)
 		return false
-	var entity_error := _restore_entities(root, entities, roots)
+	var entity_error := _restore_entities(root, entities)
 	if entity_error != "":
 		load_failed.emit(save_path, entity_error)
 		return false
@@ -193,7 +180,7 @@ func _restore_saveables(root: Node, roots: Dictionary, scoped_payload: Dictionar
 	return ""
 
 
-func _restore_entities(root: Node, entities: Dictionary, legacy_roots: Dictionary) -> String:
+func _restore_entities(root: Node, entities: Dictionary) -> String:
 	var seen: Dictionary = {}
 	for agent in _collect_entity_agents(root):
 		var entity_id := agent.get_entity_id()
@@ -211,9 +198,6 @@ func _restore_entities(root: Node, entities: Dictionary, legacy_roots: Dictionar
 			var entity_record: Dictionary = raw_record
 			record = entity_record
 			has_record = true
-		elif legacy_roots.has(entity_id):
-			record = _legacy_entity_record(legacy_roots[entity_id])
-			has_record = not record.is_empty()
 		if has_record:
 			agent.apply_entity_save_record(record)
 			if agent.has_save_errors():
@@ -263,27 +247,20 @@ func get_registered_scope_snapshot() -> Dictionary:
 	return snapshot
 
 
-func _migrate_save_payload(data: Dictionary) -> Dictionary:
-	var migrated := data.duplicate(true)
-	if not migrated.has("roots"):
-		var raw_payload = migrated.get("payload", {})
-		if raw_payload is Dictionary:
-			var legacy_payload: Dictionary = raw_payload
-			migrated["roots"] = legacy_payload.duplicate(true)
-		else:
-			migrated["roots"] = {}
-	if not migrated.has("entities"):
-		migrated["entities"] = {}
-	return migrated
-
-
-func _legacy_entity_record(raw_data: Variant) -> Dictionary:
-	if not (raw_data is Dictionary):
-		return {}
-	var data: Dictionary = raw_data
-	if data.has("components"):
-		return data
-	return {"components": data}
+func _validate_save_envelope(data: Dictionary) -> String:
+	var found_schema_version := int(data.get("schema_version", 0))
+	if found_schema_version != schema_version:
+		return "Unsupported save schema version: %d" % found_schema_version
+	for legacy_key in ["payload", "scope_manifest", "save_scopes"]:
+		if data.has(legacy_key):
+			return "Save file contains legacy field: %s" % legacy_key
+	for key in ["roots", "entities", "scopes"]:
+		if not data.has(key):
+			return "Save file missing current field: %s" % key
+		var raw_value = data[key]
+		if not (raw_value is Dictionary):
+			return "Save file field must be Dictionary: %s" % key
+	return ""
 
 
 func _dictionary_value(data: Dictionary, key: String) -> Dictionary:

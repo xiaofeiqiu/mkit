@@ -33,9 +33,19 @@ const GOLD_PACK_AMOUNT := 25
 const ATTACK_SFX_ID := "sfx.demo.attack"
 const AUTO_RUN_EXPECTED_POTION_BUYS := 2
 const HIT_VFX_AUTO_RELEASE_SECONDS := 0.55
+const EVENT_LOG_MAX_LINES := 5
 const MELEE_RANGE := 30.0
 const FIREBOLT_RANGE := 100.0
+const FIREBOLT_PROJECTILE_SPEED := 360.0
+const FIREBOLT_PROJECTILE_MIN_DURATION := 0.22
+const FIREBOLT_PROJECTILE_MAX_DURATION := 0.56
+const FIREBOLT_PROJECTILE_FALLBACK_DISTANCE := 180.0
 const TRIAL_SEED := 8606
+const DEFAULT_WINDOW_SIZE := Vector2i(1280, 720)
+const DEMO_CAMERA_CENTER := Vector2(360.0, 245.0)
+const DEMO_CAMERA_WORLD_SIZE := Vector2(1080.0, 608.0)
+const DEMO_CAMERA_MIN_ZOOM := 0.82
+const DEMO_CAMERA_MAX_ZOOM := 2.2
 const TRIAL_REWARD_UI_SCENE := preload("res://game/scenes/trial_reward_selection.tscn")
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
 
@@ -66,6 +76,7 @@ class EmbeddedSceneRouter:
 @onready var _room_root: Node2D = $RoomRoot
 @onready var _run_director: RunDirector = $RunDirector
 @onready var _player: Node2D = $Player
+@onready var _camera: Camera2D = $Camera2D
 @onready var _instructions_label: Label = $HUD/Instructions
 @onready var _zone_label: Label = $HUD/StatsPanel/ZoneInfo
 @onready var _quest_label: Label = $HUD/StatsPanel/QuestInfo
@@ -143,6 +154,8 @@ var _feedback_shake_observed: bool = false
 var _spawn_scene_effect_succeeded: bool = false
 var _hit_vfx_cleanup_verified: bool = false
 var _active_hit_vfx: Array[Node] = []
+var _active_firebolt_projectiles: Array[Node2D] = []
+var _firebolt_projectile_observed: bool = false
 var _debug_overlay_verified: bool = false
 var _interaction_focus_observed: bool = false
 var _portal_interaction_succeeded: bool = false
@@ -153,6 +166,7 @@ var _potion_use_completed: bool = false
 
 func _ready() -> void:
 	_auto_run_enabled = OS.get_cmdline_args().has("--demo-auto-run")
+	_configure_window()
 	_resolve_services()
 	if _save_manager != null and _auto_run_enabled:
 		_save_manager.save_path = "/tmp/mkit_demo_auto_save.json"
@@ -166,6 +180,7 @@ func _ready() -> void:
 	_set_instructions()
 	_log("[DEMO] RPG loop demo ready")
 	_go_to_zone(ZONE_VILLAGE, "village_square")
+	_update_camera_for_viewport()
 	if _auto_run_enabled:
 		_run_auto_loop.call_deferred()
 
@@ -193,21 +208,26 @@ func _input(event: InputEvent) -> void:
 				_request_manual_task()
 			KEY_F:
 				_cast_firebolt_command()
+			KEY_F11:
+				_toggle_fullscreen()
+			KEY_ENTER:
+				if event.alt_pressed or event.meta_pressed:
+					_toggle_fullscreen()
 			KEY_F3:
 				_toggle_debug_overlay()
 			KEY_E:
 				_toggle_field_blade()
 			KEY_C:
 				_enter_trial_cave()
-			KEY_D:
+			KEY_N:
 				_trigger_rewarded_revive_demo()
 			KEY_P:
 				_purchase_gold_pack()
-			KEY_S:
+			KEY_F6:
 				_save_demo_state()
 			KEY_O:
 				_save_demo_to_cloud()
-			KEY_L:
+			KEY_F7:
 				_load_demo_state()
 			KEY_U:
 				_load_demo_from_cloud()
@@ -332,6 +352,8 @@ func _reset_demo_state() -> void:
 	_spawn_scene_effect_succeeded = false
 	_hit_vfx_cleanup_verified = false
 	_active_hit_vfx.clear()
+	_active_firebolt_projectiles.clear()
+	_firebolt_projectile_observed = false
 	_debug_overlay_verified = false
 	_interaction_focus_observed = false
 	_portal_interaction_succeeded = false
@@ -392,6 +414,7 @@ func _connect_signals() -> void:
 	var interaction := _interaction_component()
 	if interaction != null:
 		interaction.interactable_focused.connect(_on_interactable_focused)
+		interaction.interactable_unfocused.connect(_on_interactable_unfocused)
 	var experience := _experience()
 	if experience != null:
 		experience.level_up.connect(_on_level_up)
@@ -419,19 +442,66 @@ func _connect_signals() -> void:
 		_cloud_save.cloud_load_failed.connect(_on_cloud_load_failed)
 
 
+func _configure_window() -> void:
+	if _camera != null:
+		_camera.make_current()
+	var viewport := get_viewport()
+	if viewport != null:
+		viewport.size_changed.connect(_update_camera_for_viewport)
+	_update_camera_for_viewport()
+
+
+func _update_camera_for_viewport() -> void:
+	if _camera == null:
+		return
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+	var zoom: float = minf(
+		viewport_size.x / DEMO_CAMERA_WORLD_SIZE.x,
+		viewport_size.y / DEMO_CAMERA_WORLD_SIZE.y
+	)
+	zoom = clampf(zoom, DEMO_CAMERA_MIN_ZOOM, DEMO_CAMERA_MAX_ZOOM)
+	_camera.position = DEMO_CAMERA_CENTER
+	_camera.zoom = Vector2(zoom, zoom)
+
+
+func _set_fullscreen(enabled: bool) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	if enabled:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+		return
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	DisplayServer.window_set_size(DEFAULT_WINDOW_SIZE)
+	var screen := DisplayServer.window_get_current_screen()
+	var screen_position := DisplayServer.screen_get_position(screen)
+	var screen_size := DisplayServer.screen_get_size(screen)
+	var centered_offset := Vector2i(
+		maxi(0, int((screen_size.x - DEFAULT_WINDOW_SIZE.x) * 0.5)),
+		maxi(0, int((screen_size.y - DEFAULT_WINDOW_SIZE.y) * 0.5))
+	)
+	DisplayServer.window_set_position(screen_position + centered_offset)
+
+
+func _is_fullscreen() -> bool:
+	var mode := DisplayServer.window_get_mode()
+	return (
+		mode == DisplayServer.WINDOW_MODE_FULLSCREEN
+		or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+	)
+
+
 func _grant_starter_currency() -> void:
 	if _progression != null:
 		_progression.add_currency("gold", 10)
 
 
 func _set_instructions() -> void:
-	_instructions_label.text = (
-		"Demo RPG loop: stand near portals/NPC, R room/back, G field/back, "
-		+ "T talk/choice/advance, M manual task, Shift dash, F cast firebolt, "
-		+ "K defeat beast, E equip/unequip blade, Y elder blessing, "
-		+ "C trial cave, 1/2/3 reward, B buy potion, V sell claw, H use potion, "
-		+ "S save, L load, D ad revive, P gold pack, O/U cloud, F3 debug"
-	)
+	if _instructions_label == null:
+		return
+	_instructions_label.text = ""
+	_instructions_label.visible = false
 
 
 func _toggle_debug_overlay() -> void:
@@ -439,12 +509,18 @@ func _toggle_debug_overlay() -> void:
 		_debug_overlay.toggle()
 
 
-func _go_to_zone(zone_id: String, spawn_id: String) -> void:
+func _toggle_fullscreen() -> void:
+	_set_fullscreen(not _is_fullscreen())
+
+
+func _go_to_zone(zone_id: String, spawn_id: String) -> bool:
 	if _world == null:
 		_log("[WORLD] service missing")
-		return
+		return false
 	if not _world.go_to_zone(zone_id, spawn_id):
 		_log("[WORLD] could not enter %s" % zone_id)
+		return false
+	return true
 
 
 func _toggle_room_portal() -> void:
@@ -455,7 +531,7 @@ func _toggle_room_portal() -> void:
 	elif _world.current_zone_id == ZONE_ROOM:
 		_interact_portal("ToVillage")
 	else:
-		_log("[WORLD] room portal is only available in the village or elder room")
+		_log("[WORLD] stand at the elder room door")
 
 
 func _toggle_field_portal() -> void:
@@ -464,12 +540,12 @@ func _toggle_field_portal() -> void:
 	if _is_trial_cave_open():
 		_leave_trial_cave("field_gate")
 		return
-	if _world.current_zone_id == ZONE_VILLAGE:
-		_interact_portal("ToField")
-	elif _world.current_zone_id == ZONE_FIELD:
+	if _world.current_zone_id == ZONE_FIELD:
 		_interact_portal("ToVillage")
+	elif _world.current_zone_id == ZONE_VILLAGE:
+		_interact_portal("ToField")
 	else:
-		_log("[WORLD] field gate is only available in the village or field")
+		_log("[WORLD] stand at the field gate")
 
 
 func _interact_portal(portal_name: String) -> bool:
@@ -486,8 +562,8 @@ func _try_zone_interaction(interactable_path: String, label: String) -> bool:
 		_log("[INTERACT] missing %s" % label)
 		return false
 	if interaction.current_interactable != interactable:
-		interaction.current_interactable = interactable
-		_on_interactable_focused(interactable)
+		_log("[INTERACT] stand near %s" % label)
+		return false
 	if not interaction.try_interact():
 		_log("[INTERACT] failed %s" % label)
 		return false
@@ -501,6 +577,14 @@ func _find_zone_interactable(interactable_path: String) -> Interactable:
 	if root == null:
 		return null
 	return root.get_node_or_null(interactable_path) as Interactable
+
+
+func _is_focused_zone_interactable(interactable_path: String) -> bool:
+	var interaction := _interaction_component()
+	if interaction == null:
+		return false
+	var interactable := _find_zone_interactable(interactable_path)
+	return interactable != null and interaction.current_interactable == interactable
 
 
 func _focus_zone_interactable(interactable_path: String) -> void:
@@ -751,12 +835,17 @@ func _enter_trial_cave() -> void:
 	if _is_trial_cave_open():
 		_leave_trial_cave("cave_toggle")
 		return
-	if _world == null or _world.current_zone_id != ZONE_FIELD:
+	if _world == null:
+		return
+	if _world.current_zone_id != ZONE_FIELD:
 		_log("[TRIAL] enter the field first")
 		return
 	var root := _current_zone_root()
 	if root == null or root.get_node_or_null("TrialCave") == null:
 		_log("[TRIAL] trial cave entrance missing")
+		return
+	if not _is_focused_zone_interactable("TrialCaveArea/Interactable"):
+		_log("[TRIAL] stand at the cave entrance")
 		return
 	if _run_director == null:
 		_log("[TRIAL] run director missing")
@@ -796,6 +885,7 @@ func _place_player_at_trial_cave_exit() -> void:
 
 
 func _run_trial_auto() -> void:
+	await _focus_zone_interactable("TrialCaveArea/Interactable")
 	_enter_trial_cave()
 	await _settle_world()
 	var guard := 0
@@ -959,6 +1049,13 @@ func _ensure_shop_open() -> bool:
 		return false
 	if _world == null or _world.current_zone_id != ZONE_VILLAGE:
 		_log("[SHOP] return to the village supply stall")
+		return false
+	if not _is_focused_zone_interactable("VillageSupply/Interactable"):
+		if _shop.current_shop != null:
+			_shop.close_shop()
+		if _shop_ui != null:
+			_shop_ui.visible = false
+		_log("[SHOP] stand at the village supply stall")
 		return false
 	if _shop.current_shop != null:
 		return true
@@ -1399,6 +1496,7 @@ func _on_transaction_failed(item_id: String, reason: String) -> void:
 
 func _on_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
 	_clear_hit_vfx()
+	_clear_firebolt_projectiles()
 	var interaction := _interaction_component()
 	if interaction != null:
 		interaction.current_interactable = null
@@ -1427,6 +1525,7 @@ func _on_damage_applied(result) -> void:
 func _on_ability_cast_started(ability_id: String) -> void:
 	if ability_id == ABILITY_FIREBOLT:
 		_log("[ABILITY] casting Firebolt")
+		_spawn_firebolt_projectile(_firebolt_visual_target())
 
 
 func _on_ability_failed(ability_id: String, reason: String) -> void:
@@ -1450,6 +1549,108 @@ func _spawn_hit_effect(target: Node) -> void:
 		var spawned := result.payload.get("instance", null) as Node
 		if spawned != null:
 			_track_hit_vfx(spawned)
+
+
+func _firebolt_visual_target() -> Node2D:
+	if _player == null or _player.get_tree() == null:
+		return null
+	var best: Node2D = null
+	var best_distance: float = INF
+	for node in _player.get_tree().get_nodes_in_group("enemy"):
+		var enemy := node as Node2D
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+		var health := enemy.get_node_or_null("Components/HealthComponent") as HealthComponent
+		if health != null and health.dead:
+			continue
+		var distance := _player.global_position.distance_to(enemy.global_position)
+		if distance <= FIREBOLT_RANGE and distance < best_distance:
+			best = enemy
+			best_distance = distance
+	return best
+
+
+func _player_facing_direction() -> Vector2:
+	var state_machine := _player.get_node_or_null("StateMachine") as StateMachine
+	if state_machine != null:
+		var facing: Vector2 = state_machine.blackboard.get_value("facing", Vector2.RIGHT)
+		if facing != Vector2.ZERO:
+			return facing.normalized()
+	return Vector2.RIGHT
+
+
+func _spawn_firebolt_projectile(target: Node2D) -> void:
+	if _player == null:
+		return
+	var start := _player.global_position
+	var has_target: bool = target != null and is_instance_valid(target)
+	var end: Vector2 = (
+		target.global_position
+		if has_target
+		else start + _player_facing_direction() * FIREBOLT_PROJECTILE_FALLBACK_DISTANCE
+	)
+	var direction: Vector2 = (end - start).normalized()
+	if direction == Vector2.ZERO:
+		direction = _player_facing_direction()
+	start += direction * 30.0
+	var projectile := Node2D.new()
+	projectile.name = "DemoFireboltProjectile"
+	projectile.z_index = 40
+	projectile.global_position = start
+	projectile.rotation = direction.angle()
+	var glow := Polygon2D.new()
+	glow.name = "Glow"
+	glow.color = Color(1.0, 0.2, 0.04, 0.2)
+	glow.polygon = PackedVector2Array([
+		Vector2(-42, -14), Vector2(-8, -22), Vector2(30, -10),
+		Vector2(44, 0), Vector2(30, 10), Vector2(-8, 22), Vector2(-42, 14)
+	])
+	projectile.add_child(glow)
+	var trail := Polygon2D.new()
+	trail.name = "Trail"
+	trail.color = Color(1.0, 0.24, 0.05, 0.28)
+	trail.polygon = PackedVector2Array([
+		Vector2(-34, -7), Vector2(-6, -13), Vector2(18, -5),
+		Vector2(26, 0), Vector2(18, 5), Vector2(-6, 13), Vector2(-34, 7)
+	])
+	projectile.add_child(trail)
+	var core := Polygon2D.new()
+	core.name = "Core"
+	core.color = Color(1.0, 0.78, 0.24, 0.95)
+	core.polygon = PackedVector2Array([
+		Vector2(-10, -6), Vector2(12, -10), Vector2(25, 0),
+		Vector2(12, 10), Vector2(-10, 6), Vector2(-18, 0)
+	])
+	projectile.add_child(core)
+	add_child(projectile)
+	_active_firebolt_projectiles.append(projectile)
+	_firebolt_projectile_observed = true
+	var duration := clampf(
+		start.distance_to(end) / FIREBOLT_PROJECTILE_SPEED,
+		FIREBOLT_PROJECTILE_MIN_DURATION,
+		FIREBOLT_PROJECTILE_MAX_DURATION
+	)
+	var tween := create_tween()
+	tween.tween_property(projectile, "global_position", end, duration).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(projectile, "scale", Vector2(1.25, 1.25), duration)
+	tween.tween_callback(_finish_firebolt_projectile.bind(projectile, target))
+
+
+func _finish_firebolt_projectile(projectile: Node2D, target: Node2D) -> void:
+	_active_firebolt_projectiles.erase(projectile)
+	if projectile != null and is_instance_valid(projectile):
+		projectile.queue_free()
+	if target != null and is_instance_valid(target):
+		_spawn_hit_effect(target)
+
+
+func _clear_firebolt_projectiles() -> void:
+	for projectile in _active_firebolt_projectiles.duplicate():
+		if projectile != null and is_instance_valid(projectile):
+			projectile.queue_free()
+	_active_firebolt_projectiles.clear()
 
 
 func _track_hit_vfx(node: Node) -> void:
@@ -1538,6 +1739,16 @@ func _on_interactable_focused(interactable: Interactable) -> void:
 		return
 	_interaction_focus_observed = true
 	_log("[INTERACT] focus %s" % interactable.interaction_id)
+
+
+func _on_interactable_unfocused(interactable: Interactable) -> void:
+	if interactable == null:
+		return
+	if interactable.interaction_id == "interaction.demo.village_supply":
+		if _shop != null:
+			_shop.close_shop()
+		if _shop_ui != null:
+			_shop_ui.visible = false
 
 
 func _on_domain_event(event: DomainEvent) -> void:
@@ -2028,11 +2239,20 @@ func _cleanup_audio_players() -> void:
 
 func _log(line: String) -> void:
 	print(line)
-	_log_lines.append(line)
-	if _log_lines.size() > 10:
+	_log_lines.append(_compact_log_line(line))
+	if _log_lines.size() > EVENT_LOG_MAX_LINES:
 		_log_lines.pop_front()
 	if _event_log_label != null:
-		_event_log_label.text = "\n".join(_log_lines)
+		_event_log_label.text = "Log\n%s" % "\n".join(_log_lines)
+
+
+func _compact_log_line(line: String) -> String:
+	var compact := line.replace("item.demo.", "").replace("quest.demo.", "")
+	compact = compact.replace("ability.demo.", "").replace("entity.demo.", "")
+	compact = compact.replace("zone.demo.", "")
+	if compact.length() > 62:
+		compact = "%s..." % compact.substr(0, 59)
+	return compact
 
 
 func _run_auto_loop() -> void:
@@ -2087,6 +2307,7 @@ func _run_auto_loop() -> void:
 	await _settle_world()
 	_toggle_field_blade()
 	await _settle_world()
+	await _focus_zone_interactable("VillageSupply/Interactable")
 	_buy_potion()
 	await get_tree().process_frame
 	_buy_potion()
@@ -2111,7 +2332,7 @@ func _run_auto_loop() -> void:
 		_log("[AUTO] missing: %s" % ", ".join(_demo_missing_requirements()))
 		_log("[AUTO] demo RPG loop incomplete")
 	_cleanup_audio_players()
-	await get_tree().process_frame
+	await _settle_world()
 	get_tree().quit(0 if complete else 1)
 
 
@@ -2284,6 +2505,8 @@ func _demo_missing_requirements() -> Array[String]:
 		missing.append("level")
 	if not _firebolt_cast_succeeded:
 		missing.append("firebolt")
+	if not _firebolt_projectile_observed:
+		missing.append("firebolt_projectile")
 	if not _burn_tick_observed:
 		missing.append("burn_tick")
 	if not _elder_blessing_received:

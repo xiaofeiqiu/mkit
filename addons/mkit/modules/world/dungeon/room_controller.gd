@@ -10,14 +10,12 @@ signal reward_ready(options: Array[RewardOption])
 @export var spawn_positions: Array[Vector2] = []
 var runtime: RoomRuntime = null
 var active_enemies: Dictionary = {}
-var content: ContentService = null
 var entity_spawner: EntitySpawner = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	entity_spawner = get_node_or_null(entity_spawner_path) as EntitySpawner
-	var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := EventService.find()
 	if events != null and not events.entity_died.is_connected(_on_entity_died):
 		events.entity_died.connect(_on_entity_died)
 
@@ -84,7 +82,7 @@ func check_clear_condition() -> void:
 		runtime.cleared = true
 		generate_reward()
 		room_cleared.emit(runtime.room_runtime_id)
-		var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+		var events := EventService.find()
 		if events != null:
 			events.emit_room_cleared(runtime.room_runtime_id)
 
@@ -113,13 +111,7 @@ func generate_reward() -> void:
 
 
 func get_definition() -> RoomDefinition:
-	if room_definition_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(room_definition_id) as RoomDefinition
+	return ContentService.find_resource(room_definition_id) as RoomDefinition
 
 
 func _on_entity_died(entity_id: String, _entity_ref: Node) -> void:

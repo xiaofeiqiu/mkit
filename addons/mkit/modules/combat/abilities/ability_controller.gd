@@ -8,11 +8,9 @@ signal cooldown_started(ability_id: String, duration: float)
 @export var starting_ability_ids: Array[String] = []
 var abilities: Dictionary = {}
 var active_cast_actions: Array[GameAction] = []
-var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	for id in starting_ability_ids:
 		if id.strip_edges() == "":
 			push_warning("AbilityController: ignoring empty starting ability id")
@@ -124,13 +122,7 @@ func get_cooldown_remaining(ability_id: String) -> float:
 
 
 func get_definition(ability_id: String) -> AbilityDefinition:
-	if ability_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(ability_id) as AbilityDefinition
+	return ContentService.find_resource(ability_id) as AbilityDefinition
 
 
 func to_save_data() -> Dictionary:

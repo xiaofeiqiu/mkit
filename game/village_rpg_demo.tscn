@@ -17,7 +17,8 @@
 script = ExtResource("1_slice")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1102675826]
-position = Vector2(360, 245)
+position = Vector2(340, 220)
+zoom = Vector2(1.22, 1.22)
 
 [node name="WorldHost" type="Node2D" parent="." unique_id=1591182115]
 
@@ -70,6 +71,7 @@ show_registered_services = false
 [node name="HUD" type="CanvasLayer" parent="." unique_id=238890030]
 
 [node name="Instructions" type="Label" parent="HUD" unique_id=651626077]
+visible = false
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -85,57 +87,58 @@ autowrap_mode = 3
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -390.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = 330.0
+offset_left = -392.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 232.0
 grow_horizontal = 0
+theme_override_constants/separation = 2
 
 [node name="ZoneInfo" type="Label" parent="HUD/StatsPanel" unique_id=1391634783]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Zone: --"
 autowrap_mode = 3
 
 [node name="QuestInfo" type="Label" parent="HUD/StatsPanel" unique_id=1338730397]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Quest: --"
 autowrap_mode = 3
 
 [node name="PlayerInfo" type="Label" parent="HUD/StatsPanel" unique_id=616072854]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Player: --"
 autowrap_mode = 3
 
 [node name="CombatInfo" type="Label" parent="HUD/StatsPanel" unique_id=1093318807]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Beast: --"
 autowrap_mode = 3
 
 [node name="InventoryInfo" type="Label" parent="HUD/StatsPanel" unique_id=2071053818]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Bag: empty"
 autowrap_mode = 3
 
 [node name="ShopInfo" type="Label" parent="HUD/StatsPanel" unique_id=1395355995]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Shop: closed"
 autowrap_mode = 3
 
 [node name="TrialInfo" type="Label" parent="HUD/StatsPanel" unique_id=1965509332]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Trial: ready"
 autowrap_mode = 3
 
 [node name="EventLog" type="Label" parent="HUD/StatsPanel" unique_id=2136057051]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 13
 autowrap_mode = 3
 
 [node name="UIManager" type="Node" parent="HUD" unique_id=1498283995]
@@ -151,21 +154,21 @@ visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_left = 24.0
-offset_top = 330.0
-offset_right = 620.0
-offset_bottom = 510.0
+offset_top = 470.0
+offset_right = 760.0
+offset_bottom = 690.0
 script = ExtResource("5_dialogue_ui")
 
 [node name="SpeakerLabel" type="Label" parent="HUD/DialoguePanel" unique_id=877657061]
 layout_mode = 0
-offset_right = 596.0
+offset_right = 736.0
 offset_bottom = 24.0
 theme_override_font_sizes/font_size = 18
 
 [node name="TextLabel" type="Label" parent="HUD/DialoguePanel" unique_id=537501302]
 layout_mode = 0
 offset_top = 28.0
-offset_right = 596.0
+offset_right = 736.0
 offset_bottom = 84.0
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
@@ -173,23 +176,23 @@ autowrap_mode = 3
 [node name="ChoiceContainer" type="VBoxContainer" parent="HUD/DialoguePanel" unique_id=1438745162]
 layout_mode = 0
 offset_top = 92.0
-offset_right = 596.0
-offset_bottom = 180.0
+offset_right = 736.0
+offset_bottom = 220.0
 
 [node name="QuestLogPanel" type="Control" parent="HUD" unique_id=2109934545]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 380.0
-offset_bottom = 178.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 360.0
+offset_bottom = 154.0
 script = ExtResource("6_quest_log_ui")
 
 [node name="EmptyLabel" type="Label" parent="HUD/QuestLogPanel" unique_id=1754243306]
 layout_mode = 0
 offset_right = 356.0
 offset_bottom = 24.0
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "No active quests"
 
 [node name="QuestContainer" type="VBoxContainer" parent="HUD/QuestLogPanel" unique_id=1350954737]
@@ -202,17 +205,17 @@ offset_bottom = 144.0
 visible = false
 layout_mode = 3
 anchors_preset = 0
-offset_left = 24.0
-offset_top = 190.0
-offset_right = 380.0
-offset_bottom = 320.0
+offset_left = 16.0
+offset_top = 166.0
+offset_right = 360.0
+offset_bottom = 302.0
 script = ExtResource("7_shop_ui")
 
 [node name="ShopTitle" type="Label" parent="HUD/ShopPanel" unique_id=46595458]
 layout_mode = 0
 offset_right = 356.0
 offset_bottom = 24.0
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "Village Supply"
 
 [node name="EntryContainer" type="VBoxContainer" parent="HUD/ShopPanel" unique_id=1848424248]

@@ -59,47 +59,35 @@ func add_modifier(modifier: StatModifier) -> void:
 
 
 func remove_modifier(modifier_id: String, source_id: String = "") -> void:
-	for stat_id in modifiers_by_stat.keys():
-		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
-		var old_value := get_stat_value(stat_id)
-		var removed := false
-		for modifier in list.duplicate():
-			if (
-				modifier.modifier_id == modifier_id
-				and (source_id == "" or modifier.source_id == source_id)
-			):
-				list.erase(modifier)
-				removed = true
-		if removed:
-			mark_dirty(stat_id)
-			_emit_stat_changed(stat_id, old_value)
+	_remove_modifiers_where(
+		func(m: StatModifier) -> bool:
+			return m.modifier_id == modifier_id and (source_id == "" or m.source_id == source_id)
+	)
 
 
 func remove_modifiers_from_source(source_id: String) -> void:
-	for stat_id in modifiers_by_stat.keys():
-		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
-		var old_value := get_stat_value(stat_id)
-		var removed := false
-		for modifier in list.duplicate():
-			if modifier.source_id == source_id:
-				list.erase(modifier)
-				removed = true
-		if removed:
-			mark_dirty(stat_id)
-			_emit_stat_changed(stat_id, old_value)
+	_remove_modifiers_where(func(m: StatModifier) -> bool: return m.source_id == source_id)
 
 
 func tick_modifiers(delta: float) -> void:
+	_remove_modifiers_where(
+		func(m: StatModifier) -> bool:
+			if m.remaining_duration <= 0:
+				return false
+			m.remaining_duration -= delta
+			return m.remaining_duration <= 0
+	)
+
+
+func _remove_modifiers_where(predicate: Callable) -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
 		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
-			if modifier.remaining_duration > 0:
-				modifier.remaining_duration -= delta
-				if modifier.remaining_duration <= 0:
-					list.erase(modifier)
-					removed = true
+			if predicate.call(modifier):
+				list.erase(modifier)
+				removed = true
 		if removed:
 			mark_dirty(stat_id)
 			_emit_stat_changed(stat_id, old_value)

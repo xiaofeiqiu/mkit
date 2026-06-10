@@ -13,14 +13,9 @@ func _interact_impl(context: GameplayContext) -> bool:
 	if not dialogue.start(dialogue_id, context):
 		return false
 	if npc_id != "":
-		var events := _get_events()
+		var events := EventService.find()
 		if events != null:
 			events.emit_npc_talked(npc_id)
 	return true
 
 
-func _get_events() -> EventService:
-	var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
-	if events != null:
-		return events
-	return null

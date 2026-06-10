@@ -6,7 +6,7 @@ extends Node
 #
 # Reads keys directly (instead of named input actions) so the demo needs no
 # project-level InputMap entries.
-#   Move:   WASD / Arrow keys
+#   Move:   WASD
 #   Attack: Space / J
 #   Dash:   Shift
 
@@ -69,12 +69,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _read_direction() -> Vector2:
 	var dir := Vector2.ZERO
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+	if Input.is_key_pressed(KEY_A):
 		dir.x -= 1.0
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+	if Input.is_key_pressed(KEY_D):
 		dir.x += 1.0
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+	if Input.is_key_pressed(KEY_W):
 		dir.y -= 1.0
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+	if Input.is_key_pressed(KEY_S):
 		dir.y += 1.0
 	return dir

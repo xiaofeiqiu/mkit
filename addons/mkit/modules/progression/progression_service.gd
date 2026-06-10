@@ -4,13 +4,11 @@ signal currency_changed(currency_id: String, amount: int)
 signal upgrade_level_changed(upgrade_id: String, level: int)
 signal content_unlocked(content_id: String)
 var state := ProgressionState.new()
-var content: ContentService = null
 
 
 func _ready() -> void:
 	if save_id == "":
 		save_id = "progression"
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func add_currency(currency_id: String, amount: int) -> void:
@@ -79,13 +77,7 @@ func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> 
 
 
 func get_definition(upgrade_id: String) -> UpgradeDefinition:
-	if upgrade_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(upgrade_id) as UpgradeDefinition
+	return ContentService.find_resource(upgrade_id) as UpgradeDefinition
 
 
 func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayContext) -> void:

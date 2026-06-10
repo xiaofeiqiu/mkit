@@ -20,30 +20,20 @@ func _ready() -> void:
 	_connect_events()
 	if save_id == "":
 		save_id = "run_director"
-	_register_saveable_scope()
+	register_save_scopes()
 
 
 func _exit_tree() -> void:
-	var save_service := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
-	if save_service == null:
-		return
-	save_service.unregister_saveable_scope(self)
+	unregister_save_scopes()
 
 
 func _connect_events() -> void:
 	if _events_connected:
 		return
-	var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := EventService.find()
 	if events != null:
 		events.entity_died.connect(_on_entity_died)
 		_events_connected = true
-
-
-func _register_saveable_scope() -> void:
-	var save_service := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
-	if save_service == null:
-		return
-	save_service.register_saveable_scope(self)
 
 
 func get_save_scopes() -> Array[String]:
@@ -51,10 +41,7 @@ func get_save_scopes() -> Array[String]:
 
 
 func get_save_payload_for_scope(scope: String) -> Dictionary:
-	var normalized_scope := scope.strip_edges()
-	if normalized_scope == "":
-		return {}
-	match normalized_scope:
+	match scope.strip_edges():
 		"world.run":
 			return _get_run_scope_payload()
 		"world.room":
@@ -65,8 +52,7 @@ func get_save_payload_for_scope(scope: String) -> Dictionary:
 
 
 func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
-	var normalized_scope := scope.strip_edges()
-	match normalized_scope:
+	match scope.strip_edges():
 		"world.run":
 			return _apply_run_scope_payload(data)
 		"world.room":
@@ -125,8 +111,6 @@ func _extract_room_reward_ids(runtime: RoomRuntime) -> Array[String]:
 
 
 func _apply_run_scope_payload(data: Dictionary) -> bool:
-	if not (data is Dictionary):
-		return false
 	var run_payload := data.get("run_state", {})
 	if not (run_payload is Dictionary):
 		return false
@@ -144,10 +128,8 @@ func _apply_run_scope_payload(data: Dictionary) -> bool:
 
 
 func _apply_room_scope_payload(data: Dictionary) -> bool:
-	if not (data is Dictionary):
-		return false
 	var graph_payload := data.get("room_graph", {})
-	_restore_room_graph(graph_payload)
+	_restore_room_graph(graph_payload if graph_payload is Dictionary else {})
 	if run_graph_is_empty() and run_state != null and run_state.current_room_index >= 0:
 		room_graph = DungeonGenerator.new().generate_linear(
 			run_state.first_floor_room_pool,
@@ -170,8 +152,6 @@ func _apply_room_scope_payload(data: Dictionary) -> bool:
 
 
 func _apply_reward_scope_payload(data: Dictionary) -> bool:
-	if not (data is Dictionary):
-		return false
 	if run_state != null:
 		var reward_history := data.get("reward_history", [])
 		if reward_history is Array:
@@ -230,9 +210,6 @@ func _serialize_room_graph() -> Dictionary:
 
 
 func _restore_room_graph(data: Dictionary) -> void:
-	if not (data is Dictionary):
-		room_graph = null
-		return
 	var nodes_data := data.get("nodes", [])
 	if not (nodes_data is Array) or nodes_data.is_empty():
 		room_graph = null
@@ -299,7 +276,7 @@ func start_run(seed: int = 0) -> void:
 	room_graph = DungeonGenerator.new().generate_linear(first_floor_room_pool, seed, run_length)
 	run_state.status = "active"
 	run_started.emit(run_state)
-	var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := EventService.find()
 	if events != null:
 		events.emit_run_started(run_state.run_id, seed)
 	_connect_events()
@@ -371,7 +348,7 @@ func complete_run() -> void:
 		room_graph.clear()
 		room_graph = null
 	run_finished.emit("completed")
-	var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := EventService.find()
 	if events != null:
 		events.emit_run_finished(run_state.run_id, "completed")
 
@@ -385,7 +362,7 @@ func fail_run(reason: String) -> void:
 		room_graph.clear()
 		room_graph = null
 	run_finished.emit("failed:%s" % reason)
-	var events: EventService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := EventService.find()
 	if events != null:
 		events.emit_run_finished(
 			run_state.run_id if run_state != null else "", "failed:%s" % reason

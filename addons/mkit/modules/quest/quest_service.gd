@@ -6,19 +6,17 @@ signal objective_advanced(quest_id: String, objective_id: String, current: int, 
 signal quest_completed(quest_id: String)
 signal quest_turned_in(quest_id: String)
 var log: QuestLog = QuestLog.new()
-var content: ContentService = null
 var _quest_contexts: Dictionary = {}
 
 
 func _ready() -> void:
 	if save_id == "":
 		save_id = "quest"
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	_connect_events()
 
 
 func _connect_events() -> void:
-	var events := _get_events()
+	var events := EventService.find()
 	if events == null:
 		return
 	if not events.domain_event_emitted.is_connected(notify_event):
@@ -62,7 +60,7 @@ func accept_quest(quest_id: String, context: GameplayContext) -> bool:
 	if context != null:
 		_quest_contexts[quest_id] = context
 	quest_accepted.emit(quest_id)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_quest_accepted(quest_id)
 	return true
@@ -132,7 +130,7 @@ func complete_quest(quest_id: String, context: GameplayContext) -> bool:
 		return false
 	state.status = "completed"
 	quest_completed.emit(quest_id)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_quest_completed(quest_id)
 	var definition := get_definition(quest_id)
@@ -157,20 +155,14 @@ func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 		state.status = "available"
 		state.objective_progress = {}
 	quest_turned_in.emit(quest_id)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_quest_turned_in(quest_id)
 	return true
 
 
 func get_definition(quest_id: String) -> QuestDefinition:
-	if quest_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(quest_id) as QuestDefinition
+	return ContentService.find_resource(quest_id) as QuestDefinition
 
 
 func get_state(quest_id: String) -> QuestState:
@@ -194,7 +186,7 @@ func _advance_progress(state: QuestState, objective: QuestObjectiveDefinition, a
 	objective_advanced.emit(
 		state.quest_id, objective.objective_id, updated, objective.required_count
 	)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_quest_objective_advanced(
 			state.quest_id, objective.objective_id, updated, objective.required_count
@@ -253,7 +245,3 @@ func _run_reward_effects(definition: QuestDefinition, context: GameplayContext) 
 		if not result.success:
 			return false
 	return true
-
-
-func _get_events() -> EventService:
-	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService

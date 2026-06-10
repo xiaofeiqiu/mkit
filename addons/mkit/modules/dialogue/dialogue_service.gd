@@ -5,11 +5,6 @@ signal node_entered(node: DialogueNode)
 signal choices_presented(node: DialogueNode, available: Array[DialogueChoice])
 signal dialogue_ended(dialogue_id: String)
 var runtime: DialogueRuntime = null
-var content: ContentService = null
-
-
-func _ready() -> void:
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func is_active() -> bool:
@@ -26,7 +21,7 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 	runtime.dialogue_id = dialogue_id
 	runtime.context = GameplayContext.from_context(context)
 	dialogue_started.emit(dialogue_id)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_dialogue_started(dialogue_id)
 	_enter_node(definition.start_node_id)
@@ -83,19 +78,13 @@ func end() -> void:
 	var ended_id := runtime.dialogue_id
 	runtime = null
 	dialogue_ended.emit(ended_id)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_dialogue_ended(ended_id)
 
 
 func get_definition(dialogue_id: String) -> DialogueDefinition:
-	if dialogue_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(dialogue_id) as DialogueDefinition
+	return ContentService.find_resource(dialogue_id) as DialogueDefinition
 
 
 func _enter_node(node_id: String) -> void:
@@ -137,7 +126,3 @@ func _run_effects(effects: Array[GameEffect]) -> void:
 	if executor == null:
 		return
 	executor.execute_many(effects, runtime.context, false)
-
-
-func _get_events() -> EventService:
-	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService

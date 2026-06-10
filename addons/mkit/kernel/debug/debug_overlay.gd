@@ -13,7 +13,7 @@ func _ready() -> void:
 	add_child(_label)
 	visible = visible_on_start
 	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
-		_events = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+		_events = EventService.find()
 	if not ServiceRegistry.has_service("debug"):
 		ServiceRegistry.register_service("debug", self)
 

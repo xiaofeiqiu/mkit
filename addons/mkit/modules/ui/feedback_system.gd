@@ -20,7 +20,7 @@ func _ready() -> void:
 	vfx = get_node_or_null(vfx_spawner_path) as VFXSpawner
 	audio = _resolve_audio()
 	ui = get_node_or_null(ui_manager_path) as UIManager
-	var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := EventService.find()
 	if events != null:
 		events.damage_applied.connect(_on_damage_applied)
 		events.entity_died.connect(_on_entity_died)

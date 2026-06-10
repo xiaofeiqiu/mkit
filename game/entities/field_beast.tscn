@@ -95,9 +95,18 @@ attack_range = 46.0
 
 [node name="Presentation" type="Node2D" parent="."]
 
+[node name="Shadow" type="Polygon2D" parent="Presentation"]
+z_index = -1
+color = Color(0, 0, 0, 0.3)
+polygon = PackedVector2Array(-34, 18, 0, 32, 34, 18, 0, 8)
+
 [node name="Body" type="Polygon2D" parent="Presentation"]
-color = Color(0.78, 0.16, 0.14, 1)
-polygon = PackedVector2Array(-28, -26, 28, -26, 34, 14, 0, 34, -34, 14)
+color = Color(0.82, 0.18, 0.14, 1)
+polygon = PackedVector2Array(0, -34, 32, -16, 36, 18, 0, 36, -36, 18, -32, -16)
+
+[node name="Core" type="Polygon2D" parent="Presentation"]
+color = Color(0.98, 0.36, 0.18, 1)
+polygon = PackedVector2Array(0, -20, 20, -8, 18, 14, 0, 24, -18, 14, -20, -8)
 
 [node name="NameLabel" type="Label" parent="Presentation"]
 offset_left = -76.0

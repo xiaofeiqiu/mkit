@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
+[ext_resource type="Script" path="res://addons/mkit/modules/interaction/interactable.gd" id="3_interactable"]
 
 [sub_resource type="CircleShape2D" id="CircleShape_room_portal"]
 radius = 52.0
@@ -9,14 +10,52 @@ radius = 52.0
 [sub_resource type="CircleShape2D" id="CircleShape_field_portal"]
 radius = 56.0
 
+[sub_resource type="CircleShape2D" id="CircleShape_shop"]
+radius = 40.0
+
 [node name="Village" type="Node2D"]
 
 [node name="Ground" type="ColorRect" parent="."]
+offset_left = -220.0
+offset_top = -130.0
+offset_right = 940.0
+offset_bottom = 620.0
+color = Color(0.12, 0.34, 0.22, 1)
+
+[node name="VillagePath" type="ColorRect" parent="."]
 offset_left = -80.0
-offset_top = -60.0
-offset_right = 760.0
-offset_bottom = 500.0
-color = Color(0.23, 0.42, 0.28, 1)
+offset_top = 218.0
+offset_right = 820.0
+offset_bottom = 314.0
+color = Color(0.46, 0.38, 0.25, 1)
+
+[node name="RoomPath" type="ColorRect" parent="."]
+offset_left = 276.0
+offset_top = 118.0
+offset_right = 364.0
+offset_bottom = 314.0
+color = Color(0.5, 0.4, 0.27, 1)
+
+[node name="MarketMat" type="ColorRect" parent="."]
+offset_left = 48.0
+offset_top = 150.0
+offset_right = 164.0
+offset_bottom = 232.0
+color = Color(0.2, 0.43, 0.48, 1)
+
+[node name="RoomGlow" type="ColorRect" parent="."]
+offset_left = 268.0
+offset_top = 126.0
+offset_right = 372.0
+offset_bottom = 222.0
+color = Color(0.78, 0.58, 0.28, 0.28)
+
+[node name="GateGlow" type="ColorRect" parent="."]
+offset_left = 558.0
+offset_top = 198.0
+offset_right = 662.0
+offset_bottom = 322.0
+color = Color(0.36, 0.72, 0.78, 0.22)
 
 [node name="VillageSquare" type="Marker2D" parent="."]
 position = Vector2(160, 260)
@@ -68,7 +107,7 @@ offset_left = 280.0
 offset_top = 138.0
 offset_right = 360.0
 offset_bottom = 210.0
-color = Color(0.44, 0.28, 0.16, 1)
+color = Color(0.5, 0.29, 0.16, 1)
 
 [node name="RoomLabel" type="Label" parent="."]
 offset_left = 245.0
@@ -84,7 +123,7 @@ offset_left = 570.0
 offset_top = 210.0
 offset_right = 650.0
 offset_bottom = 310.0
-color = Color(0.42, 0.34, 0.18, 1)
+color = Color(0.2, 0.35, 0.3, 1)
 
 [node name="GateLabel" type="Label" parent="."]
 offset_left = 535.0
@@ -97,8 +136,21 @@ horizontal_alignment = 1
 
 [node name="Shopkeeper" type="Polygon2D" parent="."]
 position = Vector2(105, 185)
-color = Color(0.93, 0.72, 0.25, 1)
-polygon = PackedVector2Array(-16, -16, 16, -16, 18, 18, -18, 18)
+color = Color(0.96, 0.72, 0.27, 1)
+polygon = PackedVector2Array(0, -24, 24, 0, 16, 24, -16, 24, -24, 0)
+
+[node name="VillageSupply" type="Area2D" parent="."]
+position = Vector2(105, 185)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="VillageSupply"]
+shape = SubResource("CircleShape_shop")
+
+[node name="Interactable" type="Node" parent="VillageSupply"]
+script = ExtResource("3_interactable")
+interaction_id = "interaction.demo.village_supply"
+display_text = "Open village supply"
 
 [node name="ShopLabel" type="Label" parent="."]
 offset_left = 38.0

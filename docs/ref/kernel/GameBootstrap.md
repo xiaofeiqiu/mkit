@@ -6,7 +6,7 @@
 
 ## 职责
 
-游戏启动入口。在 `_ready` 时创建 `MkitRuntimeContext`，注册所有内置服务为 runtime ports，加载内容数据库，把内容驱动的服务配置（如 `AudioDefinition`）注册到对应服务，校验内容、加载存档，最后切换到初始场景。
+游戏启动入口。在 `_ready` 时注册所有内置服务，加载内容数据库，把内容驱动的服务配置（如 `AudioDefinition`）注册到对应服务，校验内容、加载存档，最后切换到初始场景。
 
 ## 字段（@export 和 public var）
 
@@ -20,8 +20,8 @@
 
 | 方法签名 | 返回值 | 说明 |
 |----------|--------|------|
-| `boot() -> void` | `void` | 启动入口，创建 runtime context 并按序调用下面步骤 |
-| `_register_kernel_services() -> void` | `void` | 注册所有内置服务并同步到 runtime context；**override 此方法添加自定义服务** |
+| `boot() -> void` | `void` | 启动入口，按序调用下面步骤 |
+| `_register_kernel_services() -> void` | `void` | 注册所有内置服务；**override 此方法或 `_build_kernel_services` 添加自定义服务** |
 | `_load_content() -> void` | `void` | 遍历 `resource_databases`，调 `ContentService.load_database()` |
 | `_configure_content_services() -> void` | `void` | 内容入库后配置内容驱动的服务 |
 | `_register_audio_definitions() -> void` | `void` | 将 `ContentService` 中的 `AudioDefinition` 注册到 `AudioService` |

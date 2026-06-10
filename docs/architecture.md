@@ -10,7 +10,7 @@ Mkit 的当前分层模型、依赖规则、runtime port 模式、实体契约�
 flowchart TB
     Game["**Game Content**\nres://game/\n你的场景、关卡、角色脚本\n.tres 配置资源"]
     Modules["**Mkit Modules**\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop…"]
-    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\nMkitRuntimeContext / Command / HFSM / Action / Effect / Event\nContentService / SaveService / ServiceRegistry"]
+    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\nCommand / HFSM / Action / Effect / Event\nContentService / SaveService / ServiceRegistry"]
     Platform["**Platform Adapters**\n默认 Mock，可替换后端\nAnalytics · IAP · Ads · CloudSave · Audio"]
 
     Game -->|"依赖"| Modules
@@ -46,7 +46,7 @@ flowchart TB
 
 | 边界 | 当前实现 | 说明 |
 |------|----------|------|
-| Runtime port | `MkitRuntimeContext` + `ServiceRegistry.get_port(...)` | `ServiceRegistry` 仍是唯一 autoload，但服务访问优先走 runtime context |
+| 服务访问 | `ServiceRegistry.get_port(...)` | `ServiceRegistry` 是唯一 autoload，`get_port` 是带类型检查的统一访问入口 |
 | 实体契约 | `EntityRoot` + `EntityContract` | `Components/`、`Controllers/` 是默认布局，模块代码优先通过契约入口取组件 |
 | 战斗结算 | `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult` | request/result 仍是公开入口，内部已拆成意图、结算、应用装配 |
 | 可变资源 | `ResourceSet` | mana/stamina 等当前值与上限查询统一为资源池模型 |
@@ -59,7 +59,7 @@ flowchart TB
 
 ## ServiceRegistry / RuntimeContext 模式
 
-`ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 会创建 `MkitRuntimeContext`，并把内置服务注册为 runtime ports。新代码统一通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取服务：
+`ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 会把所有内置服务注册进它。新代码统一通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取服务：
 
 ```gdscript
 # 获取服务

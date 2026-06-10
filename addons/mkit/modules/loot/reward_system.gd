@@ -7,12 +7,9 @@ func generate_options(
 ) -> Array[RewardOption]:
 	if count <= 0 or pool_ids.is_empty():
 		return []
-	if ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) == null:
-		push_warning("RewardSystem.generate_options: missing ContentService service")
-		return []
 	var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if content == null:
-		push_warning("RewardSystem.generate_options: ContentService service is invalid")
+		push_warning("RewardSystem.generate_options: missing ContentService service")
 		return []
 	var ctx := GameplayContext.from_context(context)
 	var candidates: Array[RewardDefinition] = []
@@ -44,8 +41,7 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	for r in results:
 		if not r.success:
 			return false
-	var events: EventService = null
-	events = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := EventService.find()
 	if events != null:
 		events.emit_reward_selected(option.reward_id, ctx.source.name if ctx.source != null else "")
 	return true

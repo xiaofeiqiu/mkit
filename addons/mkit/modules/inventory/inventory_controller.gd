@@ -5,12 +5,9 @@ signal item_added(item: ItemInstance)
 signal item_removed(item: ItemInstance)
 @export var capacity: int = 30
 var model := InventoryModel.new()
-var content: ContentService = null
 
 
 func _ready() -> void:
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	capacity = max(1, capacity)
 	model.setup(capacity)
 	model.owner_id = _get_owner_id()
@@ -138,13 +135,7 @@ func find_item_by_definition(definition_id: String) -> ItemInstance:
 
 
 func get_item_definition(item_id: String) -> ItemDefinition:
-	if item_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(item_id) as ItemDefinition
+	return ContentService.find_resource(item_id) as ItemDefinition
 
 
 func to_save_data() -> Dictionary:
@@ -170,7 +161,7 @@ func _emit_inventory_changed(
 ) -> void:
 	inventory_changed.emit()
 	var events: EventService = null
-	events = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	events = EventService.find()
 	if events != null:
 		events.emit_inventory_changed(
 			_get_owner_id(), item.definition_id if item != null else "", quantity, change_type

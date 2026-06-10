@@ -31,7 +31,7 @@ flowchart TB
 
 **依赖规则：** 依赖只能向下流动。`game/` 可以依赖 modules + kernel；modules 只依赖 kernel；kernel 不依赖任何上层。具体 boss、物品、房间、任务、商店价格、经济规则等内容必须留在 `game/`。
 
-当前代码已经完成大改后的核心分层：`ServiceRegistry` 是唯一 autoload，`GameBootstrap` 创建 `MkitRuntimeContext` 并把服务注册为 runtime ports；实体访问走 `EntityContract`；战斗结算拆成 `DamageIntent` / `DamageResolution` / `DamageApplication`；资源与货币分别由 `ResourceSet` / `Wallet` 承载；存档支持显式 save scope。
+当前代码已经完成大改后的核心分层：`ServiceRegistry` 是唯一 autoload，`GameBootstrap` 启动时把所有内置服务注册进它；实体访问走 `EntityContract`；战斗结算拆成 `DamageIntent` / `DamageResolution` / `DamageApplication`；资源与货币分别由 `ResourceSet` / `Wallet` 承载；存档支持显式 save scope。
 
 ---
 
@@ -92,7 +92,6 @@ sequenceDiagram
 addons/mkit/
     kernel/
     bootstrap/        # GameBootstrap — 启动编排，注册所有服务
-    runtime/          # MkitRuntimeContext — runtime ports
     services/         # ServiceRegistry, TimeService, RandomService,
                       # SceneService, PoolService, AudioService,
                       # 平台适配器 (Analytics/IAP/Ads/CloudSave)

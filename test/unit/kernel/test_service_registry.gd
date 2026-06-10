@@ -97,21 +97,21 @@ func test_tc_sr_11_clear_removes_all() -> void:
 	b.free()
 
 
-# --- get_typed ---
+# --- get_port ---
 
 
-func test_tc_sr_12_get_typed_returns_object_on_match() -> void:
+func test_tc_sr_12_get_port_returns_object_on_match() -> void:
 	var obj := EventService.new()
 	reg.register_service("events", obj)
-	var result: Object = reg.get_typed("events", "EventService")
+	var result: Object = reg.get_port("events", "EventService")
 	assert_eq(result, obj)
 	obj.free()
 
 
-func test_tc_sr_13_get_typed_returns_object_on_mismatch_with_warning() -> void:
+func test_tc_sr_13_get_port_returns_object_on_mismatch_with_warning() -> void:
 	var obj := Node.new()
 	reg.register_service("thing", obj)
-	var result: Object = reg.get_typed("thing", "EventService")
+	var result: Object = reg.get_port("thing", "EventService")
 	assert_eq(result, obj)
 	obj.free()
 

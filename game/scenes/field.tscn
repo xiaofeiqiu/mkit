@@ -1,19 +1,51 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
+[ext_resource type="Script" path="res://addons/mkit/modules/interaction/interactable.gd" id="3_interactable"]
 
 [sub_resource type="CircleShape2D" id="CircleShape_field_exit"]
 radius = 52.0
 
+[sub_resource type="CircleShape2D" id="CircleShape_trial_cave"]
+radius = 58.0
+
 [node name="Field" type="Node2D"]
 
 [node name="Ground" type="ColorRect" parent="."]
-offset_left = -80.0
-offset_top = -60.0
-offset_right = 760.0
-offset_bottom = 500.0
-color = Color(0.19, 0.36, 0.36, 1)
+offset_left = -220.0
+offset_top = -130.0
+offset_right = 940.0
+offset_bottom = 620.0
+color = Color(0.1, 0.29, 0.31, 1)
+
+[node name="FieldTrail" type="ColorRect" parent="."]
+offset_left = 90.0
+offset_top = 248.0
+offset_right = 590.0
+offset_bottom = 316.0
+color = Color(0.31, 0.39, 0.29, 1)
+
+[node name="CombatPatch" type="ColorRect" parent="."]
+offset_left = 380.0
+offset_top = 170.0
+offset_right = 570.0
+offset_bottom = 320.0
+color = Color(0.17, 0.43, 0.38, 1)
+
+[node name="CaveGlow" type="ColorRect" parent="."]
+offset_left = 596.0
+offset_top = 72.0
+offset_right = 714.0
+offset_bottom = 174.0
+color = Color(0.5, 0.35, 0.78, 0.24)
+
+[node name="GateGlow" type="ColorRect" parent="."]
+offset_left = 112.0
+offset_top = 232.0
+offset_right = 208.0
+offset_bottom = 328.0
+color = Color(0.42, 0.68, 0.72, 0.22)
 
 [node name="FieldEntry" type="Marker2D" parent="."]
 position = Vector2(160, 280)
@@ -59,12 +91,25 @@ horizontal_alignment = 1
 [node name="TrialCave" type="Marker2D" parent="."]
 position = Vector2(650, 135)
 
+[node name="TrialCaveArea" type="Area2D" parent="."]
+position = Vector2(650, 135)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TrialCaveArea"]
+shape = SubResource("CircleShape_trial_cave")
+
+[node name="Interactable" type="Node" parent="TrialCaveArea"]
+script = ExtResource("3_interactable")
+interaction_id = "interaction.demo.trial_cave"
+display_text = "Enter trial cave"
+
 [node name="CaveMouth" type="ColorRect" parent="."]
 offset_left = 610.0
 offset_top = 88.0
 offset_right = 700.0
 offset_bottom = 160.0
-color = Color(0.12, 0.1, 0.16, 1)
+color = Color(0.09, 0.07, 0.13, 1)
 
 [node name="TrialLabel" type="Label" parent="."]
 offset_left = 570.0

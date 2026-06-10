@@ -13,7 +13,7 @@
 
 | 你写的 | mkit 处理的 |
 |--------|------------|
-| 新建 Bootstrap 场景，挂 `GameBootstrap` 节点 | 创建 `MkitRuntimeContext` 并注册全部内置 runtime ports（events、actions、effects…）|
+| 新建 Bootstrap 场景，挂 `GameBootstrap` 节点 | 注册全部内置服务（events、actions、effects…）|
 | 设 `resource_databases` 数组 | 加载并校验所有 ContentDefinition |
 | 设 `initial_scene_path` | 启动完成后切入游戏场景 |
 | （可选）继承 `GameBootstrap`，override `_register_kernel_services` 添加自定义服务 | 其余启动步骤 |

@@ -16,7 +16,7 @@
 flowchart TB
     Game["🟢 Game Content\nres://game/\n场景、.tres 内容、具体任务/商店/房间/表现"]
     Modules["🔵 Mkit Modules\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop、ui"]
-    Kernel["🔵 Kernel Runtime\naddons/mkit/kernel/\nMkitRuntimeContext、Command、StateMachine、Action、Effect、Event、Content、Save"]
+    Kernel["🔵 Kernel Runtime\naddons/mkit/kernel/\nCommand、StateMachine、Action、Effect、Event、Content、Save"]
     Platform["⚙️ Platform Adapters\nAnalytics、Ads、IAP、CloudSave、Audio 后端/Mock"]
 
     Game --> Modules
@@ -36,7 +36,7 @@ flowchart TB
 
 | 主题 | 当前代码怎么做 |
 |------|----------------|
-| 服务访问 | `ServiceRegistry` 是唯一 autoload；`GameBootstrap` 创建 `MkitRuntimeContext`；新代码用 `get_port(ServiceRegistry.SERVICE_*)` |
+| 服务访问 | `ServiceRegistry` 是唯一 autoload；`GameBootstrap` 启动时注册全部内置服务；新代码用 `get_port(ServiceRegistry.SERVICE_*)` |
 | 实体访问 | 默认仍有 `Components/` / `Controllers/`，但代码优先走 `EntityContract` |
 | 战斗 | 公开入口仍是 `DamageRequest` / `DamageResult`，内部已拆成 `DamageIntent` / `DamageResolution` / `DamageApplication` |
 | 可变数值 | 战斗资源用 `ResourceSet`，账号/货币用 `Wallet`，属性仍由 `StatsComponent` 管 modifier |
@@ -73,7 +73,7 @@ flowchart LR
 
 两端是绿色——**意图从哪来、结果给谁看，都是你的代码**；中间整条管线是蓝色——**mkit 包办**。
 
-管线每一步都由一个对应的**服务（Service）**驱动。服务由唯一 autoload `ServiceRegistry` 暴露，实际运行期端口由 `MkitRuntimeContext` 持有；新代码用 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取，避免散落硬编码字符串：
+管线每一步都由一个对应的**服务（Service）**驱动。服务由唯一 autoload `ServiceRegistry` 暴露；新代码用 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取，避免散落硬编码字符串：
 
 | 管线步骤 | 驱动它的服务 | 一句话 |
 |----------|-------------|--------|

@@ -18,14 +18,14 @@ point inward (`game/ -> addons/mkit/`), never the reverse.
 
 ## Current runtime shape
 
-`ServiceRegistry` is the only autoload. `GameBootstrap.boot()` creates an
-`MkitRuntimeContext`, registers built-in services into it as ports, loads
-`ResourceDatabase` assets into `ContentService`, validates content ids, restores
-a save if `SaveService.save_path` exists, then enters `initial_scene_path`.
+`ServiceRegistry` is the only autoload. `GameBootstrap.boot()` registers all
+built-in services into it, loads `ResourceDatabase` assets into
+`ContentService`, validates content ids, restores a save if
+`SaveService.save_path` exists, then enters `initial_scene_path`.
 
 The current implementation has landed the large architecture cleanup around:
 
-- runtime ports via `MkitRuntimeContext` and `ServiceRegistry.get_port(...)`
+- typed service access via `ServiceRegistry.get_port(...)`
 - `EntityContract` as the semantic entry point for entity components/controllers
 - combat as `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult`
 - reusable mutable models such as `ResourceSet` and `Wallet`
@@ -42,7 +42,6 @@ addons/mkit/
   plugin.cfg / plugin.gd          # addon manifest + autoload registration
   kernel/
     bootstrap/                    # GameBootstrap
-    runtime/                      # MkitRuntimeContext
     services/                     # ServiceRegistry, time/random/scene/pool/audio/platform services
     events/                       # DomainEvent, EventService
     commands/                     # GameCommand, CommandService, CommandReceiver

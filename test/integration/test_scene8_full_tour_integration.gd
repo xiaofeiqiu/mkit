@@ -249,7 +249,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	var input_reader := player.get_node("InputReader")
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
 	# the shared player scene starts with firebolt from live content for the demo loop.
-	assert_eq(str(input_reader.get("cast_ability_id")), "")
+	assert_eq(str(input_reader.get("cast_ability_id")), FIREBOLT)
 	assert_true(ability.has_ability(FIREBOLT))
 	assert_eq(pool.get_current("mana"), 50.0)
 
@@ -574,6 +574,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
 	watch_signals(ability)
 	demo.call("_cast_firebolt_command")
+	assert_true(bool(demo.get("_firebolt_projectile_observed")))
 	assert_true(await wait_for_signal(ability.ability_cast_finished, 1.0, "firebolt"))
 	demo.call("_update_hud")
 	assert_eq(pool.get_current("mana"), 40.0)
@@ -715,6 +716,7 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	var root := demo.call("_current_zone_root") as Node
 	assert_not_null(root)
 	assert_not_null(root.get_node_or_null("TrialCave"))
+	assert_not_null(root.get_node_or_null("TrialCaveArea/Interactable"))
 
 	var player := demo.get_node("Player") as CharacterBody2D
 	var stats := player.get_node("Components/StatsComponent") as StatsComponent
@@ -726,6 +728,11 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	watch_signals(run_director)
 	watch_signals(events)
 
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_null(run_director.run_state)
+
+	await _focus_demo_interactable(demo, "TrialCaveArea/Interactable")
 	demo.call("_enter_trial_cave")
 	await _settle_scene8_world()
 
@@ -941,6 +948,7 @@ func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_sav
 	assert_eq(health.current_hp, health.get_max_hp() * 0.5)
 
 	var gold_before := progression.get_currency("gold")
+	await _focus_demo_interactable(demo, "VillageSupply/Interactable")
 	demo.call("_purchase_gold_pack")
 	assert_true(await wait_for_signal(iap.purchase_completed, 1.0, "purchase"))
 	assert_eq(iap.purchased_products[-1], PLATFORM_GOLD_PACK_PRODUCT)
@@ -1218,6 +1226,12 @@ func test_tc_int_scene8_11_trial_cave_shortcuts_close_room_without_zone_mismatch
 
 	demo.call("_enter_trial_cave")
 	await _settle_scene8_world()
+	assert_false(room_root.visible)
+	assert_null(run_director.run_state)
+
+	await _focus_demo_interactable(demo, "TrialCaveArea/Interactable")
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
 	assert_true(room_root.visible)
 	assert_gt(room_root.get_child_count(), 0)
 	assert_eq(run_director.run_state.status, "active")
@@ -1232,6 +1246,7 @@ func test_tc_int_scene8_11_trial_cave_shortcuts_close_room_without_zone_mismatch
 	assert_eq(str(demo.get("_trial_run_finished_result")), "failed:field_gate")
 	assert_true((demo.get_node("HUD/StatsPanel/ZoneInfo") as Label).text.contains("Field"))
 
+	await _focus_demo_interactable(demo, "TrialCaveArea/Interactable")
 	demo.call("_enter_trial_cave")
 	await _settle_scene8_world()
 	assert_true(room_root.visible)

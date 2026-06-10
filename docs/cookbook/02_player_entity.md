@@ -2,7 +2,7 @@
 
 ## 本篇结束后，你的项目新增了什么
 
-玩家实体出现在场景中。按方向键发出 `move` 命令，玩家进入 Move 状态并移动；松开方向键发出 `stop_move` 命令，返回 Idle 状态。控制台打印状态切换日志。
+玩家实体出现在场景中。按 WASD 发出 `move` 命令，玩家进入 Move 状态并移动；松开 WASD 发出 `stop_move` 命令，返回 Idle 状态。控制台打印状态切换日志。
 
 ## 前置
 
@@ -98,6 +98,7 @@ func handle_command(command: GameCommand) -> bool:
 extends Node
 
 var _commands: CommandService = null
+var _was_moving: bool = false
 
 
 func _ready() -> void:
@@ -107,14 +108,23 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     if _commands == null:
         return
-    var dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+    var dir := Vector2.ZERO
+    if Input.is_key_pressed(KEY_A):
+        dir.x -= 1.0
+    if Input.is_key_pressed(KEY_D):
+        dir.x += 1.0
+    if Input.is_key_pressed(KEY_W):
+        dir.y -= 1.0
+    if Input.is_key_pressed(KEY_S):
+        dir.y += 1.0
     if dir != Vector2.ZERO:
         var cmd := GameCommand.create(BuiltinCommands.MOVE, "player", "player", {"direction": dir})
         _commands.dispatch(cmd)
-    elif Input.is_action_just_released("ui_left") or Input.is_action_just_released("ui_right") \
-            or Input.is_action_just_released("ui_up") or Input.is_action_just_released("ui_down"):
+        _was_moving = true
+    elif _was_moving:
         var cmd := GameCommand.create(BuiltinCommands.STOP_MOVE, "player", "player")
         _commands.dispatch(cmd)
+        _was_moving = false
 ```
 
 将 `PlayerInputController` 挂到主场景或玩家实体的子节点。
@@ -125,10 +135,10 @@ func _process(_delta: float) -> void:
 
 ## 运行验证
 
-按 F5 运行，按方向键：
+按 F5 运行，按 WASD：
 
 - 玩家节点应移动（Move 状态的 `move_and_slide` 生效）
-- 松开所有方向键后停止移动
+- 松开 WASD 后停止移动
 - 在 Remote 调试器 → Nodes 面板，可看到 `StateMachine` 内当前叶状态
 
 在 `PlayerIdleState.enter` 或 `PlayerMoveState.enter` 添加 `print` 可确认状态切换：

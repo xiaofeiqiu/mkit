@@ -27,6 +27,17 @@ func register_resource(res: Resource) -> void:
 		_resource_path_by_id[content_id] = res.resource_path
 
 
+## Static convenience lookup through the registered content service.
+## Returns null (without warning) for empty ids or when the service is absent.
+static func find_resource(content_id: String) -> Resource:
+	if content_id.strip_edges() == "":
+		return null
+	var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	if content == null:
+		return null
+	return content.get_resource(content_id)
+
+
 func get_resource(content_id: String) -> Resource:
 	if not _by_id.has(content_id):
 		push_warning("Content id not found: %s" % content_id)

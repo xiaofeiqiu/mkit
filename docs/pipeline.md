@@ -3,7 +3,7 @@
 每条管线描述一个完整流程的调用序列——从触发点到最终输出。
 
 > 当前实现：服务获取统一走 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`。  
-> `ServiceRegistry` 是唯一 autoload，`GameBootstrap` 会创建 `MkitRuntimeContext` 并把内置服务注册为 runtime ports。
+> `ServiceRegistry` 是唯一 autoload，`GameBootstrap` 在启动时把所有内置服务注册进它。
 
 ---
 
@@ -19,23 +19,17 @@
 sequenceDiagram
     participant GB as GameBootstrap
     participant SR as ServiceRegistry
-    participant RT as MkitRuntimeContext
     participant CS as ContentService
     participant AS as AudioService
     participant SS as SaveService
     participant SC as SceneService
 
     Note over GB: _ready() 自动调用 boot()
-    GB->>RT: new()
-    GB->>SR: set_runtime_context(RT)
     GB->>SR: register_service("events", EventService)
-    SR->>RT: register_port("events", EventService)
     GB->>SR: register_service("content", ContentService)
-    SR->>RT: register_port("content", ContentService)
     GB->>SR: register_service("actions", ActionService)
-    SR->>RT: register_port("actions", ActionService)
     GB->>SR: ... (所有内置服务)
-    Note over SR: [mkit 内部] 服务表 + runtime port 表建立完毕
+    Note over SR: [mkit 内部] 服务表建立完毕
     GB->>CS: load_database(db) × N
     CS->>CS: register_resource(def) per entry
     GB->>AS: register_audio_definitions(audio_definition[])

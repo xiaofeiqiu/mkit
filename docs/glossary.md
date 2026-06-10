@@ -156,9 +156,9 @@
 
 **SaveService**：协调 `Saveable` 的 scene-scope 与 scope-scope 持久化；`SaveableComponent` 不被直接收集，需由所属 `Saveable` 实体主动序列化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
 
-**Service / Port**：四分模式中的全局流程层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取；运行期由 `MkitRuntimeContext` 持有端口，`get_service` / `get_service_or_null` / `get_typed` 为兼容入口。
+**Service / Port**：四分模式中的全局流程层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取；`get_service` / `get_service_or_null` 为兼容入口。
 
-**ServiceRegistry**：唯一的框架 autoload（Node），持有兼容服务表并把服务同步进 `MkitRuntimeContext` ports。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
+**ServiceRegistry**：唯一的框架 autoload（Node），持有服务表，`get_port` 提供带类型检查的访问。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
 
 **State**：HFSM 状态基类（`Node`），override `enter` / `exit` / `update` / `handle_command` / `can_enter` / `can_exit` 实现状态逻辑；通过 `request_transition(path)` 请求状态切换。→ [ref/kernel/State.md](ref/kernel/State.md)
 

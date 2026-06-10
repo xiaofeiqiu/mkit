@@ -32,7 +32,7 @@ flowchart LR
 |------|----------|------------|
 | ① 定义数据 | 继承 `ContentDefinition`，加 `@export` 字段，设 `get_content_id()` | — |
 | ② 注册内容 | 把 `.tres` 文件放入 `ResourceDatabase.resources` | — |
-| ③ Boot | 挂好 `GameBootstrap` 并设 `resource_databases` | 创建 `MkitRuntimeContext`，注册 runtime ports，加载内容，校验 ID 唯一性 |
+| ③ Boot | 挂好 `GameBootstrap` 并设 `resource_databases` | 注册全部内置服务，加载内容，校验 ID 唯一性 |
 | ④ 构建实体 | 在场景树搭 EntityRoot / Components / Controllers | `EntityContract` / `EntityRoot` 提供组件和控制器语义入口 |
 | ⑤ 发出命令 | `GameCommand.create("attack", player_id, enemy_id)` → `CommandService.dispatch` | 路由到目标实体的 `CommandReceiver` |
 | ⑥ 状态决策 | 在 `State.handle_command` 返回 `true`/`false`，决定是否响应 | HFSM 从叶往根冒泡找第一个处理者 |

@@ -5,11 +5,6 @@ signal item_purchased(item_id: String, quantity: int, total_cost: int)
 signal item_sold(item_id: String, quantity: int, total_gain: int)
 signal transaction_failed(item_id: String, reason: String)
 var current_shop: ShopDefinition = null
-var content: ContentService = null
-
-
-func _ready() -> void:
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func open_shop(shop_id: String) -> bool:
@@ -79,7 +74,7 @@ func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	if entry != null and entry.stock >= 0:
 		entry.stock = max(0, entry.stock - quantity)
 	item_purchased.emit(item_id, quantity, total_cost)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_item_purchased(current_shop.shop_id, item_id, quantity)
 	return true
@@ -119,20 +114,14 @@ func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	add.amount = total_gain
 	_run_effect(add, _make_context(seller))
 	item_sold.emit(item_id, quantity, total_gain)
-	var events := _get_events()
+	var events := EventService.find()
 	if events != null:
 		events.emit_item_sold(current_shop.shop_id, item_id, quantity)
 	return true
 
 
 func get_definition(shop_id: String) -> ShopDefinition:
-	if shop_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(shop_id) as ShopDefinition
+	return ContentService.find_resource(shop_id) as ShopDefinition
 
 
 func _buy_block_reason(item_id: String, quantity: int, buyer: Node) -> String:
@@ -178,12 +167,4 @@ func _get_inventory(node: Node) -> InventoryController:
 
 
 func _get_item_definition(item_id: String) -> ItemDefinition:
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(item_id) as ItemDefinition
-
-
-func _get_events() -> EventService:
-	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+	return ContentService.find_resource(item_id) as ItemDefinition

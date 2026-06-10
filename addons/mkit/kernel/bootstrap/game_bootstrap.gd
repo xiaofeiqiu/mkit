@@ -3,7 +3,6 @@ extends Node
 @export var resource_databases: Array[ResourceDatabase] = []
 @export var initial_scene_path: String = ""
 @export var save_path: String = ""
-var _runtime_context: MkitRuntimeContext = null
 
 
 func _ready() -> void:
@@ -11,7 +10,6 @@ func _ready() -> void:
 
 
 func boot() -> void:
-	_runtime_context = MkitRuntimeContext.new()
 	_register_kernel_services()
 	_load_content()
 	_configure_content_services()
@@ -25,182 +23,59 @@ func _register_kernel_services() -> void:
 		push_error("GameBootstrap: ServiceRegistry autoload is missing")
 		return
 	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
-		if _runtime_context != null:
-			ServiceRegistry.set_runtime_context(_runtime_context)
-			for service_data in _build_kernel_services():
-				var existing_id := str(service_data["id"])
-				if not ServiceRegistry.has_service(existing_id):
-					continue
-				var existing_service := ServiceRegistry.get_service(existing_id)
-				if existing_service != null:
-					_runtime_context.register_port(existing_id, existing_service)
-			print("[mkit] GameBootstrap: runtime context attached to pre-registered services")
+		print("[mkit] GameBootstrap: services already registered, skipping")
 		return
-	ServiceRegistry.set_runtime_context(_runtime_context)
-	for service_data in _build_kernel_services():
-		_register_service_entry(
-			service_data["id"],
-			service_data["service"],
-			service_data["add_as_child"],
-			service_data.get("node_name", "")
-		)
-	print("[mkit] GameBootstrap runtime services: %s" % ", ".join(_runtime_context.get_registered_ports()))
+	var services := _build_kernel_services()
+	for service_id in services:
+		_register_service_entry(service_id, services[service_id])
+	print("[mkit] GameBootstrap runtime services: %s" % ", ".join(ServiceRegistry.get_registered_service_ids()))
 
 
-func _build_kernel_services() -> Array[Dictionary]:
-	return [
-		{
-			"id": ServiceRegistry.SERVICE_EVENTS,
-			"service": EventService.new(),
-			"node_name": "EventService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_CONTENT,
-			"service": ContentService.new(),
-			"node_name": "ContentService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_RANDOM,
-			"service": RandomService.new(),
-			"node_name": "",
-			"add_as_child": false
-		},
-		{
-			"id": ServiceRegistry.SERVICE_TIME,
-			"service": TimeService.new(),
-			"node_name": "",
-			"add_as_child": false
-		},
-		{
-			"id": ServiceRegistry.SERVICE_ACTIONS,
-			"service": ActionService.new(),
-			"node_name": "ActionService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_EFFECTS,
-			"service": EffectService.new(),
-			"node_name": "",
-			"add_as_child": false
-		},
-		{
-			"id": ServiceRegistry.SERVICE_COMMANDS,
-			"service": CommandService.new(),
-			"node_name": "CommandService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_COMBAT,
-			"service": CombatService.new(),
-			"node_name": "",
-			"add_as_child": false
-		},
-		{
-			"id": ServiceRegistry.SERVICE_SCENES,
-			"service": SceneService.new(),
-			"node_name": "SceneService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_POOL,
-			"service": PoolService.new(),
-			"node_name": "PoolService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_SAVE,
-			"service": SaveService.new(),
-			"node_name": "SaveService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_PROGRESSION,
-			"service": ProgressionService.new(),
-			"node_name": "ProgressionService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_ANALYTICS,
-			"service": AnalyticsServiceMock.new(),
-			"node_name": "AnalyticsService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_ADS,
-			"service": AdServiceMock.new(),
-			"node_name": "AdService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_IAP,
-			"service": IAPServiceMock.new(),
-			"node_name": "IAPService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_CLOUD_SAVE,
-			"service": CloudSaveServiceMock.new(),
-			"node_name": "CloudSaveService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_QUEST,
-			"service": QuestService.new(),
-			"node_name": "QuestService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_SHOP,
-			"service": ShopService.new(),
-			"node_name": "ShopService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_AUDIO,
-			"service": AudioService.new(),
-			"node_name": "AudioService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_DIALOGUE,
-			"service": DialogueService.new(),
-			"node_name": "DialogueService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_WORLD,
-			"service": WorldService.new(),
-			"node_name": "WorldService",
-			"add_as_child": true
-		},
-		{
-			"id": ServiceRegistry.SERVICE_LOOT,
-			"service": LootService.new(),
-			"node_name": "",
-			"add_as_child": false
-		}
-	]
+## Ordered id -> service instance table. Override to add or replace services;
+## Node services are added as children of ServiceRegistry, RefCounted ones are not.
+func _build_kernel_services() -> Dictionary:
+	return {
+		ServiceRegistry.SERVICE_EVENTS: EventService.new(),
+		ServiceRegistry.SERVICE_CONTENT: ContentService.new(),
+		ServiceRegistry.SERVICE_RANDOM: RandomService.new(),
+		ServiceRegistry.SERVICE_TIME: TimeService.new(),
+		ServiceRegistry.SERVICE_ACTIONS: ActionService.new(),
+		ServiceRegistry.SERVICE_EFFECTS: EffectService.new(),
+		ServiceRegistry.SERVICE_COMMANDS: CommandService.new(),
+		ServiceRegistry.SERVICE_COMBAT: CombatService.new(),
+		ServiceRegistry.SERVICE_SCENES: SceneService.new(),
+		ServiceRegistry.SERVICE_POOL: PoolService.new(),
+		ServiceRegistry.SERVICE_SAVE: SaveService.new(),
+		ServiceRegistry.SERVICE_PROGRESSION: ProgressionService.new(),
+		ServiceRegistry.SERVICE_ANALYTICS: AnalyticsServiceMock.new(),
+		ServiceRegistry.SERVICE_ADS: AdServiceMock.new(),
+		ServiceRegistry.SERVICE_IAP: IAPServiceMock.new(),
+		ServiceRegistry.SERVICE_CLOUD_SAVE: CloudSaveServiceMock.new(),
+		ServiceRegistry.SERVICE_QUEST: QuestService.new(),
+		ServiceRegistry.SERVICE_SHOP: ShopService.new(),
+		ServiceRegistry.SERVICE_AUDIO: AudioService.new(),
+		ServiceRegistry.SERVICE_DIALOGUE: DialogueService.new(),
+		ServiceRegistry.SERVICE_WORLD: WorldService.new(),
+		ServiceRegistry.SERVICE_LOOT: LootService.new(),
+	}
 
 
-func _register_service_entry(
-	service_id: String, service: Object, add_as_child: bool, node_name: String = ""
-) -> void:
+func _register_service_entry(service_id: String, service: Object) -> void:
 	if service == null:
 		push_warning("GameBootstrap._register_service_entry: service is null for %s" % service_id)
 		return
-	if add_as_child:
-		var node := service as Node
-		if node == null:
-			push_warning(
-				"GameBootstrap._register_service_entry: %s expected Node but got %s"
-				% [service_id, service.get_class()]
-			)
-			return
-		node.name = node_name if node_name != "" else str(service.get_class())
+	var node := service as Node
+	if node != null:
+		node.name = _service_node_name(service)
 		ServiceRegistry.add_child(node)
 	ServiceRegistry.register_service(service_id, service)
+
+
+func _service_node_name(service: Object) -> String:
+	var script := service.get_script() as Script
+	if script != null and script.get_global_name() != &"":
+		return str(script.get_global_name())
+	return service.get_class()
 
 
 func _load_content() -> void:
@@ -265,8 +140,7 @@ func _enter_initial_scene() -> void:
 			)
 		)
 		return
-	var scene_router: SceneService = null
-	scene_router = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
+	var scene_router := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
 	if scene_router != null:
 		scene_router.change_scene(initial_scene_path)
 	else:

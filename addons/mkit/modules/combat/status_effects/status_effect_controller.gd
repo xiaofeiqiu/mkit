@@ -4,11 +4,6 @@ signal status_applied(status_id: String, stacks: int)
 signal status_removed(status_id: String)
 signal status_ticked(status_id: String)
 var active_statuses: Dictionary = {}
-var content: ContentService = null
-
-
-func _ready() -> void:
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
 
 
 func _process(delta: float) -> void:
@@ -87,11 +82,7 @@ func from_save_data(data: Dictionary) -> void:
 
 
 func get_definition(status_id: String) -> StatusEffectDefinition:
-	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(status_id) as StatusEffectDefinition
+	return ContentService.find_resource(status_id) as StatusEffectDefinition
 
 
 func _tick_status(instance: StatusEffectInstance, definition: StatusEffectDefinition) -> void:

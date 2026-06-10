@@ -28,6 +28,20 @@ func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
 	return true
 
 
+## Helpers for subclasses that provide multi-scope payloads: call from
+## _ready / _exit_tree to keep SaveService scope registration in sync.
+func register_save_scopes() -> void:
+	var save_service := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+	if save_service != null:
+		save_service.register_saveable_scope(self)
+
+
+func unregister_save_scopes() -> void:
+	var save_service := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+	if save_service != null:
+		save_service.unregister_saveable_scope(self)
+
+
 func get_save_id() -> String:
 	if save_id == "":
 		return owner.name if owner != null else name

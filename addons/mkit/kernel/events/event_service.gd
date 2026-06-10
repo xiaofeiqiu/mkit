@@ -22,6 +22,11 @@ var recent_events: Array[DomainEvent] = []
 var max_recent_events: int = 100
 
 
+## Static convenience lookup through the service registry; null when absent.
+static func find() -> EventService:
+	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+
+
 func emit_domain_event(event: DomainEvent) -> void:
 	recent_events.append(event)
 	if recent_events.size() > max_recent_events:

@@ -128,6 +128,5 @@ Feedback  (Node)
 
 ## 延伸阅读
 
-- [FeedbackSystem ref](../ref/modules/FeedbackSystem.md) · [VFXSpawner ref](../ref/modules/VFXSpawner.md) · [DamageNumberSystem ref](../ref/modules/DamageNumberSystem.md)
 - [pipeline.md — Animation（两通道）](../pipeline.md#10-animation--action-驱动通道)
 - [GameAction ref](../ref/kernel/GameAction.md) — 生命周期钩子里播动画

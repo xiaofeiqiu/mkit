@@ -21,7 +21,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var ads: AdService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_ADS) as AdService
+var ads: AdService = Mkit.ads()
 if ads.is_rewarded_ad_ready("revive"):
     ads.show_rewarded_ad("revive")
 ```
@@ -30,7 +30,7 @@ if ads.is_rewarded_ad_ready("revive"):
 
 ```gdscript
 func request_revive_ad() -> void:
-    var ads: AdService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_ADS) as AdService
+    var ads: AdService = Mkit.ads()
     if ads == null or not ads.is_rewarded_ad_ready("revive"):
         return
     ads.rewarded_ad_completed.connect(func(placement_id: String) -> void:

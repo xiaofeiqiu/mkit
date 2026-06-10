@@ -29,7 +29,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var quest: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
+var quest: QuestService = Mkit.quest()
 var active: Array[QuestState] = quest.log.get_active()
 ```
 
@@ -37,7 +37,7 @@ var active: Array[QuestState] = quest.log.get_active()
 
 ```gdscript
 func list_active_quests() -> void:
-    var quest: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
+    var quest: QuestService = Mkit.quest()
     if quest == null:
         return
     for state in quest.log.get_active():

@@ -74,7 +74,7 @@ scope 写入用于“无完整场景树也能恢复”的关键状态（如世�
 ### 最小示例（Level 1）
 
 ```gdscript
-var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+var save := Mkit.save()
 save.save_game(get_tree().root)
 ```
 
@@ -85,7 +85,7 @@ save.save_game(get_tree().root)
 var _save: SaveService = null
 
 func _ready() -> void:
-    _save = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+    _save = Mkit.save()
     if _save == null:
         push_error("SaveService 未注册（Bootstrap 是否已运行？）")
         return

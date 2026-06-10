@@ -15,7 +15,7 @@ var entity_spawner: EntitySpawner = null
 
 func _ready() -> void:
 	entity_spawner = get_node_or_null(entity_spawner_path) as EntitySpawner
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 
@@ -82,7 +82,7 @@ func check_clear_condition() -> void:
 		runtime.cleared = true
 		generate_reward()
 		room_cleared.emit(runtime.room_runtime_id)
-		var events := EventService.find()
+		var events := Mkit.events()
 		if events != null:
 			events.emit_domain_event(WorldEvents.room_cleared(runtime.room_runtime_id))
 
@@ -99,7 +99,7 @@ func generate_reward() -> void:
 	if def == null or def.reward_pool_ids.is_empty():
 		reward_ready.emit([])
 		return
-	var reward_system := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
+	var reward_system := Mkit.loot()
 	if reward_system == null:
 		reward_ready.emit([])
 		return

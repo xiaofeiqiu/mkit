@@ -38,7 +38,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var events := EventService.find()
+var events := Mkit.events()
 events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 
 func _on_entity_died(event: DomainEvent) -> void:
@@ -49,7 +49,7 @@ func _on_entity_died(event: DomainEvent) -> void:
 
 ```gdscript
 # 模块发射：用本模块事件目录构造事件
-var events := EventService.find()
+var events := Mkit.events()
 if events != null:
     events.emit_domain_event(CombatEvents.entity_died(entity_id, owner))
 
@@ -61,7 +61,7 @@ var _events: EventService = null
 
 
 func _ready() -> void:
-    _events = EventService.find()
+    _events = Mkit.events()
     if _events == null:
         push_error("EventService not available")
         return
@@ -86,7 +86,7 @@ func _on_quest_completed(event: DomainEvent) -> void:
 
 # 调试：检查最近事件列表
 func _debug_recent_events() -> void:
-    var events := EventService.find()
+    var events := Mkit.events()
     if events == null:
         return
     for ev in events.recent_events:

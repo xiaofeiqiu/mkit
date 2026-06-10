@@ -251,7 +251,7 @@ func _exit_tree() -> void:
 	_clear_hit_vfx()
 	_cleanup_audio_players()
 	if ServiceRegistry.has_service("scenes"):
-		var current := ServiceRegistry.get_service("scenes") as SceneService
+		var current := Mkit.scenes()
 		if current == _scene_router:
 			ServiceRegistry.unregister_service("scenes")
 			if _previous_scene_router != null:
@@ -261,20 +261,20 @@ func _exit_tree() -> void:
 
 
 func _resolve_services() -> void:
-	_dialogue = ServiceRegistry.get_service("dialogue") as DialogueService
-	_quest = ServiceRegistry.get_service("quest") as QuestService
-	_shop = ServiceRegistry.get_service("shop") as ShopService
-	_world = ServiceRegistry.get_service("world") as WorldService
-	_events = ServiceRegistry.get_service("events") as EventService
-	_effects = ServiceRegistry.get_service("effects") as EffectService
-	_time = ServiceRegistry.get_service("time") as TimeService
-	_progression = ServiceRegistry.get_service("progression") as ProgressionService
-	_audio = ServiceRegistry.get_service("audio") as AudioService
-	_save_manager = ServiceRegistry.get_service("save") as SaveService
-	_analytics = ServiceRegistry.get_service("analytics") as AnalyticsService
-	_ads = ServiceRegistry.get_service("ads") as AdService
-	_iap = ServiceRegistry.get_service("iap") as IAPService
-	_cloud_save = ServiceRegistry.get_service("cloud_save") as CloudSaveService
+	_dialogue = Mkit.dialogue()
+	_quest = Mkit.quest()
+	_shop = Mkit.shop()
+	_world = Mkit.world()
+	_events = Mkit.events()
+	_effects = Mkit.effects()
+	_time = Mkit.time()
+	_progression = Mkit.progression()
+	_audio = Mkit.audio()
+	_save_manager = Mkit.save()
+	_analytics = Mkit.analytics()
+	_ads = Mkit.ads()
+	_iap = Mkit.iap()
+	_cloud_save = Mkit.cloud_save()
 
 
 
@@ -283,7 +283,7 @@ func _configure_entity_spawner() -> void:
 	_entity_spawner = EntitySpawner.new()
 	_entity_spawner.name = "DemoEntitySpawner"
 	if ServiceRegistry.has_service("content"):
-		_entity_spawner.content = ServiceRegistry.get_service("content") as ContentService
+		_entity_spawner.content = Mkit.content()
 	add_child(_entity_spawner)
 
 
@@ -293,7 +293,7 @@ func _configure_embedded_router() -> void:
 	add_child(_scene_router)
 	_previous_scene_router = null
 	if ServiceRegistry.has_service("scenes"):
-		_previous_scene_router = ServiceRegistry.get_service("scenes") as SceneService
+		_previous_scene_router = Mkit.scenes()
 	ServiceRegistry.unregister_service("scenes")
 	ServiceRegistry.register_service("scenes", _scene_router)
 	if _world != null:
@@ -760,7 +760,7 @@ func _attack_field_beast() -> void:
 
 
 func _dispatch_player_command(command_type: String, payload: Dictionary) -> void:
-	var router := ServiceRegistry.get_service("commands") as CommandService
+	var router := Mkit.commands()
 	if router == null:
 		return
 	router.dispatch(GameCommand.create(command_type, PLAYER_ID, PLAYER_ID, payload))

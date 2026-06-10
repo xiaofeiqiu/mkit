@@ -95,7 +95,7 @@ func _execute_effects(effects: Array[GameEffect], instance: StatusEffectInstance
 	context.status_id = instance.definition_id
 	context.payload["stacks"] = instance.stacks
 	context.payload["source_id"] = instance.source_id
-	var executor := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var executor := Mkit.effects()
 	if executor != null:
 		executor.execute_many(effects, context)
 

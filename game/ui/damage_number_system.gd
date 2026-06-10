@@ -26,7 +26,7 @@ func show_number(position: Vector2, amount: float, critical: bool = false) -> No
 
 func _create_number_node() -> Node:
 	if use_pool:
-		_pool = ServiceRegistry.get_port(ServiceRegistry.SERVICE_POOL) as PoolService
+		_pool = Mkit.pool()
 		if _pool != null:
 			return _pool.acquire(damage_number_scene_path, self)
 	_pool = null

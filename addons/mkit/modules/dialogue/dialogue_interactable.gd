@@ -7,13 +7,13 @@ extends Interactable
 func _interact_impl(context: GameplayContext) -> bool:
 	if dialogue_id == "":
 		return false
-	var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
+	var dialogue := Mkit.dialogue()
 	if dialogue == null:
 		return false
 	if not dialogue.start(dialogue_id, context):
 		return false
 	if npc_id != "":
-		var events := EventService.find()
+		var events := Mkit.events()
 		if events != null:
 			events.emit_domain_event(DialogueEvents.npc_talked(npc_id))
 	return true

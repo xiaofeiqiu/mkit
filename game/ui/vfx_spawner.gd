@@ -31,7 +31,7 @@ func spawn(vfx_id: String, position: Vector2, direction: Vector2 = Vector2.ZERO)
 
 func _create_vfx_node(scene_path: String) -> Node:
 	if use_pool:
-		_pool = ServiceRegistry.get_port(ServiceRegistry.SERVICE_POOL) as PoolService
+		_pool = Mkit.pool()
 		if _pool != null:
 			return _pool.acquire(scene_path, self)
 	_pool = null

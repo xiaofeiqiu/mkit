@@ -32,7 +32,7 @@
 
 ```gdscript
 # 一般在 Inspector 配 .tres；代码读取：
-var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+var content := Mkit.content()
 var def := content.get_resource("fireball") as AbilityDefinition
 print("%s 冷却 %.1fs" % [def.display_name, def.cooldown])
 ```

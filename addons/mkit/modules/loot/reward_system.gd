@@ -7,7 +7,7 @@ func generate_options(
 ) -> Array[RewardOption]:
 	if count <= 0 or pool_ids.is_empty():
 		return []
-	var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var content := Mkit.content()
 	if content == null:
 		push_warning("RewardSystem.generate_options: missing ContentService service")
 		return []
@@ -34,14 +34,14 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 		return false
 	var ctx := GameplayContext.from_context(context)
 	var executor: EffectService = null
-	executor = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	executor = Mkit.effects()
 	if executor == null:
 		executor = EffectService.new()
 	var results := executor.execute_many(option.effects, ctx, true)
 	for r in results:
 		if not r.success:
 			return false
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(
 			LootEvents.reward_selected(
@@ -60,7 +60,7 @@ func _weighted_pick(candidates: Array[RewardDefinition]) -> RewardDefinition:
 			total += max(0.0, c.weight)
 	if total <= 0.0:
 		return candidates[0]
-	var random: RandomService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_RANDOM) as RandomService
+	var random: RandomService = Mkit.random()
 	var r := random.randf_range(0.0, total) if random != null else randf_range(0.0, total)
 	var cursor := 0.0
 	for c in candidates:

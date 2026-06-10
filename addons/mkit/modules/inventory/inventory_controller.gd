@@ -161,7 +161,7 @@ func _emit_inventory_changed(
 ) -> void:
 	inventory_changed.emit()
 	var events: EventService = null
-	events = EventService.find()
+	events = Mkit.events()
 	if events != null:
 		events.emit_domain_event(
 			InventoryEvents.inventory_changed(

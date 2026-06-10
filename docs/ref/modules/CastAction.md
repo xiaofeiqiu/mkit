@@ -30,7 +30,7 @@
 var cast := CastAction.new()
 cast.duration = 1.5
 cast.on_complete_effects = ability_def.effects
-(ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService).start_action(cast, action_ctx)
+(Mkit.actions()).start_action(cast, action_ctx)
 ```
 
 ## 相关

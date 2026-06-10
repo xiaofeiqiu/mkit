@@ -22,7 +22,7 @@
 `ShopService.buy()` 用 `SpendCurrencyEffect` / `AddCurrencyEffect` 结算，它们操作的是 **`ProgressionService` 的货币**（不是实体身上的 `ResourcePoolComponent`）。所以买东西前玩家得先有 `gold`：
 
 ```gdscript
-var progression := ServiceRegistry.get_port(ServiceRegistry.SERVICE_PROGRESSION) as ProgressionService
+var progression := Mkit.progression()
 progression.add_currency("gold", 200)
 ```
 
@@ -85,7 +85,7 @@ Shop  (ShopUI)
 
 ```gdscript
 func open_village_shop(player: Node) -> void:
-    var shop := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
+    var shop := Mkit.shop()
     if shop == null:
         return
     if not shop.open_shop("shop.village"):
@@ -104,7 +104,7 @@ func open_village_shop(player: Node) -> void:
 买入（也可不经 UI 直接调）：
 
 ```gdscript
-var shop := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
+var shop := Mkit.shop()
 if shop.can_buy("item.potion", 1, player):
     shop.buy("item.potion", 1, player)
 else:

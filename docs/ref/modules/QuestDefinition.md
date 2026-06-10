@@ -44,7 +44,7 @@ var objective: QuestObjectiveDefinition = quest.get_objective("kill_enemy")
 
 ```gdscript
 func can_offer_quest(quest_id: String, player: Node) -> bool:
-    var quest_service: QuestService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
+    var quest_service: QuestService = Mkit.quest()
     if quest_service == null:
         return false
     var ctx := GameplayContext.new()

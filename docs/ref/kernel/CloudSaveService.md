@@ -36,7 +36,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var cloud := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CLOUD_SAVE) as CloudSaveService
+var cloud := Mkit.cloud_save()
 cloud.cloud_load_completed.connect(func(slot: String, data: Dictionary): apply_cloud_save(data))
 if cloud.is_available():
     cloud.load_from_cloud("auto")

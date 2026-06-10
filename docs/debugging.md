@@ -35,7 +35,7 @@ if overlay != null:
 回放最近 100 个领域事件，确认事件是否发出、顺序是否正确：
 
 ```gdscript
-var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+var events := Mkit.events()
 for event in events.recent_events:
     print("[%.2f] %s  source=%s target=%s" % [
         event.timestamp, event.event_type,
@@ -58,7 +58,7 @@ events.domain_event_emitted.connect(func(e: DomainEvent) -> void:
 `EffectService.trace_enabled`（默认 `true`）记录每次 `execute()` 的结果到 `recent_results`，定位"技能放了但没效果"：
 
 ```gdscript
-var effects := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+var effects := Mkit.effects()
 for result in effects.recent_results:
     if not result.success:
         print("FAIL  %s: %s" % [result.effect_id, result.failure_reason])
@@ -110,7 +110,7 @@ sm.transition_failed.connect(func(from: String, to: String, reason: String) -> v
 复现概率性 bug（暴击、掉落、闪避）：
 
 ```gdscript
-var rng := ServiceRegistry.get_port(ServiceRegistry.SERVICE_RANDOM) as RandomService
+var rng := Mkit.random()
 rng.set_seed(12345)    # 固定种子，每次运行结果相同
 ```
 

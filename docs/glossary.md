@@ -156,9 +156,11 @@
 
 **SaveService**：唯一存读档 facade，协调 `roots`（`Saveable`）、`entities`（`EntitySaveAgent`）与 scope-scope 持久化。→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md)
 
-**Service / Port**：四分模式中的全局流程层，通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取；`get_service` / `get_service_or_null` 为兼容入口。
+**Service / Port**：四分模式中的全局流程层，通过类型化门面 `Mkit.xxx()` 获取（底层为 `ServiceRegistry.get_port`）；`get_service` 已废弃。
 
-**ServiceRegistry**：唯一的框架 autoload（Node），持有服务表，`get_port` 提供带类型检查的访问。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
+**ServiceRegistry**：唯一的框架 autoload（Node），持有服务表；推荐经 `Mkit` 门面访问。→ [ref/kernel/ServiceRegistry.md](ref/kernel/ServiceRegistry.md)
+
+**Mkit（门面）**：类型化静态门面，`Mkit.combat()` 等访问器返回具体服务类型。→ [ref/modules/Mkit.md](ref/modules/Mkit.md)
 
 **State**：HFSM 状态基类（`Node`），override `enter` / `exit` / `update` / `handle_command` / `can_enter` / `can_exit` 实现状态逻辑；通过 `request_transition(path)` 请求状态切换。→ [ref/kernel/State.md](ref/kernel/State.md)
 

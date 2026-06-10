@@ -32,7 +32,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var time := ServiceRegistry.get_port(ServiceRegistry.SERVICE_TIME) as TimeService
+var time := Mkit.time()
 time.set_paused(true)              # 暂停（动作停止推进）
 time.set_gameplay_time_scale(0.3)  # 子弹时间
 ```

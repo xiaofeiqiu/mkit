@@ -30,7 +30,7 @@ Effect 执行链调度器。接受单个或多个 `GameEffect`，依次调 `effe
 ### 最小示例（Level 1）
 
 ```gdscript
-var effects_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+var effects_svc := Mkit.effects()
 var ctx := GameplayContext.new()
 ctx.source = self
 ctx.target = enemy
@@ -42,7 +42,7 @@ var result := effects_svc.execute(deal_damage_effect, ctx)
 ```gdscript
 # 直接触发一次性伤害（不走 Action）
 func _apply_instant_damage(source: Node, target: Node, amount: float) -> bool:
-    var effects_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+    var effects_svc := Mkit.effects()
     if effects_svc == null:
         push_error("EffectService not available")
         return false
@@ -65,7 +65,7 @@ func _apply_instant_damage(source: Node, target: Node, amount: float) -> bool:
 
 # 链式效果（治疗 + buff，任意一个失败都继续）
 func _apply_heal_and_buff(target: Node) -> void:
-    var effects_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+    var effects_svc := Mkit.effects()
     if effects_svc == null:
         return
 
@@ -91,7 +91,7 @@ func _apply_heal_and_buff(target: Node) -> void:
 
 # 调试：查看最近执行结果
 func _debug_recent_effects() -> void:
-    var effects_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+    var effects_svc := Mkit.effects()
     if effects_svc == null:
         return
     for result in effects_svc.recent_results:

@@ -35,7 +35,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
+var dialogue := Mkit.dialogue()
 var ctx := GameplayContext.new()
 ctx.source = player
 dialogue.start("dialogue.elder_intro", ctx)
@@ -46,7 +46,7 @@ dialogue.start("dialogue.elder_intro", ctx)
 ```gdscript
 # 简易对话推进控制（无 UI 也能跑）
 func _ready() -> void:
-    var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
+    var dialogue := Mkit.dialogue()
     dialogue.node_entered.connect(func(node: DialogueNode):
         print("%s: %s" % [node.speaker_id, node.text])
     )
@@ -58,7 +58,7 @@ func _ready() -> void:
 
 
 func _on_choice_key(index: int) -> void:
-    var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
+    var dialogue := Mkit.dialogue()
     if not dialogue.is_active():
         return
     if dialogue.get_available_choices().is_empty():

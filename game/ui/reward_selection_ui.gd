@@ -22,7 +22,7 @@ func _on_option_selected(option: RewardOption) -> void:
 	if run_director != null:
 		run_director.select_reward(option)
 	var ui: UIManager = null
-	ui = ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
+	ui = Mkit.ui()
 	if ui != null:
 		ui.close_screen("reward_selection")
 	else:

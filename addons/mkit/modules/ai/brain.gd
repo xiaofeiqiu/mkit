@@ -9,7 +9,7 @@ var blackboard: Blackboard = Blackboard.new()
 
 
 func _ready() -> void:
-	command_router = ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
+	command_router = Mkit.commands()
 
 
 func _process(delta: float) -> void:

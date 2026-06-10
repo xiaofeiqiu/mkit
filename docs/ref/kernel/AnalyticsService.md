@@ -26,7 +26,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var analytics := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ANALYTICS) as AnalyticsService
+var analytics := Mkit.analytics()
 analytics.track_event("level_complete", {"level": 3, "time": 42.0})
 ```
 

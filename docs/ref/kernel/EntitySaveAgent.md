@@ -107,7 +107,7 @@ zone_id = "village"
 ### 典型场景（Level 2）
 
 ```gdscript
-var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+var save := Mkit.save()
 if save.save_game(get_tree().root):
     print("saved")
 ```

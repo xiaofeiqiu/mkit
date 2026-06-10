@@ -33,7 +33,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var ads := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ADS) as AdService
+var ads := Mkit.ads()
 ads.rewarded_ad_completed.connect(func(_p: String): give_bonus_coins(50))
 if ads.is_rewarded_ad_ready("revive"):
     ads.show_rewarded_ad("revive")

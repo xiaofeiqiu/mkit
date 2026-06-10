@@ -21,7 +21,7 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 	runtime.dialogue_id = dialogue_id
 	runtime.context = GameplayContext.from_context(context)
 	dialogue_started.emit(dialogue_id)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(DialogueEvents.dialogue_started(dialogue_id))
 	_enter_node(definition.start_node_id)
@@ -78,7 +78,7 @@ func end() -> void:
 	var ended_id := runtime.dialogue_id
 	runtime = null
 	dialogue_ended.emit(ended_id)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(DialogueEvents.dialogue_ended(ended_id))
 
@@ -122,7 +122,7 @@ func _run_effects(effects: Array[GameEffect]) -> void:
 		return
 	if runtime == null:
 		return
-	var executor := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var executor := Mkit.effects()
 	if executor == null:
 		return
 	executor.execute_many(effects, runtime.context, false)

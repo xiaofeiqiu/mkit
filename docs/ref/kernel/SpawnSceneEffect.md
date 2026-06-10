@@ -36,4 +36,4 @@ fx.spawn_at_target = false   # 从施法者处生成，朝 context.direction 飞
 ## 相关
 
 - → [GameEffect](GameEffect.md)（基类）· [ref/kernel/PoolService.md](PoolService.md)
-- → [ref/modules/VFXSpawner.md](../modules/VFXSpawner.md)（表现层 VFX 的另一条路）
+- → 游戏侧 VFX spawner（如 demo 的 VFXSpawner）是表现层 VFX 的另一条路

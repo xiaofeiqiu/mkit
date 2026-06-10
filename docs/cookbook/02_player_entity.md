@@ -102,7 +102,7 @@ var _was_moving: bool = false
 
 
 func _ready() -> void:
-    _commands = ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
+    _commands = Mkit.commands()
 
 
 func _process(_delta: float) -> void:

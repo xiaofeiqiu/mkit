@@ -30,7 +30,7 @@ func _exit_tree() -> void:
 func _connect_events() -> void:
 	if _events_connected:
 		return
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 		_events_connected = true
@@ -270,13 +270,13 @@ func start_run(seed: int = 0) -> void:
 		seed = Time.get_ticks_usec()
 	run_state = RunState.create(seed)
 	run_state.status = "starting"
-	var random: RandomService = ServiceRegistry.get_port(ServiceRegistry.SERVICE_RANDOM) as RandomService
+	var random: RandomService = Mkit.random()
 	if random != null:
 		random.set_seed(seed)
 	room_graph = DungeonGenerator.new().generate_linear(first_floor_room_pool, seed, run_length)
 	run_state.status = "active"
 	run_started.emit(run_state)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(WorldEvents.run_started(run_state.run_id, seed))
 	_connect_events()
@@ -348,7 +348,7 @@ func complete_run() -> void:
 		room_graph.clear()
 		room_graph = null
 	run_finished.emit("completed")
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(WorldEvents.run_finished(run_state.run_id, "completed"))
 
@@ -362,7 +362,7 @@ func fail_run(reason: String) -> void:
 		room_graph.clear()
 		room_graph = null
 	run_finished.emit("failed:%s" % reason)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(
 			WorldEvents.run_finished(

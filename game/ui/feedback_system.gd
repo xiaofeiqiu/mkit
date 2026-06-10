@@ -20,7 +20,7 @@ func _ready() -> void:
 	vfx = get_node_or_null(vfx_spawner_path) as VFXSpawner
 	audio = _resolve_audio()
 	ui = get_node_or_null(ui_manager_path) as UIManager
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.subscribe(CombatEvents.DAMAGE_APPLIED, _on_damage_applied)
 		events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
@@ -42,7 +42,7 @@ func _resolve_audio() -> AudioService:
 		var local_audio := get_node_or_null(audio_manager_path) as AudioService
 		if local_audio != null:
 			return local_audio
-	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
+	return Mkit.audio()
 
 
 func _on_damage_applied(event: DomainEvent) -> void:

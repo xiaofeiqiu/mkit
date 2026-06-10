@@ -64,7 +64,7 @@ func _ready() -> void:
         # 这里可以加属性、播特效等
     )
 
-    var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+    var events := Mkit.events()
     if events != null:
         events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died.bind(xp))
 
@@ -129,7 +129,7 @@ func from_save_data(data: Dictionary) -> void:
 ```gdscript
 # 任意常驻脚本（如主场景）
 func _unhandled_input(event: InputEvent) -> void:
-    var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+    var save := Mkit.save()
     if save == null:
         return
     if event.is_action_pressed("quick_save"):

@@ -84,7 +84,7 @@ func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayCont
 	if definition.effects.is_empty():
 		return
 	var executor: EffectService = null
-	executor = ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	executor = Mkit.effects()
 	if executor == null:
 		return
 	var ctx := GameplayContext.from_context(context)

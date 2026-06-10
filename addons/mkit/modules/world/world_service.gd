@@ -48,7 +48,7 @@ func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
 
 func _resolve_services() -> void:
 	if scene_router == null:
-		scene_router = ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
+		scene_router = Mkit.scenes()
 	_bind_scene_router()
 
 
@@ -153,7 +153,7 @@ func _restore_loaded_zone_scene(from_zone_id: String, to_zone_id: String) -> voi
 func _publish_zone_entry(from_zone_id: String, to_zone_id: String) -> void:
 	current_zone_id = to_zone_id
 	zone_changed.emit(from_zone_id, to_zone_id)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(WorldEvents.zone_changed(from_zone_id, to_zone_id))
 		events.emit_domain_event(
@@ -188,4 +188,4 @@ func _find_player() -> Node2D:
 
 
 func _get_audio() -> AudioService:
-	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
+	return Mkit.audio()

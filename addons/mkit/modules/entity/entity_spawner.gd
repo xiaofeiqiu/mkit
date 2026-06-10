@@ -6,7 +6,7 @@ var content: ContentService = null
 
 
 func _ready() -> void:
-	content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	content = Mkit.content()
 
 
 func spawn_entity(
@@ -48,7 +48,7 @@ func _get_definition(definition_id: String) -> EntityDefinition:
 	if definition_id.strip_edges() == "":
 		return null
 	if content == null:
-		content = ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+		content = Mkit.content()
 	if content == null:
 		return null
 	return content.get_resource(definition_id) as EntityDefinition

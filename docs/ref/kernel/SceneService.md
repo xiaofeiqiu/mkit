@@ -36,7 +36,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var scenes := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
+var scenes := Mkit.scenes()
 if not scenes.change_scene("res://game/scenes/level_2.tscn"):
     push_error("场景切换失败")
 ```

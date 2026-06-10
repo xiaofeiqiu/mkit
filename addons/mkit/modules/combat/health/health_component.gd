@@ -34,7 +34,7 @@ func apply_damage(result: DamageResult) -> void:
 	_apply_on_hit_statuses(result)
 	damaged.emit(result)
 	health_changed.emit(current_hp, get_max_hp())
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(CombatEvents.damage_applied(result))
 	if current_hp <= 0.0:
@@ -82,7 +82,7 @@ func die(killer: Node = null) -> void:
 	died.emit(owner)
 	var identity := EntityContract.get_identity(owner)
 	var entity_id: String = identity.entity_id if identity != null else str(owner.name)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(CombatEvents.entity_died(entity_id, owner))
 	if destroy_on_death:

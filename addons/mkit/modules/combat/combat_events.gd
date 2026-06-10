@@ -1,7 +1,7 @@
 class_name CombatEvents
 extends RefCounted
 ## Combat-owned domain event catalog: event type constants + DomainEvent constructors.
-## Emit through the kernel bus: `EventService.find().emit_domain_event(CombatEvents.entity_died(...))`.
+## Emit through the kernel bus: `Mkit.events().emit_domain_event(CombatEvents.entity_died(...))`.
 
 const DAMAGE_APPLIED := "damage_applied"
 const ENTITY_DIED := "entity_died"

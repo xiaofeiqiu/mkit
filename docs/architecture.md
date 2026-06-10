@@ -48,7 +48,7 @@ flowchart TB
 
 | 边界 | 当前实现 | 说明 |
 |------|----------|------|
-| 服务访问 | `ServiceRegistry.get_port(...)` | `ServiceRegistry` 是唯一 autoload，`get_port` 是带类型检查的统一访问入口 |
+| 服务访问 | `Mkit.combat()` 等类型化门面 | `ServiceRegistry` 是唯一 autoload；游戏/模块代码走 `Mkit` 静态门面，kernel 内部用 `get_port` |
 | 实体契约 | `EntityRoot` + `EntityContract` | `Components/`、`Controllers/` 是默认布局，模块代码优先通过契约入口取组件 |
 | 战斗结算 | `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult` | request/result 仍是公开入口，内部已拆成意图、结算、应用装配 |
 | 可变资源 | `ResourceSet` | mana/stamina 等当前值与上限查询统一为资源池模型 |
@@ -61,18 +61,18 @@ flowchart TB
 
 ## ServiceRegistry / RuntimeContext 模式
 
-`ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 注册 kernel 内置服务，`ModuleBootstrap.boot()` 在此之上追加内置模块服务。新代码统一通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取服务：
+`ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 注册 kernel 内置服务，`ModuleBootstrap.boot()` 在此之上追加内置模块服务。游戏/模块代码统一通过类型化门面 `Mkit` 获取内置服务（kernel 内部及自定义服务用 `ServiceRegistry.get_port`）：
 
 ```gdscript
 # 获取服务
-var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
+var combat := Mkit.combat()
 if combat == null:
     push_error("CombatService not available")
     return
 
 # 检查服务是否存在
 if ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) != null:
-    var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+    var save := Mkit.save()
 
 # 注册自定义服务（在 GameBootstrap/ModuleBootstrap 子类中 override _build_services）
 ServiceRegistry.register_service("my_service", MyService.new())
@@ -131,14 +131,14 @@ ServiceRegistry.register_service("my_service", MyService.new())
 
 ```gdscript
 # Definition — 编辑器创建，通过 ContentService 查询
-var def := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+var def := Mkit.content()
 var ability_def := def.get_resource("fireball") as AbilityDefinition
 
 # Component / Controller — 从 EntityContract 语义入口查找
 var ability_ctrl := EntityContract.get_controller(owner, "AbilityController") as AbilityController
 
 # System — ServiceRegistry 获取
-var combat := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService
+var combat := Mkit.combat()
 ```
 
 ---

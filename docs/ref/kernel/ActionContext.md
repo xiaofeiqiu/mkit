@@ -34,7 +34,7 @@ var ctx := ActionContext.new()
 ctx.source = player
 ctx.target = enemy
 var action := TimedAttackAction.new()
-var runner := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
+var runner := Mkit.actions()
 runner.start_action(action, ctx)
 ```
 

@@ -18,12 +18,12 @@ var _was_moving: bool = false
 
 
 func _ready() -> void:
-	_router = ServiceRegistry.get_service("commands") as CommandService
+	_router = Mkit.commands()
 
 
 func _physics_process(_delta: float) -> void:
 	if _router == null:
-		_router = ServiceRegistry.get_service("commands") as CommandService
+		_router = Mkit.commands()
 		if _router == null:
 			return
 

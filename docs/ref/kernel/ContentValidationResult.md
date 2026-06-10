@@ -28,7 +28,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+var content := Mkit.content()
 var result := content.validate_all()
 if not result.success:
     for e in result.errors:

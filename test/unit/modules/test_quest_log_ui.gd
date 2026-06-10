@@ -9,7 +9,7 @@ class StubContent:
 		return _defs.get(id, null)
 
 
-const QUEST_LOG_UI_SCRIPT := preload("res://addons/mkit/modules/ui/quest_log_ui.gd")
+const QUEST_LOG_UI_SCRIPT := preload("res://game/ui/quest_log_ui.gd")
 
 var content: StubContent
 var events: EventService

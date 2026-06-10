@@ -45,6 +45,8 @@ func has_service(service_id: String) -> bool:
 	return _services.has(service_id.strip_edges())
 
 
+## @deprecated: use the typed [Mkit] facade from game/module code, or
+## [method get_port] from kernel code.
 func get_service(service_id: String) -> Object:
 	var service := get_service_or_null(service_id)
 	if service == null and service_id.strip_edges() != "":
@@ -60,8 +62,9 @@ func get_service_or_null(service_id: String) -> Object:
 	return _services.get(id, null)
 
 
-## Preferred accessor: typed lookup that warns when the service is missing
-## or does not match the expected class.
+## Low-level lookup that warns when the service is missing or does not match
+## the expected class. Kernel code uses this; game/module code should prefer
+## the typed [Mkit] facade.
 func get_port(service_id: String, expected_class_name: String = "") -> Object:
 	var service := get_service(service_id)
 	if service != null:
@@ -96,5 +99,13 @@ func _warn_on_type_mismatch(service_id: String, service: Object, expected_class_
 	var expected := expected_class_name.strip_edges()
 	if expected == "":
 		return
-	if service.get_class() != expected and not service.is_class(expected):
-		push_warning("Service %s may not match expected type %s" % [service_id, expected])
+	# is_class only knows native classes; script classes need a walk up the
+	# get_base_script chain comparing class_name declarations.
+	if service.is_class(expected):
+		return
+	var script := service.get_script() as Script
+	while script != null:
+		if str(script.get_global_name()) == expected:
+			return
+		script = script.get_base_script()
+	push_warning("Service %s may not match expected type %s" % [service_id, expected])

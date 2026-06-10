@@ -100,7 +100,7 @@ func _stat(stats: StatsComponent, stat_id: String, default_value: float) -> floa
 
 func _roll_chance(chance: float) -> bool:
 	var random: RandomService = null
-	random = ServiceRegistry.get_port(ServiceRegistry.SERVICE_RANDOM) as RandomService
+	random = Mkit.random()
 	if random != null:
 		return random.randf() < chance
 	return randf() < chance

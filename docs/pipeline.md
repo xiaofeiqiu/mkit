@@ -57,7 +57,7 @@ func _ready() -> void:
     if ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) == null:
         push_error("Bootstrap has not run yet")
         return
-    var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+    var content := Mkit.content()
     print("Registered content IDs: ", content.get_all_by_type("ability_definition"))
 ```
 
@@ -133,7 +133,7 @@ func enter(context: Dictionary = {}) -> void:
     _action.active_time = 0.2
     _action.recovery_time = 0.3
     _action.completed.connect(_on_attack_done)
-    var as_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
+    var as_svc := Mkit.actions()
     var ctx := ActionContext.new()
     ctx.source = owner_entity
     as_svc.start_action(_action, ctx)
@@ -194,7 +194,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("attack"):
         var cmd := GameCommand.create("attack", "player_01", "player_01")
         cmd.payload["direction"] = get_global_mouse_position() - owner.global_position
-        var svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
+        var svc := Mkit.commands()
         if not svc.dispatch(cmd):
             push_warning("attack command not handled")
 ```
@@ -438,7 +438,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 
 ```gdscript
 # 手动执行（不经由 GameAction；少数情况下需要直接触发）
-var svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+var svc := Mkit.effects()
 var ctx := GameplayContext.new()
 ctx.source = player
 ctx.target = enemy
@@ -522,7 +522,7 @@ sequenceDiagram
 
 ```gdscript
 # 订阅伤害事件（UI / VFX / 任务推进等）
-var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+var events := Mkit.events()
 events.subscribe(CombatEvents.DAMAGE_APPLIED, func(event: DomainEvent) -> void:
     var result: DamageResult = event.payload.get("result")
     if result.was_critical:
@@ -531,7 +531,7 @@ events.subscribe(CombatEvents.DAMAGE_APPLIED, func(event: DomainEvent) -> void:
 )
 events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
     # 推进击杀任务、触发掉落……
-    var quest := ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
+    var quest := Mkit.quest()
     quest.advance_objective_for_entity(str(event.payload.get("entity_id")))
 )
 ```
@@ -586,7 +586,7 @@ sequenceDiagram
 
 ```gdscript
 # 精确订阅：只关心伤害
-var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+var events := Mkit.events()
 events.subscribe(CombatEvents.DAMAGE_APPLIED, func(event: DomainEvent) -> void:
     var result: DamageResult = event.payload.get("result")
     print("命中 %.0f（暴击=%s）" % [result.final_amount, result.was_critical])
@@ -733,7 +733,7 @@ sequenceDiagram
 # ResourceDatabase.resources 里加入 AudioDefinition("hit"/"death", kind=SFX)
 
 # 想自己监听做别的表现：
-var events := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EVENTS) as EventService
+var events := Mkit.events()
 events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
     var ref := event.payload.get("entity_ref") as Node
     if ref is Node2D:
@@ -743,7 +743,7 @@ events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
 
 ### 相关文档
 
-→ [ref/modules/FeedbackSystem.md](ref/modules/FeedbackSystem.md) · [ref/modules/VFXSpawner.md](ref/modules/VFXSpawner.md) · [ref/modules/DamageNumberSystem.md](ref/modules/DamageNumberSystem.md)  
+→ FeedbackSystem / VFXSpawner / DamageNumberSystem 是游戏侧表现层组件（demo 提供参考实现，不属于框架 API）  
 → [cookbook/13_animation.md](cookbook/13_animation.md)（通道 B）
 
 ---
@@ -781,7 +781,7 @@ sequenceDiagram
 # 目标配置（QuestObjectiveDefinition）：对准 QuestService 合成的事件
 #   event_type = "enemy_killed"   match_key = "faction"   match_value = "enemy"   required_count = 3
 # 手动推进非击杀类目标（如"对话 N 次"）：
-var quest := ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
+var quest := Mkit.quest()
 quest.advance_objective("quest.talk_villagers", "talk", 1)
 ```
 
@@ -830,7 +830,7 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-var save := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+var save := Mkit.save()
 save.save_completed.connect(func(path: String): print("已存 → %s" % path))
 if not save.save_game(get_tree().root):
     push_error("存档失败")
@@ -870,7 +870,7 @@ flowchart TB
 ### 关键代码
 
 ```gdscript
-var loot := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
+var loot := Mkit.loot()
 var ctx := GameplayContext.new()
 ctx.source = $Player
 var result := loot.roll_table("loot.beast_drop", ctx)
@@ -917,7 +917,7 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
+var dialogue := Mkit.dialogue()
 dialogue.dialogue_ended.connect(func(id: String): print("对话结束: %s" % id))
 var ctx := GameplayContext.new()
 ctx.source = $Player
@@ -968,7 +968,7 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-var shop := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SHOP) as ShopService
+var shop := Mkit.shop()
 shop.open_shop("shop.village")
 shop.transaction_failed.connect(func(id: String, reason: String): print("失败 %s: %s" % [id, reason]))
 if shop.can_buy("item.potion", 1, $Player):
@@ -1014,7 +1014,7 @@ events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
 )
 
 # 花元货币升级
-var prog := ServiceRegistry.get_port(ServiceRegistry.SERVICE_PROGRESSION) as ProgressionService
+var prog := Mkit.progression()
 if prog.can_unlock("upgrade.max_hp"):
     prog.unlock_or_level_up("upgrade.max_hp")
 ```
@@ -1150,7 +1150,7 @@ sequenceDiagram
 #   target_zone_id = "zone.forest"   target_spawn_id = "from_village"
 
 # 代码直接换场景：
-var scenes := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
+var scenes := Mkit.scenes()
 if not scenes.change_scene("res://game/scenes/forest.tscn"):
     push_error("场景切换失败")
 ```

@@ -40,7 +40,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var ui: UIManager = ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
+var ui: UIManager = Mkit.ui()
 ui.open_screen("inventory", {}, true)
 ```
 
@@ -48,7 +48,7 @@ ui.open_screen("inventory", {}, true)
 
 ```gdscript
 func show_rewards(options: Array[RewardOption], director: RunDirector) -> void:
-    var ui: UIManager = ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
+    var ui: UIManager = Mkit.ui()
     if ui == null:
         return
     ui.open_screen("reward_selection", {"options": options, "run_director": director}, true)
@@ -56,6 +56,6 @@ func show_rewards(options: Array[RewardOption], director: RunDirector) -> void:
 
 ## 相关
 
-- → [RewardSelectionUI](RewardSelectionUI.md) · [DialogueUI](DialogueUI.md) · [ShopUI](ShopUI.md) · [TimeService](../kernel/TimeService.md)
+- → [TimeService](../kernel/TimeService.md)（modal 暂停依赖）；具体屏幕（商店/对话/奖励选择等）由游戏侧实现，demo 在 `game/ui/` 提供参考
 - → [cookbook/08_loot_and_rewards.md](../../cookbook/08_loot_and_rewards.md)
 

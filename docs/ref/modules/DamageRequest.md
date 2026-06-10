@@ -33,7 +33,7 @@ req.source = player
 req.target = enemy
 req.base_amount = 15.0
 req.on_hit_statuses = [{"status_id": "status.bleed", "chance": 0.3}]
-var result := (ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMBAT) as CombatService).resolve(req)
+var result := (Mkit.combat()).resolve(req)
 ```
 
 ## 相关

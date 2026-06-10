@@ -95,7 +95,7 @@ func _ready() -> void:
 
 
 func _on_choosing_reward(options: Array[RewardOption]) -> void:
-    var ui := ServiceRegistry.get_port(ServiceRegistry.SERVICE_UI) as UIManager
+    var ui := Mkit.ui()
     if ui == null:
         # 没有 UI 时退化为自动选第一个，保证 run 能继续（仅供调试）
         if not options.is_empty():
@@ -139,6 +139,5 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 
 - [LootService ref](../ref/modules/LootService.md) — roll_table / generate_options / apply_selected
 - [RewardDefinition ref](../ref/modules/RewardDefinition.md) · [RewardOption ref](../ref/modules/RewardOption.md)
-- [RewardSelectionUI ref](../ref/modules/RewardSelectionUI.md) — setup(data) 的数据约定
 - [pipeline.md — Loot Roll](../pipeline.md#14-loot-roll)
 - [cookbook/14_shop.md](14_shop.md) — 用 `LootRollResult` 之外的方式获取物品（购买）

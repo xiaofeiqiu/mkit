@@ -136,7 +136,7 @@ extends DialogueUI
 
 
 func _ready() -> void:
-    var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
+    var dialogue := Mkit.dialogue()
     if dialogue == null:
         push_error("DialogueService unavailable")
         return
@@ -150,7 +150,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if not visible:
         return
     if event.is_action_pressed("interact"):
-        var dialogue := ServiceRegistry.get_port(ServiceRegistry.SERVICE_DIALOGUE) as DialogueService
+        var dialogue := Mkit.dialogue()
         if dialogue != null and dialogue.is_active():
             if dialogue.get_available_choices().is_empty():
                 dialogue.advance()

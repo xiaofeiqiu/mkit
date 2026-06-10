@@ -231,7 +231,7 @@ func _start_cast_action(
 
 
 func _get_action_runner() -> ActionService:
-	return ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
+	return Mkit.actions()
 
 
 func _has_enough_cost(definition: AbilityDefinition) -> bool:

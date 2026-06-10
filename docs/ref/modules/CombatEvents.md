@@ -27,7 +27,7 @@ combat 模块的领域事件目录：事件类型常量 + `DomainEvent` 构造�
 
 ```gdscript
 # 发射（HealthComponent 内部即如此）
-var events := EventService.find()
+var events := Mkit.events()
 if events != null:
     events.emit_domain_event(CombatEvents.entity_died(entity_id, owner))
 

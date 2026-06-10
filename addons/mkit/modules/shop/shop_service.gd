@@ -74,7 +74,7 @@ func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	if entry != null and entry.stock >= 0:
 		entry.stock = max(0, entry.stock - quantity)
 	item_purchased.emit(item_id, quantity, total_cost)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(ShopEvents.item_purchased(current_shop.shop_id, item_id, quantity))
 	return true
@@ -114,7 +114,7 @@ func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	add.amount = total_gain
 	_run_effect(add, _make_context(seller))
 	item_sold.emit(item_id, quantity, total_gain)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(ShopEvents.item_sold(current_shop.shop_id, item_id, quantity))
 	return true
@@ -154,7 +154,7 @@ func _make_context(actor: Node) -> GameplayContext:
 
 
 func _run_effect(effect: GameEffect, ctx: GameplayContext) -> EffectResult:
-	var effects := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var effects := Mkit.effects()
 	if effects != null:
 		return effects.execute(effect, ctx)
 	return effect.apply(ctx)

@@ -32,7 +32,7 @@ func enter(context: Dictionary = {}) -> void:
 	action.completed.connect(_on_action_completed)
 	current_action = action
 
-	var runner := ServiceRegistry.get_service("actions") as ActionService
+	var runner := Mkit.actions()
 	runner.start_action(action, ctx)
 
 

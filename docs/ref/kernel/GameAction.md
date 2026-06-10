@@ -54,7 +54,7 @@
 var action := GameAction.new()
 action.on_complete_effects = [my_deal_damage_effect]
 
-var action_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
+var action_svc := Mkit.actions()
 var ctx := ActionContext.new()
 ctx.source = self
 ctx.target = enemy
@@ -105,7 +105,7 @@ func _resolve_effects(_ctx: ActionContext) -> Array[GameEffect]:
 ```gdscript
 # 启动上面的动作
 func _cast_spell(source: Node, target: Node) -> void:
-    var action_svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
+    var action_svc := Mkit.actions()
     if action_svc == null:
         return
 

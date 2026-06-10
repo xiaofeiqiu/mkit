@@ -16,7 +16,7 @@ func _ready() -> void:
 
 
 func _connect_events() -> void:
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events == null:
 		return
 	if not events.domain_event_emitted.is_connected(notify_event):
@@ -59,7 +59,7 @@ func accept_quest(quest_id: String, context: GameplayContext) -> bool:
 	if context != null:
 		_quest_contexts[quest_id] = context
 	quest_accepted.emit(quest_id)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(QuestEvents.quest_accepted(quest_id))
 	return true
@@ -129,7 +129,7 @@ func complete_quest(quest_id: String, context: GameplayContext) -> bool:
 		return false
 	state.status = "completed"
 	quest_completed.emit(quest_id)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(QuestEvents.quest_completed(quest_id))
 	var definition := get_definition(quest_id)
@@ -154,7 +154,7 @@ func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 		state.status = "available"
 		state.objective_progress = {}
 	quest_turned_in.emit(quest_id)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(QuestEvents.quest_turned_in(quest_id))
 	return true
@@ -185,7 +185,7 @@ func _advance_progress(state: QuestState, objective: QuestObjectiveDefinition, a
 	objective_advanced.emit(
 		state.quest_id, objective.objective_id, updated, objective.required_count
 	)
-	var events := EventService.find()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(
 			QuestEvents.quest_objective_advanced(
@@ -238,7 +238,7 @@ func _run_reward_effects(definition: QuestDefinition, context: GameplayContext) 
 		return false
 	if definition.reward_effects.is_empty():
 		return true
-	var executor := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var executor := Mkit.effects()
 	if executor == null:
 		return false
 	var results := executor.execute_many(definition.reward_effects, context, true)

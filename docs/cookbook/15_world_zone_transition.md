@@ -144,7 +144,7 @@ world.go_to_zone("zone.forest", "from_village")
 
 ```gdscript
 func go_to_forest() -> void:
-    var world := ServiceRegistry.get_port(ServiceRegistry.SERVICE_WORLD) as WorldService
+    var world := Mkit.world()
     if world == null:
         return
     if not world.go_to_zone("zone.forest", "from_village"):
@@ -154,7 +154,7 @@ func go_to_forest() -> void:
 需要纯粹换到某个 scene、不需要 zone 状态时，才直接用 `SceneService`：
 
 ```gdscript
-var scenes := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
+var scenes := Mkit.scenes()
 scenes.change_scene("res://game/scenes/title.tscn")
 ```
 
@@ -163,7 +163,7 @@ scenes.change_scene("res://game/scenes/title.tscn")
 `WorldService` 成功进入区域后会发本地信号，也会通过 `EventService` 发领域事件：
 
 ```gdscript
-var world := ServiceRegistry.get_port(ServiceRegistry.SERVICE_WORLD) as WorldService
+var world := Mkit.world()
 if world != null:
     world.zone_changed.connect(func(from_zone_id: String, to_zone_id: String):
         print("进入区域：%s -> %s" % [from_zone_id, to_zone_id])

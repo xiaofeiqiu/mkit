@@ -36,7 +36,7 @@ flowchart TB
 
 | 主题 | 当前代码怎么做 |
 |------|----------------|
-| 服务访问 | `ServiceRegistry` 是唯一 autoload；`GameBootstrap` 启动时注册全部内置服务；新代码用 `get_port(ServiceRegistry.SERVICE_*)` |
+| 服务访问 | `ServiceRegistry` 是唯一 autoload；`GameBootstrap` 启动时注册全部内置服务；新代码用类型化门面 `Mkit.xxx()` |
 | 实体访问 | 默认仍有 `Components/` / `Controllers/`，但代码优先走 `EntityContract` |
 | 战斗 | 公开入口仍是 `DamageRequest` / `DamageResult`，内部已拆成 `DamageIntent` / `DamageResolution` / `DamageApplication` |
 | 可变数值 | 战斗资源用 `ResourceSet`，账号/货币用 `Wallet`，属性仍由 `StatsComponent` 管 modifier |
@@ -73,7 +73,7 @@ flowchart LR
 
 两端是绿色——**意图从哪来、结果给谁看，都是你的代码**；中间整条管线是蓝色——**mkit 包办**。
 
-管线每一步都由一个对应的**服务（Service）**驱动。服务由唯一 autoload `ServiceRegistry` 暴露；新代码用 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 获取，避免散落硬编码字符串：
+管线每一步都由一个对应的**服务（Service）**驱动。服务由唯一 autoload `ServiceRegistry` 持有；新代码用类型化门面 `Mkit.xxx()` 获取，拿到的就是具体服务类型，无需字符串和 cast：
 
 | 管线步骤 | 驱动它的服务 | 一句话 |
 |----------|-------------|--------|
@@ -103,7 +103,7 @@ flowchart LR
 外加两个贯穿全程的概念：
 
 - **GameplayContext** —— 沿管线传递的**共享信使**（谁打谁、多少伤害）。详见 [第四节](#四gameplaycontext流水线上的信使)。
-- **Service / Port** —— 上面那组干活的机器，优先 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` 取用；`get_service` 只作为兼容入口。
+- **Service / Port** —— 上面那组干活的机器，优先用类型化门面 `Mkit.xxx()` 取用；`get_port` 是底层访问器，`get_service` 已废弃。
 
 ---
 
@@ -270,7 +270,7 @@ flowchart LR
 4. 运行后查询：
 
 ```gdscript
-var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+var content := Mkit.content()
 var def := content.get_resource("fireball") as AbilityDefinition
 if def == null:
     push_error("fireball 未注册")

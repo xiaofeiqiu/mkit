@@ -8,7 +8,7 @@ extends GameEffect
 func _apply_impl(context: GameplayContext) -> EffectResult:
 	if quest_id == "":
 		return EffectResult.fail(effect_id, "Missing quest_id")
-	var quest := ServiceRegistry.get_port(ServiceRegistry.SERVICE_QUEST) as QuestService
+	var quest := Mkit.quest()
 	if quest == null:
 		return EffectResult.fail(effect_id, "Missing quest service")
 	if not quest.advance_objective(quest_id, objective_id, amount):

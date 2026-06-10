@@ -25,7 +25,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var pool := ServiceRegistry.get_port(ServiceRegistry.SERVICE_POOL) as PoolService
+var pool := Mkit.pool()
 pool.warmup("res://game/vfx/spark.tscn", 16)     # 开局预热
 var fx := pool.acquire("res://game/vfx/spark.tscn", self)
 # 用完归还
@@ -34,4 +34,4 @@ pool.release("res://game/vfx/spark.tscn", fx)
 
 ## 相关
 
-- → [SpawnSceneEffect](SpawnSceneEffect.md) · [ref/modules/VFXSpawner.md](../modules/VFXSpawner.md) · [ref/modules/DamageNumberSystem.md](../modules/DamageNumberSystem.md)
+- → [SpawnSceneEffect](SpawnSceneEffect.md)；游戏侧表现层（如 demo 的 VFXSpawner / DamageNumberSystem）也常驻池

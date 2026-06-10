@@ -28,7 +28,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var prog := ServiceRegistry.get_port(ServiceRegistry.SERVICE_PROGRESSION) as ProgressionService
+var prog := Mkit.progression()
 prog.add_currency("gold", 100)
 print(prog.get_currency("gold"))
 ```
@@ -38,7 +38,7 @@ print(prog.get_currency("gold"))
 ```gdscript
 # 元升级商店：买得起就升，否则提示
 func buy_upgrade(upgrade_id: String) -> void:
-    var prog := ServiceRegistry.get_port(ServiceRegistry.SERVICE_PROGRESSION) as ProgressionService
+    var prog := Mkit.progression()
     prog.currency_changed.connect(func(id: String, amt: int): _refresh_currency_label(id, amt))
     if not prog.can_unlock(upgrade_id):
         print("无法升级（货币不足或已满级）")   # 失败路径

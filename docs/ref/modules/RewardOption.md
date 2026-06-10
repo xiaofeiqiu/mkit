@@ -23,4 +23,4 @@
 
 ## 相关
 
-- → [RewardDefinition](RewardDefinition.md) · [RewardSystem](RewardSystem.md) · [RewardSelectionUI](RewardSelectionUI.md)
+- → [RewardDefinition](RewardDefinition.md) · [RewardSystem](RewardSystem.md)

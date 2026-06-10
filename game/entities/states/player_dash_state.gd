@@ -24,7 +24,7 @@ func enter(context: Dictionary = {}) -> void:
 	ctx.source = owner_entity
 	ctx.direction = direction
 
-	var runner := ServiceRegistry.get_service("actions") as ActionService
+	var runner := Mkit.actions()
 	if runner == null:
 		request_transition.call_deferred("Player/Idle", {"reason": "missing_action_runner"})
 		return

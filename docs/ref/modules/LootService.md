@@ -23,7 +23,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var loot := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
+var loot := Mkit.loot()
 var result := loot.roll_table("loot.beast_drop", ctx)
 for item in result.item_instances:
     inventory.add_item(item)
@@ -34,7 +34,7 @@ for item in result.item_instances:
 ```gdscript
 # 生成三选一奖励并应用玩家选择
 func offer_rewards(player: Node) -> void:
-    var loot := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
+    var loot := Mkit.loot()
     var ctx := GameplayContext.new()
     ctx.source = player
     ctx.target = player

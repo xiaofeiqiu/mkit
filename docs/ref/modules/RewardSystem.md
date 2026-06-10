@@ -21,7 +21,7 @@
 
 ```gdscript
 # 一般通过 LootService 间接调用：
-var loot := ServiceRegistry.get_port(ServiceRegistry.SERVICE_LOOT) as LootService
+var loot := Mkit.loot()
 var options := loot.generate_options(["reward.a", "reward.b"], 2, ctx)
 ```
 

@@ -35,7 +35,7 @@
 ### 最小示例（Level 1）
 
 ```gdscript
-var audio := ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
+var audio := Mkit.audio()
 audio.play_sfx("hit")
 audio.play_music("dungeon_theme", 1.5)   # 1.5s 淡入
 ```
@@ -45,5 +45,5 @@ audio.play_music("dungeon_theme", 1.5)   # 1.5s 淡入
 ## 相关
 
 - → [AudioDefinition](AudioDefinition.md)（内容定义）
-- → [ref/modules/FeedbackSystem.md](../modules/FeedbackSystem.md) · [ref/modules/WorldService.md](../modules/WorldService.md)
+- → [ref/modules/WorldService.md](../modules/WorldService.md)；游戏侧反馈系统（如 demo 的 FeedbackSystem）通常在此之上做统一入口
 - → [Saveable](Saveable.md)（音量持久化）· [cookbook/15_world_zone_transition.md](../../cookbook/15_world_zone_transition.md)（区域 BGM）

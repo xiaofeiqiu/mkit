@@ -6,7 +6,7 @@ var amount: int = 0
 
 
 func _apply_impl(_context: GameplayContext) -> EffectResult:
-	var progression := ServiceRegistry.get_port(ServiceRegistry.SERVICE_PROGRESSION) as ProgressionService
+	var progression := Mkit.progression()
 	if progression != null:
 		progression.add_currency(currency_id, amount)
 	return EffectResult.ok(effect_id)

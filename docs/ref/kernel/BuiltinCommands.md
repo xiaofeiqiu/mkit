@@ -34,7 +34,7 @@
 
 ```gdscript
 var cmd := GameCommand.create(BuiltinCommands.CAST_ABILITY, "player", "player", {"ability_id": "fireball"})
-(ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService).dispatch(cmd)
+(Mkit.commands()).dispatch(cmd)
 ```
 
 ```gdscript

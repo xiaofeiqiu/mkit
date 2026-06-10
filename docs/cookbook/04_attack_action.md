@@ -57,7 +57,7 @@ var _current_action: GameAction = null
 
 
 func _ready() -> void:
-    _action_svc = ServiceRegistry.get_port(ServiceRegistry.SERVICE_ACTIONS) as ActionService
+    _action_svc = Mkit.actions()
 
 
 func enter(_context: Dictionary = {}) -> void:

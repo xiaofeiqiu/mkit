@@ -1,9 +1,17 @@
 class_name RoomLoader
 extends RefCounted
+## 说明：`RoomLoader` 是 房间与一局流程系统 的加载器，负责把定义或路径解析为运行时场景。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在房间与一局流程系统中复用这段契约或状态时使用它。
+## 示例：`var instance := RoomLoader.new()`
 
+
+## 运行时状态：`last_error` 表示 `RoomLoader` 的字段值，由 `RoomLoader` 的公开 API 读取或维护。
 var last_error: String = ""
 
 
+## 加载配置、资源或运行时状态，并保持 `RoomLoader` 的领域契约一致。
 func load_room(room_definition_id: String, container: Node) -> RoomController:
 	last_error = ""
 	if room_definition_id.strip_edges() == "":

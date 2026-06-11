@@ -24,13 +24,8 @@ const ROOM_TRIAL_02 := "room.demo.trial_02"
 const ROOM_TRIAL_03 := "room.demo.trial_03"
 const REWARD_TRIAL_ATTACK := "reward.demo.trial_attack"
 const UPGRADE_TRIAL_ATTACK := "upgrade.demo.trial_attack"
-const PLATFORM_REVIVE_PLACEMENT := "revive"
-const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.demo.gold_pack"
-const PLATFORM_CLOUD_SLOT := "demo_profile"
-const GOLD_PACK_AMOUNT := 25
 const SCENE8_BOOT_SAVE_PATH := "/tmp/mkit_scene8_bootstrap_save.json"
 const SCENE8_S7_SAVE_PATH := "/tmp/mkit_scene8_s7_save.json"
-const SCENE8_PLATFORM_SAVE_PATH := "/tmp/mkit_scene8_platform_save.json"
 const DAMAGE_NUMBER_SCENE := "res://game/ui/damage_number.tscn"
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
 const ATTACK_SFX_ID := "sfx.demo.attack"
@@ -40,56 +35,6 @@ const TOAST_SCREEN_ID := "demo.toast"
 
 var _previous_current_scene: Node = null
 var _current_scene_override: Node = null
-
-
-class SpyAnalyticsService:
-	extends AnalyticsServiceMock
-	var tracked_events: Array[Dictionary] = []
-	var user_properties: Dictionary = {}
-
-	func track_event(event_name: String, properties: Dictionary = {}) -> void:
-		tracked_events.append(
-			{"event_name": event_name, "properties": properties.duplicate(true)}
-		)
-		super.track_event(event_name, properties)
-
-	func set_user_property(key: String, value: Variant) -> void:
-		user_properties[key] = value
-		super.set_user_property(key, value)
-
-
-class SpyAdService:
-	extends AdServiceMock
-	var shown_placements: Array[String] = []
-
-	func show_rewarded_ad(placement_id: String) -> void:
-		shown_placements.append(placement_id)
-		super.show_rewarded_ad(placement_id)
-
-
-class SpyIAPService:
-	extends IAPServiceMock
-	var purchased_products: Array[String] = []
-
-	func purchase(product_id: String) -> void:
-		purchased_products.append(product_id)
-		super.purchase(product_id)
-
-
-class SpyCloudSaveService:
-	extends CloudSaveServiceMock
-	var saved_slots: Array[String] = []
-	var loaded_slots: Array[String] = []
-	var last_saved_data: Dictionary = {}
-
-	func save_to_cloud(slot: String, data: Dictionary) -> void:
-		saved_slots.append(slot)
-		last_saved_data = data.duplicate(true)
-		super.save_to_cloud(slot, data)
-
-	func load_from_cloud(slot: String) -> void:
-		loaded_slots.append(slot)
-		super.load_from_cloud(slot)
 
 
 func after_each() -> void:
@@ -108,7 +53,6 @@ func after_each() -> void:
 	_previous_current_scene = null
 	IntTestHelpers.remove_file(SCENE8_BOOT_SAVE_PATH)
 	IntTestHelpers.remove_file(SCENE8_S7_SAVE_PATH)
-	IntTestHelpers.remove_file(SCENE8_PLATFORM_SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -123,11 +67,11 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var audio := ServiceRegistry.get_service("audio") as AudioService
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var audio := ServiceRegistry.get_port("audio") as AudioService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_not_null(router)
 	assert_not_null(actions)
 	assert_not_null(events)
@@ -233,15 +177,15 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 # S1: the firebolt skill pipeline. The player scene registers ability.demo.firebolt from
 # the live content database; casting it spends mana, channels through a CastAction (cast_time
 # > 0) before its effects fire, then DealDamage + ApplyStatus burn the field beast and a
-# cooldown starts. TargetInRangeCondition gates an out-of-range cast and CooldownReadyCondition
-# blocks the immediate re-cast.
-func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns() -> void:
+# cooldown starts. TargetInRangeCondition now lives on the damage/burn effects, so an
+# out-of-range cast launches and pays cost but misses; CooldownReadyCondition blocks recasts.
+func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_misses_range_and_burns() -> void:
 	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
 	assert_not_null(actions)
 
 	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
@@ -261,38 +205,66 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	add_child_autofree(beast)
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
 	var beast_status := beast.get_node("Controllers/StatusEffectController") as StatusEffectController
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	effects.trace_enabled = true
+	effects.clear_recent_results()
+	watch_signals(ability)
+	watch_signals(beast_health)
 
-	# --- TargetInRangeCondition gates a cast beyond the 120px firebolt range ---
+	# --- out of range: cast still starts, spends mana, finishes, but the effects miss ---
 	beast.global_position = Vector2(400.0, 0.0)
 	var ctx_far := GameplayContext.new().with_source(player).with_target(beast)
-	assert_false(ability.can_cast(FIREBOLT, ctx_far))
-	assert_eq(ability.get_cast_failure_reason(FIREBOLT, ctx_far), "target_out_of_range")
+	assert_true(ability.can_cast(FIREBOLT, ctx_far))
+	assert_eq(ability.get_cast_failure_reason(FIREBOLT, ctx_far), "")
+	assert_true(ability.cast(FIREBOLT, ctx_far))
+	assert_eq(pool.get_current("mana"), 40.0)
+	assert_signal_emit_count(ability, "ability_cast_started", 1)
+	assert_eq(actions.active_actions.size(), 1)
+	assert_true(actions.active_actions[0] is CastAction)
+	assert_eq(beast_health.current_hp, 35.0)
+	assert_false(beast_status.has_status(BURN))
+	actions._process(0.5)
+	assert_eq(actions.active_actions.size(), 0)
+	assert_signal_emit_count(ability, "ability_cast_finished", 1)
+	assert_signal_emit_count(ability, "cooldown_started", 1)
+	assert_signal_emit_count(beast_health, "damaged", 0)
+	assert_eq(beast_health.current_hp, 35.0)
+	assert_false(beast_status.has_status(BURN))
+	var missed_effect_ids: Array[String] = []
+	for result in effects.recent_results:
+		if not result.success and result.failure_reason == "target_out_of_range":
+			missed_effect_ids.append(result.effect_id)
+	assert_true(missed_effect_ids.has("effect.demo.firebolt_damage"))
+	assert_true(missed_effect_ids.has("effect.demo.firebolt_burn"))
+
+	var ability_instance := ability.abilities[FIREBOLT] as AbilityInstance
+	ability_instance.current_charges = 1
+	ability_instance.cooldown_remaining = 0.0
+	pool.set_current("mana", 50.0)
 
 	# --- in range: cast pays mana up front and channels through a CastAction (cast_time > 0) ---
 	beast.global_position = Vector2(80.0, 0.0)
-	watch_signals(ability)
-	watch_signals(beast_health)
 	var ctx := GameplayContext.new().with_source(player).with_target(beast)
 	assert_true(ability.can_cast(FIREBOLT, ctx))
 	assert_true(ability.cast(FIREBOLT, ctx))
 	# ResourcePoolComponent.spend is charged immediately
 	assert_eq(pool.get_current("mana"), 40.0)
-	assert_signal_emitted(ability, "ability_cast_started")
+	assert_signal_emit_count(ability, "ability_cast_started", 2)
 	assert_eq(actions.active_actions.size(), 1)
 	assert_true(actions.active_actions[0] is CastAction)
 	# the channel is still in flight: no damage, no burn, no finish yet
 	assert_eq(beast_health.current_hp, 35.0)
 	assert_false(beast_status.has_status(BURN))
-	assert_signal_not_emitted(ability, "ability_cast_finished")
+	assert_signal_emit_count(ability, "ability_cast_finished", 1)
 
 	# --- advance the channel past cast_time: DealDamage + ApplyStatus fire, cooldown starts ---
 	actions._process(0.5)
 	assert_eq(actions.active_actions.size(), 0)
-	assert_signal_emitted(ability, "ability_cast_finished")
-	assert_signal_emitted(ability, "cooldown_started")
+	assert_signal_emit_count(ability, "ability_cast_finished", 2)
+	assert_signal_emit_count(ability, "cooldown_started", 2)
 	# 35 - (firebolt base 8 + player attack_power 10), no crit/defense
 	assert_eq(beast_health.current_hp, 17.0)
-	assert_signal_emitted(beast_health, "damaged")
+	assert_signal_emit_count(beast_health, "damaged", 1)
 	assert_true(beast_status.has_status(BURN))
 
 	# --- CooldownReadyCondition now blocks the immediate re-cast ---
@@ -302,7 +274,6 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	assert_eq(ability.get_cast_failure_reason(FIREBOLT, ctx_cd), "on_cooldown: %s" % FIREBOLT)
 	var cd_cond := CooldownReadyCondition.new()
 	cd_cond.ability_id = FIREBOLT
-	ctx_cd.ability_id = FIREBOLT
 	assert_false(cd_cond.evaluate(ctx_cd))
 
 
@@ -317,10 +288,11 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	effects.trace_enabled = true
+	var events := ServiceRegistry.get_port("events") as EventService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
 	assert_not_null(content)
 	assert_not_null(effects)
 	assert_not_null(events)
@@ -412,7 +384,7 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	request.target = beast
 	request.base_amount = 10.0
 	request.can_crit = false
-	var damage := (ServiceRegistry.get_service("combat") as CombatService).resolve(request)
+	var damage := (ServiceRegistry.get_port("combat") as CombatService).resolve(request)
 	assert_eq(damage.final_amount, 15.0)
 
 
@@ -426,7 +398,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_not_null(content)
 
 	# the blade content: a weapon-slot item carrying a +attack_power StatModifierDefinition
@@ -508,7 +480,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_not_null(content)
 	var definition := content.get_resource(ENTITY_FIELD_BEAST) as EntityDefinition
 	assert_not_null(definition)
@@ -534,7 +506,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 	var root := demo.call("_current_zone_root") as Node
 	assert_not_null(root)
@@ -557,7 +529,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_true(identity.tags.has("field_beast"))
 	var receiver := beast.get_node("CommandReceiver") as CommandReceiver
 	assert_eq(receiver.receiver_id, identity.entity_id)
-	var commands := ServiceRegistry.get_service("commands") as CommandService
+	var commands := ServiceRegistry.get_port("commands") as CommandService
 	assert_true(commands._receivers.has(identity.entity_id))
 	assert_false(commands._receivers.has(BEAST_ID))
 
@@ -570,22 +542,43 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_true((save_data["base_overrides"] as Dictionary).is_empty())
 	var health := beast.get_node("Components/HealthComponent") as HealthComponent
 	assert_true(health.destroy_on_death)
+	var status := beast.get_node("Controllers/StatusEffectController") as StatusEffectController
 
 	var player := demo.get_node("Player") as CharacterBody2D
-	player.global_position = beast.global_position + Vector2(-80.0, 0.0)
 	var ability := player.get_node("Controllers/AbilityController") as AbilityController
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
 	watch_signals(ability)
+
+	player.global_position = beast.global_position + Vector2(-400.0, 0.0)
+	demo.set("_firebolt_projectile_observed", false)
+	demo.call("_cast_firebolt_command")
+	assert_true(bool(demo.get("_firebolt_projectile_observed")))
+	assert_true(await wait_for_signal(ability.ability_cast_finished, 1.0, "firebolt_miss"))
+	assert_signal_emit_count(ability, "ability_cast_finished", 1)
+	demo.call("_update_hud")
+	assert_eq(pool.get_current("mana"), 40.0)
+	assert_eq(health.current_hp, 35.0)
+	assert_false(status.has_status(BURN))
+	assert_eq(combat_label.text, "Beast: HP 35/35")
+
+	var ability_instance := ability.abilities[FIREBOLT] as AbilityInstance
+	ability_instance.current_charges = 1
+	ability_instance.cooldown_remaining = 0.0
+	pool.set_current("mana", 50.0)
+
+	player.global_position = beast.global_position + Vector2(-80.0, 0.0)
+	demo.set("_firebolt_projectile_observed", false)
 	demo.call("_cast_firebolt_command")
 	assert_true(bool(demo.get("_firebolt_projectile_observed")))
 	assert_true(await wait_for_signal(ability.ability_cast_finished, 1.0, "firebolt"))
+	assert_signal_emit_count(ability, "ability_cast_finished", 2)
 	demo.call("_update_hud")
 	assert_eq(pool.get_current("mana"), 40.0)
 	assert_eq(health.current_hp, 17.0)
 	assert_true(combat_label.text.contains("Beast: HP 17/35"))
 	assert_true(combat_label.text.contains("burn"))
 
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var lethal := DealDamageEffect.new()
 	lethal.effect_id = "effect.test.scene8.destroy_field_beast"
 	lethal.base_amount = 999.0
@@ -612,7 +605,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 
 	var player := demo.get_node("Player") as CharacterBody2D
@@ -651,7 +644,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 
 	beast.global_position = Vector2(28.0, 0.0)
 	watch_signals(player_health)
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	watch_signals(events)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -661,7 +654,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	assert_eq(receiver.command_history[-1].command_type, BuiltinCommands.ATTACK)
 	assert_eq(state_machine.get_current_path(), "Enemy/Attack")
 
-	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
 	assert_eq(actions.active_actions.size(), 1)
 	assert_true(actions.active_actions[0] is TimedAttackAction)
 	actions._process(0.08)
@@ -679,8 +672,8 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var events := ServiceRegistry.get_port("events") as EventService
 	assert_not_null(content)
 	assert_not_null(events)
 
@@ -816,7 +809,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes
 	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var save := ServiceRegistry.get_port("save") as SaveService
 	assert_not_null(save)
 	save.save_path = SCENE8_S7_SAVE_PATH
 
@@ -900,83 +893,6 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes
 	assert_eq(equipment.get_equipped("weapon").definition_id, FIELD_BLADE)
 	assert_eq(stats.get_stat_value("attack_power"), 20.0)
 
-func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_save() -> void:
-	var bootstrap := ModuleBootstrap.new()
-	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
-	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
-	add_child_autofree(bootstrap)
-
-	var save := ServiceRegistry.get_service("save") as SaveService
-	assert_not_null(save)
-	save.save_path = SCENE8_PLATFORM_SAVE_PATH
-
-	var analytics := SpyAnalyticsService.new()
-	var ads := SpyAdService.new()
-	var iap := SpyIAPService.new()
-	var cloud := SpyCloudSaveService.new()
-	_replace_service("analytics", analytics)
-	_replace_service("ads", ads)
-	_replace_service("iap", iap)
-	_replace_service("cloud_save", cloud)
-
-	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
-	add_child_autofree(demo)
-	await _settle_scene8_world()
-
-	assert_true(analytics is AnalyticsServiceMock)
-	assert_true(ads is AdServiceMock)
-	assert_true(iap is IAPServiceMock)
-	assert_true(cloud is CloudSaveServiceMock)
-
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	assert_not_null(quest)
-	assert_not_null(progression)
-
-	var player := demo.get_node("Player") as CharacterBody2D
-	var health := player.get_node("Components/HealthComponent") as HealthComponent
-	var experience := player.get_node("Components/ExperienceComponent") as ExperienceComponent
-	assert_not_null(health)
-	assert_not_null(experience)
-
-	quest.quest_turned_in.emit(QUEST_ID)
-	experience.level_up.emit(1, 2)
-	assert_eq(analytics.tracked_events.size(), 2)
-	assert_eq(analytics.tracked_events[0].get("event_name", ""), "quest_turned_in")
-	assert_eq(analytics.tracked_events[0]["properties"]["quest_id"], QUEST_ID)
-	assert_eq(analytics.tracked_events[1].get("event_name", ""), "level_up")
-	assert_eq(int(analytics.tracked_events[1]["properties"]["new_level"]), 2)
-
-	health.die(null)
-	assert_true(await wait_for_signal(ads.rewarded_ad_completed, 1.0, "rewarded ad"))
-	assert_eq(ads.shown_placements, [PLATFORM_REVIVE_PLACEMENT])
-	assert_false(health.dead)
-	assert_eq(health.current_hp, health.get_max_hp() * 0.5)
-
-	var gold_before := progression.get_currency("gold")
-	await _focus_demo_interactable(demo, "VillageSupply/Interactable")
-	demo.call("_purchase_gold_pack")
-	assert_true(await wait_for_signal(iap.purchase_completed, 1.0, "purchase"))
-	assert_eq(iap.purchased_products[-1], PLATFORM_GOLD_PACK_PRODUCT)
-	assert_true(iap.is_purchased(PLATFORM_GOLD_PACK_PRODUCT))
-	assert_eq(progression.get_currency("gold"), gold_before + GOLD_PACK_AMOUNT)
-
-	var saved_gold := progression.get_currency("gold")
-	demo.call("_save_demo_to_cloud")
-	assert_true(await wait_for_signal(cloud.cloud_save_completed, 1.0, "cloud save"))
-	assert_eq(cloud.saved_slots[-1], PLATFORM_CLOUD_SLOT)
-	assert_true(cloud.last_saved_data.has("roots"))
-	assert_false(cloud.last_saved_data.has("payload"))
-	assert_eq(int(cloud.last_saved_data["roots"]["progression"]["currencies"]["gold"]), saved_gold)
-
-	progression.state = ProgressionState.new()
-	assert_eq(progression.get_currency("gold"), 0)
-	demo.call("_load_demo_from_cloud")
-	assert_true(await wait_for_signal(cloud.cloud_load_completed, 1.0, "cloud load"))
-	assert_eq(cloud.loaded_slots[-1], PLATFORM_CLOUD_SLOT)
-	await get_tree().process_frame
-	assert_eq(progression.get_currency("gold"), saved_gold)
-
 
 func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debug_runtime() -> void:
 	var bootstrap := ModuleBootstrap.new()
@@ -989,10 +905,10 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	scene_root.add_child(demo)
 	await _settle_scene8_world()
 
-	var time := ServiceRegistry.get_service("time") as TimeService
-	var pool := ServiceRegistry.get_service("pool") as PoolService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var ui := ServiceRegistry.get_service("ui") as UIManager
+	var time := ServiceRegistry.get_port("time") as TimeService
+	var pool := ServiceRegistry.get_port("pool") as PoolService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var ui := ServiceRegistry.get_port("ui") as UIManager
 	assert_not_null(time)
 	assert_not_null(pool)
 	assert_not_null(effects)
@@ -1002,8 +918,8 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	var damage_numbers := feedback.get_node("DamageNumbers") as DamageNumberSystem
 	var vfx := feedback.get_node("VFX") as VFXSpawner
 	var overlay := demo.get_node("DebugOverlay") as DebugOverlay
-	var audio := ServiceRegistry.get_service("audio") as AudioService
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var audio := ServiceRegistry.get_port("audio") as AudioService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_not_null(audio)
 	assert_not_null(content)
 	assert_eq(feedback.audio, audio)
@@ -1133,12 +1049,13 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldService
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var world := ServiceRegistry.get_port("world") as WorldService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	effects.trace_enabled = true
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
 	assert_not_null(world)
 	assert_not_null(dialogue)
 	assert_not_null(quest)
@@ -1219,7 +1136,7 @@ func test_tc_int_scene8_11_trial_cave_shortcuts_close_room_without_zone_mismatch
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_not_null(world)
 	await _focus_demo_interactable(demo, "ToField/Interactable")
 	demo.call("_toggle_field_portal")
@@ -1273,21 +1190,13 @@ func _resolve_damage(source: Node, target: Node) -> float:
 	request.target = target
 	request.base_amount = 10.0
 	request.can_crit = false
-	return (ServiceRegistry.get_service("combat") as CombatService).resolve(request).final_amount
+	return (ServiceRegistry.get_port("combat") as CombatService).resolve(request).final_amount
 
 
 func _disable_beast_ai(beast: Node) -> void:
 	var brain := beast.get_node_or_null("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
 	if brain != null:
 		brain.enabled = false
-
-
-func _replace_service(service_id: String, service: Object) -> void:
-	var node := service as Node
-	if node != null:
-		add_child_autofree(node)
-	ServiceRegistry.unregister_service(service_id)
-	ServiceRegistry.register_service(service_id, service)
 
 
 func _modifier_count(stats: StatsComponent, stat_id: String) -> int:

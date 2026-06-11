@@ -61,10 +61,10 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
 	assert_not_null(content)
 	assert_not_null(events)
 	assert_not_null(quest)
@@ -84,7 +84,7 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	ServiceRegistry.unregister_service("audio")
 	ServiceRegistry.register_service("audio", audio)
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_not_null(world)
 	world.scene_router = null
 

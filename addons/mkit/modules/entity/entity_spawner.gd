@@ -1,7 +1,16 @@
 class_name EntitySpawner
 extends Node
+## 说明：`EntitySpawner` 是 实体系统 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在实体系统中复用这段契约或状态时使用它。
+## 示例：`var instance := EntitySpawner.new()`
+
+## 当 `EntitySpawner` 发生 `entity spawned` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal entity_spawned(entity: Node, definition_id: String)
+## 当 `EntitySpawner` 发生 `entity spawn failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal entity_spawn_failed(definition_id: String, reason: String)
+## 运行时状态：`content` 表示 `EntitySpawner` 的字段值，由 `EntitySpawner` 的公开 API 读取或维护。
 var content: ContentService = null
 
 
@@ -9,6 +18,7 @@ func _ready() -> void:
 	content = Mkit.content()
 
 
+## 执行 `spawn_entity` 对应的公开操作，并保持 `EntitySpawner` 的领域契约一致。
 func spawn_entity(
 	definition_id: String, parent: Node, position: Vector2 = Vector2.ZERO, runtime_id: String = ""
 ) -> Node:

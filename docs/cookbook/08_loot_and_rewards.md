@@ -137,7 +137,7 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 
 ## 延伸阅读
 
-- [LootService ref](../ref/modules/LootService.md) — roll_table / generate_options / apply_selected
-- [RewardDefinition ref](../ref/modules/RewardDefinition.md) · [RewardOption ref](../ref/modules/RewardOption.md)
+- [LootService ref](../generated/html/classes/LootService.html) — roll_table / generate_options / apply_selected
+- [RewardDefinition ref](../generated/html/classes/RewardDefinition.html) · [RewardOption ref](../generated/html/classes/RewardOption.html)
 - [pipeline.md — Loot Roll](../pipeline.md#14-loot-roll)
 - [cookbook/14_shop.md](14_shop.md) — 用 `LootRollResult` 之外的方式获取物品（购买）

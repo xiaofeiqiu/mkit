@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/mkit/modules/module_bootstrap.gd" id="1_module_bootstrap"]
+
+[node name="StarterBootstrap" type="Node"]
+script = ExtResource("1_module_bootstrap")
+initial_scene_path = "res://game_template/starter_scene.tscn"

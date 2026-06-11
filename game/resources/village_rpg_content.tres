@@ -374,11 +374,13 @@ damage_type = "magical"
 element_type = "fire"
 can_crit = false
 effect_id = "effect.demo.firebolt_damage"
+conditions = Array[ExtResource("3_5kn3j")]([SubResource("Resource_firebolt_range_cond")])
 
 [sub_resource type="Resource" id="Resource_firebolt_burn"]
 script = ExtResource("20_apply_status")
 status_id = "status.demo.burn"
 effect_id = "effect.demo.firebolt_burn"
+conditions = Array[ExtResource("3_5kn3j")]([SubResource("Resource_firebolt_range_cond")])
 
 [sub_resource type="Resource" id="Resource_ability_firebolt"]
 script = ExtResource("17_ability")
@@ -391,7 +393,7 @@ cost_amount = 10.0
 cast_time = 0.4
 range = 120.0
 tags = Array[String](["fire", "spell"])
-conditions = Array[ExtResource("3_5kn3j")]([SubResource("Resource_firebolt_range_cond"), SubResource("Resource_firebolt_cooldown_cond")])
+conditions = Array[ExtResource("3_5kn3j")]([SubResource("Resource_firebolt_cooldown_cond")])
 effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_firebolt_damage"), SubResource("Resource_firebolt_burn")])
 
 [sub_resource type="Resource" id="Resource_burn_tick_damage"]

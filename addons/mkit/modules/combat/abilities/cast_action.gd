@@ -1,10 +1,19 @@
 class_name CastAction
 extends GameAction
+## 说明：`CastAction` 是 能力系统 的动作对象，负责封装可启动、更新、取消或完成的 gameplay 行为。
+## 上游：通常由 ActionService、状态机、能力控制器或脚本创建或调用。
+## 下游：会连接EffectService、GameEffect、ActionContext 和完成/取消信号，不直接依赖具体游戏内容。
+## 使用：当项目行为需要跨帧执行、可取消，或在开始/完成时触发效果时使用它。
+## 示例：`var instance := CastAction.new()`
+
+## 运行时状态：`duration` 表示持续时间，由 `CastAction` 的公开 API 读取或维护。
 var duration: float = 0.0
+## 运行时状态：`animation_name` 表示 `CastAction` 的字段值，由 `CastAction` 的公开 API 读取或维护。
 var animation_name: String = "cast"
 var _started_animation: bool = false
 
 
+## 动作启动时的覆写 hook，并保持 `CastAction` 的领域契约一致。
 func _on_start() -> void:
 	action_id = "cast"
 	cancel_tags = ["stun", "death", "silence"]
@@ -12,19 +21,21 @@ func _on_start() -> void:
 	_play_animation()
 
 
+## 动作更新时的覆写 hook，并保持 `CastAction` 的领域契约一致。
 func _on_update(delta: float) -> void:
 	if context == null or context.source == null:
 		cancel("missing_source")
 		return
-	context.elapsed = elapsed
 	if elapsed >= duration:
 		complete()
 
 
+## 动作取消时的覆写 hook，并保持 `CastAction` 的领域契约一致。
 func _on_cancel(reason: String) -> void:
 	_stop_cast_feedback()
 
 
+## 动作完成时的覆写 hook，并保持 `CastAction` 的领域契约一致。
 func _on_complete() -> void:
 	_stop_cast_feedback()
 

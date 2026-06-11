@@ -23,10 +23,10 @@ func test_tc_int_dialogue_01_interact_choice_accepts_quest_then_talk_completes()
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
 	assert_not_null(dialogue)
 	assert_not_null(quest)
 	assert_not_null(events)

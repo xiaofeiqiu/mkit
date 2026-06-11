@@ -35,28 +35,24 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 	var bootstrap := _boot_with_databases()
 	assert_not_null(bootstrap)
 
-	assert_true(ServiceRegistry.get_service("events") is EventService)
-	assert_true(ServiceRegistry.get_service("content") is ContentService)
-	assert_true(ServiceRegistry.get_service("random") is RandomService)
-	assert_true(ServiceRegistry.get_service("time") is TimeService)
-	assert_true(ServiceRegistry.get_service("actions") is ActionService)
-	assert_true(ServiceRegistry.get_service("effects") is EffectService)
-	assert_true(ServiceRegistry.get_service("commands") is CommandService)
-	assert_true(ServiceRegistry.get_service("scenes") is SceneService)
-	assert_true(ServiceRegistry.get_service("pool") is PoolService)
-	assert_true(ServiceRegistry.get_service("save") is SaveService)
-	assert_true(ServiceRegistry.get_service("progression") is ProgressionService)
-	assert_true(ServiceRegistry.get_service("analytics") is AnalyticsService)
-	assert_true(ServiceRegistry.get_service("ads") is AdService)
-	assert_true(ServiceRegistry.get_service("iap") is IAPService)
-	assert_true(ServiceRegistry.get_service("cloud_save") is CloudSaveService)
-	assert_true(ServiceRegistry.get_service("quest") is QuestService)
-	assert_true(ServiceRegistry.get_service("shop") is ShopService)
-	assert_true(ServiceRegistry.get_service("dialogue") is DialogueService)
-	assert_true(ServiceRegistry.get_service("world") is WorldService)
-	assert_true(ServiceRegistry.get_service("audio") is AudioService)
+	assert_true(ServiceRegistry.get_port("events") is EventService)
+	assert_true(ServiceRegistry.get_port("content") is ContentService)
+	assert_true(ServiceRegistry.get_port("random") is RandomService)
+	assert_true(ServiceRegistry.get_port("time") is TimeService)
+	assert_true(ServiceRegistry.get_port("actions") is ActionService)
+	assert_true(ServiceRegistry.get_port("effects") is EffectService)
+	assert_true(ServiceRegistry.get_port("commands") is CommandService)
+	assert_true(ServiceRegistry.get_port("scenes") is SceneService)
+	assert_true(ServiceRegistry.get_port("pool") is PoolService)
+	assert_true(ServiceRegistry.get_port("save") is SaveService)
+	assert_true(ServiceRegistry.get_port("progression") is ProgressionService)
+	assert_true(ServiceRegistry.get_port("quest") is QuestService)
+	assert_true(ServiceRegistry.get_port("shop") is ShopService)
+	assert_true(ServiceRegistry.get_port("dialogue") is DialogueService)
+	assert_true(ServiceRegistry.get_port("world") is WorldService)
+	assert_true(ServiceRegistry.get_port("audio") is AudioService)
 
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	watch_signals(events)
 	events.emit_domain_event(WorldEvents.room_cleared("room.int.bootstrap"))
 	var evt_room_cleared_1 := DomainEventAsserts.last_event(events, "room_cleared")
@@ -64,24 +60,25 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 	assert_eq(evt_room_cleared_1.source_id, "room.int.bootstrap")
 	assert_eq(events.recent_events[-1].event_type, "room_cleared")
 
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_true(content.validate_all().success)
 
-	var random := ServiceRegistry.get_service("random") as RandomService
+	var random := ServiceRegistry.get_port("random") as RandomService
 	random.set_seed(17)
 	assert_true(random.chance(1.0))
 
-	var time := ServiceRegistry.get_service("time") as TimeService
+	var time := ServiceRegistry.get_port("time") as TimeService
 	time.set_gameplay_time_scale(2.0)
 	assert_eq(time.advance(0.5), 1.0)
 
-	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
 	var source := Node.new()
 	add_child_autofree(source)
 	actions.cancel_actions_for_source(source, "int_boot")
 	assert_eq(actions.active_actions.size(), 0)
 
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	effects.trace_enabled = true
 	var probe := IntTestHelpers.ProbeEffect.new()
 	probe.effect_id = "fx.int.boot.probe"
 	probe.result_payload = {"probe": true}
@@ -89,49 +86,37 @@ func test_tc_int_boot_01_boot_registers_all_services() -> void:
 	assert_true(effect_result.success)
 	assert_eq(effects.recent_results.size(), 1)
 
-	var commands := ServiceRegistry.get_service("commands") as CommandService
-	assert_eq(commands.broadcast(GameCommand.create("INT_BOOT"), []), 0)
+	var commands := ServiceRegistry.get_port("commands") as CommandService
+	assert_false(commands.dispatch(GameCommand.create("INT_BOOT", "bootstrap", "")))
 
-	var scenes := ServiceRegistry.get_service("scenes") as SceneService
+	var scenes := ServiceRegistry.get_port("scenes") as SceneService
 	watch_signals(scenes)
 	assert_false(scenes.change_scene(""))
 	assert_signal_emitted_with_parameters(scenes, "scene_change_failed", ["", "empty_scene_path"])
 
-	var pool := ServiceRegistry.get_service("pool") as PoolService
+	var pool := ServiceRegistry.get_port("pool") as PoolService
 	pool.clear_pool("res://test/integration/missing_int_pool_scene.tscn")
 
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var save := ServiceRegistry.get_port("save") as SaveService
 	save.save_path = _save_path
 	assert_true(save.save_game(ServiceRegistry))
 
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
 	progression.add_currency("gold", 3)
 	assert_eq(progression.get_currency("gold"), 3)
 
-	var analytics := ServiceRegistry.get_service("analytics") as AnalyticsService
-	analytics.track_event("int_boot", {"service": "analytics"})
-
-	var ads := ServiceRegistry.get_service("ads") as AdService
-	assert_true(ads.is_rewarded_ad_ready("placement.int"))
-
-	var iap := ServiceRegistry.get_service("iap") as IAPService
-	assert_false(iap.is_purchased("product.int"))
-
-	var cloud_save := ServiceRegistry.get_service("cloud_save") as CloudSaveService
-	assert_true(cloud_save.is_available())
-
-	var quest := ServiceRegistry.get_service("quest") as QuestService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
 	assert_null(quest.get_state("quest.int.missing"))
 
-	var shop := ServiceRegistry.get_service("shop") as ShopService
+	var shop := ServiceRegistry.get_port("shop") as ShopService
 	shop.close_shop()
 	assert_null(shop.current_shop)
 
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
 	assert_false(dialogue.start("", GameplayContext.new()))
 	assert_false(dialogue.is_active())
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_eq(world.current_zone_id, "")
 	assert_null(world.get_current_zone())
 
@@ -145,11 +130,13 @@ func test_tc_int_boot_02_boot_loads_memory_resource_database_and_validation_pass
 	]
 	_boot_with_databases(databases)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_true(content.has("item.int.memory"))
 	assert_true(content.has("ability.int.memory"))
 	assert_eq(content.get_resource("item.int.memory"), item)
 	assert_eq(content.get_resource("ability.int.memory"), ability)
+	assert_eq(content.get_all_by_type("ItemDefinition").size(), 1)
+	assert_eq(content.get_all_by_type("AbilityDefinition").size(), 1)
 	assert_eq(content.get_all_by_type("item_definition").size(), 1)
 	assert_eq(content.get_all_by_type("ability_definition").size(), 1)
 	assert_true(content.validate_all().success)
@@ -166,34 +153,35 @@ func test_tc_int_boot_03_boot_loads_tres_resource_path_and_validation_passes() -
 	var databases: Array[ResourceDatabase] = [database]
 	_boot_with_databases(databases)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	var loaded := content.get_resource("item.int.path") as ItemDefinition
 	assert_not_null(loaded)
 	assert_eq(loaded.item_id, "item.int.path")
 	assert_eq(loaded.resource_path, _tres_path)
 	assert_true(content.has("item.int.path"))
+	assert_eq(content.get_all_by_type("ItemDefinition").size(), 1)
 	assert_eq(content.get_all_by_type("item_definition").size(), 1)
 	assert_true(content.validate_all().success)
 
 
 func test_tc_int_boot_04_boot_is_idempotent_when_services_already_registered() -> void:
 	var bootstrap := _boot_with_databases()
-	var events := ServiceRegistry.get_service("events")
-	var actions := ServiceRegistry.get_service("actions")
+	var events := ServiceRegistry.get_port("events")
+	var actions := ServiceRegistry.get_port("actions")
 	var child_count := ServiceRegistry.get_child_count()
 
 	bootstrap.boot()
 
-	assert_eq(ServiceRegistry.get_service("events"), events)
-	assert_eq(ServiceRegistry.get_service("actions"), actions)
+	assert_eq(ServiceRegistry.get_port("events"), events)
+	assert_eq(ServiceRegistry.get_port("actions"), actions)
 	assert_eq(ServiceRegistry.get_child_count(), child_count)
 
 
 func test_tc_int_boot_05_audio_bus_volume_saves_and_loads_through_bootstrap() -> void:
 	_boot_with_databases()
 	_capture_master_volume()
-	var audio := ServiceRegistry.get_service("audio") as AudioService
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var audio := ServiceRegistry.get_port("audio") as AudioService
+	var save := ServiceRegistry.get_port("save") as SaveService
 	assert_not_null(audio)
 	assert_not_null(save)
 	save.save_path = _save_path
@@ -227,8 +215,8 @@ func test_tc_int_boot_06_configured_save_path_loads_profile() -> void:
 
 	_boot_with_databases([], _save_path)
 
-	var save := ServiceRegistry.get_service("save") as SaveService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var save := ServiceRegistry.get_port("save") as SaveService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
 	assert_not_null(save)
 	assert_not_null(progression)
 	assert_eq(save.save_path, _save_path)
@@ -251,7 +239,7 @@ func test_tc_int_boot_07_boot_registers_audio_definitions_from_content() -> void
 
 	_boot_with_databases([database])
 
-	var audio := ServiceRegistry.get_service("audio") as AudioService
+	var audio := ServiceRegistry.get_port("audio") as AudioService
 	assert_not_null(audio)
 	assert_eq(audio.sfx_map["sfx.int.boot"], sfx_stream)
 	assert_eq(audio.music_map["music.int.boot"], music_stream)
@@ -262,8 +250,8 @@ func test_tc_int_boot_07_boot_registers_audio_definitions_from_content() -> void
 
 func test_tc_int_boot_08_save_service_roots_entities_roundtrip() -> void:
 	_boot_with_databases()
-	var save := ServiceRegistry.get_service("save") as SaveService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var save := ServiceRegistry.get_port("save") as SaveService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
 	assert_not_null(save)
 	assert_not_null(progression)
 	save.save_path = _save_path
@@ -308,7 +296,8 @@ func test_tc_int_boot_08_save_service_roots_entities_roundtrip() -> void:
 
 
 func _boot_with_databases(
-	databases: Array[ResourceDatabase] = [], profile_save_path: String = ""
+	databases: Array[ResourceDatabase] = [],
+	profile_save_path: String = ""
 ) -> ModuleBootstrap:
 	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = databases

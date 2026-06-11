@@ -1,6 +1,14 @@
 class_name StatsComponent
 extends SaveableComponent
+## 说明：`StatsComponent` 是 属性系统 的实体组件，负责挂在实体场景下保存状态并暴露局部能力。
+## 上游：通常由实体根节点、控制器、状态机或领域服务创建或调用。
+## 下游：会连接EventService、SaveService、controller 或实体展示层，不直接依赖具体游戏内容。
+## 使用：当项目实体需要持有可保存或可被 controller 查询的局部状态时使用它。
+## 示例：`var instance := StatsComponent.new()`
+
+## 当 `StatsComponent` 发生 `stat changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal stat_changed(stat_id: String, old_value: float, new_value: float)
+## 编辑器配置：`base_stats` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
 @export var base_stats: Dictionary = {
 	"max_hp": 100.0,
 	"attack_power": 10.0,
@@ -16,8 +24,11 @@ signal stat_changed(stat_id: String, old_value: float, new_value: float)
 	"damage_multiplier": 1.0,
 	"healing_multiplier": 1.0
 }
+## 运行时状态：`modifiers_by_stat` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
 var modifiers_by_stat: Dictionary = {}
+## 运行时状态：`cached_values` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
 var cached_values: Dictionary[String, float] = {}
+## 运行时状态：`dirty_stats` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
 var dirty_stats: Dictionary[String, bool] = {}
 var _initial_base_stats: Dictionary = {}
 
@@ -27,6 +38,7 @@ func _ready() -> void:
 	mark_all_dirty()
 
 
+## 返回 `stat_value` 对应的数据或对象，并保持 `StatsComponent` 的领域契约一致。
 func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	if not base_stats.has(stat_id) and not modifiers_by_stat.has(stat_id):
 		return default_value
@@ -36,6 +48,7 @@ func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	return cached_values[stat_id]
 
 
+## 设置 `base_stat` 对应的数据或对象，并保持 `StatsComponent` 的领域契约一致。
 func set_base_stat(stat_id: String, value: float) -> void:
 	var old := get_stat_value(stat_id, value)
 	base_stats[stat_id] = value
@@ -44,6 +57,7 @@ func set_base_stat(stat_id: String, value: float) -> void:
 	stat_changed.emit(stat_id, old, new_value)
 
 
+## 向当前集合或状态中增加数据，并保持 `StatsComponent` 的领域契约一致。
 func add_modifier(modifier: StatModifier) -> void:
 	if modifier == null or modifier.stat_id == "":
 		return
@@ -58,6 +72,7 @@ func add_modifier(modifier: StatModifier) -> void:
 	_emit_stat_changed(modifier.stat_id, old_value)
 
 
+## 从当前集合或状态中移除数据，并保持 `StatsComponent` 的领域契约一致。
 func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 	_remove_modifiers_where(
 		func(m: StatModifier) -> bool:
@@ -65,10 +80,12 @@ func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 	)
 
 
+## 从当前集合或状态中移除数据，并保持 `StatsComponent` 的领域契约一致。
 func remove_modifiers_from_source(source_id: String) -> void:
 	_remove_modifiers_where(func(m: StatModifier) -> bool: return m.source_id == source_id)
 
 
+## 执行 `tick_modifiers` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
 func tick_modifiers(delta: float) -> void:
 	_remove_modifiers_where(
 		func(m: StatModifier) -> bool:
@@ -93,10 +110,12 @@ func _remove_modifiers_where(predicate: Callable) -> void:
 			_emit_stat_changed(stat_id, old_value)
 
 
+## 执行 `mark_dirty` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
 func mark_dirty(stat_id: String) -> void:
 	dirty_stats[stat_id] = true
 
 
+## 执行 `mark_all_dirty` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
 func mark_all_dirty() -> void:
 	for stat_id in base_stats.keys():
 		dirty_stats[stat_id] = true
@@ -104,10 +123,12 @@ func mark_all_dirty() -> void:
 		dirty_stats[stat_id] = true
 
 
+## 执行 `mark_save_baseline` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
 func mark_save_baseline() -> void:
 	_initial_base_stats = base_stats.duplicate(true)
 
 
+## 导出当前运行时状态，供 SaveService 写入存档，并保持 `StatsComponent` 的领域契约一致。
 func to_save_data() -> Dictionary:
 	return {
 		"base_overrides": _get_base_overrides(),
@@ -115,6 +136,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
+## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `StatsComponent` 的领域契约一致。
 func from_save_data(data: Dictionary) -> void:
 	if _initial_base_stats.is_empty():
 		mark_save_baseline()

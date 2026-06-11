@@ -1,14 +1,28 @@
 class_name ItemInstance
 extends RefCounted
+## 说明：`ItemInstance` 是 背包与装备系统 的运行时实例，负责保存由定义资源派生出的可变状态。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在背包与装备系统中复用这段契约或状态时使用它。
+## 示例：`var instance := ItemInstance.new()`
+
+## 运行时状态：`instance_id` 表示稳定 id，由 `ItemInstance` 的公开 API 读取或维护。
 var instance_id: String = ""
+## 运行时状态：`definition_id` 表示稳定 id，由 `ItemInstance` 的公开 API 读取或维护。
 var definition_id: String = ""
+## 运行时状态：`quantity` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
 var quantity: int = 1
+## 运行时状态：`rolled_affixes` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
 var rolled_affixes: Array[StatModifier] = []
+## 运行时状态：`durability` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
 var durability: float = 1.0
+## 运行时状态：`upgrade_level` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
 var upgrade_level: int = 0
+## 运行时状态：`metadata` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
 var metadata: Dictionary = {}
 
 
+## 创建并返回新的运行时对象，并保持 `ItemInstance` 的领域契约一致。
 static func create(def_id: String, qty: int = 1) -> ItemInstance:
 	var item := ItemInstance.new()
 	item.instance_id = "item_%d" % Time.get_ticks_usec()
@@ -17,6 +31,7 @@ static func create(def_id: String, qty: int = 1) -> ItemInstance:
 	return item
 
 
+## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ItemInstance` 的领域契约一致。
 func to_save_data() -> Dictionary:
 	var affixes: Array = []
 	for modifier in rolled_affixes:
@@ -33,6 +48,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
+## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ItemInstance` 的领域契约一致。
 static func from_save_data(data: Dictionary) -> ItemInstance:
 	var item := ItemInstance.new()
 	item.instance_id = str(data.get("instance_id", ""))

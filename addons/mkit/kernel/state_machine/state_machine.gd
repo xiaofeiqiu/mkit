@@ -1,15 +1,32 @@
 class_name StateMachine
 extends Node
+## 说明：`StateMachine` 是 状态机 的层级状态机，负责驱动实体状态切换、命令处理和状态更新。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在状态机中复用这段契约或状态时使用它。
+## 示例：`var instance := StateMachine.new()`
+
+## 当 `StateMachine` 发生 `state changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal state_changed(previous_path: String, current_path: String)
+## 当 `StateMachine` 发生 `transition failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal transition_failed(from_path: String, to_path: String, reason: String)
+## 编辑器配置：`initial_state_path` 表示资源或节点路径，由 `StateMachine` 的公开 API 读取或维护。
 @export var initial_state_path: String = ""
+## 编辑器配置：`auto_start` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
 @export var auto_start: bool = true
+## 运行时状态：`owner_entity` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
 var owner_entity: Node = null
+## 运行时状态：`root_state` 表示运行时状态，由 `StateMachine` 的公开 API 读取或维护。
 var root_state: State = null
+## 运行时状态：`current_leaf_state` 表示运行时状态，由 `StateMachine` 的公开 API 读取或维护。
 var current_leaf_state: State = null
+## 运行时状态：`blackboard` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
 var blackboard: Blackboard = Blackboard.new()
+## 运行时状态：`previous_path` 表示资源或节点路径，由 `StateMachine` 的公开 API 读取或维护。
 var previous_path: String = ""
+## 运行时状态：`last_transition_reason` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
 var last_transition_reason: String = ""
+## 运行时状态：`last_failed_transition_reason` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
 var last_failed_transition_reason: String = ""
 
 
@@ -32,6 +49,7 @@ func _physics_process(delta: float) -> void:
 		_update_state_chain(current_leaf_state, delta, true)
 
 
+## 处理传入命令、事件或状态变化，并保持 `StateMachine` 的领域契约一致。
 func handle_command(command: GameCommand) -> bool:
 	if current_leaf_state == null:
 		return false
@@ -43,6 +61,7 @@ func handle_command(command: GameCommand) -> bool:
 	return false
 
 
+## 执行 `transition_to` 对应的公开操作，并保持 `StateMachine` 的领域契约一致。
 func transition_to(target_path: String, context: Dictionary = {}) -> bool:
 	var target := find_state_by_path(target_path)
 	if target == null:
@@ -65,12 +84,14 @@ func transition_to(target_path: String, context: Dictionary = {}) -> bool:
 	return true
 
 
+## 返回 `current_path` 对应的数据或对象，并保持 `StateMachine` 的领域契约一致。
 func get_current_path() -> String:
 	if current_leaf_state == null:
 		return ""
 	return current_leaf_state.get_full_path()
 
 
+## 执行 `find_state_by_path` 对应的公开操作，并保持 `StateMachine` 的领域契约一致。
 func find_state_by_path(path: String) -> State:
 	if root_state == null:
 		return null

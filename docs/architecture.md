@@ -11,20 +11,16 @@ flowchart TB
     Game["**Game Content**\nres://game/\n你的场景、关卡、角色脚本\n.tres 配置资源"]
     Modules["**Mkit Modules**\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop…"]
     Kernel["**Kernel Runtime**\naddons/mkit/kernel/\nCommand / HFSM / Action / Effect / Event\nContentService / SaveService / ServiceRegistry"]
-    Platform["**Platform Adapters**\n默认 Mock，可替换后端\nAnalytics · IAP · Ads · CloudSave · Audio"]
 
     Game -->|"依赖"| Modules
     Game -->|"依赖"| Kernel
     Modules -->|"依赖"| Kernel
-    Kernel -->|"依赖"| Platform
 
     classDef mkitCore  fill:#4A90D9,color:#fff,stroke:#2C6FAC
     classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
-    classDef platform  fill:#6B7280,color:#fff,stroke:#4B5563
 
     class Modules,Kernel mkitCore
     class Game userOwned
-    class Platform platform
 ```
 
 🟢 绿色 = 你实现 / 🔵 蓝色 = mkit 负责
@@ -34,23 +30,12 @@ flowchart TB
 | **Game Content** | 你的游戏逻辑、场景、配置 | `res://game/` |
 | **Mkit Modules** | 可复用的游戏系统（战斗、任务、对话、世界、商店…） | `addons/mkit/modules/` |
 | **Kernel Runtime** | 框架骨架（runtime context、管线、服务注册、内容、存档…） | `addons/mkit/kernel/` |
-| **Platform Adapters** | 平台接口，开发期用 Mock | `addons/mkit/kernel/services/` |
 
 **依赖只能向下，不能反向。** kernel 不依赖任何 module；modules 不依赖 game。该规则由 `make layering`（`tools/check_layering.py`）在 CI 中强制：kernel 引用任何 module 类即失败。
 
 模块服务的接入走**组合根**：`GameBootstrap` 只注册 kernel 服务，`ModuleBootstrap`（`addons/mkit/modules/module_bootstrap.gd`）继承它并追加 7 个内置模块服务，游戏模板默认用后者。同样，`EventService` 只提供通用总线，业务事件的类型常量与构造函数住在各模块的事件目录（`CombatEvents`、`QuestEvents`、`WorldEvents`、`DialogueEvents`、`ShopEvents`、`InventoryEvents`、`LootEvents`）。
 
-模块间的横向依赖由**模块清单**显式声明：每个模块目录下有一份 `module.cfg`，声明 `id`、依赖模块列表 `deps`、注册的服务 id `services` 和事件目录类 `events`。例如 `shop` 依赖 `inventory` 与 `progression`：
-
-```ini
-[module]
-id="shop"
-deps=["inventory", "progression"]
-services=["shop"]
-events="ShopEvents"
-```
-
-清单由 `make module-deps`（`tools/check_module_deps.py`）强制校验：实际跨模块引用必须与声明完全一致（不允许未声明的引用，也不允许声明了却不存在的依赖），依赖图必须无环，并输出拓扑加载顺序。裁剪模块时按清单反向排除依赖方即可。
+当前可以通过继承 `ModuleBootstrap` 并在 `_build_services()` 中 `erase()` 某个服务来做到"运行时不注册该服务"。这不等同于物理删除模块源码：若要从 addon 中删掉 `shop/` 等模块目录，还需要同步删除 `Mkit` 对应访问器、`ModuleBootstrap` 对应注册行以及依赖该模块的源码/文档引用。当前没有运行时模块图加载器；内置模块服务由 `ModuleBootstrap` 显式组合。
 
 ---
 
@@ -62,12 +47,12 @@ events="ShopEvents"
 |------|----------|------|
 | 服务访问 | `Mkit.combat()` 等类型化门面 | `ServiceRegistry` 是唯一 autoload；游戏/模块代码走 `Mkit` 静态门面，kernel 内部用 `get_port` |
 | 实体契约 | `EntityRoot` + `EntityContract` | `Components/`、`Controllers/` 是默认布局，模块代码优先通过契约入口取组件 |
-| 战斗结算 | `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult` | request/result 仍是公开入口，内部已拆成意图、结算、应用装配 |
+| 战斗结算 | `DamageRequest -> DamageResult` | `CombatService.resolve()` 单步结算，中间值记录在 `DamageResult.trace` |
 | 可变资源 | `ResourceSet` | mana/stamina 等当前值与上限查询统一为资源池模型 |
 | 货币 | `Wallet` | 货币从普通 Dictionary 语义收敛为离散余额模型 |
 | 存档 scope | `SaveService.register_saveable_scope(...)` + `Saveable.get_save_scopes()` | 场景树扫描仍可用，scope provider 支持无完整场景树恢复 |
 
-尚未落地：运行时按清单拓扑装配模块（`ModuleBootstrap` 仍显式列出 7 个内置服务，`module.cfg` 目前只做声明与 CI 校验）。文档和代码不要把这个目标写成当前能力。
+当前没有运行时按拓扑装配模块的能力；`ModuleBootstrap` 显式列出 7 个内置服务。文档和代码不要把模块清单或自动装配写成当前能力。
 
 ---
 
@@ -76,14 +61,12 @@ events="ShopEvents"
 `ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 注册 kernel 内置服务，`ModuleBootstrap.boot()` 在此之上追加内置模块服务。游戏/模块代码统一通过类型化门面 `Mkit` 获取内置服务（kernel 内部及自定义服务用 `ServiceRegistry.get_port`）：
 
 ```gdscript
-# 获取服务
+# 获取服务；ModuleBootstrap 启动成功后内置服务保证存在
 var combat := Mkit.combat()
-if combat == null:
-    push_error("CombatService not available")
-    return
+var result := combat.resolve(req)
 
 # 检查服务是否存在
-if ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) != null:
+if ServiceRegistry.get_port(SaveService.SERVICE_ID) != null:
     var save := Mkit.save()
 
 # 注册自定义服务（在 GameBootstrap/ModuleBootstrap 子类中 override _build_services）
@@ -99,33 +82,29 @@ ServiceRegistry.register_service("my_service", MyService.new())
 
 ### 完整服务 ID 对照表
 
-| 常量名 | 服务 ID | 类型 | 说明 |
-|---------|----------|------|------|
-| `SERVICE_EVENTS` | `"events"` | `EventService` | 领域事件广播与订阅 |
-| `SERVICE_CONTENT` | `"content"` | `ContentService` | ContentDefinition 注册与按 ID 查询 |
-| `SERVICE_RANDOM` | `"random"` | `RandomService` | 有种子随机数，支持复现 |
-| `SERVICE_TIME` | `"time"` | `TimeService` | delta / 帧管理 |
-| `SERVICE_ACTIONS` | `"actions"` | `ActionService` | GameAction 生命周期管理 |
-| `SERVICE_EFFECTS` | `"effects"` | `EffectService` | GameEffect 执行链，含 trace |
-| `SERVICE_COMMANDS` | `"commands"` | `CommandService` | GameCommand 路由分发 |
-| `SERVICE_COMBAT`* | `"combat"` | `CombatService` | 伤害结算（base → 暴击 → 防御 → final） |
-| `SERVICE_SCENES` | `"scenes"` | `SceneService` | 场景切换封装 |
-| `SERVICE_POOL` | `"pool"` | `PoolService` | 对象池（Node 实例复用） |
-| `SERVICE_SAVE` | `"save"` | `SaveService` | 存读档，收集场景树 `Saveable` 并写 `scopes`（支持无场景树恢复） |
-| `SERVICE_PROGRESSION`* | `"progression"` | `ProgressionService` | 经验、升级、货币 |
-| `SERVICE_QUEST`* | `"quest"` | `QuestService` | 任务接受 / 推进 / 完成 |
-| `SERVICE_SHOP`* | `"shop"` | `ShopService` | 商店购买 |
-| `SERVICE_AUDIO` | `"audio"` | `AudioService` | 音频播放 |
-| `SERVICE_DIALOGUE`* | `"dialogue"` | `DialogueService` | 对话树运行时 |
-| `SERVICE_WORLD`* | `"world"` | `WorldService` | 世界区域 / Zone 管理 |
-| `SERVICE_LOOT`* | `"loot"` | `LootService` | 战利品掷骰与奖励分发 |
-| `SERVICE_ANALYTICS` | `"analytics"` | `AnalyticsServiceMock` | 数据统计（默认 Mock） |
-| `SERVICE_ADS` | `"ads"` | `AdServiceMock` | 广告（默认 Mock） |
-| `SERVICE_IAP` | `"iap"` | `IAPServiceMock` | 内购（默认 Mock） |
-| `SERVICE_CLOUD_SAVE` | `"cloud_save"` | `CloudSaveServiceMock` | 云存档（默认 Mock） |
-| `SERVICE_UI` | `"ui"` | `UIManager` | UIManager.open_screen 与 UI 生命周期；由场景中的 UIManager 自注册 |
+| 服务 ID 常量 | 服务 ID | 类型 | 说明 |
+|--------------|----------|------|------|
+| `EventService.SERVICE_ID` | `"events"` | `EventService` | 领域事件广播与订阅 |
+| `ContentService.SERVICE_ID` | `"content"` | `ContentService` | ContentDefinition 注册与按 ID 查询 |
+| `RandomService.SERVICE_ID` | `"random"` | `RandomService` | 有种子随机数，支持复现 |
+| `TimeService.SERVICE_ID` | `"time"` | `TimeService` | delta / 帧管理 |
+| `ActionService.SERVICE_ID` | `"actions"` | `ActionService` | GameAction 生命周期管理 |
+| `EffectService.SERVICE_ID` | `"effects"` | `EffectService` | GameEffect 执行链，含 trace |
+| `CommandService.SERVICE_ID` | `"commands"` | `CommandService` | GameCommand 路由分发 |
+| `SceneService.SERVICE_ID` | `"scenes"` | `SceneService` | 场景切换封装 |
+| `PoolService.SERVICE_ID` | `"pool"` | `PoolService` | 对象池（Node 实例复用） |
+| `SaveService.SERVICE_ID` | `"save"` | `SaveService` | 存读档，收集场景树 `Saveable` 并写 `scopes`（支持无场景树恢复） |
+| `AudioService.SERVICE_ID` | `"audio"` | `AudioService` | 音频播放 |
+| `CombatService.SERVICE_ID`* | `"combat"` | `CombatService` | 伤害结算（base → 暴击 → 防御 → final） |
+| `ProgressionService.SERVICE_ID`* | `"progression"` | `ProgressionService` | 经验、升级、货币 |
+| `QuestService.SERVICE_ID`* | `"quest"` | `QuestService` | 任务接受 / 推进 / 完成 |
+| `ShopService.SERVICE_ID`* | `"shop"` | `ShopService` | 商店购买 |
+| `DialogueService.SERVICE_ID`* | `"dialogue"` | `DialogueService` | 对话树运行时 |
+| `WorldService.SERVICE_ID`* | `"world"` | `WorldService` | 世界区域 / Zone 管理 |
+| `LootService.SERVICE_ID`* | `"loot"` | `LootService` | 战利品掷骰与奖励分发 |
+| `UIManager.SERVICE_ID` | `"ui"` | `UIManager` | UIManager.open_screen 与 UI 生命周期；由场景中的 UIManager 自注册 |
 
-> 带 `*` 的是模块服务，由 `ModuleBootstrap` 注册；其余 kernel 服务由 `GameBootstrap` 注册。
+> `*` 是模块服务，由 `ModuleBootstrap` 注册。
 > `random`、`time`、`effects`、`combat`、`loot` 是 `RefCounted` 风格服务，不作为 `ServiceRegistry` 子节点加入场景树；大多数其他内置服务是 `Node` 并由 `GameBootstrap` 加到 `ServiceRegistry` 下。`ui` 不在 `GameBootstrap._build_services()` / `ModuleBootstrap` 中创建，通常由游戏场景里的 `UIManager` 节点自注册。
 
 ---
@@ -137,7 +116,7 @@ ServiceRegistry.register_service("my_service", MyService.new())
 | 角色 | 基类 | 生命周期 | 示例 |
 |------|------|----------|------|
 | **Definition** | `Resource` / `ContentDefinition` | 静态，编辑器配置，保存为 `.tres` | `AbilityDefinition` |
-| **Runtime / Instance** | `RefCounted` | 运行时，每个实体或系统持有一份 | `AbilityInstance`, `DamageIntent`, `Wallet` |
+| **Runtime / Instance** | `RefCounted` | 运行时，每个实体或系统持有一份 | `AbilityInstance`, `DamageRequest`, `Wallet` |
 | **Controller / Component** | `Node` / `SaveableComponent` | 挂在实体节点树上，生命周期绑定实体 | `AbilityController`, `HealthComponent` |
 | **System / Service** | `Node` / `RefCounted` | 全局单例，通过 ServiceRegistry 获取 | `CombatService`, `QuestService` |
 
@@ -206,4 +185,4 @@ func _build_services() -> Dictionary:
 
 > 服务表有序：`super()` 的表在前，自定义服务追加在后注册。
 
-> 架构目标与当前实现差异以 `spec/architect.md` 为参考；本文描述的是当前代码已实现的运行时形态。
+> 当前限制、下一步路线和实现边界见 [roadmap.md](roadmap.md)；本文描述的是当前代码已实现的运行时形态。

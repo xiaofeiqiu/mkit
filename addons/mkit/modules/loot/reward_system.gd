@@ -1,7 +1,14 @@
 class_name RewardSystem
 extends RefCounted
+## 说明：`RewardSystem` 是 掉落与奖励系统 的系统对象，负责封装该领域可复用的算法或规则。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在掉落与奖励系统中复用这段契约或状态时使用它。
+## 示例：`var instance := RewardSystem.new()`
 
 
+
+## 根据配置生成运行时结果，并保持 `RewardSystem` 的领域契约一致。
 func generate_options(
 	pool_ids: Array[String], count: int, context: GameplayContext
 ) -> Array[RewardOption]:
@@ -29,6 +36,7 @@ func generate_options(
 	return result
 
 
+## 把输入数据或效果应用到目标对象，并保持 `RewardSystem` 的领域契约一致。
 func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	if option == null:
 		return false
@@ -54,22 +62,11 @@ func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 func _weighted_pick(candidates: Array[RewardDefinition]) -> RewardDefinition:
 	if candidates.is_empty():
 		return null
-	var total := 0.0
-	for c in candidates:
-		if c != null:
-			total += max(0.0, c.weight)
-	if total <= 0.0:
-		return candidates[0]
 	var random: RandomService = Mkit.random()
-	var r := random.randf_range(0.0, total) if random != null else randf_range(0.0, total)
-	var cursor := 0.0
-	for c in candidates:
-		if c == null:
-			continue
-		cursor += max(0.0, c.weight)
-		if r <= cursor:
-			return c
-	return candidates[0]
+	if random == null:
+		return candidates[0]
+	var picked := random.weighted_pick(candidates) as RewardDefinition
+	return picked if picked != null else candidates[0]
 
 
 func _build_option(def: RewardDefinition) -> RewardOption:

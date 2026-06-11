@@ -1,7 +1,16 @@
 class_name GameBootstrap
 extends Node
+## 说明：`GameBootstrap` 是 启动流程 的组合根，负责注册服务、加载内容并进入初始场景。
+## 上游：通常由项目主场景或游戏自定义 bootstrap创建或调用。
+## 下游：会连接ServiceRegistry、ContentService、SaveService 和 SceneService，不直接依赖具体游戏内容。
+## 使用：当项目项目启动时需要注册服务、加载内容和进入初始场景时使用它。
+## 示例：`var instance := GameBootstrap.new()`
+
+## 编辑器配置：`resource_databases` 表示 `GameBootstrap` 的字段值，由 `GameBootstrap` 的公开 API 读取或维护。
 @export var resource_databases: Array[ResourceDatabase] = []
+## 编辑器配置：`initial_scene_path` 表示资源或节点路径，由 `GameBootstrap` 的公开 API 读取或维护。
 @export var initial_scene_path: String = ""
+## 编辑器配置：`save_path` 表示资源或节点路径，由 `GameBootstrap` 的公开 API 读取或维护。
 @export var save_path: String = ""
 
 
@@ -9,6 +18,7 @@ func _ready() -> void:
 	boot()
 
 
+## 执行 `boot` 对应的公开操作，并保持 `GameBootstrap` 的领域契约一致。
 func boot() -> void:
 	_register_kernel_services()
 	_load_content()
@@ -22,35 +32,31 @@ func _register_kernel_services() -> void:
 	if ServiceRegistry == null:
 		push_error("GameBootstrap: ServiceRegistry autoload is missing")
 		return
-	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
+	if ServiceRegistry.has_service(EventService.SERVICE_ID):
 		print("[mkit] GameBootstrap: services already registered, skipping")
 		return
 	var services := _build_services()
 	for service_id in services:
 		_register_service_entry(service_id, services[service_id])
+	_notify_services_ready(services)
 	print("[mkit] GameBootstrap runtime services: %s" % ", ".join(ServiceRegistry.get_registered_service_ids()))
 
 
-## Ordered id -> service instance table. Override to add or replace services;
-## Node services are added as children of ServiceRegistry, RefCounted ones are not.
-## Kernel-only: gameplay module services are appended by ModuleBootstrap.
+## 有序的 service id 到服务实例映射。覆写它可以新增或替换服务；Node 服务会挂到 ServiceRegistry 下，RefCounted 服务不会。
+## 这里只注册 kernel 服务；gameplay module 服务由 ModuleBootstrap 追加。
 func _build_services() -> Dictionary:
 	return {
-		ServiceRegistry.SERVICE_EVENTS: EventService.new(),
-		ServiceRegistry.SERVICE_CONTENT: ContentService.new(),
-		ServiceRegistry.SERVICE_RANDOM: RandomService.new(),
-		ServiceRegistry.SERVICE_TIME: TimeService.new(),
-		ServiceRegistry.SERVICE_ACTIONS: ActionService.new(),
-		ServiceRegistry.SERVICE_EFFECTS: EffectService.new(),
-		ServiceRegistry.SERVICE_COMMANDS: CommandService.new(),
-		ServiceRegistry.SERVICE_SCENES: SceneService.new(),
-		ServiceRegistry.SERVICE_POOL: PoolService.new(),
-		ServiceRegistry.SERVICE_SAVE: SaveService.new(),
-		ServiceRegistry.SERVICE_AUDIO: AudioService.new(),
-		ServiceRegistry.SERVICE_ANALYTICS: AnalyticsServiceMock.new(),
-		ServiceRegistry.SERVICE_ADS: AdServiceMock.new(),
-		ServiceRegistry.SERVICE_IAP: IAPServiceMock.new(),
-		ServiceRegistry.SERVICE_CLOUD_SAVE: CloudSaveServiceMock.new(),
+		EventService.SERVICE_ID: EventService.new(),
+		ContentService.SERVICE_ID: ContentService.new(),
+		RandomService.SERVICE_ID: RandomService.new(),
+		TimeService.SERVICE_ID: TimeService.new(),
+		ActionService.SERVICE_ID: ActionService.new(),
+		EffectService.SERVICE_ID: EffectService.new(),
+		CommandService.SERVICE_ID: CommandService.new(),
+		SceneService.SERVICE_ID: SceneService.new(),
+		PoolService.SERVICE_ID: PoolService.new(),
+		SaveService.SERVICE_ID: SaveService.new(),
+		AudioService.SERVICE_ID: AudioService.new(),
 	}
 
 
@@ -65,6 +71,13 @@ func _register_service_entry(service_id: String, service: Object) -> void:
 	ServiceRegistry.register_service(service_id, service)
 
 
+func _notify_services_ready(services: Dictionary) -> void:
+	for service_id in services:
+		var service := services[service_id] as Object
+		if service != null and service.has_method("_on_services_ready"):
+			service.call("_on_services_ready")
+
+
 func _service_node_name(service: Object) -> String:
 	var script := service.get_script() as Script
 	if script != null and script.get_global_name() != &"":
@@ -73,7 +86,7 @@ func _service_node_name(service: Object) -> String:
 
 
 func _load_content() -> void:
-	var registry := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var registry := ServiceRegistry.get_port(ContentService.SERVICE_ID) as ContentService
 	if registry == null:
 		push_error("GameBootstrap._load_content: missing ContentService service")
 		return
@@ -87,15 +100,15 @@ func _configure_content_services() -> void:
 
 
 func _register_audio_definitions() -> void:
-	var registry := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	var audio := ServiceRegistry.get_port(ServiceRegistry.SERVICE_AUDIO) as AudioService
+	var registry := ServiceRegistry.get_port(ContentService.SERVICE_ID) as ContentService
+	var audio := ServiceRegistry.get_port(AudioService.SERVICE_ID) as AudioService
 	if registry == null or audio == null:
 		return
 	audio.register_audio_definitions(registry.get_all_by_type(AudioDefinition.TYPE_NAME))
 
 
 func _validate_content() -> void:
-	var registry := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var registry := ServiceRegistry.get_port(ContentService.SERVICE_ID) as ContentService
 	if registry == null:
 		push_error("GameBootstrap._validate_content: missing ContentService service")
 		return
@@ -105,7 +118,7 @@ func _validate_content() -> void:
 
 
 func _load_profile() -> void:
-	var save_manager := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SAVE) as SaveService
+	var save_manager := ServiceRegistry.get_port(SaveService.SERVICE_ID) as SaveService
 	if save_manager == null:
 		return
 	if save_path != "":
@@ -134,7 +147,7 @@ func _enter_initial_scene() -> void:
 			)
 		)
 		return
-	var scene_router := ServiceRegistry.get_port(ServiceRegistry.SERVICE_SCENES) as SceneService
+	var scene_router := ServiceRegistry.get_port(SceneService.SERVICE_ID) as SceneService
 	if scene_router != null:
 		scene_router.change_scene(initial_scene_path)
 	else:

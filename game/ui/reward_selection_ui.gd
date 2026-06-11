@@ -11,9 +11,10 @@ func setup(data: Dictionary) -> void:
 
 
 func _render_options() -> void:
-	for option in options:
+	for i in range(options.size()):
+		var option := options[i]
 		var button := Button.new()
-		button.text = "%s\n%s" % [option.display_name, option.description]
+		button.text = "%d / click: %s\n%s" % [i + 1, option.display_name, option.description]
 		button.pressed.connect(func(): _on_option_selected(option))
 		$OptionContainer.add_child(button)
 

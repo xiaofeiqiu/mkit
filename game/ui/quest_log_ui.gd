@@ -80,7 +80,7 @@ func _render_state(container: Node, state: QuestState) -> void:
 	row.add_child(title)
 	var status := Label.new()
 	status.name = "StatusLabel"
-	status.text = "Status: %s" % state.status
+	status.text = "Status: %s" % _status_text(state.status)
 	row.add_child(status)
 	if definition != null:
 		for objective in definition.objectives:
@@ -105,6 +105,18 @@ func _objective_text(state: QuestState, objective: QuestObjectiveDefinition) -> 
 		label = objective.objective_id
 	var current := state.get_progress(objective.objective_id)
 	return "%s %d/%d" % [label, current, objective.required_count]
+
+
+func _status_text(status: String) -> String:
+	match status:
+		"accepted":
+			return "Active"
+		"completed":
+			return "Ready to turn in"
+		"turned_in":
+			return "Complete"
+		_:
+			return status
 
 
 func _clear_container(container: Node) -> void:

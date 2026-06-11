@@ -1,7 +1,14 @@
 class_name DungeonGenerator
 extends RefCounted
+## 说明：`DungeonGenerator` 是 房间与一局流程系统 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在房间与一局流程系统中复用这段契约或状态时使用它。
+## 示例：`var instance := DungeonGenerator.new()`
 
 
+
+## 根据配置生成运行时结果，并保持 `DungeonGenerator` 的领域契约一致。
 func generate_linear(room_pool_ids: Array[String], seed: int, length: int) -> RoomGraph:
 	var graph := RoomGraph.new()
 	if length <= 0:

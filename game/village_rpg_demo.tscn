@@ -71,7 +71,6 @@ show_registered_services = false
 [node name="HUD" type="CanvasLayer" parent="." unique_id=238890030]
 
 [node name="Instructions" type="Label" parent="HUD" unique_id=651626077]
-visible = false
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
@@ -81,6 +80,7 @@ offset_top = -82.0
 offset_right = -24.0
 offset_bottom = -24.0
 theme_override_font_sizes/font_size = 18
+text = "E/Enter: interact"
 autowrap_mode = 3
 
 [node name="StatsPanel" type="VBoxContainer" parent="HUD" unique_id=1791937573]

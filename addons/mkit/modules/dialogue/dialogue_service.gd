@@ -1,16 +1,31 @@
 class_name DialogueService
 extends Node
+## 说明：`DialogueService` 是 对话系统 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(DialogueService.SERVICE_ID, DialogueService.new())`
+
+## 当 `DialogueService` 发生 `dialogue started` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal dialogue_started(dialogue_id: String)
+## 当 `DialogueService` 发生 `node entered` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal node_entered(node: DialogueNode)
+## 当 `DialogueService` 发生 `choices presented` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal choices_presented(node: DialogueNode, available: Array[DialogueChoice])
+## 当 `DialogueService` 发生 `dialogue ended` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal dialogue_ended(dialogue_id: String)
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `DialogueService`。
+const SERVICE_ID: String = "dialogue"
+## 运行时状态：`runtime` 表示运行时数据，由 `DialogueService` 的公开 API 读取或维护。
 var runtime: DialogueRuntime = null
 
 
+## 判断 `active` 当前是否成立，并保持 `DialogueService` 的领域契约一致。
 func is_active() -> bool:
 	return runtime != null
 
 
+## 执行 `start` 对应的公开操作，并保持 `DialogueService` 的领域契约一致。
 func start(dialogue_id: String, context: GameplayContext) -> bool:
 	if is_active():
 		return false
@@ -28,6 +43,7 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 	return is_active()
 
 
+## 返回 `available_choices` 对应的数据或对象，并保持 `DialogueService` 的领域契约一致。
 func get_available_choices() -> Array[DialogueChoice]:
 	var available: Array[DialogueChoice] = []
 	var node := _current_node()
@@ -41,6 +57,7 @@ func get_available_choices() -> Array[DialogueChoice]:
 	return available
 
 
+## 选择指定分支并推进对应流程，并保持 `DialogueService` 的领域契约一致。
 func choose(choice_index: int) -> void:
 	if runtime == null:
 		return
@@ -57,6 +74,7 @@ func choose(choice_index: int) -> void:
 	_enter_node(choice.next_node_id)
 
 
+## 推进对应目标或流程进度，并保持 `DialogueService` 的领域契约一致。
 func advance() -> void:
 	if runtime == null:
 		return
@@ -72,6 +90,7 @@ func advance() -> void:
 	_enter_node(node.next_node_id)
 
 
+## 执行 `end` 对应的公开操作，并保持 `DialogueService` 的领域契约一致。
 func end() -> void:
 	if runtime == null:
 		return
@@ -83,8 +102,12 @@ func end() -> void:
 		events.emit_domain_event(DialogueEvents.dialogue_ended(ended_id))
 
 
+## 返回 `definition` 对应的数据或对象，并保持 `DialogueService` 的领域契约一致。
 func get_definition(dialogue_id: String) -> DialogueDefinition:
-	return ContentService.find_resource(dialogue_id) as DialogueDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(dialogue_id) as DialogueDefinition
 
 
 func _enter_node(node_id: String) -> void:

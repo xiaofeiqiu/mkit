@@ -1,8 +1,18 @@
 class_name DebugOverlay
 extends CanvasLayer
+## 说明：`DebugOverlay` 是 调试界面 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在调试界面中复用这段契约或状态时使用它。
+## 示例：`var instance := DebugOverlay.new()`
+
+## 编辑器配置：`watch_entity_path` 表示资源或节点路径，由 `DebugOverlay` 的公开 API 读取或维护。
 @export var watch_entity_path: NodePath
+## 编辑器配置：`status_provider_path` 表示资源或节点路径，由 `DebugOverlay` 的公开 API 读取或维护。
 @export var status_provider_path: NodePath
+## 编辑器配置：`visible_on_start` 表示 `DebugOverlay` 的字段值，由 `DebugOverlay` 的公开 API 读取或维护。
 @export var visible_on_start: bool = true
+## 编辑器配置：`show_registered_services` 表示 `DebugOverlay` 的字段值，由 `DebugOverlay` 的公开 API 读取或维护。
 @export var show_registered_services: bool = true
 var _label: Label = null
 var _events: EventService = null
@@ -12,8 +22,8 @@ func _ready() -> void:
 	_label = Label.new()
 	add_child(_label)
 	visible = visible_on_start
-	if ServiceRegistry.has_service(ServiceRegistry.SERVICE_EVENTS):
-		_events = EventService.find()
+	if ServiceRegistry.has_service(EventService.SERVICE_ID):
+		_events = ServiceRegistry.get_port(EventService.SERVICE_ID) as EventService
 	if not ServiceRegistry.has_service("debug"):
 		ServiceRegistry.register_service("debug", self)
 
@@ -23,14 +33,15 @@ func _process(_delta: float) -> void:
 		_label.text = _build_text()
 
 
+## 执行 `toggle` 对应的公开操作，并保持 `DebugOverlay` 的领域契约一致。
 func toggle() -> void:
 	visible = not visible
 
 
 func _build_text() -> String:
 	var lines: Array[String] = []
-	if show_registered_services and ServiceRegistry.has_method("get_port_ids"):
-		lines.append("Services: %s" % ", ".join(ServiceRegistry.get_port_ids()))
+	if show_registered_services and ServiceRegistry.has_method("get_registered_service_ids"):
+		lines.append("Services: %s" % ", ".join(ServiceRegistry.get_registered_service_ids()))
 	_append_status_provider_lines(lines)
 	var entity := get_node_or_null(watch_entity_path)
 	if entity != null:

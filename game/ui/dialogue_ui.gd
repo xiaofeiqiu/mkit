@@ -17,7 +17,7 @@ func bind(dialogue_controller: DialogueService) -> void:
 func _on_node_entered(node: DialogueNode) -> void:
 	var speaker := get_node_or_null("SpeakerLabel") as Label
 	if speaker != null:
-		speaker.text = node.speaker_id
+		speaker.text = _speaker_name(node.speaker_id)
 	var text := get_node_or_null("TextLabel") as Label
 	if text != null:
 		text.text = node.text
@@ -30,10 +30,10 @@ func _on_choices_presented(_node: DialogueNode, available: Array[DialogueChoice]
 		return
 	for child in container.get_children():
 		child.queue_free()
-	for i in available.size():
+	for i in range(available.size()):
 		var choice := available[i]
 		var button := Button.new()
-		button.text = choice.text
+		button.text = "%d. %s" % [i + 1, choice.text]
 		var index := i
 		button.pressed.connect(func(): controller.choose(index))
 		container.add_child(button)
@@ -50,3 +50,11 @@ func _clear_choices() -> void:
 		return
 	for child in container.get_children():
 		child.queue_free()
+
+
+func _speaker_name(speaker_id: String) -> String:
+	match speaker_id:
+		"npc.demo.elder":
+			return "Village Elder"
+		_:
+			return speaker_id.replace("npc.demo.", "").replace("_", " ")

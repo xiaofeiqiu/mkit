@@ -101,7 +101,7 @@ func _try_cast_ability(command: GameCommand) -> bool:
     var ctx := GameplayContext.new()
     ctx.source = owner_entity
     ctx.target = _get_nearest_enemy()  # 按实际目标逻辑实现
-    ctx.ability_id = ability_id
+    ctx.payload["ability_id"] = ability_id
 
     if not ctrl.cast(ability_id, ctx):
         # cast 失败时 ability_failed 信号会携带原因
@@ -123,7 +123,7 @@ if Input.is_action_just_pressed("ability_1"):
     var cmd := GameCommand.create(
         BuiltinCommands.CAST_ABILITY, "player", "player", {"ability_id": "fireball"}
     )
-    _commands.dispatch(cmd)
+    _receiver.receive_command(cmd)
 ```
 
 ### 步骤 7：（可选）监听施放失败原因
@@ -162,8 +162,8 @@ ctrl.ability_cast_finished.connect(func(id: String) -> void:
 
 ## 延伸阅读
 
-- [AbilityController ref](../ref/modules/AbilityController.md) — register / cast / cooldown / save
-- [AbilityDefinition ref](../ref/modules/AbilityDefinition.md) — 所有配置字段
-- [ContentService ref](../ref/kernel/ContentService.md) — get_resource / has / validate_all
+- [AbilityController ref](../generated/html/classes/AbilityController.html) — register / cast / cooldown / save
+- [AbilityDefinition ref](../generated/html/classes/AbilityDefinition.html) — 所有配置字段
+- [ContentService ref](../generated/html/classes/ContentService.html) — get_resource / has / validate_all
 - [pipeline.md — Ability Cast](../pipeline.md#5-ability-cast) — instant vs CastAction 两条路径完整图
 - [cookbook/12_status_effects.md](12_status_effects.md) — 为技能添加 DOT / buff 效果

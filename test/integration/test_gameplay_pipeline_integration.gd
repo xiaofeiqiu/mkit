@@ -52,13 +52,13 @@ class TraceEventEffect:
 		var payload := {
 			"trace_id": str(context.get_payload_value("trace_id", "")),
 			"marker": str(context.get_payload_value("marker", "")),
-			"ability_id": context.ability_id,
+			"ability_id": str(context.get_payload_value("ability_id", "")),
 			"position": context.position,
 			"direction": context.direction
 		}
 		var events: EventService = null
 		if ServiceRegistry.has_service("events"):
-			events = ServiceRegistry.get_service("events") as EventService
+			events = ServiceRegistry.get_port("events") as EventService
 		if events != null:
 			events.emit_domain_event(
 				DomainEvent.create(event_type, _get_entity_id(context.source), "", payload)
@@ -113,7 +113,8 @@ class PipelineCastState:
 			return
 		var gameplay_context := GameplayContext.from_command(command, owner_entity)
 		var action_context := ActionContext.from_command(command, owner_entity)
-		blackboard.set_value("cast_context_ability_id", gameplay_context.ability_id)
+		var ability_id := str(gameplay_context.get_payload_value("ability_id", ""))
+		blackboard.set_value("cast_context_ability_id", ability_id)
 		blackboard.set_value(
 			"cast_action_context_trace_id", str(action_context.get_payload_value("trace_id", ""))
 		)
@@ -128,7 +129,7 @@ class PipelineCastState:
 			abilities.ability_cast_finished.connect(_on_ability_cast_finished)
 		if not abilities.ability_failed.is_connected(_on_ability_failed):
 			abilities.ability_failed.connect(_on_ability_failed)
-		var result := abilities.cast(gameplay_context.ability_id, gameplay_context)
+		var result := abilities.cast(ability_id, gameplay_context)
 		blackboard.set_value("last_cast_result", result)
 
 	func exit(_context: Dictionary = {}) -> void:
@@ -151,9 +152,9 @@ func after_each() -> void:
 func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.grant"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var events := ServiceRegistry.get_port("events") as EventService
 	var receiver := player.get_node("CommandReceiver") as CommandReceiver
 	var state_machine := player.get_node("StateMachine") as StateMachine
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
@@ -221,9 +222,9 @@ func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 func test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.blocked"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 	var resources := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
@@ -261,9 +262,9 @@ func test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure() -> 
 func test_tc_int_game_03_time_pause_blocks_action_progress() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.grant"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var time := ServiceRegistry.get_service("time") as TimeService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var time := ServiceRegistry.get_port("time") as TimeService
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 
@@ -305,7 +306,7 @@ func test_tc_int_game_03_time_pause_blocks_action_progress() -> void:
 
 func test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results() -> void:
 	_boot_gameplay()
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var first := ProbeEffect.new()
 	first.effect_id = "fx.int.first"
 	var failing := FailingEffect.new()
@@ -335,10 +336,10 @@ func test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results
 func test_tc_int_game_05_command_payload_context_blackboard_effect_event_trace() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.trace"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var events := ServiceRegistry.get_port("events") as EventService
 	var state_machine := player.get_node("StateMachine") as StateMachine
 
 	var command := GameCommand.create(
@@ -410,6 +411,7 @@ func _boot_gameplay() -> void:
 	bootstrap.resource_databases = [_make_database()]
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
+	(ServiceRegistry.get_port("effects") as EffectService).trace_enabled = true
 
 
 func _make_database() -> ResourceDatabase:
@@ -533,7 +535,7 @@ func _make_player(ability_ids: Array[String]) -> Node:
 	IntTestHelpers.add_equipment_controller(player)
 	IntTestHelpers.add_animation_player(player)
 	IntTestHelpers.assign_owner(player, player)
-	(ServiceRegistry.get_service("commands") as CommandService).register_receiver("player.int", receiver)
+	(ServiceRegistry.get_port("commands") as CommandService).register_receiver("player.int", receiver)
 	add_child_autofree(player)
 	return player
 

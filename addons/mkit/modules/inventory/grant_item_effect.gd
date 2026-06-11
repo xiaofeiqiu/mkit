@@ -1,10 +1,20 @@
 class_name GrantItemEffect
 extends GameEffect
+## 说明：`GrantItemEffect` 是 背包与装备系统 的效果对象，负责由 EffectService 执行并把结果落到服务或组件。
+## 上游：通常由 GameAction、EffectService、对话、任务、物品或奖励定义创建或调用。
+## 下游：会连接GameplayContext、ConditionEvaluator、领域服务和 EffectResult，不直接依赖具体游戏内容。
+## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
+## 示例：`var instance := GrantItemEffect.new()`
+
+## 编辑器配置：`item_id` 表示稳定 id，由 `GrantItemEffect` 的公开 API 读取或维护。
 @export var item_id: String = ""
+## 编辑器配置：`quantity` 表示 `GrantItemEffect` 的字段值，由 `GrantItemEffect` 的公开 API 读取或维护。
 @export var quantity: int = 1
+## 编辑器配置：`give_to_source` 表示 `GrantItemEffect` 的字段值，由 `GrantItemEffect` 的公开 API 读取或维护。
 @export var give_to_source: bool = true
 
 
+## 子类覆写的实际效果入口，并保持 `GrantItemEffect` 的领域契约一致。
 func _apply_impl(context: GameplayContext) -> EffectResult:
 	if item_id == "":
 		return EffectResult.fail(effect_id, "Missing item_id")

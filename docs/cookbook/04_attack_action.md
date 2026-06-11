@@ -77,7 +77,7 @@ func enter(_context: Dictionary = {}) -> void:
 
     var ctx := ActionContext.new()
     ctx.source = owner_entity
-    ctx.ability_id = "melee_attack"
+    ctx.payload["ability_id"] = "melee_attack"
 
     _current_action = _action_svc.start_action(attack, ctx)
     if _current_action != null:
@@ -123,7 +123,7 @@ func handle_command(command: GameCommand) -> bool:
 # 在 PlayerInputController._process 中添加：
 if Input.is_action_just_pressed("ui_select"):  # 或自定义攻击键
     var cmd := GameCommand.create(BuiltinCommands.ATTACK, "player", "player")
-    _commands.dispatch(cmd)
+    _receiver.receive_command(cmd)
 ```
 
 ### 步骤 5：让 HitboxComponent 知道攻击目标
@@ -166,7 +166,7 @@ ctx.target = get_tree().get_first_node_in_group("enemy")  # Recipe 06 会换成�
 
 ## 延伸阅读
 
-- [GameAction ref](../ref/kernel/GameAction.md) — start / update / complete / cancel / _fire_effects
-- [ActionService ref](../ref/kernel/ActionService.md) — start_action / cancel_actions_for_source
+- [GameAction ref](../generated/html/classes/GameAction.html) — start / update / complete / cancel / _fire_effects
+- [ActionService ref](../generated/html/classes/ActionService.html) — start_action / cancel_actions_for_source
 - [pipeline.md — Ability Cast](../pipeline.md#5-ability-cast) — instant vs timed 两条路径
 - [cookbook/13_animation.md](13_animation.md) — 如何为攻击动作接入真实动画

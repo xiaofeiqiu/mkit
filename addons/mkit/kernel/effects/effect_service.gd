@@ -1,10 +1,22 @@
 class_name EffectService
 extends RefCounted
-var trace_enabled: bool = true
+## 说明：`EffectService` 是 效果管线 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(EffectService.SERVICE_ID, EffectService.new())`
+
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `EffectService`。
+const SERVICE_ID: String = "effects"
+## 已执行 effect 的调试环形缓冲区；默认关闭，调试 UI 或测试可显式开启。
+var trace_enabled: bool = false
+## 运行时状态：`recent_results` 表示执行结果集合，由 `EffectService` 的公开 API 读取或维护。
 var recent_results: Array[EffectResult] = []
+## 运行时状态：`max_recent_results` 表示执行结果集合，由 `EffectService` 的公开 API 读取或维护。
 var max_recent_results: int = 100
 
 
+## 执行传入的动作、效果或规则集合，并保持 `EffectService` 的领域契约一致。
 func execute(effect: GameEffect, context: GameplayContext) -> EffectResult:
 	if effect == null:
 		return EffectResult.fail("null_effect", "Effect is null")
@@ -13,6 +25,7 @@ func execute(effect: GameEffect, context: GameplayContext) -> EffectResult:
 	return result
 
 
+## 执行传入的动作、效果或规则集合，并保持 `EffectService` 的领域契约一致。
 func execute_many(
 	effects: Array[GameEffect], context: GameplayContext, stop_on_failure: bool = false
 ) -> Array[EffectResult]:
@@ -25,6 +38,7 @@ func execute_many(
 	return results
 
 
+## 清理当前保存的运行时状态或缓存，并保持 `EffectService` 的领域契约一致。
 func clear_recent_results() -> void:
 	recent_results.clear()
 

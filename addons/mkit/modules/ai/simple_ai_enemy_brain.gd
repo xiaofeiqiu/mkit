@@ -1,7 +1,16 @@
 class_name SimpleAIEnemyBrain
 extends Brain
+## 说明：`SimpleAIEnemyBrain` 是 AI 系统 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在AI 系统中复用这段契约或状态时使用它。
+## 示例：`var instance := SimpleAIEnemyBrain.new()`
+
+## 编辑器配置：`detection_range` 表示距离或范围，由 `SimpleAIEnemyBrain` 的公开 API 读取或维护。
 @export var detection_range: float = 240.0
+## 编辑器配置：`attack_range` 表示距离或范围，由 `SimpleAIEnemyBrain` 的公开 API 读取或维护。
 @export var attack_range: float = 48.0
+## 编辑器配置：`target_group` 表示 `SimpleAIEnemyBrain` 的字段值，由 `SimpleAIEnemyBrain` 的公开 API 读取或维护。
 @export var target_group: String = "player"
 
 
@@ -12,6 +21,7 @@ func _ready() -> void:
 		blackboard.set_value("target", target)
 
 
+## 执行 `think` 对应的公开操作，并保持 `SimpleAIEnemyBrain` 的领域契约一致。
 func think() -> void:
 	target = _get_target()
 	if target == null:

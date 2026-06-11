@@ -129,4 +129,4 @@ Feedback  (Node)
 ## 延伸阅读
 
 - [pipeline.md — Animation（两通道）](../pipeline.md#10-animation--action-驱动通道)
-- [GameAction ref](../ref/kernel/GameAction.md) — 生命周期钩子里播动画
+- [GameAction ref](../generated/html/classes/GameAction.html) — 生命周期钩子里播动画

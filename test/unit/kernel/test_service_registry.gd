@@ -18,7 +18,7 @@ func test_tc_sr_01_register_and_retrieve() -> void:
 	var obj := Node.new()
 	reg.register_service("foo", obj)
 	assert_true(reg.has_service("foo"))
-	assert_eq(reg.get_service("foo"), obj)
+	assert_eq(reg.get_port("foo"), obj)
 	obj.free()
 
 
@@ -39,7 +39,7 @@ func test_tc_sr_04_duplicate_id_replaces() -> void:
 	var obj2 := Node.new()
 	reg.register_service("dup", obj1)
 	reg.register_service("dup", obj2)
-	assert_eq(reg.get_service("dup"), obj2)
+	assert_eq(reg.get_port("dup"), obj2)
 	obj1.free()
 	obj2.free()
 
@@ -55,15 +55,15 @@ func test_tc_sr_06_has_service_false_for_whitespace() -> void:
 	assert_false(reg.has_service("   "))
 
 
-# --- get_service ---
+# --- get_port ---
 
 
-func test_tc_sr_07_get_service_null_for_missing() -> void:
-	assert_null(reg.get_service("missing"))
+func test_tc_sr_07_get_port_null_for_missing() -> void:
+	assert_null(reg.get_port("missing"))
 
 
-func test_tc_sr_08_get_service_null_for_empty() -> void:
-	assert_null(reg.get_service(""))
+func test_tc_sr_08_get_port_null_for_empty() -> void:
+	assert_null(reg.get_port(""))
 
 
 # --- unregister_service ---
@@ -95,25 +95,6 @@ func test_tc_sr_11_clear_removes_all() -> void:
 	assert_false(reg.has_service("b"))
 	a.free()
 	b.free()
-
-
-# --- get_port ---
-
-
-func test_tc_sr_12_get_port_returns_object_on_match() -> void:
-	var obj := EventService.new()
-	reg.register_service("events", obj)
-	var result: Object = reg.get_port("events", "EventService")
-	assert_eq(result, obj)
-	obj.free()
-
-
-func test_tc_sr_13_get_port_returns_object_on_mismatch_with_warning() -> void:
-	var obj := Node.new()
-	reg.register_service("thing", obj)
-	var result: Object = reg.get_port("thing", "EventService")
-	assert_eq(result, obj)
-	obj.free()
 
 
 func test_tc_sr_14_registered_service_ids_are_sorted() -> void:

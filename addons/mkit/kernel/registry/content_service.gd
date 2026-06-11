@@ -1,15 +1,25 @@
 class_name ContentService
 extends Node
+## 说明：`ContentService` 是 内容注册 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(ContentService.SERVICE_ID, ContentService.new())`
+
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `ContentService`。
+const SERVICE_ID: String = "content"
 var _by_id: Dictionary = {}
 var _by_type: Dictionary = {}
 var _resource_path_by_id: Dictionary = {}
 
 
+## 加载配置、资源或运行时状态，并保持 `ContentService` 的领域契约一致。
 func load_database(database: ResourceDatabase) -> void:
 	for res in database.get_all_resources():
 		register_resource(res)
 
 
+## 注册 `resource`，让后续查询或路由可以找到它，并保持 `ContentService` 的领域契约一致。
 func register_resource(res: Resource) -> void:
 	var content_id := _extract_content_id(res)
 	if content_id == "":
@@ -19,25 +29,15 @@ func register_resource(res: Resource) -> void:
 		push_error("Duplicate content id: %s" % content_id)
 		return
 	_by_id[content_id] = res
-	var type_name := _get_resource_type_name(res)
-	if not _by_type.has(type_name):
-		_by_type[type_name] = []
-	_by_type[type_name].append(res)
+	for type_name in _get_resource_type_names(res):
+		if not _by_type.has(type_name):
+			_by_type[type_name] = []
+		_by_type[type_name].append(res)
 	if res.resource_path != "":
 		_resource_path_by_id[content_id] = res.resource_path
 
 
-## Static convenience lookup through the registered content service.
-## Returns null (without warning) for empty ids or when the service is absent.
-static func find_resource(content_id: String) -> Resource:
-	if content_id.strip_edges() == "":
-		return null
-	var content := ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) as ContentService
-	if content == null:
-		return null
-	return content.get_resource(content_id)
-
-
+## 返回 `resource` 对应的数据或对象，并保持 `ContentService` 的领域契约一致。
 func get_resource(content_id: String) -> Resource:
 	if not _by_id.has(content_id):
 		push_warning("Content id not found: %s" % content_id)
@@ -45,6 +45,7 @@ func get_resource(content_id: String) -> Resource:
 	return _by_id[content_id]
 
 
+## 返回 `typed_resource` 对应的数据或对象，并保持 `ContentService` 的领域契约一致。
 func get_typed_resource(content_id: String, expected_script: Script) -> Resource:
 	var res := get_resource(content_id)
 	if res == null:
@@ -55,16 +56,19 @@ func get_typed_resource(content_id: String, expected_script: Script) -> Resource
 	return res
 
 
+## 返回 `all_by_type` 对应的数据或对象，并保持 `ContentService` 的领域契约一致。
 func get_all_by_type(type_name: String) -> Array:
 	if not _by_type.has(type_name):
 		return []
 	return _by_type[type_name]
 
 
+## 执行 `has` 对应的公开操作，并保持 `ContentService` 的领域契约一致。
 func has(content_id: String) -> bool:
 	return _by_id.has(content_id)
 
 
+## 执行 `validate_all` 对应的公开操作，并保持 `ContentService` 的领域契约一致。
 func validate_all() -> ContentValidationResult:
 	var result := ContentValidationResult.new()
 	result.success = true
@@ -84,10 +88,19 @@ func _extract_content_id(res: Resource) -> String:
 	return def.get_content_id()
 
 
-func _get_resource_type_name(res: Resource) -> String:
+func _get_resource_type_names(res: Resource) -> Array[String]:
 	if res == null:
-		return "Unknown"
+		return ["Unknown"]
+	var names: Array[String] = []
 	var script := res.get_script() as Script
-	if script != null and script.resource_path != "":
-		return script.resource_path.get_file().get_basename()
-	return res.get_class()
+	if script != null:
+		var global_name := str(script.get_global_name())
+		if global_name != "":
+			names.append(global_name)
+		if script.resource_path != "":
+			var file_name := script.resource_path.get_file().get_basename()
+			if file_name != "" and not names.has(file_name):
+				names.append(file_name)
+	if names.is_empty():
+		names.append(res.get_class())
+	return names

@@ -1,8 +1,17 @@
 class_name PoolService
 extends Node
+## 说明：`PoolService` 是 基础服务 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(PoolService.SERVICE_ID, PoolService.new())`
+
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `PoolService`。
+const SERVICE_ID: String = "pool"
 var _pools: Dictionary = {}
 
 
+## 执行 `warmup` 对应的公开操作，并保持 `PoolService` 的领域契约一致。
 func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 	for i in range(count):
 		var node := _instantiate(scene_path)
@@ -14,6 +23,7 @@ func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 		release(scene_path, node)
 
 
+## 执行 `acquire` 对应的公开操作，并保持 `PoolService` 的领域契约一致。
 func acquire(scene_path: String, parent: Node = null) -> Node:
 	var pool: Array = _pools.get(scene_path, [])
 	var node: Node = null
@@ -31,6 +41,7 @@ func acquire(scene_path: String, parent: Node = null) -> Node:
 	return node
 
 
+## 执行 `release` 对应的公开操作，并保持 `PoolService` 的领域契约一致。
 func release(scene_path: String, node: Node) -> void:
 	if node == null:
 		return
@@ -42,6 +53,7 @@ func release(scene_path: String, node: Node) -> void:
 	_pools[scene_path] = pool
 
 
+## 清理当前保存的运行时状态或缓存，并保持 `PoolService` 的领域契约一致。
 func clear_pool(scene_path: String) -> void:
 	if not _pools.has(scene_path):
 		return

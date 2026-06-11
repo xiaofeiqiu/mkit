@@ -114,3 +114,15 @@ func test_tc_er_12_subscriber_also_gets_signal_dispatch() -> void:
 	events.emit_event("entity_died", "e01")
 	assert_signal_emitted(events, "domain_event_emitted")
 	assert_eq(_received.size(), 1)
+
+
+func test_tc_er_13_any_event_subscriber_receives_all_events_once() -> void:
+	events.subscribe(EventService.ANY_EVENT, _record_event)
+	events.subscribe("entity_died", _record_event)
+
+	events.emit_event("entity_died", "e01")
+	events.emit_event("room_cleared", "r01")
+
+	assert_eq(_received.size(), 2)
+	assert_eq((_received[0] as DomainEvent).event_type, "entity_died")
+	assert_eq((_received[1] as DomainEvent).event_type, "room_cleared")

@@ -329,7 +329,7 @@ func test_tc_cmbt_14_resolve_populates_trace() -> void:
 func test_tc_cmbt_15_combat_service_returns_registered_instance() -> void:
 	var registered := CombatService.new()
 	ServiceRegistry.register_service("combat", registered)
-	assert_eq(ServiceRegistry.get_service("combat") as CombatService, registered)
+	assert_eq(ServiceRegistry.get_port("combat") as CombatService, registered)
 
 
 # --- evade ---

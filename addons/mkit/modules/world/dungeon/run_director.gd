@@ -1,16 +1,34 @@
 class_name RunDirector
 extends Saveable
+## 说明：`RunDirector` 是 房间与一局流程系统 的流程导演，负责推进一局流程、房间切换和奖励选择。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在房间与一局流程系统中复用这段契约或状态时使用它。
+## 示例：`var instance := RunDirector.new()`
+
+## 当 `RunDirector` 发生 `run started` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal run_started(run_state: RunState)
+## 当 `RunDirector` 发生 `room enter requested` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal room_enter_requested(room_id: String)
+## 当 `RunDirector` 发生 `choosing reward` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal choosing_reward(options: Array[RewardOption])
+## 当 `RunDirector` 发生 `run finished` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal run_finished(result: String)
+## 编辑器配置：`first_floor_room_pool` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
 @export var first_floor_room_pool: Array[String] = []
+## 编辑器配置：`room_scene_container_path` 表示资源或节点路径，由 `RunDirector` 的公开 API 读取或维护。
 @export var room_scene_container_path: NodePath = NodePath("../RoomRoot")
+## 编辑器配置：`player_group` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
 @export var player_group: String = "player"
+## 编辑器配置：`player_entity_id` 表示稳定 id，由 `RunDirector` 的公开 API 读取或维护。
 @export var player_entity_id: String = "player_001"
+## 编辑器配置：`run_length` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
 @export var run_length: int = 3
+## 运行时状态：`run_state` 表示运行时状态，由 `RunDirector` 的公开 API 读取或维护。
 var run_state: RunState = null
+## 运行时状态：`room_graph` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
 var room_graph: RoomGraph = null
+## 运行时状态：`current_room_controller` 表示当前值，由 `RunDirector` 的公开 API 读取或维护。
 var current_room_controller: RoomController = null
 var _events_connected: bool = false
 var _pending_room_runtime: RoomRuntime = null
@@ -36,10 +54,12 @@ func _connect_events() -> void:
 		_events_connected = true
 
 
+## 返回 `save_scopes` 对应的数据或对象，并保持 `RunDirector` 的领域契约一致。
 func get_save_scopes() -> Array[String]:
 	return ["world.run", "world.room", "world.reward"]
 
 
+## 返回 `save_payload_for_scope` 对应的数据或对象，并保持 `RunDirector` 的领域契约一致。
 func get_save_payload_for_scope(scope: String) -> Dictionary:
 	match scope.strip_edges():
 		"world.run":
@@ -51,6 +71,7 @@ func get_save_payload_for_scope(scope: String) -> Dictionary:
 	return {}
 
 
+## 把输入数据或效果应用到目标对象，并保持 `RunDirector` 的领域契约一致。
 func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
 	match scope.strip_edges():
 		"world.run":
@@ -253,12 +274,14 @@ func _restore_room_graph(data: Dictionary) -> void:
 	room_graph = graph
 
 
+## 执行 `run_graph_is_empty` 对应的公开操作，并保持 `RunDirector` 的领域契约一致。
 func run_graph_is_empty() -> bool:
 	if room_graph == null:
 		return true
 	return room_graph.nodes.is_empty()
 
 
+## 启动 `run` 流程，并保持 `RunDirector` 的领域契约一致。
 func start_run(seed: int = 0) -> void:
 	if first_floor_room_pool.is_empty():
 		fail_run("empty_room_pool")
@@ -290,6 +313,7 @@ func _on_entity_died(event: DomainEvent) -> void:
 		fail_run("player_died")
 
 
+## 进入对应状态、房间或节点，并保持 `RunDirector` 的领域契约一致。
 func enter_next_room() -> void:
 	if run_state == null:
 		fail_run("missing_run_state")
@@ -307,6 +331,7 @@ func enter_next_room() -> void:
 	_load_room(room_node.room_definition_id)
 
 
+## 执行 `on_room_cleared` 对应的公开操作，并保持 `RunDirector` 的领域契约一致。
 func on_room_cleared(room_controller: RoomController) -> void:
 	if run_state == null:
 		return
@@ -322,6 +347,7 @@ func on_room_cleared(room_controller: RoomController) -> void:
 	choosing_reward.emit(options)
 
 
+## 选择指定选项并推进对应流程，并保持 `RunDirector` 的领域契约一致。
 func select_reward(option: RewardOption) -> void:
 	if run_state == null:
 		fail_run("missing_run_state")
@@ -339,6 +365,7 @@ func select_reward(option: RewardOption) -> void:
 		enter_next_room()
 
 
+## 完成 `run` 流程，并保持 `RunDirector` 的领域契约一致。
 func complete_run() -> void:
 	if run_state == null:
 		push_warning("RunDirector.complete_run: run_state is null")
@@ -353,6 +380,7 @@ func complete_run() -> void:
 		events.emit_domain_event(WorldEvents.run_finished(run_state.run_id, "completed"))
 
 
+## 标记 `run` 流程失败，并保持 `RunDirector` 的领域契约一致。
 func fail_run(reason: String) -> void:
 	if reason.strip_edges() == "":
 		reason = "unknown"

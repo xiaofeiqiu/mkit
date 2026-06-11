@@ -154,7 +154,7 @@ shop.transaction_failed.connect(func(item_id: String, reason: String):
 
 ## 延伸阅读
 
-- [ShopService ref](../ref/modules/ShopService.md) — open_shop / buy / sell / 价格计算
-- [ShopDefinition ref](../ref/modules/ShopDefinition.md) · [ShopEntry ref](../ref/modules/ShopEntry.md)
-- [InventoryController ref](../ref/modules/InventoryController.md) · [ItemDefinition ref](../ref/modules/ItemDefinition.md)
+- [ShopService ref](../generated/html/classes/ShopService.html) — open_shop / buy / sell / 价格计算
+- [ShopDefinition ref](../generated/html/classes/ShopDefinition.html) · [ShopEntry ref](../generated/html/classes/ShopEntry.html)
+- [InventoryController ref](../generated/html/classes/InventoryController.html) · [ItemDefinition ref](../generated/html/classes/ItemDefinition.html)
 - [pipeline.md — Shop Purchase](../pipeline.md#16-shop-purchase)

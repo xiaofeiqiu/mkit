@@ -1,18 +1,37 @@
 class_name GameAction
 extends RefCounted
+## 说明：`GameAction` 是 动作管线 的动作基类，负责统一 action 的启动、更新、取消、完成和附带效果触发。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在动作管线中复用这段契约或状态时使用它。
+## 示例：`var instance := GameAction.new()`
+
+## 当 `GameAction` 发生 `completed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal completed(action: GameAction)
+## 当 `GameAction` 发生 `cancelled` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal cancelled(action: GameAction, reason: String)
+## 运行时状态：`action_id` 表示稳定 id，由 `GameAction` 的公开 API 读取或维护。
 var action_id: String = ""
+## 运行时状态：`context` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
 var context: ActionContext = null
+## 运行时状态：`elapsed` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
 var elapsed: float = 0.0
+## 运行时状态：`finished` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
 var finished: bool = false
+## 运行时状态：`cancelled_flag` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
 var cancelled_flag: bool = false
+## 运行时状态：`cancel_tags` 表示标签集合，由 `GameAction` 的公开 API 读取或维护。
 var cancel_tags: Array[String] = []
+## 运行时状态：`on_start_effects` 表示效果列表，由 `GameAction` 的公开 API 读取或维护。
 var on_start_effects: Array[GameEffect] = []
+## 运行时状态：`on_complete_effects` 表示效果列表，由 `GameAction` 的公开 API 读取或维护。
 var on_complete_effects: Array[GameEffect] = []
+## 运行时状态：`on_cancel_effects` 表示效果列表，由 `GameAction` 的公开 API 读取或维护。
 var on_cancel_effects: Array[GameEffect] = []
+var _effect_service: EffectService = null
 
 
+## 执行 `start` 对应的公开操作，并保持 `GameAction` 的领域契约一致。
 func start(ctx: ActionContext) -> void:
 	context = ctx
 	elapsed = 0.0
@@ -22,6 +41,7 @@ func start(ctx: ActionContext) -> void:
 	_fire_effects(on_start_effects + _resolve_effects(context))
 
 
+## 推进当前对象的运行时状态，并保持 `GameAction` 的领域契约一致。
 func update(delta: float) -> void:
 	if finished or cancelled_flag:
 		return
@@ -29,6 +49,7 @@ func update(delta: float) -> void:
 	_on_update(delta)
 
 
+## 取消当前或匹配条件的运行时流程，并保持 `GameAction` 的领域契约一致。
 func cancel(reason: String = "") -> void:
 	if finished or cancelled_flag:
 		return
@@ -38,6 +59,7 @@ func cancel(reason: String = "") -> void:
 	cancelled.emit(self, reason)
 
 
+## 执行 `complete` 对应的公开操作，并保持 `GameAction` 的领域契约一致。
 func complete() -> void:
 	if finished or cancelled_flag:
 		return
@@ -47,10 +69,12 @@ func complete() -> void:
 	completed.emit(self)
 
 
+## 判断 `finished` 当前是否成立，并保持 `GameAction` 的领域契约一致。
 func is_finished() -> bool:
 	return finished or cancelled_flag
 
 
+## 检查当前上下文是否允许 `cancel_with`，并保持 `GameAction` 的领域契约一致。
 func can_cancel_with(tag: String) -> bool:
 	return cancel_tags.has(tag)
 
@@ -58,27 +82,37 @@ func can_cancel_with(tag: String) -> bool:
 func _fire_effects(effects: Array[GameEffect]) -> void:
 	if effects.is_empty():
 		return
-	var svc := ServiceRegistry.get_port(ServiceRegistry.SERVICE_EFFECTS) as EffectService
+	var svc := _get_effect_service()
 	if svc == null:
 		return
 	svc.execute_many(effects, context)
+
+
+func _get_effect_service() -> EffectService:
+	if _effect_service == null and ServiceRegistry.has_service(EffectService.SERVICE_ID):
+		_effect_service = ServiceRegistry.get_port(EffectService.SERVICE_ID) as EffectService
+	return _effect_service
 
 
 func _resolve_effects(_ctx: ActionContext) -> Array[GameEffect]:
 	return []
 
 
+## 动作启动时的覆写 hook，并保持 `GameAction` 的领域契约一致。
 func _on_start() -> void:
 	pass
 
 
+## 动作更新时的覆写 hook，并保持 `GameAction` 的领域契约一致。
 func _on_update(delta: float) -> void:
 	pass
 
 
+## 动作取消时的覆写 hook，并保持 `GameAction` 的领域契约一致。
 func _on_cancel(reason: String) -> void:
 	pass
 
 
+## 动作完成时的覆写 hook，并保持 `GameAction` 的领域契约一致。
 func _on_complete() -> void:
 	pass

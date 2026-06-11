@@ -1,6 +1,6 @@
 # Mkit
 
-Reusable Godot 4.7-dev 2D RPG / roguelike runtime kernel and gameplay modules.
+Reusable Godot 4.6.3 stable 2D RPG / roguelike runtime kernel and gameplay modules.
 
 Mkit ships as a self-contained addon under `res://addons/mkit/`. Everything
 reusable lives inside this folder; game-specific content lives outside under
@@ -27,19 +27,13 @@ The current implementation has landed the large architecture cleanup around:
 
 - typed service access via `ServiceRegistry.get_port(...)`
 - `EntityContract` as the semantic entry point for entity components/controllers
-- combat as `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult`
+- combat as `DamageRequest -> DamageResult` resolved in one step by `CombatService`
 - reusable mutable models such as `ResourceSet` and `Wallet`
 - `SaveService` scope data and explicit scope provider registration
 
-Each module directory carries a `module.cfg` manifest declaring its `id`,
-cross-module `deps`, registered service ids, and event catalog class.
-`tools/check_module_deps.py` (`make module-deps`) enforces that actual
-cross-module references match the declarations and that the graph stays
-acyclic.
-
-Not yet implemented: runtime topological module loading from the manifests
-(`ModuleBootstrap` still lists the built-in services explicitly). Keep docs and
-game code aligned with the implemented shape above.
+`ModuleBootstrap` still lists the built-in gameplay services explicitly. There
+is no runtime module graph loader or module manifest layer in the current
+implementation.
 
 ## Layout
 
@@ -48,7 +42,7 @@ addons/mkit/
   plugin.cfg / plugin.gd          # addon manifest + autoload registration
   kernel/
     bootstrap/                    # GameBootstrap
-    services/                     # ServiceRegistry, time/random/scene/pool/audio/platform services
+    services/                     # ServiceRegistry, time/random/scene/pool/audio services
     events/                       # DomainEvent, EventService
     commands/                     # GameCommand, CommandService, CommandReceiver
     context/                      # GameplayContext, Blackboard, ActionContext
@@ -68,13 +62,14 @@ addons/mkit/
 
 ```text
 Input / AI / Script
-  -> GameCommand / CommandService / CommandReceiver
+  -> GameCommand / CommandReceiver
+  -> optional CommandService routing when the caller only knows target_id
   -> StateMachine / State
   -> GameAction / ActionService
   -> GameEffect / EffectService
   -> Domain service or component
   -> EventService / DomainEvent
-  -> UI / Audio / VFX / Analytics
+  -> UI / Audio / VFX
 ```
 
 For current user-facing docs, start at `res://docs/readme.md`.

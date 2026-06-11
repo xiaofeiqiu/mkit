@@ -131,7 +131,7 @@ func test_tc_audio_07_save_load_roundtrips_bus_volumes() -> void:
 
 
 func test_tc_audio_08_feedback_system_uses_registered_audio_when_path_empty() -> void:
-	ServiceRegistry.register_service(ServiceRegistry.SERVICE_AUDIO, audio)
+	ServiceRegistry.register_service(AudioService.SERVICE_ID, audio)
 	var feedback := FeedbackSystem.new()
 	add_child_autofree(feedback)
 	feedback._ready()

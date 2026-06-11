@@ -7,7 +7,7 @@ and update the stale artifact in the same change when it affects public behavior
 
 ## Project Facts
 
-Mkit is a reusable Godot 4.7-dev runtime kernel plus gameplay modules for 2D RPG
+Mkit is a reusable Godot 4.6.3 stable runtime kernel plus gameplay modules for 2D RPG
 and roguelike projects. It is packaged as the `Mkit` editor plugin at
 `res://addons/mkit/` and the project enables that plugin together with GUT.
 
@@ -37,7 +37,7 @@ loads `game/resources/village_rpg_content.tres`, and enters
 
 ```text
 events, content, random, time, actions, effects, commands, scenes, pool, save,
-audio, analytics, ads, iap, cloud_save
+audio
 ```
 
 `ModuleBootstrap` (used by `game/bootstrap.tscn`) extends it and appends the
@@ -46,10 +46,6 @@ built-in module services:
 ```text
 combat, progression, quest, shop, dialogue, world, loot
 ```
-
-Each directory under `addons/mkit/modules/` declares its id, cross-module deps,
-service ids, and event catalog class in a `module.cfg` manifest; `make
-module-deps` validates the declarations against actual references.
 
 It then loads configured `ResourceDatabase` assets into `ContentService`,
 validates content ids, loads a save if `SaveService.save_path` exists, and enters
@@ -80,13 +76,14 @@ Prefer the existing pipeline instead of adding parallel control paths:
 
 ```text
 Input / AI / Script
-  -> GameCommand / CommandService / CommandReceiver
+  -> GameCommand / CommandReceiver
+  -> optional CommandService routing when the caller only knows target_id
   -> StateMachine / State
   -> GameAction / ActionService
   -> GameEffect / EffectService
   -> Domain service or component
   -> EventService
-  -> UI / audio / VFX / analytics
+  -> UI / audio / VFX
 ```
 
 Use `GameplayContext` / `ActionContext` for execution context. Public events
@@ -155,9 +152,9 @@ make ut-modules    # GUT tests under test/unit/modules
 make int           # GUT tests under test/integration
 make demo-test     # run game/bootstrap.tscn with --demo-auto-run
 make docs-server   # serve docs/ on DOCS_PORT, default 8060
-make docs-check    # check docs links, ref coverage, nav sync, cookbook sections
+make docs-api      # generate Godot doctool XML and static API HTML
+make docs-check    # check docs links, nav sync, cookbook sections, stale demo paths
 make layering      # enforce kernel/modules/game layering rules
-make module-deps   # validate module.cfg manifests against actual references
 ```
 
 Focused GUT examples:
@@ -189,16 +186,16 @@ scene routing, entity scenes, or the gameplay pipeline.
 
 ## Docs
 
-Public addon interfaces should have matching reference pages under
-`docs/ref/kernel/` or `docs/ref/modules/`. `tools/check_docs_sync.py` derives
-expected ref pages from `class_name` scripts under `addons/mkit/kernel` and
-`addons/mkit/modules`, with `ServiceRegistry` handled specially because it is an
-autoload script without `class_name`.
+API reference pages under `docs/generated/html/` are generated from Godot
+doctool XML, which comes from `.gd` declarations and adjacent Godot `##` doc
+comments. Do not hand-edit generated API pages; update the source doc comment
+and run `make docs-api`.
 
 Run `make docs-check` after changing public docs or public addon APIs. The check
-also validates Markdown links, `docs/index.html` navigation, required cookbook
-ownership sections headed `## 你负责 / mkit 负责`, and rejects user-facing docs
-that expose old `game/demo` paths.
+first verifies doc comment coverage and generated API freshness, then validates
+Markdown links, `docs/index.html` navigation, required cookbook ownership
+sections headed `## 你负责 / mkit 负责`, and rejects user-facing docs that expose
+old `game/demo` paths.
 
 Keep conceptual docs in Chinese when the surrounding file is Chinese. Keep code,
 identifiers, resource paths, commands, and class names in English.
@@ -209,8 +206,9 @@ Use GDScript 2.0 with explicit types for variables, parameters, and returns
 where the surrounding code does. Public addon scripts generally use
 `class_name`; `ServiceRegistry` is the known autoload exception.
 
-Do not add explanatory comments to `.gd` files under `addons/mkit/`; the current
-addon source is intentionally comment-free. Use clear names and tests instead.
+Avoid explanatory inline comments in `.gd` files under `addons/mkit/`; use clear
+names and tests instead. Public Godot `##` doc comments are allowed for classes
+and API members because generated API docs are built from them.
 
 Avoid untyped public `Dictionary` payloads for core APIs when a typed object
 already exists or should exist. Existing typed carriers include commands,
@@ -225,8 +223,8 @@ Before reporting a code change as complete:
 
 1. Run the relevant GUT target, or state exactly why it was not run.
 2. Add or update focused tests for changed addon behavior.
-3. Update affected `docs/ref/*` pages and higher-level docs when public behavior
-   or interfaces change.
+3. Update public `##` doc comments and run `make docs-api` when generated API
+   docs are affected; update higher-level docs when public behavior changes.
 4. Run `make docs-check` for public API or docs changes.
 5. Confirm no dependency from `addons/mkit/` to `game/` was introduced.
 6. Confirm no concrete game content was added inside `addons/mkit/`.

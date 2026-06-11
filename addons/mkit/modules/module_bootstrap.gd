@@ -1,17 +1,19 @@
 class_name ModuleBootstrap
 extends GameBootstrap
-## Composition root for the built-in gameplay modules. GameBootstrap registers
-## kernel services only; this subclass appends the module services. Games that
-## use the built-in modules should boot through this (or their own subclass).
+## 说明：`ModuleBootstrap` 是内置 gameplay modules 的组合根，在 GameBootstrap 的 kernel 服务之后追加模块服务。
+## 上游：通常由 `game/bootstrap.tscn` 或项目自定义 bootstrap 场景实例化。
+## 下游：会注册 combat、progression、quest、shop、dialogue、world、loot 等模块服务。
+## 使用：当项目需要启用 mkit 内置 gameplay modules 时，继承或直接使用它。
+## 示例：在主场景挂载 `ModuleBootstrap`，配置 ResourceDatabase 后进入初始场景。
 
 
 func _build_services() -> Dictionary:
 	var services := super()
-	services[ServiceRegistry.SERVICE_COMBAT] = CombatService.new()
-	services[ServiceRegistry.SERVICE_PROGRESSION] = ProgressionService.new()
-	services[ServiceRegistry.SERVICE_QUEST] = QuestService.new()
-	services[ServiceRegistry.SERVICE_SHOP] = ShopService.new()
-	services[ServiceRegistry.SERVICE_DIALOGUE] = DialogueService.new()
-	services[ServiceRegistry.SERVICE_WORLD] = WorldService.new()
-	services[ServiceRegistry.SERVICE_LOOT] = LootService.new()
+	services[CombatService.SERVICE_ID] = CombatService.new()
+	services[ProgressionService.SERVICE_ID] = ProgressionService.new()
+	services[QuestService.SERVICE_ID] = QuestService.new()
+	services[ShopService.SERVICE_ID] = ShopService.new()
+	services[DialogueService.SERVICE_ID] = DialogueService.new()
+	services[WorldService.SERVICE_ID] = WorldService.new()
+	services[LootService.SERVICE_ID] = LootService.new()
 	return services

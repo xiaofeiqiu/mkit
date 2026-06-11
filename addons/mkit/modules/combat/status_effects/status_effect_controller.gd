@@ -1,8 +1,18 @@
 class_name StatusEffectController
 extends SaveableComponent
+## 说明：`StatusEffectController` 是 状态效果系统 的实体控制器，负责协调实体组件、服务和运行时状态。
+## 上游：通常由 EntityRoot、CommandReceiver、StateMachine、玩家输入或 AI 创建或调用。
+## 下游：会连接组件、ActionService、EffectService、ContentService 和 EventService，不直接依赖具体游戏内容。
+## 使用：当项目实体需要把输入、状态机和组件能力组合成可调用行为时使用它。
+## 示例：`var instance := StatusEffectController.new()`
+
+## 当 `StatusEffectController` 发生 `status applied` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal status_applied(status_id: String, stacks: int)
+## 当 `StatusEffectController` 发生 `status removed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal status_removed(status_id: String)
+## 当 `StatusEffectController` 发生 `status ticked` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal status_ticked(status_id: String)
+## 运行时状态：`active_statuses` 表示是否启用或当前激活状态，由 `StatusEffectController` 的公开 API 读取或维护。
 var active_statuses: Dictionary = {}
 
 
@@ -21,6 +31,7 @@ func _process(delta: float) -> void:
 			remove_status(status_id)
 
 
+## 把输入数据或效果应用到目标对象，并保持 `StatusEffectController` 的领域契约一致。
 func apply_status(
 	status_id: String, source: Node, stacks: int = 1, duration_override: float = -1.0
 ) -> bool:
@@ -42,6 +53,7 @@ func apply_status(
 	return true
 
 
+## 从当前集合或状态中移除数据，并保持 `StatusEffectController` 的领域契约一致。
 func remove_status(status_id: String) -> void:
 	if not active_statuses.has(status_id):
 		return
@@ -54,10 +66,12 @@ func remove_status(status_id: String) -> void:
 	status_removed.emit(status_id)
 
 
+## 判断是否存在 `status`，并保持 `StatusEffectController` 的领域契约一致。
 func has_status(status_id: String) -> bool:
 	return active_statuses.has(status_id)
 
 
+## 导出当前运行时状态，供 SaveService 写入存档，并保持 `StatusEffectController` 的领域契约一致。
 func to_save_data() -> Dictionary:
 	var active: Array = []
 	for status_id in active_statuses.keys():
@@ -74,6 +88,7 @@ func to_save_data() -> Dictionary:
 	return {"active": active}
 
 
+## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `StatusEffectController` 的领域契约一致。
 func from_save_data(data: Dictionary) -> void:
 	_clear_statuses_for_load()
 	for raw in data.get("active", []):
@@ -81,8 +96,12 @@ func from_save_data(data: Dictionary) -> void:
 			_restore_status_entry(raw)
 
 
+## 返回 `definition` 对应的数据或对象，并保持 `StatusEffectController` 的领域契约一致。
 func get_definition(status_id: String) -> StatusEffectDefinition:
-	return ContentService.find_resource(status_id) as StatusEffectDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(status_id) as StatusEffectDefinition
 
 
 func _tick_status(instance: StatusEffectInstance, definition: StatusEffectDefinition) -> void:
@@ -92,7 +111,7 @@ func _tick_status(instance: StatusEffectInstance, definition: StatusEffectDefini
 
 func _execute_effects(effects: Array[GameEffect], instance: StatusEffectInstance) -> void:
 	var context := GameplayContext.from_nodes(instance.source, instance.target)
-	context.status_id = instance.definition_id
+	context.payload["status_id"] = instance.definition_id
 	context.payload["stacks"] = instance.stacks
 	context.payload["source_id"] = instance.source_id
 	var executor := Mkit.effects()

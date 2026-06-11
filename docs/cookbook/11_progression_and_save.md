@@ -168,8 +168,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## 延伸阅读
 
-- [SaveService ref](../ref/kernel/SaveService.md) — save_game / load_game
-- [Saveable ref](../ref/kernel/Saveable.md) · [EntitySaveAgent ref](../ref/kernel/EntitySaveAgent.md) · [SaveableComponent ref](../ref/kernel/SaveableComponent.md) — root / entity / component 的差异
-- [ExperienceComponent ref](../ref/modules/ExperienceComponent.md) · [ProgressionService ref](../ref/modules/ProgressionService.md)
+- [SaveService ref](../generated/html/classes/SaveService.html) — save_game / load_game
+- [Saveable ref](../generated/html/classes/Saveable.html) · [EntitySaveAgent ref](../generated/html/classes/EntitySaveAgent.html) · [SaveableComponent ref](../generated/html/classes/SaveableComponent.html) — root / entity / component 的差异
+- [ExperienceComponent ref](../generated/html/classes/ExperienceComponent.html) · [ProgressionService ref](../generated/html/classes/ProgressionService.html)
 - [pipeline.md — Save / Load](../pipeline.md#13-save--load) · [pipeline.md — Progression / Level Up](../pipeline.md#17-progression--level-up)
 - [concepts.md — 存档](../concepts.md#六存档roots--entities--scope-provider)

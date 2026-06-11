@@ -1,9 +1,20 @@
 class_name InventoryController
 extends SaveableComponent
+## 说明：`InventoryController` 是 背包与装备系统 的实体控制器，负责协调实体组件、服务和运行时状态。
+## 上游：通常由 EntityRoot、CommandReceiver、StateMachine、玩家输入或 AI 创建或调用。
+## 下游：会连接组件、ActionService、EffectService、ContentService 和 EventService，不直接依赖具体游戏内容。
+## 使用：当项目实体需要把输入、状态机和组件能力组合成可调用行为时使用它。
+## 示例：`var instance := InventoryController.new()`
+
+## 当 `InventoryController` 发生 `inventory changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal inventory_changed
+## 当 `InventoryController` 发生 `item added` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal item_added(item: ItemInstance)
+## 当 `InventoryController` 发生 `item removed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal item_removed(item: ItemInstance)
+## 编辑器配置：`capacity` 表示 `InventoryController` 的字段值，由 `InventoryController` 的公开 API 读取或维护。
 @export var capacity: int = 30
+## 运行时状态：`model` 表示 `InventoryController` 的字段值，由 `InventoryController` 的公开 API 读取或维护。
 var model := InventoryModel.new()
 
 
@@ -13,6 +24,7 @@ func _ready() -> void:
 	model.owner_id = _get_owner_id()
 
 
+## 检查当前上下文是否允许 `add_item`，并保持 `InventoryController` 的领域契约一致。
 func can_add_item(item: ItemInstance) -> bool:
 	if item == null:
 		return false
@@ -26,6 +38,7 @@ func can_add_item(item: ItemInstance) -> bool:
 	return _free_space_for(definition) >= item.quantity
 
 
+## 向当前集合或状态中增加数据，并保持 `InventoryController` 的领域契约一致。
 func add_item(item: ItemInstance) -> bool:
 	if item == null:
 		push_warning("InventoryController.add_item: item is null")
@@ -100,6 +113,7 @@ func _free_space_for(definition: ItemDefinition) -> int:
 	return total
 
 
+## 从当前集合或状态中移除数据，并保持 `InventoryController` 的领域契约一致。
 func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	if instance_id.strip_edges() == "":
 		return false
@@ -120,6 +134,7 @@ func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	return false
 
 
+## 执行 `find_item` 对应的公开操作，并保持 `InventoryController` 的领域契约一致。
 func find_item(instance_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
@@ -127,6 +142,7 @@ func find_item(instance_id: String) -> ItemInstance:
 	return null
 
 
+## 执行 `find_item_by_definition` 对应的公开操作，并保持 `InventoryController` 的领域契约一致。
 func find_item_by_definition(definition_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.definition_id == definition_id:
@@ -134,10 +150,15 @@ func find_item_by_definition(definition_id: String) -> ItemInstance:
 	return null
 
 
+## 返回 `item_definition` 对应的数据或对象，并保持 `InventoryController` 的领域契约一致。
 func get_item_definition(item_id: String) -> ItemDefinition:
-	return ContentService.find_resource(item_id) as ItemDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(item_id) as ItemDefinition
 
 
+## 导出当前运行时状态，供 SaveService 写入存档，并保持 `InventoryController` 的领域契约一致。
 func to_save_data() -> Dictionary:
 	var items: Array = []
 	for slot in model.slots:
@@ -145,6 +166,7 @@ func to_save_data() -> Dictionary:
 	return {"capacity": capacity, "items": items}
 
 
+## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `InventoryController` 的领域契约一致。
 func from_save_data(data: Dictionary) -> void:
 	capacity = int(data.get("capacity", capacity))
 	capacity = max(1, capacity)

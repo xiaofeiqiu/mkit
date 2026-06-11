@@ -1,10 +1,12 @@
 class_name InventoryEvents
 extends RefCounted
-## Inventory-owned domain event catalog: event type constants + DomainEvent constructors.
+## 背包领域事件目录：集中提供事件类型常量和 DomainEvent 构造方法。
 
+## 公开常量 `INVENTORY_CHANGED`，作为 `InventoryEvents` 对外暴露的类型、事件或命令标识。
 const INVENTORY_CHANGED := "inventory_changed"
 
 
+## 执行 `inventory_changed` 对应的公开操作，并保持 `InventoryEvents` 的领域契约一致。
 static func inventory_changed(
 	owner_id: String, item_id: String = "", quantity: int = 0, change_type: String = ""
 ) -> DomainEvent:

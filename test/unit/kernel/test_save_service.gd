@@ -73,6 +73,8 @@ var _save_path := "/tmp/mkit_unit_save_service_entities.json"
 func after_each() -> void:
 	if FileAccess.file_exists(_save_path):
 		DirAccess.remove_absolute(_save_path)
+	if FileAccess.file_exists("%s.tmp" % _save_path):
+		DirAccess.remove_absolute("%s.tmp" % _save_path)
 	for child in ServiceRegistry.get_children():
 		ServiceRegistry.remove_child(child)
 		child.free()
@@ -93,10 +95,12 @@ func test_tc_save_01_writes_roots_entities_and_roundtrips_components() -> void:
 	component.value = 11
 	duck.value = 12
 	var save := _make_save_service()
+	save.profile_id = "profile.unit"
 
 	assert_true(save.save_game(scene))
 	var data := _read_json(_save_path)
 	assert_eq(int(data.get("schema_version", 0)), 2)
+	assert_eq(str(data.get("profile_id", "")), "profile.unit")
 	assert_true(data.has("roots"))
 	assert_true(data.has("entities"))
 	assert_true(data.has("scopes"))
@@ -252,13 +256,55 @@ func test_tc_save_07_skips_replaced_service_registry_children() -> void:
 	active.save_id = "audio"
 	active.value = 2
 	add_child_autofree(active)
-	ServiceRegistry.register_service(ServiceRegistry.SERVICE_AUDIO, active)
+	ServiceRegistry.register_service(AudioService.SERVICE_ID, active)
 	var save := _make_save_service()
 
 	assert_true(save.save_game(get_tree().root))
 	var data := _read_json(_save_path)
 	var roots: Dictionary = data["roots"]
 	assert_eq(int(roots["audio"]["value"]), 2)
+
+
+func test_tc_save_08_migrates_schema_v1_current_shape() -> void:
+	var scene := Node.new()
+	add_child_autofree(scene)
+	var root_save := ProbeSaveable.new()
+	root_save.name = "RootSave"
+	root_save.save_id = "root.probe"
+	root_save.value = 0
+	scene.add_child(root_save)
+	_write_json(
+		_save_path,
+		{
+			"schema_version": 1,
+			"roots": {"root.probe": {"value": 41}},
+		}
+	)
+	var save := _make_save_service()
+
+	assert_true(save.load_game(scene))
+	assert_eq(root_save.value, 41)
+
+
+func test_tc_save_09_overwrites_existing_save_through_tmp_path() -> void:
+	var scene := Node.new()
+	add_child_autofree(scene)
+	var root_save := ProbeSaveable.new()
+	root_save.name = "RootSave"
+	root_save.save_id = "root.probe"
+	root_save.value = 9
+	scene.add_child(root_save)
+	_write_json(_save_path, {"schema_version": 2, "roots": {"old": {}}, "entities": {}, "scopes": {}})
+	var save := _make_save_service()
+	save.profile_id = "profile.replace"
+
+	assert_true(save.save_game(scene))
+	assert_false(FileAccess.file_exists("%s.tmp" % _save_path))
+	var data := _read_json(_save_path)
+	assert_eq(str(data.get("profile_id", "")), "profile.replace")
+	var roots: Dictionary = data["roots"]
+	assert_true(roots.has("root.probe"))
+	assert_false(roots.has("old"))
 
 
 func _add_entity(scene: Node, entity_id: String) -> Dictionary:

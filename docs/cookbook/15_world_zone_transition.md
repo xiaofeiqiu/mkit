@@ -170,7 +170,7 @@ if world != null:
     )
 ```
 
-可以用这个信号刷新地图名、保存安全点、加载区域 UI，或给 analytics 上报区域进入。
+可以用这个信号刷新地图名、保存安全点，或加载区域 UI。
 
 ## 运行验证
 
@@ -196,8 +196,8 @@ if world != null:
 
 ## 延伸阅读
 
-- [WorldService ref](../ref/modules/WorldService.md) — go_to_zone / place_player_at_spawn / world.zone 存档 scope
-- [ZoneDefinition ref](../ref/modules/ZoneDefinition.md) · [SpawnPoint ref](../ref/modules/SpawnPoint.md) · [Portal ref](../ref/modules/Portal.md)
-- [SceneService ref](../ref/kernel/SceneService.md) — 纯场景切换和切换信号
-- [AudioDefinition ref](../ref/kernel/AudioDefinition.md) · [AudioService ref](../ref/kernel/AudioService.md) — BGM id 注册与播放
+- [WorldService ref](../generated/html/classes/WorldService.html) — go_to_zone / place_player_at_spawn / world.zone 存档 scope
+- [ZoneDefinition ref](../generated/html/classes/ZoneDefinition.html) · [SpawnPoint ref](../generated/html/classes/SpawnPoint.html) · [Portal ref](../generated/html/classes/Portal.html)
+- [SceneService ref](../generated/html/classes/SceneService.html) — 纯场景切换和切换信号
+- [AudioDefinition ref](../generated/html/classes/AudioDefinition.html) · [AudioService ref](../generated/html/classes/AudioService.html) — BGM id 注册与播放
 - [pipeline.md — Scene / Zone Transition](../pipeline.md#20-scene--zone-transition)

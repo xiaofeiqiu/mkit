@@ -14,7 +14,7 @@ flowchart LR
     B["② 注册内容\nResourceDatabase\n挂到 GameBootstrap"]:::userOwned -->
     C["③ 启动 / Boot\nGameBootstrap 创建 RuntimeContext\n注册 service ports\n加载并校验内容"]:::mkitCore -->
     D["④ 构建实体\nEntityRoot 默认布局\nEntityContract 访问组件/控制器"]:::userOwned -->
-    E["⑤ 发出命令\nGameCommand\n→ CommandService"]:::userOwned -->
+    E["⑤ 发出命令\nGameCommand\n→ CommandReceiver"]:::userOwned -->
     F["⑥ 状态决策\nStateMachine\nState.handle_command"]:::mkitCore -->
     G["⑦ 执行动作\nGameAction\n_on_start/_on_complete"]:::userOwned -->
     H["⑧ 触发效果\nGameEffect\n_apply_impl"]:::userOwned -->
@@ -34,7 +34,7 @@ flowchart LR
 | ② 注册内容 | 把 `.tres` 文件放入 `ResourceDatabase.resources` | — |
 | ③ Boot | 挂好 `GameBootstrap` 并设 `resource_databases` | 注册全部内置服务，加载内容，校验 ID 唯一性 |
 | ④ 构建实体 | 在场景树搭 EntityRoot / Components / Controllers | `EntityContract` / `EntityRoot` 提供组件和控制器语义入口 |
-| ⑤ 发出命令 | `GameCommand.create("attack", player_id, enemy_id)` → `CommandService.dispatch` | 路由到目标实体的 `CommandReceiver` |
+| ⑤ 发出命令 | 同实体控制器调用 `CommandReceiver.receive_command`；跨实体按 id 路由时用 `CommandService.dispatch` | 将命令交给目标实体的状态机入口 |
 | ⑥ 状态决策 | 在 `State.handle_command` 返回 `true`/`false`，决定是否响应 | HFSM 从叶往根冒泡找第一个处理者 |
 | ⑦ 执行动作 | 继承 `GameAction`，override `_on_start/_on_update/_on_complete` | `ActionService` 管理生命周期，钩子后自动 `_fire_effects` |
 | ⑧ 触发效果 | 继承 `GameEffect`，override `_apply_impl`，修改组件数据 | `EffectService` 检查 conditions，包装 `EffectResult` |
@@ -81,7 +81,7 @@ Recipe 15  → 用 Portal 在世界区域之间跳转               ★★☆  �
 
 ## 相关文档
 
-- [架构层模型](../architecture.md) — 理解 Game Content / Mkit Modules / Kernel Runtime / Platform Adapters 分层
+- [架构层模型](../architecture.md) — 理解 Game Content / Mkit Modules / Kernel Runtime 分层
 - [核心心智模型](../concepts.md) — 5 个模型，读完再开始
 - [管线参考](../pipeline.md) — 每条管线的完整调用序列
 - [调试工具](../debugging.md) — 遇到问题时的第一查阅点

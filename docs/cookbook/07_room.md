@@ -152,8 +152,8 @@ func _ready() -> void:
 
 ## 延伸阅读
 
-- [RunDirector ref](../ref/modules/RunDirector.md) — start_run / enter_next_room / select_reward / fail_run
-- [RoomController ref](../ref/modules/RoomController.md) — spawn_enemies / check_clear_condition / generate_reward
-- [EntitySpawner ref](../ref/modules/EntitySpawner.md) — spawn_entity 注入身份与属性
+- [RunDirector ref](../generated/html/classes/RunDirector.html) — start_run / enter_next_room / select_reward / fail_run
+- [RoomController ref](../generated/html/classes/RoomController.html) — spawn_enemies / check_clear_condition / generate_reward
+- [EntitySpawner ref](../generated/html/classes/EntitySpawner.html) — spawn_entity 注入身份与属性
 - [pipeline.md — Room / Run](../pipeline.md#18-room--run)
 - [cookbook/08_loot_and_rewards.md](08_loot_and_rewards.md) — 房间清空后弹出奖励选择

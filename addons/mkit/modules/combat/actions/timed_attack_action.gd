@@ -1,13 +1,25 @@
 class_name TimedAttackAction
 extends GameAction
+## 说明：`TimedAttackAction` 是 动作管线 的动作对象，负责封装可启动、更新、取消或完成的 gameplay 行为。
+## 上游：通常由 ActionService、状态机、能力控制器或脚本创建或调用。
+## 下游：会连接EffectService、GameEffect、ActionContext 和完成/取消信号，不直接依赖具体游戏内容。
+## 使用：当项目行为需要跨帧执行、可取消，或在开始/完成时触发效果时使用它。
+## 示例：`var instance := TimedAttackAction.new()`
+
+## 运行时状态：`startup_duration` 表示持续时间，由 `TimedAttackAction` 的公开 API 读取或维护。
 var startup_duration: float = 0.12
+## 运行时状态：`active_duration` 表示是否启用或当前激活状态，由 `TimedAttackAction` 的公开 API 读取或维护。
 var active_duration: float = 0.10
+## 运行时状态：`recovery_duration` 表示持续时间，由 `TimedAttackAction` 的公开 API 读取或维护。
 var recovery_duration: float = 0.25
+## 运行时状态：`hitbox_component_name` 表示 `TimedAttackAction` 的字段值，由 `TimedAttackAction` 的公开 API 读取或维护。
 var hitbox_component_name: StringName = &"HitboxComponent"
+## 运行时状态：`hitbox_path` 表示资源或节点路径，由 `TimedAttackAction` 的公开 API 读取或维护。
 var hitbox_path: NodePath = NodePath("")
 var _hitbox_enabled: bool = false
 
 
+## 动作启动时的覆写 hook，并保持 `TimedAttackAction` 的领域契约一致。
 func _on_start() -> void:
 	action_id = "timed_attack"
 	cancel_tags = ["dash", "stun", "death"]
@@ -15,6 +27,7 @@ func _on_start() -> void:
 	_set_hitbox_enabled(false)
 
 
+## 动作更新时的覆写 hook，并保持 `TimedAttackAction` 的领域契约一致。
 func _on_update(delta: float) -> void:
 	var total_active_start := startup_duration
 	var total_active_end := startup_duration + active_duration
@@ -29,10 +42,12 @@ func _on_update(delta: float) -> void:
 		complete()
 
 
+## 动作取消时的覆写 hook，并保持 `TimedAttackAction` 的领域契约一致。
 func _on_cancel(reason: String) -> void:
 	_set_hitbox_enabled(false)
 
 
+## 动作完成时的覆写 hook，并保持 `TimedAttackAction` 的领域契约一致。
 func _on_complete() -> void:
 	_set_hitbox_enabled(false)
 

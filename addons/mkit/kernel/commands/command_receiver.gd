@@ -1,10 +1,22 @@
 class_name CommandReceiver
 extends Node
+## 说明：`CommandReceiver` 是 命令路由 的命令接收器，负责把 GameCommand 转交给实体状态机或本地处理逻辑。
+## 上游：通常由 CommandService 或直接持有目标实体的脚本创建或调用。
+## 下游：会连接StateMachine、命令历史和未处理命令 hook，不直接依赖具体游戏内容。
+## 使用：当项目实体需要被 CommandService 通过 target_id 路由命令时使用它。
+## 示例：`var instance := CommandReceiver.new()`
+
+## 编辑器配置：`receiver_id` 表示稳定 id，由 `CommandReceiver` 的公开 API 读取或维护。
 @export var receiver_id: String = ""
+## 编辑器配置：`auto_register` 表示 `CommandReceiver` 的字段值，由 `CommandReceiver` 的公开 API 读取或维护。
 @export var auto_register: bool = true
+## 运行时状态：`owner_entity` 表示 `CommandReceiver` 的字段值，由 `CommandReceiver` 的公开 API 读取或维护。
 var owner_entity: Node = null
+## 运行时状态：`state_machine` 表示运行时状态，由 `CommandReceiver` 的公开 API 读取或维护。
 var state_machine: StateMachine = null
+## 运行时状态：`command_history` 表示 `CommandReceiver` 的字段值，由 `CommandReceiver` 的公开 API 读取或维护。
 var command_history: Array[GameCommand] = []
+## 运行时状态：`max_history` 表示最大值，由 `CommandReceiver` 的公开 API 读取或维护。
 var max_history: int = 20
 var _registered_router: CommandService = null
 
@@ -34,6 +46,7 @@ func _exit_tree() -> void:
 	_registered_router = null
 
 
+## 执行 `configure_receiver_id` 对应的公开操作，并保持 `CommandReceiver` 的领域契约一致。
 func configure_receiver_id(id: String) -> void:
 	if id == "":
 		return
@@ -44,6 +57,7 @@ func configure_receiver_id(id: String) -> void:
 	_register_with_router()
 
 
+## 接收外部传入的数据并交给本地处理，并保持 `CommandReceiver` 的领域契约一致。
 func receive_command(command: GameCommand) -> bool:
 	if command == null:
 		push_warning("CommandReceiver.receive_command: command is null")
@@ -62,6 +76,7 @@ func receive_command(command: GameCommand) -> bool:
 	return fallback_handled
 
 
+## 处理传入命令、事件或状态变化，并保持 `CommandReceiver` 的领域契约一致。
 func handle_unhandled_command(command: GameCommand) -> bool:
 	return false
 
@@ -89,7 +104,10 @@ func _register_with_router() -> void:
 		push_warning("CommandReceiver auto_register skipped: receiver_id is empty")
 		set_process(true)
 		return
-	var router := ServiceRegistry.get_port(ServiceRegistry.SERVICE_COMMANDS) as CommandService
+	if not ServiceRegistry.has_service(CommandService.SERVICE_ID):
+		set_process(true)
+		return
+	var router := ServiceRegistry.get_port(CommandService.SERVICE_ID) as CommandService
 	if router == null:
 		set_process(true)
 		return

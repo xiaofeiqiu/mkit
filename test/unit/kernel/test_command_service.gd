@@ -115,44 +115,6 @@ func test_tc_cr_09_dispatch_empty_target_returns_false() -> void:
 	assert_false(handled)
 
 
-# --- broadcast ---
-
-
-func test_tc_cr_10_broadcast_delivers_to_all() -> void:
-	var r1 := StubReceiver.new()
-	r1.auto_register = false
-	var r2 := StubReceiver.new()
-	r2.auto_register = false
-	router.register_receiver("e01", r1)
-	router.register_receiver("e02", r2)
-	var cmd := GameCommand.create("stun", "aoe", "")
-	var ids: Array[String] = ["e01", "e02"]
-	var count := router.broadcast(cmd, ids)
-	assert_eq(count, 2)
-	assert_not_null(r1.last_command)
-	assert_not_null(r2.last_command)
-	r1.free()
-	r2.free()
-
-
-func test_tc_cr_11_broadcast_skips_empty_and_missing() -> void:
-	var r1 := StubReceiver.new()
-	r1.auto_register = false
-	router.register_receiver("e01", r1)
-	var cmd := GameCommand.create("aoe", "src", "")
-	var ids: Array[String] = ["e01", "", "missing"]
-	var count := router.broadcast(cmd, ids)
-	assert_eq(count, 1)
-	r1.free()
-
-
-func test_tc_cr_12_broadcast_empty_ids_returns_zero() -> void:
-	var cmd := GameCommand.create("aoe", "src", "")
-	var ids: Array[String] = []
-	var count := router.broadcast(cmd, ids)
-	assert_eq(count, 0)
-
-
 # --- CommandReceiver history ---
 
 
@@ -190,4 +152,18 @@ func test_tc_cr_16_receive_command_marks_consumed_when_fallback_handles() -> voi
 	var cmd := GameCommand.create("interact", "src", "target")
 	assert_true(recv.receive_command(cmd))
 	assert_true(cmd.consumed)
+	recv.free()
+
+
+func test_tc_cr_17_dispatch_rejects_already_consumed_command() -> void:
+	var recv := StubReceiver.new()
+	recv.auto_register = false
+	router.register_receiver("target", recv)
+	var cmd := GameCommand.create("interact", "src", "target")
+	cmd.mark_consumed()
+	watch_signals(router)
+	assert_false(router.dispatch(cmd))
+	assert_null(recv.last_command)
+	assert_signal_emitted(router, "command_dispatched")
+	assert_signal_emitted_with_parameters(router, "command_failed", [cmd, "Command already consumed"])
 	recv.free()

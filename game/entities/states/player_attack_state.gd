@@ -44,7 +44,7 @@ func exit(context: Dictionary = {}) -> void:
 
 
 func _play_attack_sfx() -> void:
-	var audio := ServiceRegistry.get_service_or_null("audio") as AudioService
+	var audio := Mkit.audio()
 	if audio != null:
 		audio.play_sfx(ATTACK_SFX_ID)
 

@@ -17,8 +17,8 @@
 | `EntityIdentity` 设 `entity_id` | 自动生成唯一 ID（若留空）|
 | 继承 `State`，实现 `handle_command` / `enter` / `exit` / `update` | HFSM 层级路由、LCA transition |
 | 在 `StateMachine` 上设 `initial_state_path` | 自动在 `_ready` 时进入初始状态 |
-| 在 `CommandReceiver` 上设 `receiver_id` | 自动注册到 `CommandService` |
-| 发出 `GameCommand` → `CommandService.dispatch` | 路由命令到对应 `CommandReceiver` |
+| 挂 `CommandReceiver`，按需设置 `receiver_id` | 接收命令并交给 `StateMachine`；按 id 路由时可自动注册到 `CommandService` |
+| 发出 `GameCommand` → `CommandReceiver.receive_command` | 将命令交给同实体状态机入口 |
 
 ## 步骤
 
@@ -97,16 +97,18 @@ func handle_command(command: GameCommand) -> bool:
 # res://game/player/player_input_controller.gd
 extends Node
 
-var _commands: CommandService = null
+var _receiver: CommandReceiver = null
 var _was_moving: bool = false
 
 
 func _ready() -> void:
-    _commands = Mkit.commands()
+    _receiver = EntityContract.get_command_receiver(self)
 
 
 func _process(_delta: float) -> void:
-    if _commands == null:
+    if _receiver == null:
+        _receiver = EntityContract.get_command_receiver(self)
+    if _receiver == null:
         return
     var dir := Vector2.ZERO
     if Input.is_key_pressed(KEY_A):
@@ -119,11 +121,11 @@ func _process(_delta: float) -> void:
         dir.y += 1.0
     if dir != Vector2.ZERO:
         var cmd := GameCommand.create(BuiltinCommands.MOVE, "player", "player", {"direction": dir})
-        _commands.dispatch(cmd)
+        _receiver.receive_command(cmd)
         _was_moving = true
     elif _was_moving:
         var cmd := GameCommand.create(BuiltinCommands.STOP_MOVE, "player", "player")
-        _commands.dispatch(cmd)
+        _receiver.receive_command(cmd)
         _was_moving = false
 ```
 
@@ -152,17 +154,17 @@ func enter(context: Dictionary = {}) -> void:
 
 | 现象 | 原因 | 修复 |
 |------|------|------|
-| 命令发出但状态没切换 | `CommandReceiver.receiver_id` 与命令的 `target_id` 不匹配 | 确认两者均为 `"player"` |
-| `CommandService.dispatch` 返回 `false` | `CommandReceiver` 未注册到 `CommandService` | 检查 `auto_register = true`，且 Bootstrap 先于玩家场景运行 |
+| 命令发出但状态没切换 | `CommandReceiver` 缺失，或 `State.handle_command` 未处理该类型 | 确认实体有 `CommandReceiver`，并检查当前 State 的 `handle_command` |
+| `CommandService.dispatch` 返回 `false`（仅按 id 路由时） | `target_id` 为空或 `CommandReceiver` 未注册到 `CommandService` | 检查 `receiver_id` / `auto_register`，且 Bootstrap 先于玩家场景运行 |
 | 玩家不移动 | `CharacterBody2D` 未调 `move_and_slide()` | 在 `update()` 中调用 `body.move_and_slide()` |
 | `StateMachine` 找不到初始状态 | `initial_state_path` 路径拼错 | 路径格式为 `"Root/Idle"`（与节点 `state_id` 一致，用 `/` 分隔）|
 | `handle_command` 返回 true 但没跳转 | `request_transition` 的路径不存在 | 确认目标 State 节点存在且 `state_id` 正确 |
 
 ## 延伸阅读
 
-- [StateMachine ref](../ref/kernel/StateMachine.md) — transition 路由、can_enter/can_exit、blackboard
-- [State ref](../ref/kernel/State.md) — 所有可 override 的方法
-- [GameCommand ref](../ref/kernel/GameCommand.md) — 创建命令、payload 读取
-- [CommandService ref](../ref/kernel/CommandService.md) — dispatch、broadcast、注册/注销
+- [StateMachine ref](../generated/html/classes/StateMachine.html) — transition 路由、can_enter/can_exit、blackboard
+- [State ref](../generated/html/classes/State.html) — 所有可 override 的方法
+- [GameCommand ref](../generated/html/classes/GameCommand.html) — 创建命令、payload 读取
+- [CommandService ref](../generated/html/classes/CommandService.html) — 按 id dispatch、注册/注销
 - [pipeline.md — Command Dispatch](../pipeline.md#3-command-dispatch) — 命令分发完整时序图
 - [pipeline.md — HFSM Transition](../pipeline.md#4-hfsm-transition) — 状态切换时序

@@ -15,9 +15,9 @@ func test_tc_int_shop_01_open_buy_sell_and_stock_pipeline() -> void:
 	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var shop := ServiceRegistry.get_service("shop") as ShopService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var shop := ServiceRegistry.get_port("shop") as ShopService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
+	var events := ServiceRegistry.get_port("events") as EventService
 	assert_not_null(shop)
 	assert_not_null(progression)
 	assert_not_null(events)

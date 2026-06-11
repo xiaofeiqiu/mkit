@@ -59,7 +59,7 @@ EnemyEntity  (EntityRoot)
 - 距离 ≤ detection_range 且 > attack_range → `MOVE`（方向朝向玩家）
 - 距离 ≤ attack_range → `ATTACK`
 
-命令发给**自身**（`target_id = self.entity_id`），由敌人自己的 `CommandReceiver` 接收。
+命令发给**自身**（`target_id = self.entity_id`），由敌人自己的 `CommandReceiver` 直接接收。
 
 ### 步骤 3：实现敌人状态
 
@@ -218,14 +218,14 @@ print("Brain: intent=%s dist=%.1f" % [blackboard.get_value("intent", "?"), dista
 | 现象 | 原因 | 修复 |
 |------|------|------|
 | 敌人不动 | Brain 无法找到玩家 | 确认玩家节点已加入 `"player"` group（Scene → Groups）|
-| 命令发出但敌人状态不切换 | `CommandReceiver.receiver_id` 未正确初始化 | 检查 `EntityIdentity.entity_id` 非空；`auto_register = true` |
+| 命令发出但敌人状态不切换 | `CommandReceiver` 缺失，或当前 State 未处理该命令 | 检查实体默认布局，并确认对应 State 的 `handle_command` |
 | 敌人攻击但玩家不掉血 | `ctx.target` 不是带 HealthComponent 的节点 | 确认 `get_first_node_in_group("player")` 返回的是 EntityRoot 节点 |
 | `think_interval` 为 0 → 卡死 | `Brain._process` 每帧都调 `think()` | 保持 `think_interval > 0`（默认 0.2 即可）|
 | 敌人追到玩家但超出 attack_range 时没切回 Move | 状态机处于 Attack 中，Brain 发的 MOVE 命令未被 Attack 状态处理 | 在 `EnemyAttackState.handle_command` 中处理 MOVE 命令，或 action complete 后自动回 Idle |
 
 ## 延伸阅读
 
-- [Brain ref](../ref/modules/Brain.md) — think_interval / issue_command / blackboard
-- [SimpleAIEnemyBrain ref](../ref/modules/SimpleAIEnemyBrain.md) — 内置简单 AI 策略
-- [EntitySpawner ref](../ref/modules/EntitySpawner.md) — 在运行时动态 spawn 敌人
+- [Brain ref](../generated/html/classes/Brain.html) — think_interval / issue_command / blackboard
+- [SimpleAIEnemyBrain ref](../generated/html/classes/SimpleAIEnemyBrain.html) — 内置简单 AI 策略
+- [EntitySpawner ref](../generated/html/classes/EntitySpawner.html) — 在运行时动态 spawn 敌人
 - [cookbook/07_room.md](07_room.md) — 将敌人放进房间系统，由 RoomController 管理 spawn

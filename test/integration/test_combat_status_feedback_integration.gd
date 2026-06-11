@@ -25,8 +25,9 @@ class ProbeTickEffect:
 
 	func _apply_impl(context: GameplayContext) -> EffectResult:
 		tick_count += 1
-		status_ids.append(context.status_id)
-		return EffectResult.ok(effect_id, {"status_id": context.status_id})
+		var status_id := str(context.get_payload_value("status_id", ""))
+		status_ids.append(status_id)
+		return EffectResult.ok(effect_id, {"status_id": status_id})
 
 
 class ProbeDamageNumberSystem:
@@ -72,7 +73,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 	_boot_with_database(_make_database(tick_probe))
 	ServiceRegistry.unregister_service("random")
 	ServiceRegistry.register_service("random", FixedRandom.new())
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	var feedback := _make_feedback_system()
 	var damage_numbers := feedback.get_node("DamageNumbers") as ProbeDamageNumberSystem
 	var vfx := feedback.get_node("VFX") as ProbeVFXSpawner
@@ -126,7 +127,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 
 func test_tc_int_cmb_02_heal_clamps_to_max_hp_and_emits() -> void:
 	_boot_with_database(_make_database(null))
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var source := _make_entity("Source", "entity.int.source", "player", false, false, false)
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, false)
 	var target_stats := target.get_node("Components/StatsComponent") as StatsComponent
@@ -147,8 +148,8 @@ func test_tc_int_cmb_02_heal_clamps_to_max_hp_and_emits() -> void:
 
 func test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_feedback() -> void:
 	_boot_with_database(_make_database(null))
-	var events := ServiceRegistry.get_service("events") as EventService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var feedback := _make_feedback_system()
 	var vfx := feedback.get_node("VFX") as ProbeVFXSpawner
 	var audio := feedback.get_node("Audio") as ProbeAudioManager
@@ -176,12 +177,14 @@ func test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_feedback() -> void
 	assert_eq(vfx.calls[1].vfx_id, "death")
 	assert_eq(audio.played[0], "hit")
 	assert_eq(audio.played[1], "death")
-	assert_eq((events.recent_events[-1] as DomainEvent).event_type, "entity_died")
+	var evt_enemy_killed := DomainEventAsserts.last_event(events, QuestEvents.ENEMY_KILLED)
+	assert_not_null(evt_enemy_killed)
+	assert_eq((events.recent_events[-1] as DomainEvent).event_type, QuestEvents.ENEMY_KILLED)
 
 
 func test_tc_int_cmb_04_status_duration_expiry_removes_stat_modifier() -> void:
 	_boot_with_database(_make_database(null))
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var source := _make_entity("Source", "entity.int.source", "player", false, false, false)
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, false)
 	var target_stats := target.get_node("Components/StatsComponent") as StatsComponent
@@ -212,7 +215,7 @@ func test_tc_int_cmb_04_status_duration_expiry_removes_stat_modifier() -> void:
 
 func test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target() -> void:
 	_boot_with_database(_make_database(null))
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, true)
 	var health := target.get_node("Components/HealthComponent") as HealthComponent
 	health.current_hp = 42.0
@@ -228,7 +231,7 @@ func test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target()
 	var label := overlay.get_child(0) as Label
 	var text := label.text
 
-	assert_eq(ServiceRegistry.get_service("debug"), overlay)
+	assert_eq(ServiceRegistry.get_port("debug"), overlay)
 	assert_true(text.contains("State: Root/Idle"))
 	assert_true(text.contains("Last command: INT_DEBUG"))
 	assert_true(text.contains("HP: 42 / 100"))

@@ -1,10 +1,20 @@
 class_name EquipmentController
 extends SaveableComponent
+## 说明：`EquipmentController` 是 背包与装备系统 的实体控制器，负责协调实体组件、服务和运行时状态。
+## 上游：通常由 EntityRoot、CommandReceiver、StateMachine、玩家输入或 AI 创建或调用。
+## 下游：会连接组件、ActionService、EffectService、ContentService 和 EventService，不直接依赖具体游戏内容。
+## 使用：当项目实体需要把输入、状态机和组件能力组合成可调用行为时使用它。
+## 示例：`var instance := EquipmentController.new()`
+
+## 当 `EquipmentController` 发生 `equipment changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal equipment_changed(slot_id: String, item: ItemInstance)
+## 编辑器配置：`allowed_slots` 表示 `EquipmentController` 的字段值，由 `EquipmentController` 的公开 API 读取或维护。
 @export var allowed_slots: Array[String] = ["weapon", "helmet", "armor", "ring", "amulet"]
+## 运行时状态：`equipped` 表示 `EquipmentController` 的字段值，由 `EquipmentController` 的公开 API 读取或维护。
 var equipped: Dictionary = {}
 
 
+## 检查当前上下文是否允许 `equip`，并保持 `EquipmentController` 的领域契约一致。
 func can_equip(item: ItemInstance, slot_id: String) -> bool:
 	if item == null:
 		return false
@@ -16,6 +26,7 @@ func can_equip(item: ItemInstance, slot_id: String) -> bool:
 	return definition.equipment_slot == slot_id
 
 
+## 执行 `equip` 对应的公开操作，并保持 `EquipmentController` 的领域契约一致。
 func equip(item: ItemInstance, slot_id: String) -> bool:
 	if not can_equip(item, slot_id):
 		return false
@@ -27,6 +38,7 @@ func equip(item: ItemInstance, slot_id: String) -> bool:
 	return true
 
 
+## 执行 `unequip` 对应的公开操作，并保持 `EquipmentController` 的领域契约一致。
 func unequip(slot_id: String) -> ItemInstance:
 	if not equipped.has(slot_id):
 		return null
@@ -37,14 +49,20 @@ func unequip(slot_id: String) -> ItemInstance:
 	return item
 
 
+## 返回 `equipped` 对应的数据或对象，并保持 `EquipmentController` 的领域契约一致。
 func get_equipped(slot_id: String) -> ItemInstance:
 	return equipped.get(slot_id, null)
 
 
+## 返回 `item_definition` 对应的数据或对象，并保持 `EquipmentController` 的领域契约一致。
 func get_item_definition(item_id: String) -> ItemDefinition:
-	return ContentService.find_resource(item_id) as ItemDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(item_id) as ItemDefinition
 
 
+## 导出当前运行时状态，供 SaveService 写入存档，并保持 `EquipmentController` 的领域契约一致。
 func to_save_data() -> Dictionary:
 	var slots: Dictionary = {}
 	for slot_id in equipped.keys():
@@ -54,6 +72,7 @@ func to_save_data() -> Dictionary:
 	return {"slots": slots}
 
 
+## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `EquipmentController` 的领域契约一致。
 func from_save_data(data: Dictionary) -> void:
 	for item in equipped.values():
 		if item is ItemInstance:

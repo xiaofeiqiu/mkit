@@ -202,6 +202,18 @@ func test_tc_quest_02_kill_event_advances_objective_to_complete() -> void:
 	)
 
 
+func test_tc_quest_12_synthesized_kill_event_is_published_to_event_service() -> void:
+	var objectives: Array[QuestObjectiveDefinition] = [_make_objective("obj.kill", "enemy_killed")]
+	_make_quest("quest.kill", objectives)
+	quest.accept_quest("quest.kill", null)
+
+	events.emit_domain_event(CombatEvents.entity_died("rat_1", _make_enemy("rat_1")))
+
+	var enemy_killed := DomainEventAsserts.last_event(events, QuestEvents.ENEMY_KILLED)
+	assert_not_null(enemy_killed)
+	assert_eq(enemy_killed.source_id, "rat_1")
+
+
 # --- item acquired with payload count key ---
 
 

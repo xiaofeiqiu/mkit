@@ -42,6 +42,27 @@
       letter-spacing: -0.2px;
     }
     .sidebar-header span { opacity: 0.55; font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+    .nav-search {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-search input {
+      width: 100%;
+      background: var(--code-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 7px 9px;
+      font-size: 12.5px;
+      outline: none;
+    }
+    .nav-search input:focus { border-color: var(--active-border); }
+    #nav-empty {
+      display: none;
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
     .nav-group { margin-top: 4px; }
     .nav-group-label {
       padding: 8px 16px 4px;
@@ -157,6 +178,10 @@
     Mkit Docs
     <span>Godot 4.x RPG Framework</span>
   </div>
+  <div class="nav-search">
+    <input id="nav-search" type="search" placeholder="搜索：技能、任务、存档、Shop、Debug…" autocomplete="off">
+  </div>
+  <div id="nav-empty">没有匹配的文档入口</div>
   <div id="nav-root"></div>
 </nav>
 
@@ -172,14 +197,26 @@ const NAV = [
   { group: '入门', items: [
     { label: 'Overview',        href: 'readme.md' },
     { label: 'Getting Started', href: 'getting_started.md' },
+    { label: 'Compatibility',    href: 'compatibility.md' },
     { label: 'Architecture',    href: 'architecture.md' },
     { label: 'Concepts',        href: 'concepts.md' },
     { label: 'Glossary',        href: 'glossary.md' },
+    { label: 'Current Limits',   href: 'roadmap.md' },
+  ]},
+  { group: '常用任务', items: [
+    { label: '做一个技能',       href: 'cookbook/05_ability.md#步骤' },
+    { label: '做一个任务',       href: 'cookbook/10_quest.md#步骤' },
+    { label: '做一个商店',       href: 'cookbook/14_shop.md#步骤' },
+    { label: '做存档/读档',      href: 'cookbook/11_progression_and_save.md#步骤' },
+    { label: '调试技能没效果',   href: 'debugging.md#按症状选择工具' },
   ]},
   { group: '指南', items: [
     { label: 'Pipeline',   href: 'pipeline.md' },
     { label: 'Debugging',  href: 'debugging.md' },
     { label: 'Error Reporting', href: 'error_reporting.md' },
+  ]},
+  { group: 'API Reference', items: [
+    { label: 'Generated API HTML', href: 'generated/html/index.html' },
   ]},
   { group: 'Cookbook', collapsed: true, items: [
     { label: 'Index',                   href: 'cookbook/index.md' },
@@ -199,55 +236,6 @@ const NAV = [
     { label: '14 · Shop',               href: 'cookbook/14_shop.md' },
     { label: '15 · World / Zone',       href: 'cookbook/15_world_zone_transition.md' },
   ]},
-  { group: 'Kernel Ref', collapsed: true, items: [
-    'GameBootstrap','ServiceRegistry','GameCommand','CommandService',
-    'CommandReceiver','BuiltinCommands','GameAction','ActionService',
-    'ActionContext',
-    'GameEffect','EffectService','EffectResult',
-    'SpawnSceneEffect','LogEffect',
-    'GameplayContext','Blackboard','DomainEvent','EventService',
-    'EntityContract','EntityRoot','EntityIdentity',
-    'ContentDefinition','ContentService','ContentValidationResult','ResourceDatabase',
-    'Saveable','EntitySaveAgent','SaveableComponent','SaveService',
-    'State','StateMachine','Condition','ConditionEvaluator',
-    'TargetInRangeCondition',
-    'TimeService','RandomService','SceneService','PoolService',
-    'AudioDefinition','AudioService','AnalyticsService','AnalyticsServiceMock',
-    'AdService','AdServiceMock','IAPService','IAPServiceMock',
-    'CloudSaveService','CloudSaveServiceMock','DebugOverlay',
-  ].map(c => ({ label: c, href: `ref/kernel/${c}.md` })),
-  },
-  { group: 'Module Ref', collapsed: true, items: [
-    'Mkit','ModuleBootstrap',
-    'CombatEvents','WorldEvents','QuestEvents','DialogueEvents',
-    'ShopEvents','InventoryEvents','LootEvents',
-    'AbilityDefinition','AbilityInstance','AbilityController','CastAction','CooldownReadyCondition',
-    'Brain','SimpleAIEnemyBrain',
-    'CombatService','DamageRequest','DamageResult','HitboxComponent','HurtboxComponent',
-    'DealDamageEffect','DashAction','TimedAttackAction',
-    'DamageIntent','DamageApplication','DamageResolution','DamageStatusApplication','ResourceSet',
-    'DialogueDefinition','DialogueNode','DialogueChoice','DialogueRuntime',
-    'DialogueInteractable','DialogueService',
-    'EntityDefinition','EntitySpawner',
-    'HealthComponent','ResourcePoolComponent','HealEffect',
-    'Interactable','InteractionComponent',
-    'ItemDefinition','ItemInstance','InventorySlot','InventoryModel',
-    'InventoryController','EquipmentController','GrantItemEffect',
-    'LootTableDefinition','LootEntry','LootService','LootRollResult',
-    'RewardDefinition','RewardOption','RewardSystem',
-    'ExperienceComponent','ExperienceCurve','ProgressionState','Wallet',
-    'ProgressionService','UpgradeDefinition','AddCurrencyEffect','SpendCurrencyEffect',
-    'QuestDefinition','QuestObjectiveDefinition','QuestState','QuestLog',
-    'QuestService','AcceptQuestEffect','AdvanceObjectiveEffect','CompleteQuestEffect',
-    'RoomDefinition','RoomGraph','RoomLoader','RoomNode','RoomRuntime',
-    'RoomController','DungeonGenerator','RunState','RunDirector','RewardCoordinator',
-    'ShopDefinition','ShopEntry','ShopService',
-    'StatDefinition','StatModifier','StatModifierDefinition','StatsComponent','ApplyStatModifierEffect',
-    'StatusEffectDefinition','StatusEffectInstance','StatusEffectController','ApplyStatusEffect',
-    'UIManager',
-    'ZoneDefinition','WorldService','Portal','SpawnPoint',
-  ].map(c => ({ label: c, href: `ref/modules/${c}.md` })),
-  },
 ]
 
 // ── Mermaid config ────────────────────────────────────────────────────────────
@@ -307,8 +295,10 @@ function buildNav() {
       const li = document.createElement('li')
       const a = document.createElement('a')
       a.textContent = item.label
-      a.href = '#' + item.href
+      const isHtmlPage = item.href.endsWith('.html')
+      a.href = isHtmlPage ? item.href : '#' + item.href
       a.dataset.href = item.href
+      a.dataset.search = `${item.label} ${item.href} ${group.group}`.toLowerCase()
       li.appendChild(a)
       ul.appendChild(li)
     })
@@ -317,6 +307,28 @@ function buildNav() {
     div.appendChild(ul)
     root.appendChild(div)
   })
+}
+
+function applyNavFilter() {
+  const input = document.getElementById('nav-search')
+  const query = (input ? input.value : '').trim().toLowerCase()
+  let visibleTotal = 0
+
+  document.querySelectorAll('.nav-group').forEach(group => {
+    let visibleInGroup = 0
+    group.querySelectorAll('.nav-items li').forEach(li => {
+      const link = li.querySelector('a')
+      const matches = !query || (link && link.dataset.search.includes(query))
+      li.style.display = matches ? '' : 'none'
+      if (matches) visibleInGroup += 1
+    })
+    group.style.display = visibleInGroup > 0 ? '' : 'none'
+    if (query && visibleInGroup > 0) group.classList.remove('collapsed')
+    visibleTotal += visibleInGroup
+  })
+
+  const empty = document.getElementById('nav-empty')
+  if (empty) empty.style.display = visibleTotal === 0 ? 'block' : 'none'
 }
 
 function setActiveLink(href) {
@@ -548,6 +560,7 @@ window.addEventListener('hashchange', () => loadPage(currentHref()))
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildNav()
+document.getElementById('nav-search').addEventListener('input', applyNavFilter)
 loadPage(currentHref())
 </script>
 </body>

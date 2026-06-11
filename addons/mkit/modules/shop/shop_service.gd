@@ -1,12 +1,26 @@
 class_name ShopService
 extends Node
+## 说明：`ShopService` 是 商店系统 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(ShopService.SERVICE_ID, ShopService.new())`
+
+## 当 `ShopService` 发生 `shop opened` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal shop_opened(shop_id: String)
+## 当 `ShopService` 发生 `item purchased` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal item_purchased(item_id: String, quantity: int, total_cost: int)
+## 当 `ShopService` 发生 `item sold` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal item_sold(item_id: String, quantity: int, total_gain: int)
+## 当 `ShopService` 发生 `transaction failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal transaction_failed(item_id: String, reason: String)
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `ShopService`。
+const SERVICE_ID: String = "shop"
+## 运行时状态：`current_shop` 表示当前值，由 `ShopService` 的公开 API 读取或维护。
 var current_shop: ShopDefinition = null
 
 
+## 打开对应 UI 或流程入口，并保持 `ShopService` 的领域契约一致。
 func open_shop(shop_id: String) -> bool:
 	var definition := get_definition(shop_id)
 	if definition == null:
@@ -16,10 +30,12 @@ func open_shop(shop_id: String) -> bool:
 	return true
 
 
+## 关闭对应 UI 或流程入口，并保持 `ShopService` 的领域契约一致。
 func close_shop() -> void:
 	current_shop = null
 
 
+## 返回 `buy_price` 对应的数据或对象，并保持 `ShopService` 的领域契约一致。
 func get_buy_price(item_id: String) -> int:
 	if current_shop == null:
 		return -1
@@ -33,6 +49,7 @@ func get_buy_price(item_id: String) -> int:
 	return int(round(base * current_shop.buy_price_multiplier))
 
 
+## 返回 `sell_price` 对应的数据或对象，并保持 `ShopService` 的领域契约一致。
 func get_sell_price(item_id: String) -> int:
 	if current_shop == null:
 		return -1
@@ -42,10 +59,12 @@ func get_sell_price(item_id: String) -> int:
 	return int(round(item_def.value * current_shop.sell_price_multiplier))
 
 
+## 检查当前上下文是否允许 `buy`，并保持 `ShopService` 的领域契约一致。
 func can_buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	return _buy_block_reason(item_id, quantity, buyer) == ""
 
 
+## 执行 `buy` 对应的公开操作，并保持 `ShopService` 的领域契约一致。
 func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	var reason := _buy_block_reason(item_id, quantity, buyer)
 	if reason != "":
@@ -80,6 +99,7 @@ func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	return true
 
 
+## 执行 `sell` 对应的公开操作，并保持 `ShopService` 的领域契约一致。
 func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	if current_shop == null:
 		transaction_failed.emit("", "No shop open")
@@ -120,8 +140,12 @@ func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	return true
 
 
+## 返回 `definition` 对应的数据或对象，并保持 `ShopService` 的领域契约一致。
 func get_definition(shop_id: String) -> ShopDefinition:
-	return ContentService.find_resource(shop_id) as ShopDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(shop_id) as ShopDefinition
 
 
 func _buy_block_reason(item_id: String, quantity: int, buyer: Node) -> String:
@@ -167,4 +191,7 @@ func _get_inventory(node: Node) -> InventoryController:
 
 
 func _get_item_definition(item_id: String) -> ItemDefinition:
-	return ContentService.find_resource(item_id) as ItemDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(item_id) as ItemDefinition

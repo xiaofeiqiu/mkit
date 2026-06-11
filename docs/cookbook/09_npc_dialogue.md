@@ -178,8 +178,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## 延伸阅读
 
-- [DialogueService ref](../ref/modules/DialogueService.md) — start / choose / advance / end
-- [DialogueDefinition ref](../ref/modules/DialogueDefinition.md) · [DialogueNode ref](../ref/modules/DialogueNode.md) · [DialogueChoice ref](../ref/modules/DialogueChoice.md)
-- [Interactable ref](../ref/modules/Interactable.md) · [InteractionComponent ref](../ref/modules/InteractionComponent.md)
+- [DialogueService ref](../generated/html/classes/DialogueService.html) — start / choose / advance / end
+- [DialogueDefinition ref](../generated/html/classes/DialogueDefinition.html) · [DialogueNode ref](../generated/html/classes/DialogueNode.html) · [DialogueChoice ref](../generated/html/classes/DialogueChoice.html)
+- [Interactable ref](../generated/html/classes/Interactable.html) · [InteractionComponent ref](../generated/html/classes/InteractionComponent.html)
 - [pipeline.md — Dialogue](../pipeline.md#15-dialogue)
 - [cookbook/10_quest.md](10_quest.md) — 在对话选项里接受任务

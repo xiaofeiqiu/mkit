@@ -26,7 +26,7 @@ class EffectInteractable:
 	func _interact_impl(context: GameplayContext) -> bool:
 		call_count += 1
 		last_context = context
-		var executor := ServiceRegistry.get_service("effects") as EffectService
+		var executor := ServiceRegistry.get_port("effects") as EffectService
 		if executor == null:
 			return false
 		var results := executor.execute_many(effects, context, true)
@@ -44,9 +44,9 @@ func after_each() -> void:
 	IntTestHelpers.cleanup_service_registry()
 
 
-func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
+func test_tc_int_ui_01_enemy_brain_issues_command_to_receiver() -> void:
 	_boot_runtime()
-	var router := ServiceRegistry.get_service("commands") as CommandService
+	var router := ServiceRegistry.get_port("commands") as CommandService
 	assert_not_null(router)
 
 	var world := Node2D.new()
@@ -72,7 +72,7 @@ func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
 	assert_eq(receiver.last_command.source_id, "enemy.int.ai")
 	assert_eq(receiver.last_command.target_id, "enemy.int.ai")
 	assert_eq(receiver.last_command.payload["target"], player)
-	assert_signal_emitted(router, "command_dispatched")
+	assert_signal_not_emitted(router, "command_dispatched")
 	assert_signal_not_emitted(router, "command_failed")
 
 	player.global_position = Vector2(96.0, 0.0)
@@ -86,8 +86,9 @@ func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
 
 func test_tc_int_ui_02_interaction_executes_interactable_effects() -> void:
 	_boot_runtime()
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	assert_not_null(effects)
+	effects.trace_enabled = true
 
 	var world := Node2D.new()
 	world.name = "World"
@@ -127,7 +128,7 @@ func test_tc_int_ui_02_interaction_executes_interactable_effects() -> void:
 func test_tc_int_ui_03_scene_router_emits_success_and_failure_paths() -> void:
 	_boot_runtime()
 	_save_plain_scene(SCENE_TARGET_PATH, "SceneRouterTarget")
-	var router := ServiceRegistry.get_service("scenes") as SceneService
+	var router := ServiceRegistry.get_port("scenes") as SceneService
 	assert_not_null(router)
 
 	watch_signals(router)
@@ -155,7 +156,7 @@ func test_tc_int_ui_03_scene_router_emits_success_and_failure_paths() -> void:
 func test_tc_int_ui_04_modal_ui_pauses_and_closes_to_resume_time() -> void:
 	_boot_runtime()
 	_save_control_scene(MODAL_SCREEN_PATH, "ModalScreen")
-	var time := ServiceRegistry.get_service("time") as TimeService
+	var time := ServiceRegistry.get_port("time") as TimeService
 	var ui := _make_ui_manager({"modal.int.pause": MODAL_SCREEN_PATH})
 	assert_not_null(time)
 	assert_not_null(ui)
@@ -182,7 +183,7 @@ func test_tc_int_ui_05_ui_manager_registers_ui_service() -> void:
 	await get_tree().process_frame
 
 	assert_true(ServiceRegistry.has_service("ui"))
-	assert_eq(ServiceRegistry.get_service("ui"), ui)
+	assert_eq(ServiceRegistry.get_port("ui"), ui)
 
 
 func _boot_runtime() -> ModuleBootstrap:

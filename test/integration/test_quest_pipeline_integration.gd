@@ -15,11 +15,11 @@ func test_tc_int_quest_01_bootstrap_combat_reward_and_save_roundtrip() -> void:
 	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
 
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
+	var save := ServiceRegistry.get_port("save") as SaveService
 	assert_not_null(quest)
 	assert_not_null(events)
 	assert_not_null(effects)

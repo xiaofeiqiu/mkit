@@ -1,8 +1,20 @@
 class_name ProgressionService
 extends Saveable
+## 说明：`ProgressionService` 是 成长系统 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(ProgressionService.SERVICE_ID, ProgressionService.new())`
+
+## 当 `ProgressionService` 发生 `currency changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal currency_changed(currency_id: String, amount: int)
+## 当 `ProgressionService` 发生 `upgrade level changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal upgrade_level_changed(upgrade_id: String, level: int)
+## 当 `ProgressionService` 发生 `content unlocked` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal content_unlocked(content_id: String)
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `ProgressionService`。
+const SERVICE_ID: String = "progression"
+## 运行时状态：`state` 表示运行时状态，由 `ProgressionService` 的公开 API 读取或维护。
 var state := ProgressionState.new()
 
 
@@ -11,6 +23,7 @@ func _ready() -> void:
 		save_id = "progression"
 
 
+## 向当前集合或状态中增加数据，并保持 `ProgressionService` 的领域契约一致。
 func add_currency(currency_id: String, amount: int) -> void:
 	if currency_id.strip_edges() == "":
 		push_warning("ProgressionService.add_currency: currency_id is empty")
@@ -21,6 +34,7 @@ func add_currency(currency_id: String, amount: int) -> void:
 	currency_changed.emit(currency_id, state.get_currency(currency_id))
 
 
+## 扣除指定资源或货币，并保持 `ProgressionService` 的领域契约一致。
 func spend_currency(currency_id: String, amount: int) -> bool:
 	if currency_id.strip_edges() == "":
 		return false
@@ -32,12 +46,14 @@ func spend_currency(currency_id: String, amount: int) -> bool:
 	return true
 
 
+## 返回 `currency` 对应的数据或对象，并保持 `ProgressionService` 的领域契约一致。
 func get_currency(currency_id: String) -> int:
 	if currency_id.strip_edges() == "":
 		return 0
 	return state.get_currency(currency_id)
 
 
+## 检查当前上下文是否允许 `unlock`，并保持 `ProgressionService` 的领域契约一致。
 func can_unlock(upgrade_id: String) -> bool:
 	if upgrade_id.strip_edges() == "":
 		return false
@@ -54,6 +70,7 @@ func can_unlock(upgrade_id: String) -> bool:
 	return state.get_currency(definition.currency_id) >= definition.get_cost_for_level(next_level)
 
 
+## 执行 `unlock_or_level_up` 对应的公开操作，并保持 `ProgressionService` 的领域契约一致。
 func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> bool:
 	if upgrade_id.strip_edges() == "":
 		return false
@@ -76,8 +93,12 @@ func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> 
 	return true
 
 
+## 返回 `definition` 对应的数据或对象，并保持 `ProgressionService` 的领域契约一致。
 func get_definition(upgrade_id: String) -> UpgradeDefinition:
-	return ContentService.find_resource(upgrade_id) as UpgradeDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(upgrade_id) as UpgradeDefinition
 
 
 func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayContext) -> void:
@@ -91,9 +112,11 @@ func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayCont
 	executor.execute_many(definition.effects, ctx)
 
 
+## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ProgressionService` 的领域契约一致。
 func to_save_data() -> Dictionary:
 	return state.to_save_data()
 
 
+## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ProgressionService` 的领域契约一致。
 func from_save_data(data: Dictionary) -> void:
 	state.from_save_data(data)

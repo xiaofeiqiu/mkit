@@ -2,14 +2,14 @@
 
 每条管线描述一个完整流程的调用序列——从触发点到最终输出。
 
-> 当前实现：服务获取统一走 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`。  
+> 当前实现：游戏/模块代码统一走 `Mkit.xxx()`；kernel 内部和自定义服务使用 `ServiceRegistry.get_port(XxxService.SERVICE_ID)`。
 > `ServiceRegistry` 是唯一 autoload，`GameBootstrap` 在启动时把所有内置服务注册进它。
 
 ---
 
 ## P0-1：Runtime Bootstrap
 
-**触发点：** `GameBootstrap._ready()`  
+**触发点：** `GameBootstrap._ready()`
 **涉及系统：** `GameBootstrap`、`ServiceRegistry`、`ContentService`、`AudioService`、`SaveService`、`SceneService`
 **输出：** 所有服务在线，内容已注册，内容驱动的服务配置已应用，存档已加载，初始场景已切换
 
@@ -32,7 +32,7 @@ sequenceDiagram
     Note over SR: [mkit 内部] 服务表建立完毕
     GB->>CS: load_database(db) × N
     CS->>CS: register_resource(def) per entry
-    GB->>AS: register_audio_definitions(audio_definition[])
+    GB->>AS: register_audio_definitions(AudioDefinition[])
     GB->>CS: validate_all()
     CS-->>GB: ContentValidationResult
     Note over GB: 若 result.success == false → push_error
@@ -52,40 +52,37 @@ sequenceDiagram
 #   initial_scene_path = "res://game/scenes/main.tscn"
 #   save_path = ""  # 留空使用 SaveService 默认 user://save.json
 
-# 验证服务在线（在任意节点的 _ready 中）
+# 验证内容入库（在任意节点的 _ready 中）
 func _ready() -> void:
-    if ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) == null:
-        push_error("Bootstrap has not run yet")
-        return
     var content := Mkit.content()
-    print("Registered content IDs: ", content.get_all_by_type("ability_definition"))
+    print("Registered abilities: ", content.get_all_by_type("AbilityDefinition"))
 ```
 
 ```gdscript
-# 自定义服务注册（继承 GameBootstrap，override _register_kernel_services）
+# 自定义服务注册（继承 GameBootstrap，override _build_services）
 class_name MyBootstrap
 extends GameBootstrap
 
-func _register_kernel_services() -> void:
-    super._register_kernel_services()    # 先注册所有内置服务
-    var my_svc := MyGameService.new()
-    ServiceRegistry.register_service("my_game", my_svc)
+func _build_services() -> Dictionary:
+    var services := super()    # 先拿内置服务表
+    services["my_game"] = MyGameService.new()
+    return services
 ```
 
 > `UIManager` 不由 `GameBootstrap._build_services()` / `ModuleBootstrap` 创建；场景中存在 `UIManager` 节点时，它会自注册 `"ui"` 服务。
 
 ### 相关文档
 
-→ [architecture.md — ServiceRegistry 模式](architecture.md#serviceregistry-模式)  
-→ [cookbook/01_bootstrap.md](cookbook/01_bootstrap.md)  
-→ [ref/kernel/GameBootstrap.md](ref/kernel/GameBootstrap.md)
+→ [architecture.md — ServiceRegistry 模式](architecture.md#serviceregistry-模式)
+→ [cookbook/01_bootstrap.md](cookbook/01_bootstrap.md)
+→ [generated/html/classes/GameBootstrap.html](generated/html/classes/GameBootstrap.html)
 
 ---
 
 ## P0-2：Main Gameplay Loop（每帧）
 
-**触发点：** Godot `_process(delta)`  
-**涉及系统：** `StateMachine`、`State`、`ActionService`、`AbilityController`  
+**触发点：** Godot `_process(delta)`
+**涉及系统：** `StateMachine`、`State`、`ActionService`、`AbilityController`
 **输出：** 状态 update、action 推进（含完成检测）、冷却 tick
 
 ### 流程
@@ -144,16 +141,16 @@ func _on_attack_done(_action: GameAction) -> void:
 
 ### 相关文档
 
-→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)  
-→ [ref/kernel/ActionService.md](ref/kernel/ActionService.md)  
-→ [ref/kernel/StateMachine.md](ref/kernel/StateMachine.md)
+→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)
+→ [generated/html/classes/ActionService.html](generated/html/classes/ActionService.html)
+→ [generated/html/classes/StateMachine.html](generated/html/classes/StateMachine.html)
 
 ---
 
 ## P1-3：Command Dispatch
 
-**触发点：** 任意代码发出 `GameCommand`（玩家输入处理、AI Brain、脚本事件）  
-**涉及系统：** `CommandService`、`CommandReceiver`、`StateMachine`、`State`  
+**触发点：** 任意代码发出 `GameCommand`（玩家输入处理、AI Brain、脚本事件）
+**涉及系统：** `CommandReceiver`、`StateMachine`、`State`；跨实体按 id 路由时可选用 `CommandService`
 **输出：** 目标实体的 State 处理命令，或命令被拒绝并发 `command_failed`
 
 ### 流程
@@ -161,18 +158,22 @@ func _on_attack_done(_action: GameAction) -> void:
 ```mermaid
 sequenceDiagram
     participant You as [你的代码]
-    participant CS as CommandService
     participant CR as CommandReceiver
+    participant CS as CommandService（可选）
     participant SM as StateMachine
     participant S as State（leaf→root）
 
     Note over You: [你实现] 输入处理 / AI / 脚本
-    You->>CS: dispatch(command)
-    CS->>CS: 查 _receivers[command.target_id]
-    alt target_id 未注册
-        CS-->>You: command_failed("No receiver for target_id")
+    alt 已持有实体 / CommandReceiver
+        You->>CR: receive_command(command)
+    else 只知道 target_id
+        You->>CS: dispatch(command)
+        CS->>CS: 查 _receivers[command.target_id]
+        alt target_id 未注册
+            CS-->>You: command_failed("No receiver for target_id")
+        end
+        CS->>CR: receive_command(command)
     end
-    CS->>CR: receive_command(command)
     CR->>SM: handle_command(command)
     SM->>S: handle_command(command) — leaf 开始向 root 冒泡
     Note over S: [你实现] State.handle_command → return true 消费命令
@@ -183,7 +184,7 @@ sequenceDiagram
     else 命令未处理
         CR->>CR: handle_unhandled_command(command)  [可 override]
     end
-    CS-->>You: command_dispatched 信号（无论成功失败）
+    CS-->>You: command_dispatched 信号（仅 dispatch 路径）
 ```
 
 ### 关键代码
@@ -194,8 +195,8 @@ func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("attack"):
         var cmd := GameCommand.create("attack", "player_01", "player_01")
         cmd.payload["direction"] = get_global_mouse_position() - owner.global_position
-        var svc := Mkit.commands()
-        if not svc.dispatch(cmd):
+        var receiver := EntityContract.get_command_receiver(self)
+        if receiver == null or not receiver.receive_command(cmd):
             push_warning("attack command not handled")
 ```
 
@@ -216,17 +217,17 @@ func handle_command(command: GameCommand) -> bool:
 
 ### 相关文档
 
-→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)  
-→ [ref/kernel/CommandService.md](ref/kernel/CommandService.md)  
-→ [ref/kernel/GameCommand.md](ref/kernel/GameCommand.md)  
+→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)
+→ [generated/html/classes/CommandService.html](generated/html/classes/CommandService.html)
+→ [generated/html/classes/GameCommand.html](generated/html/classes/GameCommand.html)
 → [cookbook/02_player_entity.md](cookbook/02_player_entity.md)
 
 ---
 
 ## P1-4：HFSM Transition
 
-**触发点：** `State.request_transition(path)` 或 `StateMachine.transition_to(path)`  
-**涉及系统：** `StateMachine`、`State`（当前链 + 目标链）  
+**触发点：** `State.request_transition(path)` 或 `StateMachine.transition_to(path)`
+**涉及系统：** `StateMachine`、`State`（当前链 + 目标链）
 **输出：** 当前状态链 exit，目标状态链 enter，`state_changed` 信号
 
 ### 流程
@@ -288,16 +289,16 @@ sm.transition_failed.connect(func(from: String, to: String, reason: String) -> v
 
 ### 相关文档
 
-→ [ref/kernel/StateMachine.md](ref/kernel/StateMachine.md)  
-→ [ref/kernel/State.md](ref/kernel/State.md)  
+→ [generated/html/classes/StateMachine.html](generated/html/classes/StateMachine.html)
+→ [generated/html/classes/State.html](generated/html/classes/State.html)
 → [debugging.md — 状态没切换](debugging.md#常见问题速查表)
 
 ---
 
 ## P1-5：Ability Cast
 
-**触发点：** `AbilityController.cast(ability_id, context)`  
-**涉及系统：** `AbilityController`、`ActionService`、`GameAction`/`CastAction`、`EffectService`  
+**触发点：** `AbilityController.cast(ability_id, context)`
+**涉及系统：** `AbilityController`、`ActionService`、`GameAction`/`CastAction`、`EffectService`
 **输出：** 效果链执行，冷却开始，`ability_cast_finished` 信号
 
 ### 流程
@@ -377,17 +378,17 @@ ac.ability_failed.connect(func(id: String, reason: String) -> void:
 
 ### 相关文档
 
-→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)  
-→ [ref/modules/AbilityController.md](ref/modules/AbilityController.md)  
-→ [ref/modules/AbilityDefinition.md](ref/modules/AbilityDefinition.md)  
+→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)
+→ [generated/html/classes/AbilityController.html](generated/html/classes/AbilityController.html)
+→ [generated/html/classes/AbilityDefinition.html](generated/html/classes/AbilityDefinition.html)
 → [cookbook/05_ability.md](cookbook/05_ability.md)
 
 ---
 
 ## P1-6：Effect Execution
 
-**触发点：** `EffectService.execute(effect, context)` 或 `execute_many(effects, context)`（通常由 `GameAction._fire_effects` 调用）  
-**涉及系统：** `EffectService`、`GameEffect`、`Condition`/`ConditionEvaluator`  
+**触发点：** `EffectService.execute(effect, context)` 或 `execute_many(effects, context)`（通常由 `GameAction._fire_effects` 调用）
+**涉及系统：** `EffectService`、`GameEffect`、`Condition`/`ConditionEvaluator`
 **输出：** `EffectResult`（success/fail + payload）
 
 ### 流程
@@ -458,17 +459,17 @@ effect.conditions = [cond]   # 目标超出 200px 时 effect 自动 skip
 
 ### 相关文档
 
-→ [ref/kernel/GameEffect.md](ref/kernel/GameEffect.md)  
-→ [ref/kernel/EffectService.md](ref/kernel/EffectService.md)  
-→ [ref/kernel/EffectResult.md](ref/kernel/EffectResult.md)  
+→ [generated/html/classes/GameEffect.html](generated/html/classes/GameEffect.html)
+→ [generated/html/classes/EffectService.html](generated/html/classes/EffectService.html)
+→ [generated/html/classes/EffectResult.html](generated/html/classes/EffectResult.html)
 → [debugging.md — Effect 执行了但没效果](debugging.md#常见问题速查表)
 
 ---
 
 ## P1-7：Damage Resolution
 
-**触发点：** `DealDamageEffect._apply_impl(context)` 或 `HitboxComponent` 构建 `DamageRequest` 并调用 `CombatService.resolve()`  
-**涉及系统：** `DealDamageEffect` / `HitboxComponent`、`CombatService`、`DamageIntent`、`DamageResolution`、`DamageApplication`、`HealthComponent`、`EventService`  
+**触发点：** `DealDamageEffect._apply_impl(context)` 或 `HitboxComponent` 构建 `DamageRequest` 并调用 `CombatService.resolve()`
+**涉及系统：** `DealDamageEffect` / `HitboxComponent`、`CombatService`、`HealthComponent`、`EventService`
 **输出：** HP 减少，`damage_applied` 信号，若 HP 归零则 `entity_died` 信号
 
 ### 流程
@@ -477,22 +478,13 @@ effect.conditions = [cond]   # 目标超出 200px 时 effect 自动 skip
 sequenceDiagram
     participant DDE as DealDamageEffect
     participant CS as CombatService
-    participant DI as DamageIntent
-    participant DR as DamageResolution
-    participant DA as DamageApplication
     participant HS as HealthComponent
     participant EV as EventService
 
     Note over DDE: [mkit modules] _apply_impl(ctx)
     DDE->>DDE: 构建 DamageRequest（base_amount、damage_type、can_crit…）
     DDE->>CS: resolve(request)
-    CS->>DI: from_request(request)
-    DI-->>CS: DamageIntent
-    CS->>DR: resolve_damage_resolution(intent)
-    Note over DR: 闪避 → base + attack_power → multiplier → crit → defense → on_hit_statuses
-    DR-->>CS: DamageResolution
-    CS->>DA: from_resolution(resolution)
-    DA-->>CS: DamageResult
+    Note over CS: 闪避 → base + attack_power → multiplier → crit → defense → on_hit_statuses
     CS-->>DDE: DamageResult（final_amount、was_critical、was_evaded、trace）
     DDE->>HS: apply_damage(result)
     Note over HS: [mkit modules] current_hp -= final_amount
@@ -549,17 +541,17 @@ dmg.hit_tags = ["melee"]
 
 ### 相关文档
 
-→ [ref/modules/CombatService.md](ref/modules/CombatService.md)  
-→ [ref/modules/DealDamageEffect.md](ref/modules/DealDamageEffect.md)  
-→ [ref/modules/HealthComponent.md](ref/modules/HealthComponent.md)  
+→ [generated/html/classes/CombatService.html](generated/html/classes/CombatService.html)
+→ [generated/html/classes/DealDamageEffect.html](generated/html/classes/DealDamageEffect.html)
+→ [generated/html/classes/HealthComponent.html](generated/html/classes/HealthComponent.html)
 → [cookbook/03_health_and_stats.md](cookbook/03_health_and_stats.md)
 
 ---
 
 ## P2-8：Event Notification
 
-**触发点：** 任意 `EventService.emit_*()`  
-**涉及系统：** `EventService`、`DomainEvent`、订阅方（`FeedbackSystem`、`QuestService`、UI、`RoomController` …）  
+**触发点：** 任意 `EventService.emit_*()`
+**涉及系统：** `EventService`、`DomainEvent`、订阅方（`FeedbackSystem`、`QuestService`、UI、`RoomController` …）
 **输出：** 类型化信号广播 + `recent_events` 入队，所有订阅者收到通知
 
 ### 流程
@@ -571,16 +563,15 @@ sequenceDiagram
     participant Sub as 订阅方<br/>(FeedbackSystem/QuestService/UI)
 
     Note over Caller,ES: [mkit 内部]
-    Caller->>ES: CombatEvents.damage_applied(result)
-    ES->>ES: damage_applied.emit(result)  (类型化信号)
-    ES->>ES: emit_domain_event(DomainEvent)
+    Caller->>ES: emit_domain_event(CombatEvents.damage_applied(result))
     ES->>ES: recent_events.append(event)  (上限 100)
-    ES->>ES: domain_event_emitted.emit(event)  (通用信号)
-    Note over Sub: [你/模块] 订阅了 damage_applied 或 domain_event_emitted
-    ES-->>Sub: 信号回调
+    ES->>ES: _dispatch_to_subscribers(event)
+    ES->>ES: domain_event_emitted.emit(event)  (debug firehose)
+    Note over Sub: [你/模块] subscribe(damage_applied 或 ANY_EVENT)
+    ES-->>Sub: 订阅回调
 ```
 
-**设计要点：** 每个 `emit_*` 都做两件事——发一个**类型化信号**（`damage_applied`）给精确订阅者，再发一个**通用信号**（`domain_event_emitted`）给"什么都想听"的订阅者（如 `QuestService` 靠它统计目标）。发出方完全不知道谁在听，这是表现层与逻辑层解耦的关键。
+**设计要点：** 领域事件是跨系统 canonical 通道。精确订阅者用 `subscribe(事件类型, callback)`；需要监听全部事件的系统用 `subscribe(EventService.ANY_EVENT, callback)`。`domain_event_emitted` 仍会发出，但定位为 DebugOverlay / 录制工具使用的 firehose 信号。
 
 ### 关键代码
 
@@ -593,23 +584,23 @@ events.subscribe(CombatEvents.DAMAGE_APPLIED, func(event: DomainEvent) -> void:
 )
 
 # 通用订阅：监听一切领域事件（调试 / 统计 / 任务）
-events.domain_event_emitted.connect(func(event: DomainEvent) -> void:
+events.subscribe(EventService.ANY_EVENT, func(event: DomainEvent) -> void:
     print("[%s] %s → %s" % [event.event_type, event.source_id, event.target_id])
 )
 ```
 
 ### 相关文档
 
-→ [ref/kernel/EventService.md](ref/kernel/EventService.md) · [ref/kernel/DomainEvent.md](ref/kernel/DomainEvent.md)  
-→ [concepts.md — 模型 1：标准管线](concepts.md#模型-1标准管线时序图)（最后一跳）  
+→ [generated/html/classes/EventService.html](generated/html/classes/EventService.html) · [generated/html/classes/DomainEvent.html](generated/html/classes/DomainEvent.html)
+→ [concepts.md — 模型 1：标准管线](concepts.md#模型-1标准管线时序图)（最后一跳）
 → [debugging.md](debugging.md)（recent_events 回放）
 
 ---
 
 ## P2-9：Entity Spawn
 
-**触发点：** `EntitySpawner.spawn_entity(definition_id, parent, position)`  
-**涉及系统：** `EntitySpawner`、`EntityDefinition`、`EntityIdentity`、`CommandReceiver`、`StatsComponent`、`AbilityController`  
+**触发点：** `EntitySpawner.spawn_entity(definition_id, parent, position)`
+**涉及系统：** `EntitySpawner`、`EntityDefinition`、`EntityIdentity`、`CommandReceiver`、`StatsComponent`、`AbilityController`
 **输出：** 一个已注入身份/属性/技能并挂入场景树的实体节点
 
 ### 流程
@@ -648,15 +639,15 @@ if enemy != null:
 
 ### 相关文档
 
-→ [ref/modules/EntitySpawner.md](ref/modules/EntitySpawner.md) · [ref/modules/EntityDefinition.md](ref/modules/EntityDefinition.md)  
+→ [generated/html/classes/EntitySpawner.html](generated/html/classes/EntitySpawner.html) · [generated/html/classes/EntityDefinition.html](generated/html/classes/EntityDefinition.html)
 → [cookbook/07_room.md](cookbook/07_room.md)
 
 ---
 
 ## P2-10：Animation — Action 驱动通道
 
-**触发点：** `GameAction._on_start()` / `_on_update()`  
-**涉及系统：** `GameAction`（及子类）、`Presentation/AnimationPlayer`、`HitboxComponent`  
+**触发点：** `GameAction._on_start()` / `_on_update()`
+**涉及系统：** `GameAction`（及子类）、`Presentation/AnimationPlayer`、`HitboxComponent`
 **输出：** 动画播放，且逻辑（Hitbox 开关）与动画时序严格对齐
 
 ### 流程
@@ -692,15 +683,15 @@ func _on_start() -> void:
 
 ### 相关文档
 
-→ [ref/kernel/GameAction.md](ref/kernel/GameAction.md) · [ref/modules/TimedAttackAction.md](ref/modules/TimedAttackAction.md)  
+→ [generated/html/classes/GameAction.html](generated/html/classes/GameAction.html) · [generated/html/classes/TimedAttackAction.html](generated/html/classes/TimedAttackAction.html)
 → [cookbook/13_animation.md](cookbook/13_animation.md)（通道 A）
 
 ---
 
 ## P2-11：Animation — 事件反馈通道
 
-**触发点：** `EventService.damage_applied` / `entity_died`  
-**涉及系统：** `EventService`、`FeedbackSystem`、`DamageNumberSystem`、`VFXSpawner`、`AudioService`  
+**触发点：** `EventService.damage_applied` / `entity_died`
+**涉及系统：** `EventService`、`FeedbackSystem`、`DamageNumberSystem`、`VFXSpawner`、`AudioService`
 **输出：** 浮动伤害数字 + 命中/死亡特效 + 音效（被动触发，与发出方解耦）
 
 ### 流程
@@ -743,15 +734,15 @@ events.subscribe(CombatEvents.ENTITY_DIED, func(event: DomainEvent) -> void:
 
 ### 相关文档
 
-→ FeedbackSystem / VFXSpawner / DamageNumberSystem 是游戏侧表现层组件（demo 提供参考实现，不属于框架 API）  
+→ FeedbackSystem / VFXSpawner / DamageNumberSystem 是游戏侧表现层组件（demo 提供参考实现，不属于框架 API）
 → [cookbook/13_animation.md](cookbook/13_animation.md)（通道 B）
 
 ---
 
 ## P3-12：Quest Lifecycle
 
-**触发点：** `AcceptQuestEffect`（接受）/ 任意领域事件（推进）  
-**涉及系统：** `QuestService`、`QuestDefinition`、`QuestState`、`EventService`、`AcceptQuestEffect` / `AdvanceObjectiveEffect` / `CompleteQuestEffect`  
+**触发点：** `AcceptQuestEffect`（接受）/ 任意领域事件（推进）
+**涉及系统：** `QuestService`、`QuestDefinition`、`QuestState`、`EventService`、`AcceptQuestEffect` / `AdvanceObjectiveEffect` / `CompleteQuestEffect`
 **输出：** 任务从 `available → active → completed → turned_in`，达成时跑 `reward_effects`
 
 ### 流程
@@ -787,14 +778,14 @@ quest.advance_objective("quest.talk_villagers", "talk", 1)
 
 ### 相关文档
 
-→ [ref/modules/QuestService.md](ref/modules/QuestService.md) · [ref/modules/QuestDefinition.md](ref/modules/QuestDefinition.md)  
+→ [generated/html/classes/QuestService.html](generated/html/classes/QuestService.html) · [generated/html/classes/QuestDefinition.html](generated/html/classes/QuestDefinition.html)
 → [cookbook/10_quest.md](cookbook/10_quest.md)
 
 ---
 
 ## P3-13：Save / Load
 
-**触发点：** `SaveService.save_game(root)` / `load_game(root)`  
+**触发点：** `SaveService.save_game(root)` / `load_game(root)`
 **涉及系统：** `SaveService`、`Saveable`、`EntitySaveAgent`、`SaveableComponent`
 **输出：** root 状态与 entity component 状态序列化为 JSON 写盘 / 反序列化恢复
 
@@ -838,15 +829,15 @@ if not save.save_game(get_tree().root):
 
 ### 相关文档
 
-→ [ref/kernel/SaveService.md](ref/kernel/SaveService.md) · [ref/kernel/Saveable.md](ref/kernel/Saveable.md) · [ref/kernel/EntitySaveAgent.md](ref/kernel/EntitySaveAgent.md) · [ref/kernel/SaveableComponent.md](ref/kernel/SaveableComponent.md)
+→ [generated/html/classes/SaveService.html](generated/html/classes/SaveService.html) · [generated/html/classes/Saveable.html](generated/html/classes/Saveable.html) · [generated/html/classes/EntitySaveAgent.html](generated/html/classes/EntitySaveAgent.html) · [generated/html/classes/SaveableComponent.html](generated/html/classes/SaveableComponent.html)
 → [concepts.md — 存档](concepts.md#六存档roots--entities--scope-provider) · [cookbook/11_progression_and_save.md](cookbook/11_progression_and_save.md)
 
 ---
 
 ## P3-14：Loot Roll
 
-**触发点：** `LootService.roll_table(table_id, ctx)` 或 `generate_options(pool_ids, count, ctx)`  
-**涉及系统：** `LootService`、`LootTableDefinition`、`LootEntry`、`LootRollResult`、`RewardSystem`、`RandomService`  
+**触发点：** `LootService.roll_table(table_id, ctx)` 或 `generate_options(pool_ids, count, ctx)`
+**涉及系统：** `LootService`、`LootTableDefinition`、`LootEntry`、`LootRollResult`、`RewardSystem`、`RandomService`
 **输出：** 掉落物 `LootRollResult.item_instances` 或可选奖励 `Array[RewardOption]`
 
 ### 流程
@@ -880,15 +871,15 @@ for item in result.item_instances:
 
 ### 相关文档
 
-→ [ref/modules/LootService.md](ref/modules/LootService.md) · [ref/modules/LootTableDefinition.md](ref/modules/LootTableDefinition.md) · [ref/modules/RewardSystem.md](ref/modules/RewardSystem.md)  
+→ [generated/html/classes/LootService.html](generated/html/classes/LootService.html) · [generated/html/classes/LootTableDefinition.html](generated/html/classes/LootTableDefinition.html) · [generated/html/classes/RewardSystem.html](generated/html/classes/RewardSystem.html)
 → [cookbook/08_loot_and_rewards.md](cookbook/08_loot_and_rewards.md)
 
 ---
 
 ## P3-15：Dialogue
 
-**触发点：** `DialogueService.start(dialogue_id, ctx)`  
-**涉及系统：** `DialogueService`、`DialogueDefinition`、`DialogueNode`、`DialogueChoice`、`DialogueRuntime`  
+**触发点：** `DialogueService.start(dialogue_id, ctx)`
+**涉及系统：** `DialogueService`、`DialogueDefinition`、`DialogueNode`、`DialogueChoice`、`DialogueRuntime`
 **输出：** 节点推进、选项求值、节点/选项 effect 触发，结束发 `dialogue_ended`
 
 ### 流程
@@ -926,15 +917,15 @@ dialogue.start("dialogue.elder_intro", ctx)   # 已有对话进行中则返回 f
 
 ### 相关文档
 
-→ [ref/modules/DialogueService.md](ref/modules/DialogueService.md) · [ref/modules/DialogueDefinition.md](ref/modules/DialogueDefinition.md)  
+→ [generated/html/classes/DialogueService.html](generated/html/classes/DialogueService.html) · [generated/html/classes/DialogueDefinition.html](generated/html/classes/DialogueDefinition.html)
 → [cookbook/09_npc_dialogue.md](cookbook/09_npc_dialogue.md)
 
 ---
 
 ## P3-16：Shop Purchase
 
-**触发点：** `ShopService.buy(item_id, quantity, buyer)`  
-**涉及系统：** `ShopService`、`ShopDefinition`、`ShopEntry`、`SpendCurrencyEffect`、`InventoryController`、`ProgressionService`  
+**触发点：** `ShopService.buy(item_id, quantity, buyer)`
+**涉及系统：** `ShopService`、`ShopDefinition`、`ShopEntry`、`SpendCurrencyEffect`、`InventoryController`、`ProgressionService`
 **输出：** 扣货币、物品入包、库存减少，发 `item_purchased`
 
 ### 流程
@@ -977,15 +968,15 @@ if shop.can_buy("item.potion", 1, $Player):
 
 ### 相关文档
 
-→ [ref/modules/ShopService.md](ref/modules/ShopService.md) · [ref/modules/ShopDefinition.md](ref/modules/ShopDefinition.md)  
+→ [generated/html/classes/ShopService.html](generated/html/classes/ShopService.html) · [generated/html/classes/ShopDefinition.html](generated/html/classes/ShopDefinition.html)
 → [cookbook/14_shop.md](cookbook/14_shop.md)
 
 ---
 
 ## P4-17：Progression / Level Up
 
-**触发点：** `ExperienceComponent.add_xp(amount)` / `ProgressionService.unlock_or_level_up(id)`  
-**涉及系统：** `ExperienceComponent`、`ExperienceCurve`、`ProgressionService`、`UpgradeDefinition`  
+**触发点：** `ExperienceComponent.add_xp(amount)` / `ProgressionService.unlock_or_level_up(id)`
+**涉及系统：** `ExperienceComponent`、`ExperienceCurve`、`ProgressionService`、`UpgradeDefinition`
 **输出：** 等级提升（`level_up`）/ 永久升级解锁（`upgrade_level_changed`）
 
 ### 流程
@@ -1021,15 +1012,15 @@ if prog.can_unlock("upgrade.max_hp"):
 
 ### 相关文档
 
-→ [ref/modules/ExperienceComponent.md](ref/modules/ExperienceComponent.md) · [ref/modules/ProgressionService.md](ref/modules/ProgressionService.md)  
+→ [generated/html/classes/ExperienceComponent.html](generated/html/classes/ExperienceComponent.html) · [generated/html/classes/ProgressionService.html](generated/html/classes/ProgressionService.html)
 → [cookbook/11_progression_and_save.md](cookbook/11_progression_and_save.md)
 
 ---
 
 ## P4-18：Room / Run
 
-**触发点：** `RunDirector.start_run(seed)`  
-**涉及系统：** `RunDirector`、`DungeonGenerator`、`RoomGraph`、`RoomLoader`、`RoomController`、`RunState`、`EventService`  
+**触发点：** `RunDirector.start_run(seed)`
+**涉及系统：** `RunDirector`、`DungeonGenerator`、`RoomGraph`、`RoomLoader`、`RoomController`、`RunState`、`EventService`
 **输出：** 线性房间序列逐个加载、清空、推进，直到 `run_finished`
 
 ### 流程
@@ -1074,15 +1065,15 @@ director.start_run(12345)
 
 ### 相关文档
 
-→ [ref/modules/RunDirector.md](ref/modules/RunDirector.md) · [ref/modules/RoomController.md](ref/modules/RoomController.md) · [ref/modules/DungeonGenerator.md](ref/modules/DungeonGenerator.md)  
+→ [generated/html/classes/RunDirector.html](generated/html/classes/RunDirector.html) · [generated/html/classes/RoomController.html](generated/html/classes/RoomController.html) · [generated/html/classes/DungeonGenerator.html](generated/html/classes/DungeonGenerator.html)
 → [cookbook/07_room.md](cookbook/07_room.md) · [cookbook/08_loot_and_rewards.md](cookbook/08_loot_and_rewards.md)
 
 ---
 
 ## P4-19：Status Effect Tick
 
-**触发点：** `StatusEffectController._process(delta)`（每帧）  
-**涉及系统：** `StatusEffectController`、`StatusEffectInstance`、`StatusEffectDefinition`、`StatsComponent`  
+**触发点：** `StatusEffectController._process(delta)`（每帧）
+**涉及系统：** `StatusEffectController`、`StatusEffectInstance`、`StatusEffectDefinition`、`StatsComponent`
 **输出：** 周期触发 `effects_on_tick`，到期移除并卸下属性加成
 
 ### 流程
@@ -1100,7 +1091,7 @@ flowchart TB
     classDef mkitCore fill:#4A90D9,color:#fff,stroke:#2C6FAC
 ```
 
-**施加入口有两条：** `ApplyStatusEffect`（effect 链显式施加）或伤害的 `on_hit_statuses`（`DamageIntent.on_hit_statuses` → `DamageResolution.applied_status_effects` → `DamageResult.status_applications` → `HealthComponent` 转交）。两者最终都落到 `StatusEffectController.apply_status()`，按 `stack_rule` 叠加。
+**施加入口有两条：** `ApplyStatusEffect`（effect 链显式施加）或伤害的 `on_hit_statuses`（`DamageRequest.on_hit_statuses` → `DamageResult.status_applications` → `HealthComponent` 转交）。两者最终都落到 `StatusEffectController.apply_status()`，按 `stack_rule` 叠加。
 
 ### 关键代码
 
@@ -1113,15 +1104,15 @@ ctrl.status_removed.connect(func(id: String): print("状态结束: %s" % id))
 
 ### 相关文档
 
-→ [ref/modules/StatusEffectController.md](ref/modules/StatusEffectController.md) · [ref/modules/StatusEffectDefinition.md](ref/modules/StatusEffectDefinition.md)  
+→ [generated/html/classes/StatusEffectController.html](generated/html/classes/StatusEffectController.html) · [generated/html/classes/StatusEffectDefinition.html](generated/html/classes/StatusEffectDefinition.html)
 → [cookbook/12_status_effects.md](cookbook/12_status_effects.md)
 
 ---
 
 ## P4-20：Scene / Zone Transition
 
-**触发点：** `SceneService.change_scene(path)` 或 `WorldService.go_to_zone(zone_id, spawn_id)`  
-**涉及系统：** `SceneService`、`WorldService`、`ZoneDefinition`、`SpawnPoint`、`Portal`  
+**触发点：** `SceneService.change_scene(path)` 或 `WorldService.go_to_zone(zone_id, spawn_id)`
+**涉及系统：** `SceneService`、`WorldService`、`ZoneDefinition`、`SpawnPoint`、`Portal`
 **输出：** 场景切换，玩家落到目标出生点，发 `zone_changed`
 
 ### 流程
@@ -1157,5 +1148,5 @@ if not scenes.change_scene("res://game/scenes/forest.tscn"):
 
 ### 相关文档
 
-→ [ref/kernel/SceneService.md](ref/kernel/SceneService.md) · [ref/modules/WorldService.md](ref/modules/WorldService.md) · [ref/modules/Portal.md](ref/modules/Portal.md) · [ref/modules/SpawnPoint.md](ref/modules/SpawnPoint.md)
+→ [generated/html/classes/SceneService.html](generated/html/classes/SceneService.html) · [generated/html/classes/WorldService.html](generated/html/classes/WorldService.html) · [generated/html/classes/Portal.html](generated/html/classes/Portal.html) · [generated/html/classes/SpawnPoint.html](generated/html/classes/SpawnPoint.html)
 → [cookbook/15_world_zone_transition.md](cookbook/15_world_zone_transition.md)

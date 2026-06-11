@@ -115,7 +115,7 @@ offset_top = 110.0
 offset_right = 395.0
 offset_bottom = 134.0
 theme_override_font_sizes/font_size = 18
-text = "Elder Room (R)"
+text = "Elder Room (E)"
 horizontal_alignment = 1
 
 [node name="Gate" type="ColorRect" parent="."]
@@ -131,7 +131,7 @@ offset_top = 320.0
 offset_right = 685.0
 offset_bottom = 344.0
 theme_override_font_sizes/font_size = 18
-text = "Field Gate (G)"
+text = "Field Gate (E)"
 horizontal_alignment = 1
 
 [node name="Shopkeeper" type="Polygon2D" parent="."]
@@ -158,5 +158,5 @@ offset_top = 135.0
 offset_right = 172.0
 offset_bottom = 160.0
 theme_override_font_sizes/font_size = 18
-text = "Village Supply (B)"
+text = "Village Supply (E)"
 horizontal_alignment = 1

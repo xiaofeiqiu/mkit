@@ -1,89 +1,83 @@
 class_name CombatService
 extends RefCounted
+## 说明：`CombatService` 是 战斗系统 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(CombatService.SERVICE_ID, CombatService.new())`
+
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `CombatService`。
+const SERVICE_ID: String = "combat"
 
 
+## 执行 `resolve` 对应的公开操作，并保持 `CombatService` 的领域契约一致。
 func resolve(request: DamageRequest) -> DamageResult:
-	var intent := resolve_damage_intent(request)
-	var resolution := resolve_damage_resolution(intent)
-	return to_application(resolution).to_result()
+	var result := DamageResult.new()
+	if request == null or request.source == null or request.target == null:
+		result.trace["failure"] = "missing source or target"
+		return result
 
+	result.source = request.source
+	result.target = request.target
+	result.base_amount = request.base_amount
+	result.damage_type = request.damage_type
+	result.element_type = request.element_type
+	result.trace["base"] = request.base_amount
+	result.trace["damage_source_node"] = _safe_node_name(request.source)
+	result.trace["damage_target_node"] = _safe_node_name(request.target)
 
-func resolve_damage_intent(request: DamageRequest) -> DamageIntent:
-	return DamageIntent.from_request(request)
+	if request.can_evade and _roll_chance(_stat(_get_stats(request.target), "evade_chance", 0.0)):
+		result.was_evaded = true
+		result.final_amount = 0.0
+		result.trace["evaded"] = true
+		return result
 
-
-func resolve_damage_resolution(intent: DamageIntent) -> DamageResolution:
-	var resolution := DamageResolution.new()
-	if intent == null or intent.source == null or intent.target == null:
-		resolution.failure_reason = "missing source or target"
-		resolution.trace["failure"] = resolution.failure_reason
-		return resolution
-
-	resolution.source = intent.source
-	resolution.target = intent.target
-	resolution.base_amount = intent.base_amount
-	resolution.damage_type = intent.damage_type
-	resolution.element_type = intent.element_type
-	resolution.trace["base"] = intent.base_amount
-	resolution.trace["damage_source_node"] = _safe_node_name(intent.source)
-	resolution.trace["damage_target_node"] = _safe_node_name(intent.target)
-
-	if intent.can_evade and _roll_chance(_stat(_get_stats(intent.target), "evade_chance", 0.0)):
-		resolution.was_evaded = true
-		resolution.final_amount = 0.0
-		resolution.trace["evaded"] = true
-		return resolution
-
-	var source_stats := _get_stats(intent.source)
-	var target_stats := _get_stats(intent.target)
+	var source_stats := _get_stats(request.source)
+	var target_stats := _get_stats(request.target)
 	var attack_power := _stat(source_stats, "attack_power", 0.0)
 	var damage_multiplier := _stat(source_stats, "damage_multiplier", 1.0)
 	var defense := _stat(target_stats, "defense", 0.0)
 	var crit_chance := _stat(source_stats, "crit_chance", 0.0)
 	var crit_damage := _stat(source_stats, "crit_damage", 1.5)
 
-	var amount := intent.base_amount
+	var amount := request.base_amount
 	amount += attack_power
-	resolution.trace["after_attack_power"] = amount
+	result.trace["after_attack_power"] = amount
 	amount *= damage_multiplier
-	resolution.trace["after_damage_multiplier"] = amount
+	result.trace["after_damage_multiplier"] = amount
 
-	if intent.can_crit and _roll_chance(crit_chance):
-		resolution.was_critical = true
+	if request.can_crit and _roll_chance(crit_chance):
+		result.was_critical = true
 		amount *= crit_damage
-		resolution.trace["crit_roll"] = true
+		result.trace["crit_roll"] = true
 
-	resolution.trace["after_crit"] = amount
+	result.trace["after_crit"] = amount
 	amount = max(0.0, amount - defense)
-	resolution.trace["after_defense"] = amount
-	resolution.final_amount = max(0.0, amount)
-	resolution.trace["final"] = resolution.final_amount
+	result.trace["after_defense"] = amount
+	result.final_amount = max(0.0, amount)
+	result.trace["final"] = result.final_amount
 
-	_resolve_status_applications(intent, resolution)
-	return resolution
-
-
-func to_application(resolution: DamageResolution) -> DamageApplication:
-	return DamageApplication.from_resolution(resolution)
+	_resolve_status_applications(request, result)
+	return result
 
 
-func _resolve_status_applications(intent: DamageIntent, resolution: DamageResolution) -> void:
-	if intent == null or resolution == null:
+func _resolve_status_applications(request: DamageRequest, result: DamageResult) -> void:
+	if result.was_evaded or result.was_blocked:
 		return
-	if resolution.was_evaded or resolution.was_blocked:
-		return
-	for entry in intent.on_hit_statuses:
+	for entry in request.on_hit_statuses:
 		var status_id := str(entry.get("status_id", ""))
 		if status_id == "":
 			continue
 		var chance := float(entry.get("chance", 1.0))
 		if not _roll_chance(chance):
 			continue
-		var app := DamageStatusApplication.from_values(
-			status_id, int(entry.get("stacks", 1)), float(entry.get("duration", -1.0))
-		)
-		resolution.applied_status_effects.append(app)
-		resolution.trace["applied_status_effects"] = _as_status_id_list(resolution.applied_status_effects)
+		result.applied_status_effects.append(status_id)
+		result.status_applications.append({
+			"status_id": status_id,
+			"stacks": max(1, int(entry.get("stacks", 1))),
+			"duration": float(entry.get("duration", -1.0)),
+		})
+		result.trace["applied_status_effects"] = result.applied_status_effects.duplicate()
 
 
 func _get_stats(entity: Node) -> StatsComponent:
@@ -108,11 +102,3 @@ func _roll_chance(chance: float) -> bool:
 
 func _safe_node_name(node: Node) -> String:
 	return node.name if node != null else "null"
-
-
-func _as_status_id_list(applications: Array[DamageStatusApplication]) -> Array[String]:
-	var ids: Array[String] = []
-	for app in applications:
-		if app != null:
-			ids.append(app.status_id)
-	return ids

@@ -1,6 +1,6 @@
 # Mkit
 
-Mkit 是一个面向 Godot 4.7-dev 的可复用游戏运行时框架，专为 2D roguelike / RPG 设计。它提供完整的命令→状态→动作→效果→事件管线，以及战斗、对话、任务、存档、房间、商店、世界与战利品等可复用游戏系统。
+Mkit 是一个面向 Godot 4.6.3 stable 的可复用游戏运行时框架，专为 2D roguelike / RPG 设计。它提供完整的命令→状态→动作→效果→事件管线，以及战斗、对话、任务、存档、房间、商店、世界与战利品等可复用游戏系统。
 
 ---
 
@@ -11,27 +11,23 @@ flowchart TB
     Game["**Game Content**\nres://game/\n（你的关卡、角色、配置）"]
     Modules["**Mkit Modules**\naddons/mkit/modules/\n（combat、quest、dialogue、world…）"]
     Kernel["**Kernel Runtime**\naddons/mkit/kernel/\n（runtime context、命令、状态机、动作、效果、事件、存档）"]
-    Platform["**Platform Adapters**\nservices mocks/backends\n（Analytics、IAP、Ads、CloudSave、Audio 后端）"]
 
     Game --> Modules
     Game --> Kernel
     Modules --> Kernel
-    Kernel --> Platform
 
     classDef mkitCore fill:#4A90D9,color:#fff,stroke:#2C6FAC
     classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
-    classDef platform  fill:#6B7280,color:#fff,stroke:#4B5563
 
     class Modules,Kernel mkitCore
     class Game userOwned
-    class Platform platform
 ```
 
 🟢 绿色 = 你实现 / 🔵 蓝色 = mkit 负责
 
 **依赖规则：** 依赖只能向下流动。`game/` 可以依赖 modules + kernel；modules 只依赖 kernel；kernel 不依赖任何上层。具体 boss、物品、房间、任务、商店价格、经济规则等内容必须留在 `game/`。
 
-当前代码已经完成大改后的核心分层：`ServiceRegistry` 是唯一 autoload，`GameBootstrap` 启动时把所有内置服务注册进它；实体访问走 `EntityContract`；战斗结算拆成 `DamageIntent` / `DamageResolution` / `DamageApplication`；资源与货币分别由 `ResourceSet` / `Wallet` 承载；存档支持显式 save scope。
+当前代码已经完成大改后的核心分层：`ServiceRegistry` 是唯一 autoload，`GameBootstrap` 启动时把所有内置服务注册进它；实体访问走 `EntityContract`；战斗结算由 `CombatService.resolve()` 一步完成（`DamageRequest` → `DamageResult`）；资源与货币分别由 `ResourceSet` / `Wallet` 承载；存档支持显式 save scope。
 
 ---
 
@@ -42,7 +38,7 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     actor You as 你的代码
-    participant CmdSvc as CommandService
+    participant CR as CommandReceiver
     participant SM as StateMachine
     participant AC as AbilityController
     participant ActSvc as ActionService
@@ -51,10 +47,10 @@ sequenceDiagram
     participant EvtSvc as EventService
     participant UI as UI / VFX / Audio
 
-    You->>CmdSvc: dispatch(GameCommand)
-    Note over CmdSvc: kernel — 路由到 CommandReceiver<br/>CommandReceiver 由实体实现【你实现】
+    You->>CR: receive_command(GameCommand)
+    Note over CR: kernel — 同实体输入 / AI 可直接调用<br/>跨实体按 id 路由可选用 CommandService
 
-    CmdSvc->>SM: handle_command(cmd)
+    CR->>SM: handle_command(cmd)
     Note over SM: kernel — HFSM 决定是否响应、触发状态转换
 
     SM->>AC: cast(ability_id, ctx)
@@ -71,7 +67,7 @@ sequenceDiagram
     Note over FxSvc: kernel — 调度效果链，GameEffect 是抽象基类
 
     FxSvc->>CbtSvc: _apply_impl → resolve(DamageRequest)
-    Note over CbtSvc: module — DamageIntent → DamageResolution → DamageApplication<br/>DealDamageEffect._apply_impl【mkit 提供，可扩展】
+    Note over CbtSvc: module — 闪避 → 攻击/倍率 → 暴击 → 防御<br/>DealDamageEffect._apply_impl【mkit 提供，可扩展】
 
     CbtSvc-->>FxSvc: EffectResult
 
@@ -82,7 +78,7 @@ sequenceDiagram
     Note over UI: module — 表现层响应【你实现订阅】
 ```
 
-**kernel 是管线骨架**（Command / HFSM / Action / Effect / Event / RuntimeContext / Save 均在 kernel）。`GameEffect._apply_impl` 是 effect 落到具体领域的正规接缝；新代码优先通过 `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)`、`EntityContract`、typed context/result 对象访问领域系统，避免散落硬编码 service 字符串和绝对节点路径。
+**kernel 是管线骨架**（Command / HFSM / Action / Effect / Event / RuntimeContext / Save 均在 kernel）。`GameEffect._apply_impl` 是 effect 落到具体领域的正规接缝；game/module 新代码优先通过 `Mkit.xxx()`，kernel 内部通过 `ServiceRegistry.get_port(XxxService.SERVICE_ID)`，并结合 `EntityContract`、typed context/result 对象访问领域系统，避免散落硬编码 service 字符串和绝对节点路径。
 
 ---
 
@@ -93,8 +89,7 @@ addons/mkit/
     kernel/
     bootstrap/        # GameBootstrap — 启动编排，注册所有服务
     services/         # ServiceRegistry, TimeService, RandomService,
-                      # SceneService, PoolService, AudioService,
-                      # 平台适配器 (Analytics/IAP/Ads/CloudSave)
+                      # SceneService, PoolService, AudioService
     events/           # DomainEvent, EventService
     commands/         # GameCommand, CommandService, CommandReceiver, BuiltinCommands
     context/          # GameplayContext, Blackboard, ActionContext
@@ -107,7 +102,7 @@ addons/mkit/
     debug/            # DebugOverlay
   modules/
     ai/               # Brain, SimpleAIEnemyBrain
-    combat/           # CombatService, DamageIntent/Resolution/Application,
+    combat/           # CombatService, DamageRequest/Result,
                       # ResourceSet, HealthComponent, StatsComponent,
                       # AbilityController, HitboxComponent, StatusEffectController…
     entity/           # EntityRoot, EntityContract, EntityIdentity, EntitySpawner
@@ -133,9 +128,21 @@ res://game/           # 你的游戏内容（场景、配置 .tres、脚本）
 | 第一次接触，跑起来 | [getting_started.md](getting_started.md) |
 | 理解三层架构和依赖规则 | [architecture.md](architecture.md) |
 | 理解整条管线的"为什么" | [concepts.md](concepts.md) |
-| 对照大改目标与当前实现 | `spec/architect.md` |
-| 查某个类的字段/方法 | [ref/kernel/](ref/kernel/GameBootstrap.md) 或 [ref/modules/](ref/modules/AbilityDefinition.md) |
+| 查某个类的字段/方法 | [Generated API Reference](generated/html/index.html) |
 | 按步骤做一个完整 RPG | [cookbook/index.md](cookbook/index.md) |
 | 系统不按预期运行 | [debugging.md](debugging.md) |
+| 查看当前限制和后续路线 | [roadmap.md](roadmap.md) |
 | 查所有管线调用序列 | [pipeline.md](pipeline.md) |
 | 查术语定义 | [glossary.md](glossary.md) |
+
+API reference 由 Godot doctool XML 生成，入口是 [generated/html/index.html](generated/html/index.html)。修改公开 API 或 `##` doc comment 后运行 `make docs-api`，不要直接手写生成页。
+
+## 常用任务入口
+
+| 任务 | 先看 | 关联 Reference |
+|------|------|----------------|
+| 做一个技能 | [cookbook/05_ability.md](cookbook/05_ability.md) | [AbilityDefinition](generated/html/classes/AbilityDefinition.html), [AbilityController](generated/html/classes/AbilityController.html), [CastAction](generated/html/classes/CastAction.html) |
+| 做一个任务 | [cookbook/10_quest.md](cookbook/10_quest.md) | [QuestDefinition](generated/html/classes/QuestDefinition.html), [QuestService](generated/html/classes/QuestService.html), [AdvanceObjectiveEffect](generated/html/classes/AdvanceObjectiveEffect.html) |
+| 做一个商店 | [cookbook/14_shop.md](cookbook/14_shop.md) | [ShopDefinition](generated/html/classes/ShopDefinition.html), [ShopService](generated/html/classes/ShopService.html), [ShopEntry](generated/html/classes/ShopEntry.html) |
+| 做存档/读档 | [cookbook/11_progression_and_save.md](cookbook/11_progression_and_save.md) | [SaveService](generated/html/classes/SaveService.html), [Saveable](generated/html/classes/Saveable.html), [SaveableComponent](generated/html/classes/SaveableComponent.html) |
+| 调试技能没效果 | [debugging.md](debugging.md) | [EffectService](generated/html/classes/EffectService.html), [CommandService](generated/html/classes/CommandService.html), [DebugOverlay](generated/html/classes/DebugOverlay.html) |

@@ -15,19 +15,19 @@
 |--------|------------|
 | 创建 `QuestDefinition` (.tres)：目标 + 奖励 | `QuestService` 注册、校验、按 id 查询 |
 | 在对话选项挂 `AcceptQuestEffect` | `accept_quest()` 校验前置/条件，创建 `QuestState`，发 `quest_accepted` |
-| 把目标的 `event_type` 对准某个领域事件 | `QuestService` 监听 `domain_event_emitted`，自动匹配并推进目标 |
+| 把目标的 `event_type` 对准某个领域事件 | `QuestService` 通过 `EventService.ANY_EVENT` 订阅领域事件，自动匹配并推进目标 |
 | （可选）监听 `quest_completed` / `quest_turned_in` 做 UI | 目标集满后自动完成；`auto_complete` 时自动上交并跑 `reward_effects` |
 
 ## 它如何"自动"推进
 
-`QuestService` 在 `_ready()` 时连上了 `EventService.domain_event_emitted` 和 `entity_died`。敌人死亡时，它会合成一个 `"enemy_killed"` 事件，payload 携带死者的 `faction` / `tags` / `definition_id`。每个活跃任务的目标若 `event_type` 与之匹配、`match_key`/`match_value` 也对得上，就自动 +1。**所以"杀 3 只敌人"这种目标完全不需要你手动调用推进接口。**
+`QuestService` 在 `_ready()` 时订阅全部领域事件，并额外订阅 `entity_died`。敌人死亡时，它会合成一个 `"enemy_killed"` 领域事件并发回 `EventService`，payload 携带死者的 `faction` / `tags` / `definition_id`。每个活跃任务的目标若 `event_type` 与之匹配、`match_key`/`match_value` 也对得上，就自动 +1。**所以"杀 3 只敌人"这种目标完全不需要你手动调用推进接口。**
 
 ```mermaid
 flowchart LR
     A["敌人 HealthComponent.die()"]:::mkitCore -->
     B["CombatEvents.entity_died 领域事件"]:::mkitCore -->
-    C["QuestService._on_entity_died\n合成 enemy_killed 事件"]:::mkitCore -->
-    D["notify_event 匹配活跃任务目标"]:::mkitCore -->
+    C["QuestService._on_entity_died\n发出 enemy_killed 领域事件"]:::mkitCore -->
+    D["ANY_EVENT 订阅匹配活跃任务目标"]:::mkitCore -->
     E["objective_advanced (+1)"]:::mkitCore -->
     F["集满 → quest_completed → 跑 reward_effects"]:::mkitCore
 
@@ -138,8 +138,8 @@ func _ready() -> void:
 
 ## 延伸阅读
 
-- [QuestService ref](../ref/modules/QuestService.md) — accept_quest / advance_objective / complete_quest / turn_in_quest
-- [QuestDefinition ref](../ref/modules/QuestDefinition.md) · [QuestObjectiveDefinition ref](../ref/modules/QuestObjectiveDefinition.md)
-- [AcceptQuestEffect ref](../ref/modules/AcceptQuestEffect.md) · [AdvanceObjectiveEffect ref](../ref/modules/AdvanceObjectiveEffect.md) · [CompleteQuestEffect ref](../ref/modules/CompleteQuestEffect.md)
+- [QuestService ref](../generated/html/classes/QuestService.html) — accept_quest / advance_objective / complete_quest / turn_in_quest
+- [QuestDefinition ref](../generated/html/classes/QuestDefinition.html) · [QuestObjectiveDefinition ref](../generated/html/classes/QuestObjectiveDefinition.html)
+- [AcceptQuestEffect ref](../generated/html/classes/AcceptQuestEffect.html) · [AdvanceObjectiveEffect ref](../generated/html/classes/AdvanceObjectiveEffect.html) · [CompleteQuestEffect ref](../generated/html/classes/CompleteQuestEffect.html)
 - [pipeline.md — Quest Lifecycle](../pipeline.md#12-quest-lifecycle)
 - [cookbook/11_progression_and_save.md](11_progression_and_save.md) — 任务/击杀给 XP，并把进度存档

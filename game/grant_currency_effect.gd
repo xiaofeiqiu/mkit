@@ -10,8 +10,6 @@ func _apply_impl(_context: GameplayContext) -> EffectResult:
 		return EffectResult.fail(effect_id, "Missing currency_id")
 	if amount <= 0:
 		return EffectResult.fail(effect_id, "Invalid amount")
-	if not ServiceRegistry.has_service("progression"):
-		return EffectResult.fail(effect_id, "Missing progression service")
 	var progression := Mkit.progression()
 	if progression == null:
 		return EffectResult.fail(effect_id, "Missing progression service")

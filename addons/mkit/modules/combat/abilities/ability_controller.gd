@@ -1,12 +1,26 @@
 class_name AbilityController
 extends SaveableComponent
+## 说明：`AbilityController` 是 能力系统 的实体控制器，负责协调实体组件、服务和运行时状态。
+## 上游：通常由 EntityRoot、CommandReceiver、StateMachine、玩家输入或 AI 创建或调用。
+## 下游：会连接组件、ActionService、EffectService、ContentService 和 EventService，不直接依赖具体游戏内容。
+## 使用：当项目实体需要把输入、状态机和组件能力组合成可调用行为时使用它。
+## 示例：`var instance := AbilityController.new()`
+
+## 当 `AbilityController` 发生 `ability registered` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal ability_registered(ability_id: String)
+## 当 `AbilityController` 发生 `ability cast started` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal ability_cast_started(ability_id: String)
+## 当 `AbilityController` 发生 `ability cast finished` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal ability_cast_finished(ability_id: String)
+## 当 `AbilityController` 发生 `ability failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal ability_failed(ability_id: String, reason: String)
+## 当 `AbilityController` 发生 `cooldown started` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal cooldown_started(ability_id: String, duration: float)
+## 编辑器配置：`starting_ability_ids` 表示稳定 id 列表，由 `AbilityController` 的公开 API 读取或维护。
 @export var starting_ability_ids: Array[String] = []
+## 运行时状态：`abilities` 表示 `AbilityController` 的字段值，由 `AbilityController` 的公开 API 读取或维护。
 var abilities: Dictionary = {}
+## 运行时状态：`active_cast_actions` 表示是否启用或当前激活状态，由 `AbilityController` 的公开 API 读取或维护。
 var active_cast_actions: Array[GameAction] = []
 
 
@@ -24,6 +38,7 @@ func _process(delta: float) -> void:
 			instance.tick(delta)
 
 
+## 注册 `ability`，让后续查询或路由可以找到它，并保持 `AbilityController` 的领域契约一致。
 func register_ability(ability_id: String) -> bool:
 	if ability_id.strip_edges() == "":
 		push_warning("AbilityController.register_ability: ability_id is empty")
@@ -41,18 +56,22 @@ func register_ability(ability_id: String) -> bool:
 	return true
 
 
+## 注销 `ability`，停止后续查询或路由使用它，并保持 `AbilityController` 的领域契约一致。
 func unregister_ability(ability_id: String) -> void:
 	abilities.erase(ability_id)
 
 
+## 判断是否存在 `ability`，并保持 `AbilityController` 的领域契约一致。
 func has_ability(ability_id: String) -> bool:
 	return abilities.has(ability_id)
 
 
+## 检查当前上下文是否允许 `cast`，并保持 `AbilityController` 的领域契约一致。
 func can_cast(ability_id: String, context: GameplayContext) -> bool:
 	return get_cast_failure_reason(ability_id, context) == ""
 
 
+## 返回 `cast_failure_reason` 对应的数据或对象，并保持 `AbilityController` 的领域契约一致。
 func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> String:
 	if context == null:
 		return "missing_context"
@@ -70,12 +89,13 @@ func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> St
 		return "on_cooldown: %s" % ability_id
 	if not _has_enough_cost(definition):
 		return "insufficient_%s" % definition.cost_type
-	context.ability_id = ability_id
+	context.payload["ability_id"] = ability_id
 	if not ConditionEvaluator.evaluate_all(definition.conditions, context):
 		return ", ".join(ConditionEvaluator.collect_failures(definition.conditions, context))
 	return ""
 
 
+## 执行 `cast` 对应的公开操作，并保持 `AbilityController` 的领域契约一致。
 func cast(ability_id: String, context: GameplayContext) -> bool:
 	if context == null:
 		ability_failed.emit(ability_id, "missing_context")
@@ -109,22 +129,29 @@ func cast(ability_id: String, context: GameplayContext) -> bool:
 	return true
 
 
+## 判断 `cooldown_ready` 当前是否成立，并保持 `AbilityController` 的领域契约一致。
 func is_cooldown_ready(ability_id: String) -> bool:
 	if not abilities.has(ability_id):
 		return false
 	return (abilities[ability_id] as AbilityInstance).is_cooldown_ready()
 
 
+## 返回 `cooldown_remaining` 对应的数据或对象，并保持 `AbilityController` 的领域契约一致。
 func get_cooldown_remaining(ability_id: String) -> float:
 	if not abilities.has(ability_id):
 		return 0.0
 	return (abilities[ability_id] as AbilityInstance).cooldown_remaining
 
 
+## 返回 `definition` 对应的数据或对象，并保持 `AbilityController` 的领域契约一致。
 func get_definition(ability_id: String) -> AbilityDefinition:
-	return ContentService.find_resource(ability_id) as AbilityDefinition
+	var content := Mkit.content()
+	if content == null:
+		return null
+	return content.get_resource(ability_id) as AbilityDefinition
 
 
+## 导出当前运行时状态，供 SaveService 写入存档，并保持 `AbilityController` 的领域契约一致。
 func to_save_data() -> Dictionary:
 	var learned: Array[String] = []
 	var cooldowns: Dictionary = {}
@@ -144,6 +171,7 @@ func to_save_data() -> Dictionary:
 	return {"learned": learned, "cooldowns": cooldowns, "charges": charges, "recharge_durations": recharge_durations}
 
 
+## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `AbilityController` 的领域契约一致。
 func from_save_data(data: Dictionary) -> void:
 	abilities.clear()
 	for ability_id in data.get("learned", []):
@@ -171,7 +199,7 @@ func from_save_data(data: Dictionary) -> void:
 
 func _build_action_context(context: GameplayContext, definition: AbilityDefinition) -> ActionContext:
 	var ctx := ActionContext.from_context(context)
-	ctx.ability_id = definition.ability_id
+	ctx.payload["ability_id"] = definition.ability_id
 	return ctx
 
 

@@ -15,12 +15,25 @@ class NeverEndingAction:
 		pass
 
 
+class RecordingAction:
+	extends GameAction
+	var last_delta: float = -1.0
+
+	func _on_update(delta: float) -> void:
+		last_delta = delta
+
+
 var runner: ActionService
 
 
 func before_each() -> void:
+	ServiceRegistry.clear()
 	runner = ActionService.new()
 	add_child_autofree(runner)
+
+
+func after_each() -> void:
+	ServiceRegistry.clear()
 
 
 # --- start_action ---
@@ -120,4 +133,16 @@ func test_tc_ar_11_same_action_twice_does_not_double_connect_signals() -> void:
 	runner.start_action(action, ActionContext.new())
 	runner.start_action(action, ActionContext.new())
 	assert_eq(runner.active_actions.size(), 2)
-	assert_eq(action.completed.get_connections().size(), 1)
+	assert_eq(action.cancelled.get_connections().size(), 1)
+
+
+func test_tc_ar_12_services_ready_caches_time_for_scaled_delta() -> void:
+	var time := TimeService.new()
+	time.set_gameplay_time_scale(2.5)
+	ServiceRegistry.register_service(TimeService.SERVICE_ID, time)
+	ServiceRegistry.register_service(EffectService.SERVICE_ID, EffectService.new())
+	runner._on_services_ready()
+	var action := RecordingAction.new()
+	runner.start_action(action, ActionContext.new())
+	runner._process(0.2)
+	assert_eq(action.last_delta, 0.5)

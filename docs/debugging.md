@@ -28,6 +28,8 @@ if overlay != null:
 
 也可实现 `get_debug_status_lines() -> Array[String]` 方法挂到 `status_provider_path`，注入自定义行。
 
+demo 的 `game/village_rpg_demo.gd` 已通过 `status_provider_path` 聚合当前 zone、run 状态、交互 focus、最近 failed command、最近 failed effect 和 missing service。普通 HUD 保留玩家信息，开发诊断优先看 DebugOverlay。
+
 ---
 
 ### EventService.recent_events
@@ -43,22 +45,25 @@ for event in events.recent_events:
     ])
 ```
 
-也可订阅 `domain_event_emitted` 信号获取实时推送：
+也可订阅所有领域事件获取实时推送：
 
 ```gdscript
-events.domain_event_emitted.connect(func(e: DomainEvent) -> void:
+events.subscribe(EventService.ANY_EVENT, func(e: DomainEvent) -> void:
     print("event: %s payload=%s" % [e.event_type, e.payload])
 )
 ```
+
+`domain_event_emitted` 信号仍会发出，但只建议 DebugOverlay、录制/回放工具这类 firehose 调试用途直接连接。
 
 ---
 
 ### EffectService trace
 
-`EffectService.trace_enabled`（默认 `true`）记录每次 `execute()` 的结果到 `recent_results`，定位"技能放了但没效果"：
+`EffectService.trace_enabled`（默认 `false`，调试时手动打开）开启后记录每次 `execute()` 的结果到 `recent_results`，定位"技能放了但没效果"：
 
 ```gdscript
 var effects := Mkit.effects()
+effects.trace_enabled = true
 for result in effects.recent_results:
     if not result.success:
         print("FAIL  %s: %s" % [result.effect_id, result.failure_reason])
@@ -116,6 +121,18 @@ rng.set_seed(12345)    # 固定种子，每次运行结果相同
 
 ---
 
+## 按症状选择工具
+
+| 现象 | 先看哪里 | 下一步 |
+|------|----------|--------|
+| 按键没反应 | DebugOverlay 的 `Focus`、`Last command`、`Last failed command` | 确认玩家是否在交互区域内，或实体是否有 `CommandReceiver` |
+| 技能没有伤害 | DebugOverlay 的 `Last failed effect`，再看 `EffectService.recent_results` | 检查 target、range、cooldown、mana cost 和 effect conditions |
+| 事件没有到 UI | `EventService.recent_events` | 确认事件类型是否正确，UI 信号是否已连接 |
+| 存档没有恢复 | Output 中的 Save 日志，之后看 `SaveService` payload | 检查 save scope、`get_save_id()`、节点名称和 load 顺序 |
+| 场景没有切换 | DebugOverlay 的 `Focus` 与 Output 中的 `[WORLD]` 日志 | 确认 `WorldService.current_zone_id`、Portal `target_zone_id`、SceneService 路由 |
+
+---
+
 ## 常见问题速查表
 
 | 现象 | 先检查 | 常见原因 |
@@ -125,9 +142,9 @@ rng.set_seed(12345)    # 固定种子，每次运行结果相同
 | 状态没切换 | `StateMachine.last_failed_transition_reason` | `can_enter()` 返回 false、路径拼错、HFSM 层级匹配不到 |
 | 动画不播 | `Presentation/AnimationPlayer` 是否存在；`anim.has_animation(name)` | 默认表现节点缺失；Action 中 `has_animation` 检查失败后静默跳过 |
 | 存档读取后数据丢失 | `to_save_data()` 返回值；节点 `name` 与 save key 的匹配 | 忘记 override；`get_save_id()` 返回空串；节点 name 与存档 key 不匹配 |
-| 服务取到 null | `ServiceRegistry.get_port(ServiceRegistry.SERVICE_*)` / `get_port_ids()` | Bootstrap 未运行；服务常量用错；测试环境未注册；UIManager 尚未进入场景自注册 |
+| 服务取到 null | `Mkit.xxx()` / `ServiceRegistry.get_registered_service_ids()` | Bootstrap 未运行；服务常量用错；测试环境未注册；UIManager 尚未进入场景自注册 |
 | 实体组件找不到兄弟 | `EntityContract.get_component(owner, "XxxComponent")` 的 warning | 默认布局缺少 `Components/` / `Controllers/` 成员，或节点不在 `EntityRoot` 下 |
-| Command 发出但无响应 | `CommandService.command_failed` 信号 | `target_id` 为空、接收方未注册、`receive_command` 返回 false |
+| Command 发出但无响应 | DebugOverlay 的 `Last command`；按 id 路由时再看 `CommandService.command_failed` 信号 | State 未处理该命令、`target_id` 为空、接收方未注册、`receive_command` 返回 false |
 | Action 一直不结束 | `ActionService.active_actions` 列表 | `GameAction.complete()` 或 `cancel()` 未被调用；`_on_update` 判断条件有 bug |
 | ContentService 报 duplicate id | 启动日志 | 两个 `.tres` 的 `get_content_id()` 返回了相同字符串 |
 
@@ -137,8 +154,8 @@ rng.set_seed(12345)    # 固定种子，每次运行结果相同
 
 遇到"系统不动"时，按顺序检查：
 
-1. **服务在线**：`ServiceRegistry.get_port(ServiceRegistry.SERVICE_*) != null` → 若为 null，Bootstrap 未运行或服务常量用错
-2. **命令到达**：订阅 `CommandService.command_dispatched` / `command_failed`，确认命令被发出且被路由
+1. **服务在线**：`Mkit.xxx() != null`，或打印 `ServiceRegistry.get_registered_service_ids()` → 若为 null，Bootstrap 未运行或服务常量用错
+2. **命令到达**：看 `CommandReceiver.command_history` / DebugOverlay 的 `Last command`；按 id 路由时再订阅 `CommandService.command_dispatched` / `command_failed`
 3. **状态响应**：打印 `sm.get_current_path()`，检查 `last_failed_transition_reason`
 4. **Effect 执行**：`EffectService.recent_results`，找 `success = false` 条目
 5. **事件发出**：`EventService.recent_events`，确认预期事件出现

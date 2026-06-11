@@ -1,20 +1,35 @@
 class_name EntitySaveAgent
 extends Node
+## 说明：`EntitySaveAgent` 是 存档系统 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在存档系统中复用这段契约或状态时使用它。
+## 示例：`var instance := EntitySaveAgent.new()`
 
+
+## 公开常量 `ENTITY_SAVE_PARTICIPANT_GROUP`，作为 `EntitySaveAgent` 对外暴露的类型、事件或命令标识。
 const ENTITY_SAVE_PARTICIPANT_GROUP: String = "mkit_entity_save_participant"
+## 编辑器配置：`entity_id` 表示稳定 id，由 `EntitySaveAgent` 的公开 API 读取或维护。
 @export var entity_id: String = ""
+## 编辑器配置：`scene_path` 表示资源或节点路径，由 `EntitySaveAgent` 的公开 API 读取或维护。
 @export var scene_path: String = ""
+## 编辑器配置：`zone_id` 表示稳定 id，由 `EntitySaveAgent` 的公开 API 读取或维护。
 @export var zone_id: String = ""
+## 编辑器配置：`root_path` 表示资源或节点路径，由 `EntitySaveAgent` 的公开 API 读取或维护。
 @export var root_path: NodePath = NodePath("")
+## 编辑器配置：`restore_order` 表示 `EntitySaveAgent` 的字段值，由 `EntitySaveAgent` 的公开 API 读取或维护。
 @export var restore_order: int = 0
+## 编辑器配置：`include_duck_participants` 表示 `EntitySaveAgent` 的字段值，由 `EntitySaveAgent` 的公开 API 读取或维护。
 @export var include_duck_participants: bool = true
 var _last_errors: Array[String] = []
 
 
+## 返回 `entity_id` 对应的数据或对象，并保持 `EntitySaveAgent` 的领域契约一致。
 func get_entity_id() -> String:
 	return entity_id.strip_edges()
 
 
+## 执行 `to_entity_save_record` 对应的公开操作，并保持 `EntitySaveAgent` 的领域契约一致。
 func to_entity_save_record() -> Dictionary:
 	_last_errors.clear()
 	var root := _resolve_root()
@@ -43,6 +58,7 @@ func to_entity_save_record() -> Dictionary:
 	return _make_record(components)
 
 
+## 把输入数据或效果应用到目标对象，并保持 `EntitySaveAgent` 的领域契约一致。
 func apply_entity_save_record(record: Dictionary) -> void:
 	_last_errors.clear()
 	var root := _resolve_root()
@@ -70,10 +86,12 @@ func apply_entity_save_record(record: Dictionary) -> void:
 			)
 
 
+## 判断是否存在 `save_errors`，并保持 `EntitySaveAgent` 的领域契约一致。
 func has_save_errors() -> bool:
 	return not _last_errors.is_empty()
 
 
+## 返回 `save_errors` 对应的数据或对象，并保持 `EntitySaveAgent` 的领域契约一致。
 func get_save_errors() -> Array[String]:
 	var result: Array[String] = []
 	for error in _last_errors:

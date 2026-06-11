@@ -16,7 +16,7 @@
 | 在 `Components/` 下添加 `StatsComponent` 节点，配置 `base_stats` | 属性修改器合并计算（flat / percent / override）|
 | 在 `Components/` 下添加 `HealthComponent` 节点，设 `current_hp` | 从 `StatsComponent.get_stat_value("max_hp")` 读上限；死亡后 `die()` |
 | 创建 `DealDamageEffect` 资源，配置 `base_amount` | 通过 `EntityContract` 查找 `HealthComponent`，调用 `CombatService.resolve()` 计算最终伤害 |
-| 用 `EffectService.execute(effect, ctx)` 触发伤害 | `DamageRequest -> DamageIntent -> DamageResolution -> DamageApplication -> DamageResult`、暴击、防御、闪避、广播 `damage_applied` 事件 |
+| 用 `EffectService.execute(effect, ctx)` 触发伤害 | `DamageRequest -> DamageResult`、暴击、防御、闪避、广播 `damage_applied` 事件 |
 | 订阅 `EventService.entity_died` 信号，处理死亡逻辑 | 广播 `entity_died` 事件 |
 
 ## 步骤
@@ -171,9 +171,9 @@ Entity died: player_12345               ← 10次后 HP 归零
 
 ## 延伸阅读
 
-- [HealthComponent ref](../ref/modules/HealthComponent.md)
-- [StatsComponent ref](../ref/modules/StatsComponent.md)
-- [DealDamageEffect ref](../ref/modules/DealDamageEffect.md)
-- [GameplayContext ref](../ref/kernel/GameplayContext.md) — source / target / amount / tags
-- [EffectService ref](../ref/kernel/EffectService.md) — execute / execute_many / trace
+- [HealthComponent ref](../generated/html/classes/HealthComponent.html)
+- [StatsComponent ref](../generated/html/classes/StatsComponent.html)
+- [DealDamageEffect ref](../generated/html/classes/DealDamageEffect.html)
+- [GameplayContext ref](../generated/html/classes/GameplayContext.html) — source / target / tags / payload
+- [EffectService ref](../generated/html/classes/EffectService.html) — execute / execute_many / trace
 - [pipeline.md — Damage Resolution](../pipeline.md#7-damage-resolution) — 伤害结算完整时序

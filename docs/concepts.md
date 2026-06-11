@@ -10,26 +10,22 @@
 
 ## 一、大改后的分层
 
-当前代码已经落地了大改后的核心分层，每个模块目录下的 `module.cfg` 显式声明模块间依赖（由 `make module-deps` 校验）；运行时拓扑加载器尚未落地。理解当前代码时按下面四层看：
+当前代码已经落地了大改后的核心分层。模块服务由 `ModuleBootstrap` 显式组合注册；当前没有运行时拓扑加载器或模块清单层。理解当前代码时按下面三层看：
 
 ```mermaid
 flowchart TB
     Game["🟢 Game Content\nres://game/\n场景、.tres 内容、具体任务/商店/房间/表现"]
     Modules["🔵 Mkit Modules\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop、ui"]
     Kernel["🔵 Kernel Runtime\naddons/mkit/kernel/\nCommand、StateMachine、Action、Effect、Event、Content、Save"]
-    Platform["⚙️ Platform Adapters\nAnalytics、Ads、IAP、CloudSave、Audio 后端/Mock"]
 
     Game --> Modules
     Game --> Kernel
     Modules --> Kernel
-    Kernel --> Platform
 
     classDef mkitCore fill:#4A90D9,color:#fff,stroke:#2C6FAC
     classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
-    classDef platform fill:#6B7280,color:#fff,stroke:#4B5563
     class Modules,Kernel mkitCore
     class Game userOwned
-    class Platform platform
 ```
 
 几条硬边界：
@@ -38,7 +34,7 @@ flowchart TB
 |------|----------------|
 | 服务访问 | `ServiceRegistry` 是唯一 autoload；`GameBootstrap` 启动时注册全部内置服务；新代码用类型化门面 `Mkit.xxx()` |
 | 实体访问 | 默认仍有 `Components/` / `Controllers/`，但代码优先走 `EntityContract` |
-| 战斗 | 公开入口仍是 `DamageRequest` / `DamageResult`，内部已拆成 `DamageIntent` / `DamageResolution` / `DamageApplication` |
+| 战斗 | 入口是 `DamageRequest`，`CombatService.resolve()` 直接结算并返回 `DamageResult` |
 | 可变数值 | 战斗资源用 `ResourceSet`，账号/货币用 `Wallet`，属性仍由 `StatsComponent` 管 modifier |
 | 存档 | `SaveService` 收集场景树 `Saveable` 到 `roots`，收集 `EntitySaveAgent` 到 `entities`，也支持显式注册 save scope provider |
 
@@ -113,14 +109,14 @@ flowchart LR
 
 玩家按 **Q** 放火球（`fireball`）。整条链是这样的：
 
-1. **你的输入代码**捕获按键，建一个 `GameCommand`（"放 fireball"）并 `dispatch`。
-2. `CommandService` 按 `target_id` 把命令送到玩家实体的 `StateMachine`。
+1. **你的输入代码**捕获按键，建一个 `GameCommand`（"放 fireball"）并交给玩家实体的 `CommandReceiver`。
+2. `CommandReceiver` 把命令送到玩家实体的 `StateMachine`。如果调用方只知道目标 id、没有节点引用，可改用 `CommandService.dispatch` 路由。
 3. `StateMachine` 问当前状态「现在能放技能吗」——能 → **你的 State** 在 `handle_command` 里调用 `AbilityController.cast("fireball", ctx)`。
 4. `AbilityController` 检查冷却 / 法力 / conditions，通过后建一个 `GameAction`：
    - 火球有 **前摇（`cast_time>0`）**→ 交给 `ActionService` 逐帧推进，前摇走完才继续；
    - 火球**即时**→ 同一帧 `start()` + `complete()`。
 5. `GameAction` 完成时，触发它的 `on_complete_effects`——也就是 `AbilityDefinition.effects` 里配好的那串 `GameEffect`。
-6. `EffectService` 逐个执行 effect。`DealDamageEffect` 读 `context`（谁打谁、多少），向 `CombatService` 提交 `DamageRequest`；`CombatService` 内部转成 `DamageIntent`，结算出 `DamageResolution`，装配为 `DamageApplication`，最终返回 `DamageResult`。
+6. `EffectService` 逐个执行 effect。`DealDamageEffect` 读 `context`（谁打谁、多少），向 `CombatService` 提交 `DamageRequest`；`CombatService` 结算闪避 / 暴击 / 防御后返回 `DamageResult`。
 7. effect 通过 `EventService` 把结果广播成 `DomainEvent`（`damage_applied` / `entity_died`）。
 8. **你的 UI / 飘血数字 / 音效 / 镜头震动**订阅了这些信号 → 表现层响应。
 
@@ -131,7 +127,7 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant You as 🟢 你的代码
-    participant CS as CommandService
+    participant CR as CommandReceiver
     participant SM as StateMachine
     participant AC as AbilityController
     participant AS as ActionService
@@ -142,8 +138,8 @@ sequenceDiagram
     participant EV as EventService
 
     Note over You: 输入 / AI / 脚本造命令
-    You->>CS: dispatch(GameCommand)
-    CS->>SM: 路由到目标实体（via CommandReceiver）
+    You->>CR: receive_command(GameCommand)
+    CR->>SM: handle_command(command)
     Note over SM: HFSM 决定是否响应
     SM->>AC: cast(ability_id, ctx)
     Note over You: 👆 你的 State 在 handle_command 里调用
@@ -160,7 +156,7 @@ sequenceDiagram
     ES->>GE: apply(ctx) → _apply_impl(ctx)
     Note over GE: 👇 你实现 _apply_impl
     GE->>Combat: resolve(DamageRequest)
-    Combat->>Combat: DamageIntent → DamageResolution → DamageApplication
+    Combat->>Combat: 闪避 → 攻击/倍率 → 暴击 → 防御
     Combat-->>GE: DamageResult
     GE->>EV: CombatEvents.damage_applied(result)
     EV-->>You: damage_applied / entity_died 信号
@@ -173,8 +169,8 @@ sequenceDiagram
 
 | 这一跳 | 产出 | 交给谁 | 为什么这么分 |
 |--------|------|--------|--------------|
-| 输入 → `GameCommand` | 类型化意图对象 | `CommandService` | 意图与执行解耦；命令可序列化、可回放、可联网广播 |
-| `CommandService` → 实体 | 路由到 `target_id` | `StateMachine` | 发送方不必持有目标引用，只需知道 ID |
+| 输入 / AI → `GameCommand` | 类型化意图对象 | `CommandReceiver` | 意图与执行解耦；同实体控制器不需要绕一次服务查表 |
+| `CommandService` → 实体（可选） | 路由到 `target_id` | `CommandReceiver` | 发送方不持有目标引用、只知道 ID 时使用 |
 | `StateMachine` → 状态判断 | 是否放行 | `AbilityController` | HFSM 把「此刻能做什么」的合法性封装进状态 |
 | `cast()` → `GameAction` | 带时序的行为 | `ActionService` | 即时逻辑与有前摇/持续的行为统一成一个接口 |
 | `GameAction` 完成 → `_fire_effects` | effect 数组 | `EffectService` | **data-driven**：effects 在编辑器配置，无需写代码手动调用 |
@@ -205,15 +201,17 @@ instant.complete()                                 # 立刻触发 on_complete_ef
 管线上每一步都拿到**同一个** `GameplayContext` 对象，读它、改它、传给下一步。它就是那张始终随订单走的小票。
 
 ```gdscript
-# 从 GameCommand 创建，再补充字段
+# 从 GameCommand 创建，再补充通用字段和模块 payload
 var ctx := GameplayContext.from_command(command, player_node, target_node)
-ctx.amount = 50.0
+ctx.payload["amount"] = 50.0
+ctx.payload["ability_id"] = "fireball"
 ctx.tags = ["fire", "aoe"]
 
 # Effect 链中：每个 _apply_impl 都能读写它
 func _apply_impl(context: GameplayContext) -> EffectResult:
     var target := context.target       # 谁挨打
-    context.amount *= 1.5              # 改一下，下一个 effect 接着用
+    var amount := float(context.get_payload_value("amount", 0.0))
+    context.payload["amount"] = amount * 1.5
     return EffectResult.ok(effect_id)
 ```
 
@@ -224,19 +222,14 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 | 实体 | `source` | `Node` | 发起者（施法者 / 攻击者） |
 | | `target` | `Node` | 目标 |
 | | `instigator` | `Node` | 最终责任人（如 DoT 的原始施法者） |
-| 关联 ID | `ability_id` | `String` | 触发的技能 |
-| | `item_id` | `String` | 关联物品 |
-| | `status_id` | `String` | 关联状态效果 |
-| | `room_id` / `run_id` | `String` | 关联房间 / 一局 Run |
 | 空间 | `position` | `Vector2` | 世界坐标 |
 | | `direction` | `Vector2` | 方向 |
-| 数值 | `amount` | `float` | 当前数值（伤害、治疗量…） |
 | 语义 | `tags` | `Array[String]` | 标签（"fire"、"crit"…） |
-| 自由 | `payload` | `Dictionary` | 任意扩展字段 |
+| 扩展 | `payload` | `Dictionary` | 模块私有字段，如 `ability_id` / `item_id` / `status_id` / `room_id` / `run_id` / `amount` |
 
 链式辅助：`with_source()` / `with_target()` / `with_payload_value(k,v)` / `get_payload_value(k, default)` / `has_tag(tag)`。
 
-`ActionContext` 继承自它，额外带 `action_id` / `duration` / `elapsed` / `phase`，供 `GameAction` 内部使用。
+`ActionContext` 继承自它，额外带 `duration` / `phase`，供 `GameAction` 内部使用。`action_id` 和 `elapsed` 属于 `GameAction` 本身。
 
 > ⚠️ context 每帧可能被多个 effect 传递，**保持轻量**——除 Node 引用外别塞重型对象。
 
@@ -276,16 +269,15 @@ if def == null:
     push_error("fireball 未注册")
     return
 
-# 按类型批量取。注意：type 名是「脚本文件名去扩展名」（snake_case）
-var all_abilities := content.get_all_by_type("ability_definition")
+# 按类型批量取。type 名优先使用 class_name
+var all_abilities := content.get_all_by_type("AbilityDefinition")
 ```
 
 **两条规则：**
 
 - `get_content_id()` 必须返回**非空且全局唯一**的字符串。
 - **重复 ID 在注册时（`register_resource`）就被拒绝**并跳过；`validate_all()` 在 bootstrap 末尾跑一次，检查空 ID 与 null 资源。
-
-> `get_all_by_type` 的类型名 = 资源脚本的**文件名去掉扩展名**（如 `ability_definition.gd` → `"ability_definition"`），**不是** `class_name`。
+- `get_all_by_type()` 的类型名优先使用脚本 `class_name`（如 `"AbilityDefinition"`）。为了兼容旧内容，脚本文件名去扩展名（如 `"ability_definition"`）也会注册为别名。
 
 ---
 
@@ -313,7 +305,7 @@ func from_save_data(data: Dictionary) -> void:
     level = int(data.get("level", 1))
 ```
 
-> 关键区别：`SaveService.save_game(root)` 会收集场景树中的 **`Saveable`** 节点写入 `roots`，收集 **`EntitySaveAgent`** 写入 `entities`。`SaveableComponent`（如 `AbilityController`）提供相同序列化接口，但必须挂在某个 entity agent 的实体根下。`RunDirector` / `WorldService` 这类需要脱离完整场景树恢复的对象，可以通过 `SaveService.register_saveable_scope(provider)` 显式注册 scope provider。完整时序见 [ref/kernel/SaveService.md](ref/kernel/SaveService.md)。
+> 关键区别：`SaveService.save_game(root)` 会收集场景树中的 **`Saveable`** 节点写入 `roots`，收集 **`EntitySaveAgent`** 写入 `entities`。`SaveableComponent`（如 `AbilityController`）提供相同序列化接口，但必须挂在某个 entity agent 的实体根下。`RunDirector` / `WorldService` 这类需要脱离完整场景树恢复的对象，可以通过 `SaveService.register_saveable_scope(provider)` 显式注册 scope provider。完整时序见 [generated/html/classes/SaveService.html](generated/html/classes/SaveService.html)。
 
 ---
 

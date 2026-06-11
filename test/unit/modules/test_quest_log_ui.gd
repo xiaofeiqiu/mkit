@@ -68,10 +68,10 @@ func test_tc_qlui_01_bind_renders_empty_and_refreshes_from_quest_signals() -> vo
 
 	assert_true(quest.advance_objective("quest.alpha", "obj.collect", 1))
 	assert_true(quest.complete_quest("quest.alpha", null))
-	assert_eq(_label_text(0, "StatusLabel"), "Status: completed")
+	assert_eq(_label_text(0, "StatusLabel"), "Status: Ready to turn in")
 
 	assert_true(quest.turn_in_quest("quest.alpha", null))
-	assert_eq(_label_text(0, "StatusLabel"), "Status: turned_in")
+	assert_eq(_label_text(0, "StatusLabel"), "Status: Complete")
 	await get_tree().process_frame
 
 
@@ -110,7 +110,7 @@ func test_tc_qlui_04_repeatable_turn_in_renders_final_reset_state() -> void:
 	assert_true(quest.accept_quest("quest.repeat", null))
 	assert_true(quest.advance_objective("quest.repeat", "obj.repeat", 1))
 	assert_true(quest.complete_quest("quest.repeat", null))
-	assert_eq(_label_text(0, "StatusLabel"), "Status: completed")
+	assert_eq(_label_text(0, "StatusLabel"), "Status: Ready to turn in")
 
 	assert_true(quest.turn_in_quest("quest.repeat", null))
 	assert_eq(quest.get_state("quest.repeat").status, "available")

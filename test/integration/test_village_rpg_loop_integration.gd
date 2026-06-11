@@ -81,14 +81,14 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var shop := ServiceRegistry.get_service("shop") as ShopService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var shop := ServiceRegistry.get_port("shop") as ShopService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
+	var save := ServiceRegistry.get_port("save") as SaveService
 	assert_not_null(content)
 	assert_not_null(events)
 	assert_not_null(effects)
@@ -116,7 +116,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	ServiceRegistry.unregister_service("audio")
 	ServiceRegistry.register_service("audio", audio)
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_not_null(world)
 	world.scene_router = null
 

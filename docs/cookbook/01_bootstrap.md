@@ -2,7 +2,7 @@
 
 ## 本篇结束后，你的项目新增了什么
 
-运行场景后，控制台打印所有已注册服务 ID（`events`、`content`、`actions`…），无报错。游戏框架已启动，所有内置服务就绪。
+运行场景后，控制台打印所有已注册服务 ID（`events`、`content`、`actions`…），无报错。游戏框架已启动，kernel 服务就绪。
 
 ## 前置
 
@@ -13,7 +13,7 @@
 
 | 你写的 | mkit 处理的 |
 |--------|------------|
-| 新建 Bootstrap 场景，挂 `GameBootstrap` 节点 | 注册全部内置服务（events、actions、effects…）|
+| 新建 Bootstrap 场景，挂 `GameBootstrap` 节点 | 注册 kernel 服务（events、actions、effects…）|
 | 设 `resource_databases` 数组 | 加载并校验所有 ContentDefinition |
 | 设 `initial_scene_path` | 启动完成后切入游戏场景 |
 | （可选）继承 `GameBootstrap`，override `_register_kernel_services` 添加自定义服务 | 其余启动步骤 |
@@ -40,6 +40,7 @@
 然后在 Inspector 配置：
 - `resource_databases` → 添加 `res://data/main_database.tres`
 - `initial_scene_path` → 留空（此阶段只验证启动）
+- 需要内置 gameplay 模块时，改挂 `ModuleBootstrap`
 
 **方式 B：继承 GameBootstrap（需要自定义服务）**
 
@@ -68,14 +69,14 @@ func _ready() -> void:
 
 
 func _verify_services() -> void:
-    var ids := ServiceRegistry.get_port_ids()
+    var ids := ServiceRegistry.get_registered_service_ids()
     print("=== mkit services online ===")
     for id in ids:
         print("  [OK] %s" % id)
     print("============================")
 
     # 如果需要在首屏显示服务列表：
-    if ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT) == null:
+    if ServiceRegistry.get_port(ContentService.SERVICE_ID) == null:
         push_error("ContentService missing — check GameBootstrap setup")
 ```
 
@@ -90,31 +91,22 @@ func _verify_services() -> void:
 ```
 === mkit services online ===
   [OK] actions
-  [OK] ads
-  [OK] analytics
   [OK] audio
-  [OK] cloud_save
   [OK] commands
-  [OK] combat
   [OK] content
-  [OK] dialogue
   [OK] effects
   [OK] events
-  [OK] iap
-  [OK] loot
   [OK] pool
-  [OK] progression
-  [OK] quest
   [OK] random
   [OK] save
   [OK] scenes
-  [OK] shop
   [OK] time
-  [OK] world
 ============================
 ```
 
 无 `push_error` 或 `push_warning` 输出即为成功。
+
+若使用 `ModuleBootstrap`，输出会额外包含 `combat`、`dialogue`、`loot`、`progression`、`quest`、`shop`、`world`。
 
 ## 常见错误
 
@@ -123,11 +115,11 @@ func _verify_services() -> void:
 | `ServiceRegistry autoload is missing` | 未将 `ServiceRegistry` 加为 autoload | Project Settings → AutoLoad → 添加 `addons/mkit/kernel/services/service_registry.gd`，命名为 `ServiceRegistry` |
 | `Content validation failed` | ResourceDatabase 中有 `ContentDefinition` 的 `get_content_id()` 返回空串 | 确认每个 `.tres` 的 ID 字段非空且唯一 |
 | `initial_scene_path ... points to the scene that already contains this GameBootstrap` | Bootstrap 场景的 `initial_scene_path` 指向了自身 | 将 `initial_scene_path` 改为另一个场景，或留空 |
-| `ServiceRegistry.get_port(ServiceRegistry.SERVICE_CONTENT)` 返回 null | 在 `_ready` 中过早访问服务（Bootstrap 还未执行）| 确保 Bootstrap 场景是第一个运行的场景 |
+| `ServiceRegistry.get_port(ContentService.SERVICE_ID)` 返回 null | 在 `_ready` 中过早访问服务（Bootstrap 还未执行）| 确保 Bootstrap 场景是第一个运行的场景 |
 
 ## 延伸阅读
 
-- [ServiceRegistry ref](../ref/kernel/ServiceRegistry.md) — 注册、获取、检查服务的完整 API
-- [GameBootstrap ref](../ref/kernel/GameBootstrap.md) — 启动时序的所有 override 点
-- [ResourceDatabase ref](../ref/kernel/ResourceDatabase.md) — 内容数据库结构
+- [ServiceRegistry ref](../generated/html/classes/ServiceRegistry.html) — 注册、获取、检查服务的完整 API
+- [GameBootstrap ref](../generated/html/classes/GameBootstrap.html) — 启动时序的所有 override 点
+- [ResourceDatabase ref](../generated/html/classes/ResourceDatabase.html) — 内容数据库结构
 - [pipeline.md — Runtime Bootstrap](../pipeline.md#1-runtime-bootstrap) — 启动时序完整流程图

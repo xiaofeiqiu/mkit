@@ -29,8 +29,10 @@ const SCENE8_S7_SAVE_PATH := "/tmp/mkit_scene8_s7_save.json"
 const DAMAGE_NUMBER_SCENE := "res://game/ui/damage_number.tscn"
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
 const ATTACK_SFX_ID := "sfx.demo.attack"
-const ATTACK_SFX_PATH := "res://game/audio/pixel_attack_sound.wav"
-const DEMO_BGM_PATH := "res://game/audio/snowy_sunny_village_campfire_loop.wav"
+const ATTACK_SFX_PATH := "res://game/audio/demo_attack_slash.wav"
+const DEMO_VILLAGE_BGM_PATH := "res://game/audio/demo_village_loop.wav"
+const DEMO_ROOM_BGM_PATH := "res://game/audio/demo_room_loop.wav"
+const DEMO_FIELD_BGM_PATH := "res://game/audio/demo_field_loop.wav"
 const TOAST_SCREEN_ID := "demo.toast"
 
 var _previous_current_scene: Node = null
@@ -925,11 +927,21 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	assert_eq(feedback.audio, audio)
 	assert_true(content.get_resource(ATTACK_SFX_ID) is AudioDefinition)
 	assert_true(content.get_resource("bgm.demo.village") is AudioDefinition)
+	assert_true(content.get_resource("sfx.demo.firebolt") is AudioDefinition)
 	assert_true(audio.sfx_map.has(ATTACK_SFX_ID))
 	assert_eq((audio.sfx_map[ATTACK_SFX_ID] as AudioStream).resource_path, ATTACK_SFX_PATH)
-	assert_eq((audio.music_map["bgm.demo.village"] as AudioStream).resource_path, DEMO_BGM_PATH)
-	assert_eq((audio.music_map["bgm.demo.room"] as AudioStream).resource_path, DEMO_BGM_PATH)
-	assert_eq((audio.music_map["bgm.demo.field"] as AudioStream).resource_path, DEMO_BGM_PATH)
+	assert_eq(
+		(audio.music_map["bgm.demo.village"] as AudioStream).resource_path,
+		DEMO_VILLAGE_BGM_PATH
+	)
+	assert_eq(
+		(audio.music_map["bgm.demo.room"] as AudioStream).resource_path,
+		DEMO_ROOM_BGM_PATH
+	)
+	assert_eq(
+		(audio.music_map["bgm.demo.field"] as AudioStream).resource_path,
+		DEMO_FIELD_BGM_PATH
+	)
 	assert_eq((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_mode, AudioStreamWAV.LOOP_FORWARD)
 	assert_eq((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_begin, 0)
 	assert_gt((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_end, 0)

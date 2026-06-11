@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://4q7tl2ksc527" path="res://game/ui/vfx_spawner.gd" id="12_vfx"]
 [ext_resource type="Script" uid="uid://c0ubv5dhkqofk" path="res://addons/mkit/kernel/debug/debug_overlay.gd" id="13_debug"]
 [ext_resource type="Script" uid="uid://g0xrotivu2ky" path="res://game/player_saveable.gd" id="14_player_saveable"]
+[ext_resource type="Script" path="res://game/ui/demo_hud_skin.gd" id="15_hud_skin"]
 
 [node name="VillageRpgDemo" type="Node2D" unique_id=2133037375]
 script = ExtResource("1_slice")
@@ -69,6 +70,7 @@ visible_on_start = false
 show_registered_services = false
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=238890030]
+script = ExtResource("15_hud_skin")
 
 [node name="Instructions" type="Label" parent="HUD" unique_id=651626077]
 anchors_preset = 12

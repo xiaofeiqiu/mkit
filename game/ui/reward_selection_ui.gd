@@ -14,7 +14,9 @@ func _render_options() -> void:
 	for i in range(options.size()):
 		var option := options[i]
 		var button := Button.new()
-		button.text = "%d / click: %s\n%s" % [i + 1, option.display_name, option.description]
+		button.text = "%d. %s\n%s" % [i + 1, option.display_name, option.description]
+		button.add_theme_font_size_override("font_size", 16)
+		button.add_theme_color_override("font_color", Color(0.92, 0.9, 0.82, 1.0))
 		button.pressed.connect(func(): _on_option_selected(option))
 		$OptionContainer.add_child(button)
 

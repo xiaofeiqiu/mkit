@@ -1,41 +1,50 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/spawn_point.gd" id="1_spawn"]
 [ext_resource type="Script" path="res://addons/mkit/modules/world/portal.gd" id="2_portal"]
 [ext_resource type="PackedScene" path="res://game/entities/npc_elder.tscn" id="3_elder"]
+[ext_resource type="Script" path="res://game/scenes/demo_scene_polish.gd" id="4_polish"]
 
 [sub_resource type="CircleShape2D" id="CircleShape_room_exit"]
 radius = 48.0
 
 [node name="VillageRoom" type="Node2D"]
 
+[node name="ScenePolish" type="Node2D" parent="."]
+script = ExtResource("4_polish")
+scene_style = "room"
+
 [node name="Floor" type="ColorRect" parent="."]
+z_index = -35
 offset_left = -220.0
 offset_top = -130.0
 offset_right = 940.0
 offset_bottom = 620.0
-color = Color(0.18, 0.17, 0.25, 1)
+color = Color(0.12, 0.11, 0.18, 0.18)
 
 [node name="Rug" type="ColorRect" parent="."]
+z_index = -8
 offset_left = 118.0
 offset_top = 174.0
 offset_right = 520.0
 offset_bottom = 332.0
-color = Color(0.38, 0.16, 0.23, 1)
+color = Color(0.46, 0.14, 0.22, 0.38)
 
 [node name="WarmLight" type="ColorRect" parent="."]
+z_index = -7
 offset_left = 300.0
 offset_top = 104.0
 offset_right = 522.0
 offset_bottom = 288.0
-color = Color(0.78, 0.55, 0.24, 0.18)
+color = Color(1, 0.64, 0.22, 0.22)
 
 [node name="ExitPath" type="ColorRect" parent="."]
+z_index = -7
 offset_left = 142.0
 offset_top = 246.0
 offset_right = 220.0
 offset_bottom = 390.0
-color = Color(0.34, 0.27, 0.24, 1)
+color = Color(0.42, 0.29, 0.2, 0.34)
 
 [node name="RoomEntry" type="Marker2D" parent="."]
 position = Vector2(180, 250)
@@ -58,11 +67,12 @@ target_zone_id = "zone.demo.village"
 target_spawn_id = "from_room"
 
 [node name="Door" type="ColorRect" parent="."]
+z_index = -1
 offset_left = 140.0
 offset_top = 338.0
 offset_right = 220.0
 offset_bottom = 390.0
-color = Color(0.48, 0.29, 0.16, 1)
+color = Color(0.54, 0.3, 0.14, 0.48)
 
 [node name="DoorLabel" type="Label" parent="."]
 offset_left = 112.0

@@ -27,6 +27,7 @@ const REWARD_TRIAL_ATTACK := "reward.demo.trial_attack"
 const UPGRADE_TRIAL_ATTACK := "upgrade.demo.trial_attack"
 const PLAYER_ID := "player_001"
 const ATTACK_SFX_ID := "sfx.demo.attack"
+const FIREBOLT_SFX_ID := "sfx.demo.firebolt"
 const AUTO_RUN_EXPECTED_POTION_BUYS := 2
 const HIT_VFX_AUTO_RELEASE_SECONDS := 0.55
 const EVENT_LOG_MAX_LINES := 5
@@ -1458,6 +1459,7 @@ func _on_damage_applied(event: DomainEvent) -> void:
 func _on_ability_cast_started(ability_id: String) -> void:
 	if ability_id == ABILITY_FIREBOLT:
 		_log("[ABILITY] casting %s" % _display_name(ability_id, "Firebolt"))
+		_play_sfx(FIREBOLT_SFX_ID)
 		_spawn_firebolt_projectile(_firebolt_visual_target())
 
 
@@ -2403,7 +2405,7 @@ func _run_auto_loop() -> void:
 		_log("[AUTO] missing: %s" % ", ".join(_demo_missing_requirements()))
 		_log("[AUTO] demo RPG loop incomplete")
 	_cleanup_audio_players()
-	await _settle_world()
+	await _settle_shutdown()
 	get_tree().quit(0 if complete else 1)
 
 
@@ -2412,6 +2414,12 @@ func _settle_world() -> void:
 	await get_tree().process_frame
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+
+
+func _settle_shutdown() -> void:
+	for i in range(6):
+		await get_tree().process_frame
+		await get_tree().physics_frame
 
 
 func _verify_debug_overlay_for_auto_run() -> void:

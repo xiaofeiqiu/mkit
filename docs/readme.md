@@ -1,6 +1,6 @@
 # Mkit
 
-Mkit 是一个面向 Godot 4.6.3 stable 的可复用游戏运行时框架，专为 2D roguelike / RPG 设计。它提供完整的命令→状态→动作→效果→事件管线，以及战斗、对话、任务、存档、房间、商店、世界与战利品等可复用游戏系统。
+Mkit 是一个面向 Godot 4.6.3 stable 的可复用游戏运行时框架，专为 2D roguelike / RPG 设计。它提供可按需组合的轻路径与命令→状态→动作→效果→事件管线，以及战斗、对话、任务、存档、房间、商店、世界与战利品等可复用游戏系统。
 
 ---
 
@@ -10,7 +10,7 @@ Mkit 是一个面向 Godot 4.6.3 stable 的可复用游戏运行时框架，专�
 flowchart TB
     Game["**Game Content**\nres://game/\n（你的关卡、角色、配置）"]
     Modules["**Mkit Modules**\naddons/mkit/modules/\n（combat、quest、dialogue、world…）"]
-    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\n（runtime context、命令、状态机、动作、效果、事件、存档）"]
+    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\n（ServiceRegistry、命令、状态机、动作、效果、事件、存档）"]
 
     Game --> Modules
     Game --> Kernel
@@ -31,9 +31,18 @@ flowchart TB
 
 ---
 
-## 标准管线
+## 标准管线与短路径
 
-一次玩家输入或 AI 决策从触发到产生游戏效果的完整路径：
+一次玩家输入或 AI 决策从触发到产生游戏效果时，可以按需求选择路径：
+
+| 需求 | 推荐路径 |
+|------|----------|
+| 已持有目标节点，只做同步变化 | 直接调用 component / domain service；需要 condition 或 trace 时用 `EffectService.execute()` |
+| 本实体输入或 AI 命令 | `CommandReceiver.receive_command()` |
+| 只知道目标 id | `CommandService.dispatch()` |
+| 有前摇、持续、取消或统一 effect 链 | `GameAction` + `ActionService` |
+
+下面是带状态、ability 和 effect 链的标准/高级路径展开：
 
 ```mermaid
 sequenceDiagram
@@ -42,6 +51,7 @@ sequenceDiagram
     participant SM as StateMachine
     participant AC as AbilityController
     participant ActSvc as ActionService
+    participant GA as GameAction
     participant FxSvc as EffectService
     participant CbtSvc as CombatService
     participant EvtSvc as EventService
@@ -56,14 +66,18 @@ sequenceDiagram
     SM->>AC: cast(ability_id, ctx)
     Note over AC: module — 条件 / cost 检查【你实现具体逻辑】
 
-    AC->>ActSvc: start_action(GameAction, ctx)
-    Note over ActSvc: kernel — 管理 start / update / complete / cancel
-
-    loop action 时序帧
-        ActSvc->>ActSvc: _update(delta)
+    alt 有前摇 / 持续 / 可取消
+        AC->>ActSvc: start_action(GameAction, ctx)
+        Note over ActSvc: kernel — 管理 start / update / complete / cancel
+        loop action 时序帧
+            ActSvc->>GA: update(delta)
+        end
+        GA->>GA: complete()
+    else 即时 ability
+        AC->>GA: start() + complete() 同帧
     end
 
-    ActSvc->>FxSvc: execute_many(effects, ctx)
+    GA->>FxSvc: _fire_effects(effects, ctx)
     Note over FxSvc: kernel — 调度效果链，GameEffect 是抽象基类
 
     FxSvc->>CbtSvc: _apply_impl → resolve(DamageRequest)
@@ -78,7 +92,7 @@ sequenceDiagram
     Note over UI: module — 表现层响应【你实现订阅】
 ```
 
-**kernel 是管线骨架**（Command / HFSM / Action / Effect / Event / RuntimeContext / Save 均在 kernel）。`GameEffect._apply_impl` 是 effect 落到具体领域的正规接缝；game/module 新代码优先通过 `Mkit.xxx()`，kernel 内部通过 `ServiceRegistry.get_port(XxxService.SERVICE_ID)`，并结合 `EntityContract`、typed context/result 对象访问领域系统，避免散落硬编码 service 字符串和绝对节点路径。
+**kernel 是管线骨架**（Command / HFSM / Action / Effect / Event / Save 均在 kernel）。`GameEffect._apply_impl` 是 effect 落到具体领域的正规接缝；game/module 新代码优先通过 `Mkit.xxx()`，kernel 内部通过 `ServiceRegistry.get_port(XxxService.SERVICE_ID)`，并结合 `EntityContract`、typed context/result 对象访问领域系统，避免散落硬编码 service 字符串和绝对节点路径。
 
 ---
 
@@ -108,7 +122,7 @@ addons/mkit/
     entity/           # EntityRoot, EntityContract, EntityIdentity, EntitySpawner
     dialogue/         # DialogueService, DialogueDefinition, DialogueRuntime…
     quest/            # QuestService, QuestDefinition, QuestState…
-    loot/             # LootService, LootTableDefinition, RewardSystem…
+    loot/             # LootService, DeathLootService, LootTableDefinition, RewardSystem…
     inventory/        # InventoryController, InventoryModel, ItemDefinition…
     progression/      # ProgressionService, Wallet, ExperienceComponent, ExperienceCurve…
     shop/             # ShopService, ShopDefinition…
@@ -133,6 +147,7 @@ res://game/           # 你的游戏内容（场景、配置 .tres、脚本）
 | 系统不按预期运行 | [debugging.md](debugging.md) |
 | 查看当前限制和后续路线 | [roadmap.md](roadmap.md) |
 | 查所有管线调用序列 | [pipeline.md](pipeline.md) |
+| 查公共事件 payload key | [event_payloads.md](event_payloads.md) |
 | 查术语定义 | [glossary.md](glossary.md) |
 
 API reference 由 Godot doctool XML 生成，入口是 [generated/html/index.html](generated/html/index.html)。修改公开 API 或 `##` doc comment 后运行 `make docs-api`，不要直接手写生成页。

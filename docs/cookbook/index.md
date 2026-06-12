@@ -6,13 +6,19 @@ Cookbook 是一条**单一项目的累进构建主线**。每篇 Recipe 在上�
 
 ## 通用开发流程
 
-每次为 mkit 游戏添加一个新系统（技能、任务、物品…），都遵循同一条路径：
+为 mkit 游戏添加一个新系统时，先按需求选择最短可用路径；每篇具体 Recipe 都在 `## 本篇路径` 里给出本篇可直接跟做的步骤。这里仅保留判断规则：
+
+- **Minimal path**：你已经有节点引用，只做一次同步查询、数值变化或事件响应。直接调用 component / domain service；需要 condition、trace 或 data-driven effect 时用 `EffectService.execute()`。
+- **Standard path**：输入、AI 或脚本要让本实体状态机处理意图。把 `GameCommand` 交给本实体 `CommandReceiver.receive_command(command)`。
+- **Advanced path**：只有调用方只知道 `target_id` 时才用 `CommandService` 路由；只有行为需要跨帧、可取消或统一 start / complete / cancel effects 时才用 `GameAction` + `ActionService`。
+
+下面是完整路径的展开图，用作复杂系统的参考，不是每个功能都必须走完的清单：
 
 ```mermaid
 flowchart LR
     A["① 定义数据\nContentDefinition\n(.tres)"]:::userOwned -->
     B["② 注册内容\nResourceDatabase\n挂到 GameBootstrap"]:::userOwned -->
-    C["③ 启动 / Boot\nGameBootstrap 创建 RuntimeContext\n注册 service ports\n加载并校验内容"]:::mkitCore -->
+    C["③ 启动 / Boot\nGameBootstrap 注册 services\n加载并校验内容"]:::mkitCore -->
     D["④ 构建实体\nEntityRoot 默认布局\nEntityContract 访问组件/控制器"]:::userOwned -->
     E["⑤ 发出命令\nGameCommand\n→ CommandReceiver"]:::userOwned -->
     F["⑥ 状态决策\nStateMachine\nState.handle_command"]:::mkitCore -->
@@ -34,14 +40,16 @@ flowchart LR
 | ② 注册内容 | 把 `.tres` 文件放入 `ResourceDatabase.resources` | — |
 | ③ Boot | 挂好 `GameBootstrap` 并设 `resource_databases` | 注册全部内置服务，加载内容，校验 ID 唯一性 |
 | ④ 构建实体 | 在场景树搭 EntityRoot / Components / Controllers | `EntityContract` / `EntityRoot` 提供组件和控制器语义入口 |
-| ⑤ 发出命令 | 同实体控制器调用 `CommandReceiver.receive_command`；跨实体按 id 路由时用 `CommandService.dispatch` | 将命令交给目标实体的状态机入口 |
+| ⑤ 发出命令 | 同实体控制器调用 `CommandReceiver.receive_command`；只知道目标 id 时才用 `CommandService.dispatch` | 将命令交给目标实体的状态机入口 |
 | ⑥ 状态决策 | 在 `State.handle_command` 返回 `true`/`false`，决定是否响应 | HFSM 从叶往根冒泡找第一个处理者 |
-| ⑦ 执行动作 | 继承 `GameAction`，override `_on_start/_on_update/_on_complete` | `ActionService` 管理生命周期，钩子后自动 `_fire_effects` |
+| ⑦ 执行动作 | 有前摇、持续、取消时继承 `GameAction`，override `_on_start/_on_update/_on_complete` | `ActionService` 管理跨帧生命周期，钩子后自动 `_fire_effects` |
 | ⑧ 触发效果 | 继承 `GameEffect`，override `_apply_impl`，修改组件数据 | `EffectService` 检查 conditions，包装 `EffectResult` |
 | ⑨ 广播事件 | 调用 `EventService.emit_*` | 通过信号通知所有订阅者（UI、Audio、VFX）|
 
 **最精简的路径（不需要全部步骤）：**
-- 只需一个瞬时效果？跳过 ③④⑤⑥⑦，直接用 `EffectService.execute(effect, ctx)`
+- 只需一个同步数值变化？直接调用 component / domain service；需要 condition、trace 或 data-driven 配置时再用 `EffectService.execute(effect, ctx)`
+- 只需要本实体响应输入？直接把 `GameCommand` 交给 `CommandReceiver.receive_command()`；只有跨实体按 id 发命令时才走 `CommandService`
+- 只需前摇、持续或取消？再把行为包装成 `GameAction` 并交给 `ActionService`
 - 只需一个 AI 命令？Brain 直接调 `issue_command()`，跳过输入层
 - 只需监听事件？订阅 `EventService` 信号，不需要任何实体
 

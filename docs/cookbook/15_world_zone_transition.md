@@ -20,6 +20,46 @@
 | 在交互 `Area2D` 下挂 `Portal`，配置目标 zone / spawn | `Portal` 调 `WorldService.go_to_zone()`，再由 `SceneService` 换场景 |
 | 可选：创建 `AudioDefinition`，让 `audio_id` 匹配 `bgm_id` | `GameBootstrap` 自动注册 BGM；`WorldService` 进入区域后播放 |
 
+## 本篇路径
+
+### Minimal path：代码直接切换区域
+
+1. 先按步骤 1 / 2 准备 `village.tscn`、`forest.tscn` 和 `ZoneDefinition("zone.forest")`，并加入 `ResourceDatabase`。
+2. 在 `forest.tscn` 放一个 `SpawnPoint`，`spawn_id = "from_village"`，并确保玩家在 `"player"` group。
+3. 在剧情、调试按钮或战斗结束回调里直接调用：
+
+```gdscript
+if not Mkit.world().go_to_zone("zone.forest", "from_village"):
+    push_warning("切换区域失败：检查 zone id、scene_path、spawn_id")
+```
+
+4. 验证方式：场景切到 `forest.tscn`，玩家被移动到 `from_village` 出生点。
+5. 这是系统服务调用，不要包装成 `GameAction`。
+
+### Standard path：玩家按交互键触发 Portal
+
+1. 在 `village.tscn` 里放 `ForestGate (Area2D)`，下面放 `CollisionShape2D` 和名为 `Interactable` 的 `Portal`。
+2. 在 `Portal` Inspector 填 `target_zone_id = "zone.forest"`、`target_spawn_id = "from_village"`。
+3. 玩家实体挂 `InteractionComponent`，按交互键时调用 `interaction_component.try_interact()`。
+4. 玩家走进 `ForestGate` 后按键，`Portal.interact(ctx)` 通过条件后调用 `WorldService.go_to_zone(...)`。
+5. 验证方式：远离 portal 按键无效，走近按键切到森林并落在正确 spawn。
+
+这条路径走玩家自己的交互组件，不需要 `CommandService`。
+
+### Advanced path：只有玩家 id / 目标 id 时才路由命令
+
+1. 确认玩家 receiver id 是 `"player"` 且已注册到 `CommandService`。
+2. 剧情脚本只有玩家 id 时，发送：
+
+```gdscript
+var command := GameCommand.create("interact", "script", "player")
+Mkit.commands().dispatch(command)
+```
+
+3. 玩家 command handler 收到 `"interact"` 后调用自己的 `InteractionComponent.try_interact()`。
+4. 如果当前聚焦对象是 portal，就进入 Standard path；如果没有聚焦对象，命令应返回失败或无效果。
+5. 区域切换本身没有跨帧取消窗口；不要为普通 portal 跳转写 `GameAction`。
+
 ## 关键认知：纯换场景和世界区域跳转不是一回事
 
 `SceneService.change_scene(path)` 只做场景切换，适合标题页、失败界面、重载当前关卡这类没有"世界区域"语义的跳转。
@@ -125,7 +165,7 @@ Village  (Node2D)
 ```gdscript
 func _process(_delta: float) -> void:
     if Input.is_action_just_pressed("interact"):
-        var interaction := EntityContract.get_controller(owner, "InteractionComponent") as InteractionComponent
+        var interaction := EntityContract.get_controller(self, "InteractionComponent") as InteractionComponent
         if interaction != null:
             interaction.try_interact()
 ```

@@ -1,6 +1,6 @@
 # Architecture
 
-Mkit 的当前分层模型、依赖规则、runtime port 模式、实体契约和启动边界。读完能回答"我的代码放哪层、为什么"。
+Mkit 的当前分层模型、依赖规则、ServiceRegistry 服务边界、实体契约和启动边界。读完能回答"我的代码放哪层、为什么"。
 
 ---
 
@@ -29,11 +29,11 @@ flowchart TB
 |----|------|------|
 | **Game Content** | 你的游戏逻辑、场景、配置 | `res://game/` |
 | **Mkit Modules** | 可复用的游戏系统（战斗、任务、对话、世界、商店…） | `addons/mkit/modules/` |
-| **Kernel Runtime** | 框架骨架（runtime context、管线、服务注册、内容、存档…） | `addons/mkit/kernel/` |
+| **Kernel Runtime** | 框架骨架（ServiceRegistry、管线、服务注册、内容、存档…） | `addons/mkit/kernel/` |
 
 **依赖只能向下，不能反向。** kernel 不依赖任何 module；modules 不依赖 game。该规则由 `make layering`（`tools/check_layering.py`）在 CI 中强制：kernel 引用任何 module 类即失败。
 
-模块服务的接入走**组合根**：`GameBootstrap` 只注册 kernel 服务，`ModuleBootstrap`（`addons/mkit/modules/module_bootstrap.gd`）继承它并追加 7 个内置模块服务，游戏模板默认用后者。同样，`EventService` 只提供通用总线，业务事件的类型常量与构造函数住在各模块的事件目录（`CombatEvents`、`QuestEvents`、`WorldEvents`、`DialogueEvents`、`ShopEvents`、`InventoryEvents`、`LootEvents`）。
+模块服务的接入走**组合根**：`GameBootstrap` 只注册 kernel 服务，`ModuleBootstrap`（`addons/mkit/modules/module_bootstrap.gd`）继承它并追加内置模块服务（combat、progression、quest、shop、dialogue、world、loot、death_loot），游戏模板默认用后者。同样，`EventService` 只提供通用总线，业务事件的类型常量与构造函数住在各模块的事件目录（`CombatEvents`、`QuestEvents`、`WorldEvents`、`DialogueEvents`、`ShopEvents`、`InventoryEvents`、`LootEvents`）。
 
 当前可以通过继承 `ModuleBootstrap` 并在 `_build_services()` 中 `erase()` 某个服务来做到"运行时不注册该服务"。这不等同于物理删除模块源码：若要从 addon 中删掉 `shop/` 等模块目录，还需要同步删除 `Mkit` 对应访问器、`ModuleBootstrap` 对应注册行以及依赖该模块的源码/文档引用。当前没有运行时模块图加载器；内置模块服务由 `ModuleBootstrap` 显式组合。
 
@@ -52,11 +52,11 @@ flowchart TB
 | 货币 | `Wallet` | 货币从普通 Dictionary 语义收敛为离散余额模型 |
 | 存档 scope | `SaveService.register_saveable_scope(...)` + `Saveable.get_save_scopes()` | 场景树扫描仍可用，scope provider 支持无完整场景树恢复 |
 
-当前没有运行时按拓扑装配模块的能力；`ModuleBootstrap` 显式列出 7 个内置服务。文档和代码不要把模块清单或自动装配写成当前能力。
+当前没有运行时按拓扑装配模块的能力；`ModuleBootstrap` 显式列出内置服务。文档和代码不要把模块清单、自动发现、拓扑装配、event DSL、通用存档迁移框架或 ECS/component registry 写成当前能力。
 
 ---
 
-## ServiceRegistry / RuntimeContext 模式
+## ServiceRegistry / Mkit 门面模式
 
 `ServiceRegistry` 是整个框架唯一的 autoload。`GameBootstrap.boot()` 注册 kernel 内置服务，`ModuleBootstrap.boot()` 在此之上追加内置模块服务。游戏/模块代码统一通过类型化门面 `Mkit` 获取内置服务（kernel 内部及自定义服务用 `ServiceRegistry.get_port`）：
 
@@ -102,6 +102,7 @@ ServiceRegistry.register_service("my_service", MyService.new())
 | `DialogueService.SERVICE_ID`* | `"dialogue"` | `DialogueService` | 对话树运行时 |
 | `WorldService.SERVICE_ID`* | `"world"` | `WorldService` | 世界区域 / Zone 管理 |
 | `LootService.SERVICE_ID`* | `"loot"` | `LootService` | 战利品掷骰与奖励分发 |
+| `DeathLootService.SERVICE_ID`* | `"death_loot"` | `DeathLootService` | 敌人死亡事件到掉落规则的桥接 |
 | `UIManager.SERVICE_ID` | `"ui"` | `UIManager` | UIManager.open_screen 与 UI 生命周期；由场景中的 UIManager 自注册 |
 
 > `*` 是模块服务，由 `ModuleBootstrap` 注册。

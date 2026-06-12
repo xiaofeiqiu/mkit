@@ -18,11 +18,66 @@
 | 给玩家挂 `EntitySaveAgent`，设置稳定 `entity_id` | `SaveService` 收集 `Saveable` 到 `roots`，收集 `EntitySaveAgent` 到 `entities`，并写入 scope 用于缺场景树恢复 |
 | 按键调 `save_game()` / `load_game()` | `GameBootstrap` 启动时若有存档自动 `load_game()` |
 
+## 本篇路径
+
+### Minimal path：XP、货币和存读档直接调组件 / 服务
+
+1. 先按步骤 1 创建 `ExperienceCurve`，再按步骤 2 把 `ExperienceComponent` 挂到玩家身上。
+2. 在玩家脚本 `_ready()` 里缓存组件并连接升级信号：
+
+```gdscript
+var xp := EntityContract.get_component(self, "ExperienceComponent") as ExperienceComponent
+xp.level_up.connect(func(old_level: int, new_level: int): print("level up ", new_level))
+```
+
+3. 测试给经验时直接调用：
+
+```gdscript
+xp.add_xp(50)
+Mkit.progression().add_currency("gold", 25)
+```
+
+4. 在主场景输入脚本里绑定保存 / 读取：
+
+```gdscript
+if event.is_action_pressed("quick_save"):
+    Mkit.save().save_game(get_tree().root)
+elif event.is_action_pressed("quick_load"):
+    Mkit.save().load_game(get_tree().root)
+```
+
+5. 验证方式：加 XP 能触发升级，按保存键生成 `user://save.json`，改血量或货币后读取能恢复。
+
+这条路径没有实体意图，也不需要状态机：不要把存档按钮包装成 `GameCommand` 或 `GameAction`。
+
+### Standard path：UI / 系统输入自己调用服务
+
+1. 如果玩家按键只是打开存档、背包或升级面板，先用 Recipe 18 注册 UI screen，例如 `"save_menu"`。
+2. 输入脚本只打开面板：
+
+```gdscript
+Mkit.ui().open_screen("save_menu", {"root": get_tree().root}, true)
+```
+
+3. 面板按钮回调里调用 `Mkit.save().save_game(root)`、`Mkit.save().load_game(root)` 或 `Mkit.progression()`。
+4. 面板关闭后刷新 HUD，确认货币、等级、任务状态和实体组件都来自读取结果。
+5. 只有“让某个实体执行攻击、互动、施法”这类行为时才交给 `CommandReceiver`；存档和货币按钮不是实体行为。
+
+### Advanced path：持久化边界走 EntitySaveAgent / save scope
+
+1. 在玩家实体下加 `EntitySaveAgent`，`entity_id` 填稳定 id，例如 `"player"` 或 `"player_001"`。
+2. 把 HP、背包、技能冷却、装备、位置等实体局部状态做成玩家子树里的 `SaveableComponent`，由 agent 写进 `entities.<player_id>.components`。
+3. 任务、货币、经验组件这类全局系统状态保持为 `Saveable` root，写进 `roots`。
+4. 只有世界区域、run/room/reward 这类“当前场景树可能还没加载，但仍要恢复”的系统，才用 save scope。
+5. 保存后打开 `user://save.json` 检查：玩家组件应在 `entities` 下，不要再出现另一套玩家聚合 root。
+
 ## 关键认知：roots 存全局，entities 存实体组件
 
 - `Saveable`（`extends Node`）：`SaveService.save_game(root)` 会收集场景树中的 `Saveable` 并按 `get_save_id()` 写入 `roots`；通过 scope 可在场景树缺失时恢复世界/奖励状态。`QuestService`、`ProgressionService`、`ExperienceComponent` 都是 `Saveable`，开箱即存。
 - `EntitySaveAgent`（`extends Node`）：挂在实体下，按稳定 `entity_id` 写入 `entities[entity_id]`，并收集该实体下的组件。
 - `SaveableComponent`（`extends Node`）：`HealthComponent`、`AbilityController`、`InventoryController`、`StatsComponent` 等都是它。它**有相同的 `to_save_data()` 接口，但不会被 `SaveService` 当作全局 root 收集**。要持久化它们，实体下必须有一个 `EntitySaveAgent`。
+
+用所有权来选入口：全局系统状态进 `roots`，实体局部状态进 `entities`，没有稳定场景根但需要跨场景恢复的系统切片才注册 `scopes`。不要为了保存玩家再写一个外部 `Saveable` 去手动收集 `Components/` 和 `Controllers/`；玩家位置、姿态、朝向这类特殊状态也应做成实体下的小型 `SaveableComponent` 或 duck participant。
 
 > 这是最常踩的坑：单独挂一个 `InventoryController` 不会进存档。下面步骤 4 给出标准实体收集模式。
 
@@ -84,6 +139,7 @@ func _on_entity_died(event: DomainEvent, xp: ExperienceComponent) -> void:
 ```text
 Player
   Components/
+    PositionSaveComponent
     HealthComponent
     StatsComponent
   Controllers/
@@ -101,6 +157,8 @@ Inspector 设置：
 | `zone_id` | `"village"` | 可选，用于世界/区域恢复 |
 
 `get_save_key()` 默认返回组件节点 `name`，所以玩家子树里每个组件节点名要唯一（`HealthComponent`、`AbilityController`…天然唯一）。这样 HP、技能冷却、背包、属性 modifier 会进入 `entities.player.components`。
+
+如果玩家位置也要随实体存档，把位置封装成实体内组件，例如 `PositionSaveComponent extends SaveableComponent`，`get_save_key()` 返回 `"Position"`，`to_save_data()` / `from_save_data()` 读写 owner 的 `global_position`。这样位置和 HP、背包一样由同一个 `EntitySaveAgent` 收集。
 
 如果某个节点因为单继承限制不能 `extends SaveableComponent`，但也要随实体存档，显式加入 group 并实现 duck-typed 接口：
 
@@ -193,6 +251,7 @@ func _unhandled_input(event: InputEvent) -> void:
 |------|------|------|
 | 背包/HP/技能没存上 | 它们是 `SaveableComponent`，没被实体 agent 收集 | 用步骤 4 的 `EntitySaveAgent` 收集；确认 `entity_id` 唯一 |
 | 读档后组件数据没回来 | `get_save_key()`（节点 name）与存档 key 不一致 | 别在运行时改组件节点名；存读用同一棵子树 |
+| 玩家保存逻辑出现两套 | 同时用了实体内 `EntitySaveAgent` 和外部 `Saveable` 聚合器 | 删除外部玩家聚合器，把特殊状态改成实体内 `SaveableComponent` |
 | 两个全局状态串台 | `Saveable.save_id` 重复 | 每个 `Saveable` 的 `save_id` 全局唯一 |
 | 两个实体串台 | `EntitySaveAgent.entity_id` 重复 | 每个长期实体的 `entity_id` 在 `entities` 内唯一 |
 | 升级不触发 | `ExperienceComponent.curve` 为空或已满级 | 配好 `curve`；`current_level < max_level` 才吃 XP |

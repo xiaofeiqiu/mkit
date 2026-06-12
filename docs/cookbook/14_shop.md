@@ -17,6 +17,64 @@
 | 给玩家 `Controllers/InventoryController` + 一些 `gold` | 买入：扣货币 → `add_item`；失败自动退款 |
 | 开店：`ShopService.open_shop()` + 绑 `ShopUI` | `buy()` / `sell()` 校验、改库存、发 `item_purchased` / `item_sold` |
 
+## 本篇路径
+
+### Minimal path：UI 已经拿到 shop id 时直接调 ShopService
+
+1. 先按步骤 1 / 2 创建 `item.potion` 和 `shop.village`，并加入 `ResourceDatabase`。
+2. 确认玩家有 `InventoryController`，并先给货币：
+
+```gdscript
+Mkit.progression().add_currency("gold", 200)
+```
+
+3. 打开商店时执行：
+
+```gdscript
+var shop := Mkit.shop()
+if shop.open_shop("shop.village"):
+    var ui := preload("res://game/ui/shop.tscn").instantiate() as ShopUI
+    add_child(ui)
+    ui.bind(shop, player)
+```
+
+4. UI 按钮里直接调用 `shop.buy("item.potion", 1, player)`。
+5. 验证方式：金币减少、背包新增药水、库存减少或交易失败原因可见。
+
+这条路径是普通 UI 服务调用，不需要实体 command 或 action。
+
+### Standard path：玩家按交互键打开商店
+
+1. 商店 NPC 或柜台做成 `Area2D`，下面放名为 `Interactable` 的商店交互节点。
+2. 玩家实体挂 `InteractionComponent`，输入脚本在按下交互键时调用 `interaction_component.try_interact()`。
+3. 商店 interactable 的 `_interact_impl(context)` 里写：
+
+```gdscript
+var shop := Mkit.shop()
+if shop == null or not shop.open_shop("shop.village"):
+    return false
+_open_shop_ui(shop, context.source)
+return true
+```
+
+4. `_open_shop_ui()` 实例化 `ShopUI` 并 `bind(shop, context.source)`。
+5. 验证方式：只有玩家靠近商店并按交互键时 UI 才打开。
+
+这条路径和 NPC / Portal 一样，入口是玩家自己的交互组件。
+
+### Advanced path：只知道 NPC id 时才用 CommandService
+
+1. 给商店 NPC 配 `EntityIdentity.entity_id = "shopkeeper"` 和自动注册的 `CommandReceiver`。
+2. 剧情脚本只有 NPC id 时，发送命令：
+
+```gdscript
+var command := GameCommand.create("open_shop", "script", "shopkeeper")
+Mkit.commands().dispatch(command)
+```
+
+3. NPC 的 command handler 处理 `"open_shop"`，调用 Standard path 的商店打开逻辑。
+4. 如果调用方已经拿到 NPC 节点、商店 UI 或玩家 `InteractionComponent`，直接调用对应对象，不要经过 `CommandService`。
+
 ## 关键认知：商店货币来自 ProgressionService
 
 `ShopService.buy()` 用 `SpendCurrencyEffect` / `AddCurrencyEffect` 结算，它们操作的是 **`ProgressionService` 的货币**（不是实体身上的 `ResourcePoolComponent`）。所以买东西前玩家得先有 `gold`：

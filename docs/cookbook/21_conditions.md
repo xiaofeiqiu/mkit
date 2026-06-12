@@ -21,6 +21,45 @@
 
 > `Condition` 继承 `Resource`（不是 `ContentDefinition`），**不需要**加入 `ResourceDatabase`，直接作为 `.tres` 子资源内嵌在定义里即可。
 
+## 本篇路径
+
+### Minimal path：手动测试单个条件
+
+1. 在编辑器里创建一个 `TargetInRangeCondition` 子资源，`condition_id = "test_range"`，`range = 200.0`。
+2. 测试脚本拿到 `player` 和 `enemy` 后构造上下文：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, enemy)
+```
+
+3. 手动求值并打印失败原因：
+
+```gdscript
+print(range_condition.evaluate(ctx))
+print(ConditionEvaluator.collect_failures([range_condition], ctx))
+```
+
+4. 把敌人拖到 200 像素外再运行，应输出 false 和 `"target_out_of_range"`。
+5. 这条路径只做同步查询，不要包装成 `GameAction`。
+
+### Standard path：把条件挂到数据入口
+
+1. 打开 `fireball.tres`，在 `conditions` 数组里加入 `TargetInRangeCondition(range=200.0)`。
+2. 确认 Recipe 05 的施法代码给 `GameplayContext` 填了 `source=player`、`target=enemy`。
+3. 玩家按火球键时，仍然只发 `cast_ability` 命令；`AbilityController.cast()` 会在扣费前自动求值。
+4. 条件失败时，`ability_failed` 带失败原因，魔法值不扣，effect 不执行。
+5. 同样的写法可以挂到 dialogue choice、shop entry、interactable、quest、loot、reward 或 item use。
+
+调用方不需要手动发 command；条件是入口自己的门禁。
+
+### Advanced path：条件跟随 action / effect 生命周期
+
+1. 如果条件要在 effect 真正应用前检查，把它挂到 `GameEffect.conditions`，例如给 `DealDamageEffect` 加“目标血量低于 30%”。
+2. `EffectService.execute(effect, ctx)` 会在 `_apply_impl()` 前自动求值，失败时该 effect 返回失败。
+3. 如果这个 effect 放在 `TimedAttackAction.on_complete_effects`，条件就在攻击完成 / 命中结算时求值。
+4. 验证方式：满血敌人无法触发处决伤害，打到 30% 以下后同一个 effect 才通过。
+5. 只有行为本身需要跨帧、可取消或统一 effect 链时才用 `GameAction`；普通条件查询不需要。
+
 ## 步骤
 
 ### 步骤 1：给火球术挂射程条件（TargetInRangeCondition）

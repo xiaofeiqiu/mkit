@@ -21,6 +21,45 @@
 | 在主场景挂 `RunDirector`，配 `first_floor_room_pool` / `RoomRoot` 容器 | `DungeonGenerator` 生成线性图，`RunDirector` 串联房间、处理推进/失败 |
 | 调 `run_director.start_run()` | 加载首个房间，监听清空，自动进下一间 |
 
+## 本篇路径
+
+### Minimal path：只手动生成一个敌人
+
+1. 先创建 `EntityDefinition("enemy.field_beast")`，`scene_path` 指向 Recipe 06 的敌人场景，并加入 `ResourceDatabase`。
+2. 在测试房间放两个节点：`Enemies`（`Node2D`）和 `EntitySpawner`。
+3. 在房间脚本 `_ready()` 里写：
+
+```gdscript
+@onready var enemies_root: Node2D = $Enemies
+@onready var spawner: EntitySpawner = $EntitySpawner
+
+func _ready() -> void:
+    spawner.spawn_entity("enemy.field_beast", enemies_root, Vector2(160, 96))
+```
+
+4. 运行房间，看到一只敌人出现在 `Enemies` 下并带有 `EntityIdentity.definition_id = "enemy.field_beast"`，说明手动刷怪路径完成。
+
+### Standard path：房间里的敌人仍按自己的 AI 命令行动
+
+1. 确认敌人场景自带 `SimpleAIEnemyBrain`、`CommandReceiver` 和 Idle / Move / Attack state。
+2. `RoomController` 或手动 spawner 只负责实例化敌人，不要在房间脚本里直接控制敌人移动和攻击。
+3. 敌人生成后，brain 自动找 `"player"` group 并给自己的 receiver 发 move / attack 命令。
+4. 房间脚本只订阅死亡事件或等 `RoomController.room_cleared`，验证重点是“敌人自己会动，房间只管清空”。
+
+### Advanced path：多房间 run 用 `RunDirector`
+
+1. 按步骤 2 创建至少一个 `RoomDefinition`，并把它加入 `ResourceDatabase`。
+2. 主场景放 `RunDirector` 和 `RoomRoot` 容器，Inspector 里配置 `first_floor_room_pool = ["room.combat_a"]`、`room_root_path = "../RoomRoot"`、玩家路径或玩家 group。
+3. 在主场景 `_ready()` 里调用：
+
+```gdscript
+run_director.run_finished.connect(func(reason: String): print("run finished: ", reason))
+run_director.start_run()
+```
+
+4. 运行后 `RunDirector` 加载房间，`RoomController` 按 `enemy_spawn_ids` 刷怪。
+5. 杀光房间敌人后进入下一房间；玩家死亡则触发失败。
+
 ## 步骤
 
 ### 步骤 1：为敌人创建 EntityDefinition

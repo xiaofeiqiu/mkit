@@ -18,6 +18,55 @@
 | 监听 `RunDirector.choosing_reward`，显示选项 UI | `RunDirector` 暂停推进，进入 `choosing_reward` 状态 |
 | 玩家点选 → 调 `run_director.select_reward(option)` | `RewardCoordinator` → `LootService.apply_selected()` 跑 effect、发 `reward_selected`，再进下一间 |
 
+## 本篇路径
+
+### Minimal path：代码里直接生成并应用 reward
+
+1. 先按步骤 1 创建至少 3 个 `RewardDefinition`，并全部加入 `ResourceDatabase`。
+2. 在测试脚本里准备玩家节点和 reward id 列表：
+
+```gdscript
+var pool_ids := ["reward.heal", "reward.attack_up", "reward.gold"]
+var ctx := GameplayContext.from_nodes(player, player)
+```
+
+3. 生成三选一：
+
+```gdscript
+var options := Mkit.loot().generate_options(pool_ids, 3, ctx)
+```
+
+4. 先不做 UI，直接应用第一个选项：
+
+```gdscript
+if not options.is_empty():
+    Mkit.loot().apply_selected(options[0], ctx)
+```
+
+5. 玩家回血、加属性或获得奖励事件后，说明 reward 本身可用。
+
+### Advanced path：房间清空后由 run 等待玩家选择
+
+1. 打开 Recipe 07 的 `RoomDefinition`，把 `reward_pool_ids` 填成 `["reward.heal", "reward.attack_up", "reward.gold"]`。
+2. 主场景放 `UIManager`，把 `"reward_selection"` 映射到 `res://game/ui/reward_selection.tscn`。
+3. 连接 `RunDirector.choosing_reward`：
+
+```gdscript
+func _ready() -> void:
+    run_director.choosing_reward.connect(_on_choosing_reward)
+
+func _on_choosing_reward(options: Array[RewardOption]) -> void:
+    Mkit.ui().open_screen("reward_selection", {
+        "options": options,
+        "run_director": run_director,
+    }, true)
+```
+
+4. 玩家点击 UI 按钮后，`RewardSelectionUI` 调 `run_director.select_reward(option)`。
+5. 验证方式：房间清空后不会直接进入下一间，选完 reward 后才推进。
+
+本篇选择奖励通常来自 UI callback，不需要新增实体 `CommandReceiver` 路径。
+
 ## 步骤
 
 ### 步骤 1：创建 RewardDefinition

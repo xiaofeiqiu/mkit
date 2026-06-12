@@ -17,6 +17,59 @@
 | 面板场景 + 可选的 `setup(data)` 方法 | `UIManager.open_screen()` 实例化、挂载、入栈、调 `setup` |
 | 主场景挂 `UIManager` + `ScreenRoot`，配 `screen_scene_map` | screen 去重、modal 时 `TimeService.set_paused(true)`、关闭时恢复 |
 
+## 本篇路径
+
+### Minimal path：HUD 直接订阅信号
+
+1. 按步骤 1 搭 `HudLayer/Hud/HealthBar/GoldLabel`，`Hud` 脚本导出 `player_path`。
+2. 在 `Hud._ready()` 里取玩家血量组件并连接信号：
+
+```gdscript
+var player := get_node(player_path)
+var health := EntityContract.get_component(player, "HealthComponent") as HealthComponent
+health.health_changed.connect(_on_health_changed)
+_on_health_changed(health.current_hp, health.get_max_hp())
+```
+
+3. 同一个 `_ready()` 里订阅 `ProgressionService.currency_changed`，并立即刷新金币文本。
+4. 运行后让玩家受伤或加金币，HUD 应只在信号到达时刷新。
+5. HUD 是表现层订阅者，不发命令、不走 `CommandReceiver`、不包装 `GameAction`。
+
+### Standard path：玩家按键打开 UIManager screen
+
+1. 主场景放 `UIManager`，下面放 `ScreenRoot`，并在 `screen_scene_map` 配：
+
+```gdscript
+{"inventory": "res://game/ui/inventory_panel.tscn"}
+```
+
+2. 背包面板根节点实现 `setup(data)`，从 data 里拿 `inventory`。
+3. 输入脚本检测到背包键时打开：
+
+```gdscript
+var inventory := EntityContract.get_controller(player, "InventoryController")
+Mkit.ui().open_screen("inventory", {"inventory": inventory}, true)
+```
+
+4. 面板里按取消键时调用 `Mkit.ui().close_screen("inventory")`。
+5. 验证方式：第一次按键出现面板，重复打开不会堆多个，modal 打开时 `TimeService` 暂停。
+
+打开面板是 UI 服务调用，不要为了普通面板开关写实体 action。
+
+### Advanced path：只有目标实体 id 时才路由 UI 命令
+
+1. 确认玩家 `CommandReceiver` 已注册，receiver id 是 `"player"`。
+2. 只有剧情脚本只知道玩家 id、并希望玩家实体自己处理 UI 意图时，发送：
+
+```gdscript
+var command := GameCommand.create("open_inventory", "script", "player")
+Mkit.commands().dispatch(command)
+```
+
+3. 玩家 command handler 处理 `"open_inventory"`，找到自己的 `InventoryController`，再调用 `Mkit.ui().open_screen(...)`。
+4. 已经能直接拿到 `Mkit.ui()` 的按钮、HUD、主场景脚本，不需要走 `CommandService`。
+5. UI 开关本身没有跨帧取消生命周期，不需要 `GameAction`。
+
 ## 关键认知：HUD 订阅，面板走 UIManager
 
 - **常驻 HUD**（血条、金币、Buff 图标）：自己放在 `CanvasLayer` 下常驻场景，**拉取数据靠订阅**——绝不每帧轮询。游戏逻辑不知道 HUD 存在。

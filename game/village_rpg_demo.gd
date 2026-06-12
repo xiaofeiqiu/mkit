@@ -42,6 +42,8 @@ const DEMO_CAMERA_WORLD_SIZE := Vector2(1080.0, 608.0)
 const DEMO_CAMERA_MIN_ZOOM := 0.82
 const DEMO_CAMERA_MAX_ZOOM := 2.2
 const TRIAL_REWARD_UI_SCENE := preload("res://game/scenes/trial_reward_selection.tscn")
+const DEMO_AUTO_RUN_VERIFIER_SCRIPT := preload("res://game/demo_auto_run_verifier.gd")
+const DEMO_SAVE_PAYLOAD_VERIFIER_SCRIPT := preload("res://game/demo_save_payload_verifier.gd")
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
 
 
@@ -102,6 +104,8 @@ var _audio: AudioService = null
 var _save_manager: SaveService = null
 var _entity_spawner: EntitySpawner = null
 var _scene_router := EmbeddedSceneRouter.new()
+var _auto_run_verifier: Variant = DEMO_AUTO_RUN_VERIFIER_SCRIPT.new()
+var _save_payload_verifier: Variant = DEMO_SAVE_PAYLOAD_VERIFIER_SCRIPT.new()
 var _previous_scene_router: SceneService = null
 var _log_lines: Array[String] = []
 var _field_beast_ref: Node = null
@@ -904,46 +908,6 @@ func _place_player_at_trial_cave_exit() -> void:
 		_player.global_position = marker.global_position
 
 
-func _run_trial_auto() -> void:
-	await _focus_zone_interactable("TrialCaveArea/Interactable")
-	_enter_trial_cave()
-	await _settle_world()
-	var guard := 0
-	while not _is_trial_terminal() and guard < 12:
-		var status := _run_director.run_state.status if _run_director.run_state != null else ""
-		if status == "active":
-			_defeat_trial_room_enemies()
-		elif status == "choosing_reward":
-			_select_trial_reward(_trial_reward_index(REWARD_TRIAL_ATTACK))
-		await _settle_world()
-		guard += 1
-	if not _is_trial_completed():
-		_log("[TRIAL] auto run did not complete")
-
-
-func _defeat_trial_room_enemies() -> void:
-	if _run_director == null or _run_director.current_room_controller == null:
-		_log("[TRIAL] no active room")
-		return
-	var room := _run_director.current_room_controller
-	if room.runtime == null:
-		_log("[TRIAL] active room has no runtime")
-		return
-	var enemy_ids := room.runtime.active_enemy_ids.duplicate()
-	for enemy_id in enemy_ids:
-		var enemy := room.active_enemies.get(enemy_id, null) as Node
-		if enemy == null:
-			continue
-		var brain := enemy.get_node_or_null("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
-		if brain != null:
-			brain.enabled = false
-		var damage := DealDamageEffect.new()
-		damage.effect_id = "effect.demo.trial_strike"
-		damage.base_amount = 999.0
-		damage.can_crit = false
-		_effects.execute(damage, GameplayContext.new().with_source(_player).with_target(enemy))
-
-
 func _select_trial_reward(index: int) -> void:
 	if _pending_trial_rewards.is_empty():
 		_log("[TRIAL] no pending rewards")
@@ -967,13 +931,6 @@ func _select_trial_reward(index: int) -> void:
 	_pending_trial_rewards.clear()
 	_reward_screen = null
 	_log("[TRIAL] picked reward %s" % selected.display_name)
-
-
-func _trial_reward_index(reward_id: String) -> int:
-	for i in range(_pending_trial_rewards.size()):
-		if _pending_trial_rewards[i].reward_id == reward_id:
-			return i
-	return 0
 
 
 func _is_trial_terminal() -> bool:
@@ -1144,220 +1101,6 @@ func _load_demo_state() -> bool:
 func _sync_loaded_state_flags() -> void:
 	var equipment := _equipment_controller()
 	_field_blade_equipped = equipment != null and equipment.get_equipped(WEAPON_SLOT) != null
-
-
-func _read_demo_save_data() -> Dictionary:
-	if _save_manager == null:
-		return {}
-	var file := FileAccess.open(_save_manager.save_path, FileAccess.READ)
-	if file == null:
-		return {}
-	var text := file.get_as_text()
-	file.close()
-	var parsed = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return {}
-	var data: Dictionary = parsed
-	return data
-
-
-func _write_demo_save_data(data: Dictionary) -> bool:
-	if _save_manager == null:
-		return false
-	var file := FileAccess.open(_save_manager.save_path, FileAccess.WRITE)
-	if file == null:
-		return false
-	file.store_string(JSON.stringify(data, "  "))
-	file.close()
-	return true
-
-
-func _validate_demo_save_data(data: Dictionary, label: String) -> bool:
-	var missing := _demo_save_data_missing_requirements(data)
-	if missing.is_empty():
-		return true
-	_log("[%s] save data missing: %s" % [label, ", ".join(missing)])
-	return false
-
-
-func _demo_save_data_missing_requirements(data: Dictionary) -> Array[String]:
-	var missing: Array[String] = []
-	if data.is_empty():
-		missing.append("save_data")
-		return missing
-	if int(data.get("save_version", 0)) <= 0:
-		missing.append("save_version")
-	var roots := _dict_value(data, "roots")
-	if roots.is_empty():
-		missing.append("roots")
-	var scopes := _dict_value(data, "scopes")
-	if (
-		not scopes.has("global")
-		or not scopes.has("world.run")
-		or not scopes.has("world.room")
-		or not scopes.has("world.reward")
-	):
-		missing.append("scopes")
-	var global_scope := _dict_value(scopes, "global")
-	if (
-		not global_scope.has("demo_player")
-		or not global_scope.has("player_experience")
-		or not global_scope.has("progression")
-		or not global_scope.has("quest")
-	):
-		missing.append("global_scope")
-	_append_saved_player_requirements(roots, missing)
-	_append_saved_quest_requirements(roots, missing)
-	_append_saved_progression_requirements(roots, missing)
-	_append_saved_trial_scope_requirements(scopes, missing)
-	return missing
-
-
-func _append_saved_player_requirements(payload: Dictionary, missing: Array[String]) -> void:
-	var player_payload := _dict_value(payload, "demo_player")
-	var components := _dict_value(player_payload, "components")
-	var inventory_payload := _dict_value(components, "InventoryController")
-	var saved_items := _array_value(inventory_payload, "items")
-	if int(inventory_payload.get("capacity", 0)) < 20:
-		missing.append("saved_inventory_capacity")
-	if _saved_item_count(saved_items, ITEM_CHARM) < 1:
-		missing.append("saved_charm")
-	if _saved_item_count(saved_items, ITEM_FIELD_BLADE) < 1:
-		missing.append("saved_field_blade")
-	if _saved_item_count(saved_items, ITEM_POTION) < 1:
-		missing.append("saved_potion")
-	if _saved_item_count(saved_items, ITEM_CLAW) > 0:
-		missing.append("saved_claw_sold")
-	var equipment_payload := _dict_value(components, "EquipmentController")
-	var slots := _dict_value(equipment_payload, "slots")
-	var weapon := _dict_value(slots, WEAPON_SLOT)
-	if str(weapon.get("definition_id", "")) != ITEM_FIELD_BLADE:
-		missing.append("saved_equipped_weapon")
-	var ability_payload := _dict_value(components, "AbilityController")
-	if not _array_has_string(_array_value(ability_payload, "learned"), ABILITY_FIREBOLT):
-		missing.append("saved_firebolt")
-	if float(_dict_value(ability_payload, "charges").get(ABILITY_FIREBOLT, 0.0)) < 1.0:
-		missing.append("saved_firebolt_charge")
-	var resource_payload := _dict_value(components, "ResourcePoolComponent")
-	if float(resource_payload.get("mana", 0.0)) <= 0.0:
-		missing.append("saved_mana")
-	var health_payload := _dict_value(components, "HealthComponent")
-	if bool(health_payload.get("dead", true)):
-		missing.append("saved_alive")
-	if float(health_payload.get("current_hp", 0.0)) <= 50.0:
-		missing.append("saved_potion_heal")
-	var stats_payload := _dict_value(components, "StatsComponent")
-	var modifiers := _array_value(stats_payload, "persistent_modifiers")
-	if _saved_modifier_count(modifiers, "effect.demo.trial_attack_upgrade") < 3:
-		missing.append("saved_trial_attack_modifiers")
-	if _saved_modifier_count(modifiers, "effect.demo.elder_blessing_attack") < 1:
-		missing.append("saved_elder_blessing")
-	var experience_payload := _dict_value(payload, "player_experience")
-	if int(experience_payload.get("current_level", 0)) < 2:
-		missing.append("saved_level")
-
-
-func _append_saved_quest_requirements(payload: Dictionary, missing: Array[String]) -> void:
-	var quest_payload := _dict_value(payload, "quest")
-	var states := _dict_value(quest_payload, "states")
-	if _saved_quest_status(states, QUEST_ID) != "turned_in":
-		missing.append("saved_field_report")
-	if _saved_quest_status(states, QUEST_MANUAL_ID) != "turned_in":
-		missing.append("saved_manual_quest")
-	var field_state := _dict_value(states, QUEST_ID)
-	var field_progress := _dict_value(field_state, "objective_progress")
-	if int(field_progress.get(QUEST_OBJECTIVE_ID, 0)) < 1:
-		missing.append("saved_field_objective")
-	var manual_state := _dict_value(states, QUEST_MANUAL_ID)
-	var manual_progress := _dict_value(manual_state, "objective_progress")
-	if int(manual_progress.get(QUEST_MANUAL_OBJECTIVE_ID, 0)) < 1:
-		missing.append("saved_manual_objective")
-
-
-func _append_saved_progression_requirements(payload: Dictionary, missing: Array[String]) -> void:
-	var progression_payload := _dict_value(payload, "progression")
-	var currencies := _dict_value(progression_payload, "currencies")
-	var saved_gold := int(currencies.get("gold", -1))
-	if saved_gold < 0:
-		missing.append("saved_gold")
-
-
-func _append_saved_trial_scope_requirements(scopes: Dictionary, missing: Array[String]) -> void:
-	var world_run := _dict_value(_dict_value(scopes, "world.run"), "run_director")
-	var run_state := _dict_value(world_run, "run_state")
-	if str(run_state.get("status", "")) != "completed":
-		missing.append("saved_trial_completed")
-	if int(run_state.get("seed", 0)) != TRIAL_SEED:
-		missing.append("saved_trial_seed")
-	if _array_value(run_state, "room_history").size() != 3:
-		missing.append("saved_trial_rooms")
-	var reward_history := _array_value(run_state, "reward_history")
-	if reward_history.size() != 3 or _array_string_count(reward_history, REWARD_TRIAL_ATTACK) != 3:
-		missing.append("saved_trial_rewards")
-	if not _array_has_string(_array_value(run_state, "temporary_upgrade_ids"), UPGRADE_TRIAL_ATTACK):
-		missing.append("saved_trial_upgrade")
-	var world_reward := _dict_value(_dict_value(scopes, "world.reward"), "run_director")
-	var scoped_rewards := _array_value(world_reward, "reward_history")
-	if scoped_rewards.size() != 3 or _array_string_count(scoped_rewards, REWARD_TRIAL_ATTACK) != 3:
-		missing.append("saved_reward_scope")
-	var world_room := _dict_value(_dict_value(scopes, "world.room"), "run_director")
-	var room_runtime := _dict_value(world_room, "current_room_runtime")
-	if not bool(room_runtime.get("cleared", false)):
-		missing.append("saved_room_scope")
-
-
-func _dict_value(data: Dictionary, key: String) -> Dictionary:
-	var value: Variant = data.get(key, {})
-	if value is Dictionary:
-		return value
-	return {}
-
-
-func _array_value(data: Dictionary, key: String) -> Array:
-	var value: Variant = data.get(key, [])
-	if value is Array:
-		return value
-	return []
-
-
-func _array_has_string(values: Array, expected: String) -> bool:
-	for value in values:
-		if str(value) == expected:
-			return true
-	return false
-
-
-func _array_string_count(values: Array, expected: String) -> int:
-	var count := 0
-	for value in values:
-		if str(value) == expected:
-			count += 1
-	return count
-
-
-func _saved_item_count(items: Array, definition_id: String) -> int:
-	var total := 0
-	for raw in items:
-		if raw is Dictionary:
-			var item_data: Dictionary = raw
-			if str(item_data.get("definition_id", "")) == definition_id:
-				total += int(item_data.get("quantity", 0))
-	return total
-
-
-func _saved_modifier_count(modifiers: Array, modifier_id: String) -> int:
-	var total := 0
-	for raw in modifiers:
-		if raw is Dictionary:
-			var modifier_data: Dictionary = raw
-			if str(modifier_data.get("modifier_id", "")) == modifier_id:
-				total += 1
-	return total
-
-
-func _saved_quest_status(states: Dictionary, quest_id: String) -> String:
-	var state := _dict_value(states, quest_id)
-	return str(state.get("status", ""))
 
 
 func _on_dialogue_started(dialogue_id: String) -> void:
@@ -2328,76 +2071,7 @@ func _record_debug_failure(line: String) -> void:
 
 
 func _run_auto_loop() -> void:
-	if _auto_run_started:
-		return
-	_auto_run_started = true
-	await _settle_world()
-	await _verify_debug_overlay_for_auto_run()
-	await _focus_zone_interactable("ToRoom/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	await _focus_zone_interactable("Elder/InteractionArea/Interactable")
-	_talk_or_advance_dialogue()
-	await get_tree().process_frame
-	_talk_or_advance_dialogue()
-	await get_tree().process_frame
-	_talk_or_advance_dialogue()
-	await _settle_world()
-	await _focus_zone_interactable("ToVillage/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	await _focus_zone_interactable("ToField/Interactable")
-	_toggle_field_portal()
-	await _settle_world()
-	await _dash_player_once()
-	await _settle_world()
-	await _cast_firebolt_at_beast()
-	await _settle_world()
-	await _engage_field_beast_via_commands()
-	await _settle_world()
-	await _run_trial_auto()
-	await _settle_world()
-	await _focus_zone_interactable("ToVillage/Interactable")
-	_toggle_field_portal()
-	await _settle_world()
-	await _wait_for_hit_vfx_cleanup()
-	await _focus_zone_interactable("ToRoom/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	await _focus_zone_interactable("Elder/InteractionArea/Interactable")
-	_request_elder_blessing()
-	await _settle_world()
-	await _focus_zone_interactable("Elder/InteractionArea/Interactable")
-	_request_manual_task()
-	await _settle_world()
-	await _focus_zone_interactable("ToVillage/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	_toggle_field_blade()
-	await _settle_world()
-	_toggle_field_blade()
-	await _settle_world()
-	_toggle_field_blade()
-	await _settle_world()
-	await _focus_zone_interactable("VillageSupply/Interactable")
-	_buy_potion()
-	await get_tree().process_frame
-	_buy_potion()
-	await get_tree().process_frame
-	_sell_claw()
-	await get_tree().process_frame
-	_use_potion()
-	await get_tree().process_frame
-	await _roundtrip_demo_save_for_auto_run()
-	var complete := _demo_loop_complete()
-	if complete:
-		_log("[AUTO] demo RPG loop complete")
-	else:
-		_log("[AUTO] missing: %s" % ", ".join(_demo_missing_requirements()))
-		_log("[AUTO] demo RPG loop incomplete")
-	_cleanup_audio_players()
-	await _settle_shutdown()
-	get_tree().quit(0 if complete else 1)
+	await _auto_run_verifier.run(self, _save_payload_verifier)
 
 
 func _settle_world() -> void:
@@ -2411,108 +2085,6 @@ func _settle_shutdown() -> void:
 	for i in range(6):
 		await get_tree().process_frame
 		await get_tree().physics_frame
-
-
-func _verify_debug_overlay_for_auto_run() -> void:
-	if _debug_overlay == null:
-		return
-	_debug_overlay.visible = true
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var label: Label = null
-	if _debug_overlay.get_child_count() > 0:
-		label = _debug_overlay.get_child(0) as Label
-	var text := label.text if label != null else ""
-	_debug_overlay_verified = (
-		text.contains("Zone:")
-		and text.contains("Run:")
-		and text.contains("Runtime:")
-		and text.contains("State:")
-		and text.contains("HP:")
-	)
-	if _debug_overlay_verified:
-		_log("[AUTO] debug overlay status verified")
-	_debug_overlay.visible = false
-
-
-func _wait_for_hit_vfx_cleanup() -> void:
-	var elapsed := 0.0
-	while elapsed < 1.0 and _visible_hit_vfx_count() > 0:
-		await get_tree().process_frame
-		elapsed += get_process_delta_time()
-	_hit_vfx_cleanup_verified = _visible_hit_vfx_count() == 0
-	if _hit_vfx_cleanup_verified:
-		_log("[AUTO] hit VFX cleanup verified")
-
-
-func _roundtrip_demo_save_for_auto_run() -> void:
-	_demo_save_roundtrip_succeeded = false
-	_demo_save_payload_verified = false
-	if not _save_demo_state():
-		return
-	var saved_data := _read_demo_save_data()
-	_demo_save_payload_verified = _validate_demo_save_data(saved_data, "SAVE")
-	_scramble_demo_saved_state()
-	await get_tree().process_frame
-	if _load_demo_state():
-		_demo_save_roundtrip_succeeded = (
-			_demo_save_payload_verified and _demo_save_roundtrip_restored()
-		)
-		if _demo_save_roundtrip_succeeded:
-			_log("[SAVE] round-trip restored demo state")
-		else:
-			_log("[SAVE] round-trip restore check failed")
-
-
-func _scramble_demo_saved_state() -> void:
-	var equipment := _equipment_controller()
-	if equipment != null:
-		equipment.unequip(WEAPON_SLOT)
-	var inventory := _inventory()
-	if inventory != null:
-		inventory.model.setup(inventory.capacity)
-	var stats := _player_stats()
-	if stats != null:
-		var modifier_definition := StatModifierDefinition.new()
-		modifier_definition.modifier_id = "mod.demo.save_scramble_attack"
-		modifier_definition.stat_id = "attack_power"
-		modifier_definition.value = -999.0
-		modifier_definition.stacking_rule = StatModifierDefinition.StackingRule.REPLACE_SAME_SOURCE
-		stats.add_modifier(StatModifier.from_definition(modifier_definition, "demo_save_scramble"))
-	var health := _player_health()
-	if health != null:
-		health.current_hp = 1.0
-	var pool := _player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
-	if pool != null:
-		pool.set_current("mana", 0.0)
-	var ability := _ability_controller()
-	if ability != null:
-		ability.unregister_ability(ABILITY_FIREBOLT)
-	_field_blade_equipped = false
-
-
-func _demo_save_roundtrip_restored() -> bool:
-	var equipment := _equipment_controller()
-	if equipment == null or equipment.get_equipped(WEAPON_SLOT) == null:
-		_log("[SAVE] round-trip missing equipped weapon")
-		return false
-	var inventory := _inventory()
-	if inventory == null or inventory.find_item_by_definition(ITEM_POTION) == null:
-		_log("[SAVE] round-trip missing potion")
-		return false
-	var ability := _ability_controller()
-	if ability == null or not ability.has_ability(ABILITY_FIREBOLT):
-		_log("[SAVE] round-trip missing firebolt")
-		return false
-	var pool := _player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
-	if pool == null or pool.get_current("mana") <= 0.0:
-		_log("[SAVE] round-trip missing mana")
-		return false
-	var stats := _player_stats()
-	if stats == null or stats.get_stat_value("attack_power", 0.0) < 30.0:
-		_log("[SAVE] round-trip attack_power below gate")
-		return false
-	return true
 
 
 func _demo_loop_complete() -> bool:

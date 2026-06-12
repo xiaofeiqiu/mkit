@@ -19,6 +19,54 @@
 | 在 State 中调用 `ability_ctrl.cast(ability_id, ctx)` | 条件检查、cost 扣除、CastAction（有 cast_time）或 instant GameAction，`_fire_effects` |
 | 可选：添加 `ResourcePoolComponent` 管理魔法值 | — |
 
+## 本篇路径
+
+### Minimal path：只验证技能 effect
+
+1. 先创建 `res://data/effects/fireball_damage.tres`，类型为 `DealDamageEffect`，`base_amount = 30`。
+2. 在测试脚本导出这个资源，并准备 caster / target 两个节点。
+3. 按键时执行：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(caster, target)
+Mkit.effects().execute(fireball_damage, ctx)
+```
+
+4. 目标扣血、`EffectService.recent_results` 有成功记录，即说明 effect 本身没问题。
+5. 这条路径不检查 `AbilityDefinition`、冷却、费用、`cast_time`，只用来验证效果资源。
+
+### Standard path：输入或 AI 发施法命令
+
+1. 按步骤 1-4 创建 `fireball.tres`、配置 `ResourcePoolComponent`，并在 `PlayerEntity/Controllers/AbilityController.starting_ability_ids` 填 `["fireball"]`。
+2. 在 Recipe 02 的 `player_input.gd` 里增加技能键：
+
+```gdscript
+if Input.is_action_just_pressed("cast_fireball"):
+    _send_command(BuiltinCommands.CAST_ABILITY, {"ability_id": "fireball"})
+```
+
+3. 在 `Idle` / `Move` state 的 `handle_command()` 里处理 `BuiltinCommands.CAST_ABILITY`，调用本篇步骤 5 的 `_try_cast_ability(command)`。
+4. 运行后按技能键：魔法值减少、目标扣血、冷却开始；冷却中再按会走 `ability_failed`。
+
+### Advanced path：`AbilityController` 统一处理 cast time 和 effects
+
+1. 在 state 里先找施法目标，例如最近敌人；没有目标就返回 `false`。
+2. 用命令、施法者和目标构造上下文：
+
+```gdscript
+var ctx := GameplayContext.from_command(command, owner_entity, target)
+```
+
+3. 调用：
+
+```gdscript
+var ability_id := str(command.payload.get("ability_id", ""))
+return ability_ctrl.cast(ability_id, ctx)
+```
+
+4. `fireball.tres.cast_time = 0` 时，`AbilityController` 会创建 instant action 并同帧完成。
+5. 把 `cast_time` 改成 `0.8` 再运行，施法会交给 `CastAction` / `ActionService` 跨帧推进；这时才需要关心取消和施法动画。
+
 ## 步骤
 
 ### 步骤 1：创建 AbilityDefinition 资源

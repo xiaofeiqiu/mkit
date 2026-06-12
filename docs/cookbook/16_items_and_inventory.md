@@ -20,6 +20,62 @@ Recipe 08（掉落）和 Recipe 14（商店）里物品只是顺带出现；这�
 | 使用物品：执行 `use_effects` 后 `remove_item_by_instance_id()` | `EffectService.execute_many()` 跑效果链并记录 trace |
 | 装备物品：挂 `EquipmentController`，调 `equip()` | 校验 `equipment_slot`，把 `stat_modifiers` 挂上/摘下 `StatsComponent` |
 
+## 本篇路径
+
+### Minimal path：代码、掉落、商店直接改背包
+
+1. 先按步骤 1 创建 `ItemDefinition("item.potion")` 并加入 `ResourceDatabase`；玩家 `Controllers/` 下加 `InventoryController`。
+2. 调试发物品或掉落结算时直接创建实例并放进背包：
+
+```gdscript
+var inventory := EntityContract.get_controller(player, "InventoryController") as InventoryController
+var potion := ItemInstance.create("item.potion", 3)
+inventory.add_item(potion)
+```
+
+3. 装备路径先按步骤 5 创建 `item.iron_sword`，玩家再加 `EquipmentController`，然后：
+
+```gdscript
+var sword := inventory.find_item_by_definition("item.iron_sword")
+equipment.equip(sword, "weapon")
+```
+
+4. 使用普通药水时，按步骤 4 执行 `definition.use_effects`，成功后 `remove_item_by_instance_id(...)` 扣数量。
+5. 验证方式：背包格子出现药水，装备剑后 `attack_power` 增加。
+
+掉落、商店、初始装备都是同步数据变化，不需要 command 或 action。
+
+### Standard path：玩家按快捷键使用物品
+
+1. 在 Recipe 02 的输入脚本里加快捷键：
+
+```gdscript
+if Input.is_action_just_pressed("use_potion"):
+    _send_command("use_item", {"definition_id": "item.potion"})
+```
+
+2. 在 `Idle` / `Move` state 的 `handle_command()` 里处理 `"use_item"`。
+3. state 判断当前状态允许使用后，调用本篇步骤 4 的 `use_item(owner_entity, definition_id)`。
+4. `use_item()` 执行 `use_effects`，再从 `InventoryController` 扣数量。
+5. 验证方式：按快捷键后玩家回血、药水数量减 1、HUD / 背包 UI 收到 `inventory_changed`。
+
+调用方已经拿到玩家实体时，不需要 `CommandService`。
+
+### Advanced path：物品使用有前摇或可取消时才写 GameAction
+
+1. 只有读条喝药、放置陷阱、使用卷轴可被打断这类需求，才创建 `UseItemAction`。
+2. command handler 中先找到要使用的 `ItemInstance.instance_id`，并写进 action payload，避免读条期间背包变化。
+3. 启动 action：
+
+```gdscript
+var action := UseItemAction.new()
+action.item_instance_id = item.instance_id
+Mkit.actions().start_action(action, ActionContext.from_nodes(player, player))
+```
+
+4. 在 action `_on_complete(context)` 中执行 `definition.use_effects` 并扣数量；在 `_on_cancel(context)` 中不扣物品。
+5. 普通瞬时药水不要走这条路径，直接用 Standard path。
+
 ## 关键认知：definition 与 instance 是两层
 
 - **`ItemDefinition`**（`extends ContentDefinition`，.tres）：静态数据——名字、堆叠规则、使用效果、装备加成。入 `ResourceDatabase`，全游戏共享一份。

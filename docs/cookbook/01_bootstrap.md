@@ -18,6 +18,25 @@
 | 设 `initial_scene_path` | 启动完成后切入游戏场景 |
 | （可选）继承 `GameBootstrap`，override `_register_kernel_services` 添加自定义服务 | 其余启动步骤 |
 
+## 本篇路径
+
+### Minimal path：只启动服务和内容
+
+1. 先在文件系统里创建 `res://data/main_database.tres`，类型选 `ResourceDatabase`，`database_id` 填 `"main"`。
+2. 新建 `res://game/bootstrap.tscn`，根节点用 `Node`，脚本选择 `GameBootstrap`；如果本项目马上要用 combat / quest / shop 等模块，脚本改选 `ModuleBootstrap`。
+3. 在 Inspector 里把 `resource_databases` 增加一项，拖入 `res://data/main_database.tres`；`initial_scene_path` 暂时留空。
+4. 给 bootstrap 根节点临时加验证脚本，运行后打印注册服务：
+
+```gdscript
+func _ready() -> void:
+    super._ready()
+    print(ServiceRegistry.get_registered_service_ids())
+```
+
+5. 运行 `res://game/bootstrap.tscn`，看到 `events`、`content`、`actions`、`effects`、`commands` 等 id 出现在输出里，就说明本篇完成。
+
+本篇还没有实体输入、AI、`CommandReceiver`、`CommandService` 或 `GameAction`；这些从 Recipe 02 开始进入。
+
 ## 步骤
 
 ### 步骤 1：创建 ResourceDatabase

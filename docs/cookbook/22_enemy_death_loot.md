@@ -21,6 +21,46 @@
 | 把资源加入 `ResourceDatabase.resources` | `ContentService` 注册并按 id / type 查找资源 |
 | 监听 `LootEvents.LOOT_DROPPED`，把结果交付到背包或世界 | mkit 只发 typed drop event，不碰具体游戏交付方式 |
 
+## 本篇路径
+
+### Minimal path：直接测试掉落表
+
+1. 先按步骤 1 / 2 创建 `item.beast_claw` 和 `LootTableDefinition("loot.field_beast")`，并加入 `ResourceDatabase`。
+2. 测试脚本拿到敌人和玩家节点后构造上下文：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(enemy, player)
+```
+
+3. 直接 roll 表：
+
+```gdscript
+var result := Mkit.loot().roll_table("loot.field_beast", ctx)
+print(result.item_instances)
+print(result.debug_rolls)
+```
+
+4. 如果要直接进背包，循环 `result.item_instances` 调 `inventory.add_item(item)`。
+5. 这条路径适合测试表和调试概率，不需要真的杀敌。
+
+### Standard path：死亡事件驱动掉落规则
+
+1. 按步骤 3 创建 `DeathLootRuleDefinition("death_loot.field_beast")`，让 `entity_definition_ids = ["enemy.field_beast"]`，`loot_table_ids = ["loot.field_beast"]`。
+2. 把 rule 和 loot table 都加入 `ResourceDatabase`；`ModuleBootstrap` 会注册 `DeathLootService`。
+3. 敌人由 `EntitySpawner` 生成时，确认 `EntityIdentity.definition_id = "enemy.field_beast"`。
+4. 杀死敌人，`HealthComponent.die(killer)` 发出 `CombatEvents.ENTITY_DIED`，`DeathLootService` 自动匹配 rule 并 roll 表。
+5. 订阅 `LootEvents.LOOT_DROPPED`，把 `drop.roll_result.item_instances` 放进背包或生成地面拾取物。
+
+这是事件驱动的系统结果，不需要给死亡掉落单独发实体 command。
+
+### Advanced path：规则扩展仍然围绕事件和条件
+
+1. boss 专属掉落：新增一条高 `priority` 的 `DeathLootRuleDefinition`，`entity_definition_ids = ["enemy.boss"]`，并设 `stop_after_match = true`。
+2. 区域或难度限定掉落：把自定义 `Condition` 放进 rule 或 `LootEntry.conditions`。
+3. 条件里读取 `GameplayContext.payload["death_definition_id"]`、`["killer_id"]`、`["rule_id"]`、`["loot_table_id"]` 等字段做判断。
+4. 多个规则命中时，用 `priority` 和 `stop_after_match` 控制叠加关系。
+5. 掉落规则不需要 `GameAction`；只有“死亡动画后再掉落”这种跨帧表现，才把表现部分放进 action，掉落仍由事件规则处理。
+
 ## 步骤
 
 ### 步骤 1：准备可掉落物品

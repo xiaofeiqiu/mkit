@@ -18,6 +18,55 @@
 | 继承 `ModuleBootstrap`，override `_build_services()` 追加 | 服务注册完成后逐个回调 `_on_services_ready()` |
 | （可选）自己的类型化门面 `Game.reputation()` | `ServiceRegistry.get_port()` 提供底层查找 |
 
+## 本篇路径
+
+### Minimal path：已有调用点直接取服务
+
+1. 先按步骤 1 / 2 写好 `ReputationEvents` 和 `ReputationService`。
+2. 按步骤 3 让你的 bootstrap 继承 `ModuleBootstrap`，并在 `_build_services()` 里注册 `ReputationService.SERVICE_ID`。
+3. 运行 bootstrap 后，在任意脚本里取服务并检查：
+
+```gdscript
+var reputation := ServiceRegistry.get_port(ReputationService.SERVICE_ID) as ReputationService
+if reputation == null:
+    push_error("ReputationService 未注册")
+    return
+reputation.add_reputation("faction.village", 5)
+```
+
+4. 连接 `reputation.reputation_changed`，确认 UI 或 log 收到新数值。
+5. 调用点多时，再加 `Game.reputation()` 门面，避免到处写字符串和强转。
+
+这是普通领域服务调用，不需要 `CommandService` 或 `GameAction`。
+
+### Standard path：从现有 pipeline 的结果回调接入
+
+1. 声望来自任务完成时，订阅任务事件，而不是写一条新的任务流程：
+
+```gdscript
+Mkit.events().subscribe("quest_completed", func(event: DomainEvent):
+    Game.reputation().add_reputation("faction.village", 25)
+)
+```
+
+2. 声望来自对话选择、商店购买或交互结果时，也在对应 effect、service callback 或事件订阅里调用 `add_reputation(...)`。
+3. `ReputationService.add_reputation()` 内部统一发节点信号和 `ReputationEvents.reputation_changed(...)`。
+4. UI、任务或成就订阅 `ReputationEvents`，不要在每个调用点手拼 payload。
+5. 验证方式：完成任务后声望增长，HUD 和事件订阅者都收到同一个变化。
+
+### Advanced path：跨系统通知只加 typed event factory
+
+1. 需要“达到 friendly 后解锁商店折扣”这类跨系统响应时，在 `ReputationEvents` 中新增常量和静态构造函数。
+2. `ReputationService` 检测到阈值跨越时发 typed event：
+
+```gdscript
+Mkit.events().emit_domain_event(ReputationEvents.rank_reached(faction_id, "friendly"))
+```
+
+3. 商店 UI、任务或成就系统订阅 `ReputationEvents.REPUTATION_RANK_REACHED`。
+4. 不需要为一个自定义服务新增 event DSL、module graph 或 action 层。
+5. 只有服务自己的行为需要跨帧、可取消或统一 effect 链时，才考虑 `GameAction`；声望数值变化不需要。
+
 ## 关键认知：服务 = 注册进 ServiceRegistry 的普通 Node
 
 mkit 没有「服务基类」魔法：一个服务就是一个 Node（要存档则 `extends Saveable`），约定三件事——

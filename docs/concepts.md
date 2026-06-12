@@ -42,11 +42,21 @@ flowchart TB
 
 ---
 
-## 二、大局观：mkit = 一条管线 + 一组服务
+## 二、大局观：mkit = 可伸缩管线 + 一组服务
 
 mkit 的核心只有一句话：
 
-> **把「意图」变成「游戏效果」，全程走同一条流水线；流水线每一步背后都有一个随取随用的服务在干活。**
+> **把「意图」变成「游戏效果」：简单需求走最短路径，复杂行为再接入命令、状态、动作、效果、事件。**
+
+常用时先按这三档判断，不要把完整图当作每次必经清单：
+
+| 路径 | 适合需求 | 推荐入口 |
+|------|----------|----------|
+| Minimal path | 已经有节点引用，只做同步查询、数值变化或事件响应 | 直接调用 component / domain service；需要 condition、trace 或 data-driven 配置时用 `EffectService.execute()` |
+| Standard path | 输入、AI、脚本把意图交给本实体状态机处理 | `EntityContract.get_command_receiver(...).receive_command(command)` |
+| Advanced path | 只知道目标 id、或行为有前摇、持续、取消、统一 effect 链 | `CommandService.dispatch()`；`GameAction` + `ActionService.start_action()` |
+
+下面这张图展示 standard / advanced path 的完整展开：
 
 ```mermaid
 flowchart LR
@@ -67,20 +77,20 @@ flowchart LR
     class IN,OUT userOwned
 ```
 
-两端是绿色——**意图从哪来、结果给谁看，都是你的代码**；中间整条管线是蓝色——**mkit 包办**。
+两端是绿色——**意图从哪来、结果给谁看，都是你的代码**；中间蓝色部分是 mkit 提供的可选协作层，按需求取用。
 
 管线每一步都由一个对应的**服务（Service）**驱动。服务由唯一 autoload `ServiceRegistry` 持有；新代码用类型化门面 `Mkit.xxx()` 获取，拿到的就是具体服务类型，无需字符串和 cast：
 
 | 管线步骤 | 驱动它的服务 | 一句话 |
 |----------|-------------|--------|
-| `GameCommand` 路由 | `CommandService`（`"commands"`） | 按目标把命令送到对的实体 |
-| `GameAction` 时序 | `ActionService`（`"actions"`） | 逐帧推进有前摇/持续的行为 |
+| `GameCommand` 路由 | `CommandService`（`"commands"`） | 调用方只知道 `target_id` 时，按目标把命令送到对的实体 |
+| `GameAction` 时序 | `ActionService`（`"actions"`） | 逐帧推进有前摇、持续时间或取消窗口的行为 |
 | `GameEffect` 执行 | `EffectService`（`"effects"`） | 顺序跑完一串效果，带 trace |
 | `DomainEvent` 广播 | `EventService`（`"events"`） | 把结果发给所有订阅者 |
 
 > 还有一批与管线协作的服务：`ContentService`（配置数据）、`CombatService`（伤害结算）、`SaveService`（存档）……完整的服务 ID 表、三层依赖关系、实体节点约定见 [architecture.md](architecture.md)。
 
-**记住这一张图，后面全是它的放大。**
+**记住这张图的边界：它是完整能力图，不是最小使用步骤。**
 
 ---
 
@@ -122,7 +132,7 @@ flowchart LR
 
 你只写了**第 1 步**（造命令）、**第 3 步的判断**（State 里调 `cast`）、**第 6 步的 effect 实现**和**第 8 步**（订阅）。其余全是 mkit。
 
-### 3.2 完整时序
+### 3.2 完整技能时序
 
 ```mermaid
 sequenceDiagram
@@ -172,15 +182,15 @@ sequenceDiagram
 | 输入 / AI → `GameCommand` | 类型化意图对象 | `CommandReceiver` | 意图与执行解耦；同实体控制器不需要绕一次服务查表 |
 | `CommandService` → 实体（可选） | 路由到 `target_id` | `CommandReceiver` | 发送方不持有目标引用、只知道 ID 时使用 |
 | `StateMachine` → 状态判断 | 是否放行 | `AbilityController` | HFSM 把「此刻能做什么」的合法性封装进状态 |
-| `cast()` → `GameAction` | 带时序的行为 | `ActionService` | 即时逻辑与有前摇/持续的行为统一成一个接口 |
-| `GameAction` 完成 → `_fire_effects` | effect 数组 | `EffectService` | **data-driven**：effects 在编辑器配置，无需写代码手动调用 |
+| `cast()` → `GameAction` | 带时序的行为 | `ActionService` | 有前摇、持续、取消的行为交给统一生命周期；即时 ability 可同帧完成 |
+| `GameAction` 完成 → `_fire_effects` | effect 数组 | `EffectService` | **data-driven**：ability effects 在编辑器配置；普通同步逻辑不必包装成 action |
 | `EffectService` → `_apply_impl` | `EffectResult` | 调用链 | 每个 effect 独立可测；condition 检查由 kernel 统一做 |
 | `GameEffect` → domain component/service | typed result / state mutation | `HealthComponent`、`QuestService` 等 | effect 只负责把语义效果落到领域对象 |
 | domain component/service → `EventService` | `DomainEvent` / typed signal payload | 所有订阅者 | 执行（扣血）与表现（飘字/音效）彻底分离 |
 
-### 3.4 即时 vs 前摇：为什么都包成 GameAction
+### 3.4 即时 vs 前摇：AbilityController 何时使用 GameAction
 
-近战平 A 是即时的，火球有 0.5s 前摇——但它们**走同一条路**。秘诀是：哪怕即时技能，`AbilityController` 也把它包成一个 `GameAction`，只是同帧 `start()` + `complete()`：
+`AbilityController` 为了让 `AbilityDefinition.effects` 只配置一次，会把 ability 的 effect 链挂到 `GameAction` 上。即时 ability 不进入 `ActionService`，只是同帧 `start()` + `complete()`：
 
 ```gdscript
 # AbilityController.cast() 内部（即时分支）
@@ -190,9 +200,9 @@ instant.start(_build_action_context(context, definition))
 instant.complete()                                 # 立刻触发 on_complete_effects
 ```
 
-有前摇时换成 `CastAction`，由 `ActionService` 逐帧 `update`，前摇结束才 `complete()`——**触发 effect 的代码一字不差**。
+有前摇时换成 `CastAction`，由 `ActionService` 逐帧 `update`，前摇结束才 `complete()`。两条 ability 路径复用同一组 `AbilityDefinition.effects`，但这不是所有同步逻辑都必须包装成 `GameAction`。
 
-> 这就是为什么 effect 不再由谁「手动调用」：`GameAction` 在 `start` / `complete` / `cancel` 三个时机各自触发 `on_start_effects` / `on_complete_effects` / `on_cancel_effects`。你只要把 effect 填进对应数组（通常来自 `AbilityDefinition.effects`）。
+> 普通同步查询或一次性数值变化，可以直接调用 component / domain service；如果需要 condition、trace、编辑器配置的 effect 链，再直接用 `EffectService.execute()` 或挂到 `GameAction` 生命周期上。
 
 ---
 
@@ -290,6 +300,8 @@ var all_abilities := content.get_all_by_type("AbilityDefinition")
 | `Saveable` | `Node` | `save_id`（空则回退到 `owner.name` / `name`） | **`SaveService` 自动收集到 `roots`，并支持 `save_scope` 场景外恢复** |
 | `EntitySaveAgent` | `Node` | `entity_id` | **`SaveService` 自动收集到 `entities`，负责聚合该实体下的组件** |
 | `SaveableComponent` | `Node` | 节点 `name`（实体内唯一） | **不作为全局 root 收集**——由所属实体的 `EntitySaveAgent` 收集到 `components` |
+
+选择规则按所有权来定：全局系统状态用 `Saveable`，实体局部状态用 `EntitySaveAgent` 聚合，跨场景但缺少稳定场景根的系统切片才注册 save scope。不要为玩家或敌人再写一个外部 `Saveable` 手动收集整棵实体树；位置、姿态、临时模式这类特殊实体状态应做成实体内的 `SaveableComponent` 或 duck participant。
 
 `Saveable` 和 `SaveableComponent` 都只需实现序列化的两个方法：
 

@@ -1,9 +1,9 @@
 class_name ActionService
 extends Node
-## 说明：`ActionService` 是 动作管线 的运行时服务，负责集中处理该领域的跨节点规则和查询。
-## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
-## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
-## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 说明：`ActionService` 是跨帧动作的运行时服务，负责推进、取消和清理正在运行的 `GameAction`。
+## 上游：通常由需要前摇、持续时间、时间缩放或取消窗口的状态、controller、Mkit 门面或其他领域服务调用。
+## 下游：会调用 `GameAction.start()` / `update()` 并转发完成或取消信号，不直接依赖具体游戏内容。
+## 使用：当 action 需要逐帧推进或统一取消时调用 `start_action()`；即时效果可以同帧 `GameAction.start()` + `complete()`，或直接执行组件/服务逻辑。
 ## 示例：`ServiceRegistry.register_service(ActionService.SERVICE_ID, ActionService.new())`
 
 ## 当 `ActionService` 发生 `action started` 事件时发出，供 UI、音频、VFX、任务或测试订阅。

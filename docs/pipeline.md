@@ -1,6 +1,14 @@
 # Pipeline 参考
 
-每条管线描述一个完整流程的调用序列——从触发点到最终输出。
+每条管线描述一个完整流程的调用序列——从触发点到最终输出。它们是排查和扩展复杂系统时的参考，不是每个功能都必须走完的默认路径。
+
+常用选择：
+
+| 路径 | 适合需求 | 推荐入口 |
+| --- | --- | --- |
+| Minimal path | 已有节点引用，只做同步变化 | 直接调用 component / domain service；需要 condition、trace 或 data-driven 配置时用 `EffectService.execute()` |
+| Standard path | 本实体输入或 AI | 直接调用目标实体的 `CommandReceiver.receive_command()` |
+| Advanced path | 只知道目标 id，或有前摇、持续、取消、统一 effect 链 | `CommandService.dispatch()`；`GameAction` + `ActionService` |
 
 > 当前实现：游戏/模块代码统一走 `Mkit.xxx()`；kernel 内部和自定义服务使用 `ServiceRegistry.get_port(XxxService.SERVICE_ID)`。
 > `ServiceRegistry` 是唯一 autoload，`GameBootstrap` 在启动时把所有内置服务注册进它。
@@ -141,7 +149,7 @@ func _on_attack_done(_action: GameAction) -> void:
 
 ### 相关文档
 
-→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)
+→ [concepts.md — 可伸缩管线](concepts.md)
 → [generated/html/classes/ActionService.html](generated/html/classes/ActionService.html)
 → [generated/html/classes/StateMachine.html](generated/html/classes/StateMachine.html)
 
@@ -217,7 +225,7 @@ func handle_command(command: GameCommand) -> bool:
 
 ### 相关文档
 
-→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)
+→ [concepts.md — 可伸缩管线](concepts.md)
 → [generated/html/classes/CommandService.html](generated/html/classes/CommandService.html)
 → [generated/html/classes/GameCommand.html](generated/html/classes/GameCommand.html)
 → [cookbook/02_player_entity.md](cookbook/02_player_entity.md)
@@ -378,7 +386,7 @@ ac.ability_failed.connect(func(id: String, reason: String) -> void:
 
 ### 相关文档
 
-→ [concepts.md — 模型 1](concepts.md#模型-1标准管线)
+→ [concepts.md — 可伸缩管线](concepts.md)
 → [generated/html/classes/AbilityController.html](generated/html/classes/AbilityController.html)
 → [generated/html/classes/AbilityDefinition.html](generated/html/classes/AbilityDefinition.html)
 → [cookbook/05_ability.md](cookbook/05_ability.md)
@@ -387,7 +395,7 @@ ac.ability_failed.connect(func(id: String, reason: String) -> void:
 
 ## P1-6：Effect Execution
 
-**触发点：** `EffectService.execute(effect, context)` 或 `execute_many(effects, context)`（通常由 `GameAction._fire_effects` 调用）
+**触发点：** `EffectService.execute(effect, context)` 或 `execute_many(effects, context)`（可由 `GameAction._fire_effects` 调用，也可在同步效果里直接调用）
 **涉及系统：** `EffectService`、`GameEffect`、`Condition`/`ConditionEvaluator`
 **输出：** `EffectResult`（success/fail + payload）
 
@@ -438,7 +446,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 ```
 
 ```gdscript
-# 手动执行（不经由 GameAction；少数情况下需要直接触发）
+# 同步执行（不经由 GameAction；需要 condition / trace / data-driven effect 时直接触发）
 var svc := Mkit.effects()
 var ctx := GameplayContext.new()
 ctx.source = player
@@ -592,7 +600,7 @@ events.subscribe(EventService.ANY_EVENT, func(event: DomainEvent) -> void:
 ### 相关文档
 
 → [generated/html/classes/EventService.html](generated/html/classes/EventService.html) · [generated/html/classes/DomainEvent.html](generated/html/classes/DomainEvent.html)
-→ [concepts.md — 模型 1：标准管线](concepts.md#模型-1标准管线时序图)（最后一跳）
+→ [concepts.md — 可伸缩管线](concepts.md)（最后一跳）
 → [debugging.md](debugging.md)（recent_events 回放）
 
 ---

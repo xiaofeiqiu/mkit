@@ -22,6 +22,53 @@
 | 监听 `RunDirector.choosing_reward` 并显示 UI | `RunDirector` 等玩家选择，选完后推进到下一房间 |
 | 可选：监听 `LootEvents.REWARD_SELECTED` 记录本局升级 | mkit 只发选择事件，不规定你的升级记录格式 |
 
+## 本篇路径
+
+### Minimal path：直接测试一个升级效果
+
+1. 先按步骤 1 创建 `res://data/effects/upgrade_attack_effect.tres`，类型为 `ApplyStatModifierEffect`。
+2. 测试脚本拿到玩家节点后构造上下文：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, player)
+```
+
+3. 直接执行效果：
+
+```gdscript
+Mkit.effects().execute(upgrade_attack_effect, ctx)
+```
+
+4. 检查玩家 `StatsComponent.get_stat_value("attack_power")` 是否增加。
+5. 这条路径用于验证单张 reward 的效果；普通同步效果不需要 `GameAction`。
+
+### Standard path：UI button 选择 reward
+
+1. 按步骤 2 创建 3 个 `RewardDefinition`，并把它们加入 `ResourceDatabase`。
+2. 复用 Recipe 08 的 `RewardSelectionUI`，它会为每个 `RewardOption` 创建按钮。
+3. 主场景连接 `RunDirector.choosing_reward`，打开 UI：
+
+```gdscript
+func _on_choosing_reward(options: Array[RewardOption]) -> void:
+    Mkit.ui().open_screen("reward_selection", {
+        "options": options,
+        "run_director": _run_director,
+    }, true)
+```
+
+4. 玩家点击按钮时，UI 直接调用 `run_director.select_reward(option)`。
+5. 验证方式：选中“剑刃强化”后攻击力增加，UI 关闭并进入下一房间。
+
+UI 选择不是实体行为，不需要 `CommandReceiver` 或 `CommandService`。
+
+### Advanced path：房间清空后等待三选一再推进
+
+1. 打开参与本局的 `RoomDefinition`，把 `reward_pool_ids` 填成 3 个升级 reward id。
+2. `RoomController` 清房后生成 reward options；`RunDirector` 不立即加载下一间，而是发 `choosing_reward(options)`。
+3. UI 用 modal screen 显示三张卡，暂停 run 推进。
+4. 玩家选择后，`select_reward(option)` 执行 `RewardDefinition.effects`；全部成功后 `RunDirector` 才加载下一间。
+5. 如果某个 reward 本身需要前摇、可取消或跨帧表现，再把那张 reward 的具体行为做成 `GameAction`；三选一选择流程本身不需要 action。
+
 ## 关键认知：RewardDefinition 与 UpgradeDefinition 不同
 
 | 类型 | 用途 | 什么时候用 |

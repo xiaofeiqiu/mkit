@@ -79,6 +79,7 @@ func from_save_data(data: Dictionary) -> void:
 			_remove_item_modifiers(item)
 	equipped.clear()
 	var slots: Dictionary = data.get("slots", {})
+	_remove_saved_slot_modifiers(slots)
 	for slot_id in slots.keys():
 		var key := str(slot_id)
 		if not allowed_slots.has(key):
@@ -109,3 +110,15 @@ func _remove_item_modifiers(item: ItemInstance) -> void:
 	var stats := EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 	if stats != null:
 		stats.remove_modifiers_from_source(item.instance_id)
+
+
+func _remove_saved_slot_modifiers(slots: Dictionary) -> void:
+	var stats := EntityContract.get_component(owner, "StatsComponent") as StatsComponent
+	if stats == null:
+		return
+	for raw in slots.values():
+		if not (raw is Dictionary):
+			continue
+		var source_id := str(raw.get("instance_id", ""))
+		if source_id != "":
+			stats.remove_modifiers_from_source(source_id)

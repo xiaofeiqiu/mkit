@@ -18,6 +18,54 @@
 | 给玩家挂 `InteractionComponent`（Area2D），按键调 `try_interact()` | 进入/离开范围自动聚焦可交互对象 |
 | 搭一个对话框 UI，`bind()` 到 `DialogueService` | 发 `node_entered` / `choices_presented` / `dialogue_ended` 信号驱动 UI |
 
+## 本篇路径
+
+### Minimal path：剧情脚本直接开对话
+
+1. 先按步骤 1 创建 `res://data/dialogue/elder_intro.tres`，并把它加入 `ResourceDatabase.resources`。
+2. 在场景里放一个 NPC 节点，例如 `Elder`，脚本或主场景能拿到 `player` 和 `elder` 两个节点。
+3. 在剧情脚本里直接启动对话：
+
+```gdscript
+func start_intro_dialogue(player: Node, elder: Node) -> void:
+    var ctx := GameplayContext.from_nodes(player, elder)
+    if not Mkit.dialogue().start("dialogue.elder_intro", ctx):
+        push_warning("dialogue.elder_intro 没有注册或无法启动")
+```
+
+4. 如果 `DialogueUI` 已经 bind 到 `DialogueService`，界面会显示 `greet` 节点文本。
+5. 这条路径适合 cutscene 或测试；没有靠近检测，也不需要 `InteractionComponent`。
+
+### Standard path：玩家按交互键
+
+1. 给玩家加 `InteractionComponent` 和碰撞形状，输入脚本里按 `interact` 时调用 `interaction_component.try_interact()`。
+2. NPC 场景按这个结构搭：
+
+```text
+Elder  (Node2D)
+└── InteractArea  (Area2D)
+    ├── CollisionShape2D
+    └── Interactable  (DialogueInteractable)
+```
+
+3. 在 `DialogueInteractable` 的 Inspector 里填 `dialogue_id = "dialogue.elder_intro"`，节点名必须是 `Interactable`。
+4. 玩家走近 NPC，`InteractionComponent` 聚焦该 interactable；按交互键后它调用 `DialogueService.start(...)`。
+5. 验证方式：走近出现提示，按键打开对话；离开范围后按键不再触发。
+
+### Advanced path：只知道 id 时先路由命令
+
+1. 确认玩家 `CommandReceiver.auto_register = true`，receiver id 是 `"player"`。
+2. 剧情系统只有玩家 id，没有玩家节点引用时，发送交互命令：
+
+```gdscript
+var command := GameCommand.create("interact", "script", "player")
+Mkit.commands().dispatch(command)
+```
+
+3. 玩家实体收到命令后，在自己的 command handler 中调用 `InteractionComponent.try_interact()`。
+4. 后续仍然走 Standard path：当前聚焦对象是 `DialogueInteractable`，它启动对话。
+5. 如果剧情脚本已经拿到 `player` 节点，直接调用 `try_interact()`，不要走 `CommandService`。
+
 ## 步骤
 
 ### 步骤 1：创建 DialogueDefinition
@@ -124,7 +172,7 @@ PlayerEntity  (EntityRoot)
 func _process(_delta: float) -> void:
     # ...（移动/攻击输入）
     if Input.is_action_just_pressed("interact"):
-        var interaction := EntityContract.get_controller(owner, "InteractionComponent") as InteractionComponent
+        var interaction := EntityContract.get_controller(self, "InteractionComponent") as InteractionComponent
         if interaction != null:
             if not interaction.try_interact():
                 # 附近没有可交互对象，或对方拒绝（conditions 不满足）

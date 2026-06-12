@@ -8,6 +8,10 @@ make demo-test
 
 或者在 Godot 中运行 `res://game/bootstrap.tscn`。
 
+## 定位
+
+`game/village_rpg_demo.tscn` 是完整 showcase，用来覆盖 combat、dialogue、quest、shop、world/run、loot、save、UI、audio 和 VFX 的组合效果。想从更小的项目模板开始，请先看 `game_template/`。自动 smoke 流程和存档 payload 校验分别在 `game/demo_auto_run_verifier.gd`、`game/demo_save_payload_verifier.gd`，不是普通玩法脚本必须复制的结构。
+
 ## 操作
 
 | 类别 | 操作 | 按键 |

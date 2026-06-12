@@ -18,6 +18,55 @@
 | 玩家按键时调 `try_interact()` | 构造 `GameplayContext`（source=玩家，target=交互物 owner）并派发 |
 | 监听 `interactable_focused/unfocused` 显示提示 | 进出范围自动发信号 |
 
+## 本篇路径
+
+### Minimal path：剧情或测试直接触发交互物
+
+1. 先按步骤 1 写好 `HealingFountainInteractable`，并按步骤 2 搭好 `HealingFountain/InteractArea/Interactable`。
+2. 测试脚本已拿到玩家和泉水 interactable 时，直接调用：
+
+```gdscript
+var interactable := $HealingFountain/InteractArea/Interactable as Interactable
+var ctx := GameplayContext.from_nodes(player, interactable.owner)
+interactable.interact(ctx)
+```
+
+3. `Interactable.interact()` 会先检查 `conditions`，通过后才进入 `_interact_impl(ctx)`。
+4. 验证方式：玩家回血，`EventService.recent_events` 出现 `fountain_used`。
+5. 这条路径适合自动触发器、测试和 cutscene 中明确指定的交互物；一次同步交互不需要 `GameAction`。
+
+### Standard path：玩家按交互键使用当前聚焦对象
+
+1. 玩家实体下加 `InteractionComponent` 和 `CollisionShape2D`，碰撞层要能碰到泉水的 `InteractArea`。
+2. 场景中的交互物必须按约定命名：`InteractArea/Interactable`，`Interactable.display_text = "饮用"`。
+3. 玩家输入脚本里写：
+
+```gdscript
+if Input.is_action_just_pressed("interact"):
+    var interaction := EntityContract.get_controller(self, "InteractionComponent") as InteractionComponent
+    if interaction != null:
+        interaction.try_interact()
+```
+
+4. HUD 订阅 `interactable_focused` / `interactable_unfocused`，显示或隐藏「按 E 饮用」。
+5. 验证方式：走近显示提示，按 E 回血；走开提示消失，按 E 无效果。
+
+这是本篇默认路径，调用方有玩家节点，不需要命令路由。
+
+### Advanced path：只有玩家 id 时才走 CommandService
+
+1. 确认玩家 receiver id 是 `"player"`，并自动注册到 `CommandService`。
+2. 剧情系统只有玩家 id 时，发送：
+
+```gdscript
+var command := GameCommand.create("interact", "script", "player")
+Mkit.commands().dispatch(command)
+```
+
+3. 玩家 command handler 收到 `"interact"` 后调用自己的 `InteractionComponent.try_interact()`。
+4. 当前聚焦对象是治疗泉时，后续完全进入 Standard path。
+5. 如果脚本已经持有玩家节点，直接调 `try_interact()`，不要经过 `CommandService`。
+
 ## 关键认知：约定两个节点名
 
 `InteractionComponent`（挂玩家，`extends Area2D`）检测到重叠 `Area2D` 时，会取对方**名为 `Interactable` 的子节点**——名字必须精确匹配。一个交互物的标准结构：
@@ -86,7 +135,7 @@ func _interact_impl(context: GameplayContext) -> bool:
 # 玩家输入脚本
 func _process(_delta: float) -> void:
     if Input.is_action_just_pressed("interact"):
-        var interaction := EntityContract.get_controller(owner, "InteractionComponent") as InteractionComponent
+        var interaction := EntityContract.get_controller(self, "InteractionComponent") as InteractionComponent
         if interaction != null and not interaction.try_interact():
             pass   # 附近没有交互物 / conditions 不满足 / 冷却中
 ```

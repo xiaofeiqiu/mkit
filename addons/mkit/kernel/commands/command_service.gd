@@ -1,9 +1,9 @@
 class_name CommandService
 extends Node
-## 说明：`CommandService` 是 命令路由 的运行时服务，负责集中处理该领域的跨节点规则和查询。
-## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
-## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
-## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 说明：`CommandService` 是可选的命令路由服务，用 `GameCommand.target_id` 找到已注册的 `CommandReceiver`。
+## 上游：通常由只知道目标实体 id 的输入、AI、剧情脚本、Mkit 门面或其他领域服务调用。
+## 下游：只负责把命令转交给目标 `CommandReceiver`，不直接依赖具体游戏内容。
+## 使用：当调用方没有目标节点引用、只能按 `target_id` 发命令时使用；已持有实体或接收器时直接调用 `CommandReceiver.receive_command()`。
 ## 示例：`ServiceRegistry.register_service(CommandService.SERVICE_ID, CommandService.new())`
 
 ## 当 `CommandService` 发生 `command dispatched` 事件时发出，供 UI、音频、VFX、任务或测试订阅。

@@ -63,7 +63,7 @@ res://addons/mkit/
 effects, events, pool, random, save, scenes, time
 ```
 
-看到上述输出说明 Bootstrap 成功运行，kernel 服务在线。若你改用 `ModuleBootstrap`，还会看到 `combat`、`dialogue`、`loot`、`progression`、`quest`、`shop`、`world`。`ui` 服务由场景中的 `UIManager` 节点自注册，所以只有游戏场景包含 UIManager 且已进入该场景后才会出现。
+看到上述输出说明 Bootstrap 成功运行，kernel 服务在线。若你改用 `ModuleBootstrap`，还会看到 `combat`、`death_loot`、`dialogue`、`loot`、`progression`、`quest`、`shop`、`world`。`ui` 服务由场景中的 `UIManager` 节点自注册，所以只有游戏场景包含 UIManager 且已进入该场景后才会出现。
 
 这一步只是安装验证，不是最终体验。下一步应该让你看到一个能移动、能交互、能触发 mkit command/effect 的可玩切片。
 
@@ -93,7 +93,7 @@ effects, events, pool, random, save, scenes, time
 
 你应该能看到：玩家移动、传送门切换场景、对话 UI、任务 HUD、伤害/VFX、敌人死亡和掉落日志。这比只打印 service ids 更接近真实项目的第一步完成体验。
 
-想从一个小起点开始改自己的项目时，优先看 `game_template/`。它只有 bootstrap、一个 starter scene、一个能移动/攻击的玩家、一个敌人和一条任务，适合作为第一份可删改代码。`game/` 下的 village RPG demo 是完整 showcase，适合对照系统能力，不建议整段复制根脚本。
+想从一个小起点开始改自己的项目时，优先看 `game_template/`。它只有 bootstrap、一个 starter scene、一个能移动/攻击的玩家、一个敌人和一条任务，适合作为第一份可删改代码。`game/` 下的 village RPG demo 是完整 showcase，适合对照系统能力，不建议整段复制根脚本；自动 smoke 和存档 payload 校验拆在 `game/demo_auto_run_verifier.gd`、`game/demo_save_payload_verifier.gd`，不是普通项目模板。
 
 | 你要改的部分 | 从这里开始 |
 |--------------|------------|

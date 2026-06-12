@@ -18,6 +18,42 @@
 | 把目标的 `event_type` 对准某个领域事件 | `QuestService` 通过 `EventService.ANY_EVENT` 订阅领域事件，自动匹配并推进目标 |
 | （可选）监听 `quest_completed` / `quest_turned_in` 做 UI | 目标集满后自动完成；`auto_complete` 时自动上交并跑 `reward_effects` |
 
+## 本篇路径
+
+### Minimal path：剧情或测试直接接任务
+
+1. 先按步骤 1 创建 `res://data/quests/cull_beasts.tres`，并加入 `ResourceDatabase.resources`。
+2. 在测试脚本里拿到 `player` 和发任务的 `npc`，构造上下文：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, npc)
+```
+
+3. 直接接任务：
+
+```gdscript
+if not Mkit.quest().accept_quest("quest.cull_beasts", ctx):
+    push_warning("接任务失败：检查 quest id、前置条件或是否已接")
+```
+
+4. 如果 `auto_complete = false` 且你要测试交付，完成目标后再调用：
+
+```gdscript
+Mkit.quest().turn_in_quest("quest.cull_beasts", ctx)
+```
+
+5. 看到 `quest_accepted` / `quest_turned_in` 事件或奖励效果执行，说明任务资源本身可用。
+
+### Standard path：任务由对话、战斗和事件推进
+
+1. 在 Recipe 09 的 `elder_intro.tres` 里新增“我来帮忙”选项，并把 `AcceptQuestEffect(quest_id="quest.cull_beasts")` 放进该选项的 `effects`。
+2. 玩家对话时点击该选项，`DialogueService` 执行 effect，`QuestService.accept_quest(...)` 创建任务状态。
+3. 敌人死亡时不要手动推进任务；`HealthComponent.die(killer)` 发出死亡事件，`QuestService` 会合成并匹配 `"enemy_killed"`。
+4. 任务 objective 的 `match_key` / `match_value` 命中后自动 +1，达到 `required_count = 3` 后自动完成。
+5. 验证方式：接任务后杀 3 只敌人，看到 `quest_completed`，并且 `quest_reward_atk.tres` 的奖励效果执行。
+
+本篇不需要 `CommandService` 或 `GameAction`。只有当某个任务目标要求玩家执行“攻击、互动、施法”这类实体行为时，才回到对应 recipe 的 command / action path。
+
 ## 它如何"自动"推进
 
 `QuestService` 在 `_ready()` 时订阅全部领域事件，并额外订阅 `entity_died`。敌人死亡时，它会合成一个 `"enemy_killed"` 领域事件并发回 `EventService`，payload 携带死者的 `faction` / `tags` / `definition_id`。每个活跃任务的目标若 `event_type` 与之匹配、`match_key`/`match_value` 也对得上，就自动 +1。**所以"杀 3 只敌人"这种目标完全不需要你手动调用推进接口。**

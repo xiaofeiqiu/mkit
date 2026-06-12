@@ -17,6 +17,57 @@
 | 搭建 `FeedbackSystem`、`DamageNumberSystem`、`VFXSpawner` 节点并配置路径 / 资源表 | `EventService` 发出伤害与死亡事件，`FeedbackSystem` 将事件转发给表现子系统 |
 | 提供浮动数字、命中特效、死亡特效和音效资源 | `DamageNumberSystem` / `VFXSpawner` / `AudioService` 负责实例化、播放和自动清理 |
 
+## 本篇路径
+
+### Minimal path：即时表现直接播动画
+
+1. 在玩家或敌人实体下创建 `Presentation/AnimationPlayer`，并在 `AnimationPlayer` 里建好 `"idle"` 和 `"move"` 动画。
+2. 在临时脚本或 state 里取动画播放器：
+
+```gdscript
+var anim := EntityContract.get_contract_node(entity, "Presentation", "AnimationPlayer") as AnimationPlayer
+```
+
+3. 即时表现直接播放：
+
+```gdscript
+if anim != null and anim.has_animation("idle"):
+    anim.play("idle")
+```
+
+4. 运行后实体能播放 idle / move，即说明表现接缝正确。
+5. 这条路径只是表现更新，不发命令，也不需要 `GameAction`。
+
+### Standard path：输入 / AI 进入状态后由状态播动画
+
+1. 输入或 AI 仍然按 Recipe 02 / 06 发 `move`、`stop_move`、`attack` 命令。
+2. 在 `PlayerMoveState.enter()` 里播放 `"move"`：
+
+```gdscript
+var anim := EntityContract.get_contract_node(owner_entity, "Presentation", "AnimationPlayer") as AnimationPlayer
+if anim != null and anim.has_animation("move"):
+    anim.play("move")
+```
+
+3. 在 `PlayerIdleState.enter()` 里播放 `"idle"`。
+4. 运行后按 WASD，状态切换和动画切换应同步出现。
+5. 调用方已持有实体时不要绕到 `CommandService`；只知道 `target_id` 的外部脚本才需要命令路由。
+
+### Advanced path：攻击 / 施法表现跟随 GameAction
+
+1. 攻击动画要和 hitbox active 窗口对齐时，继续使用 Recipe 04 的 `TimedAttackAction`。
+2. 在 action `_on_start(context)` 或自定义 action 开始处播放 `"attack"`：
+
+```gdscript
+var anim := EntityContract.get_contract_node(context.source, "Presentation", "AnimationPlayer") as AnimationPlayer
+if anim != null and anim.has_animation("attack"):
+    anim.play("attack")
+```
+
+3. 让 action 控制 hitbox startup / active / recovery，动画长度按这三段时间制作。
+4. 在 action complete / cancel 时播放 `"idle"` 或交给 state 切回 idle。
+5. 验证方式：按攻击键时动画开始，命中帧和 hitbox active 窗口一致，被取消时不会继续完成表现。
+
 ## 两条通道
 
 ```mermaid

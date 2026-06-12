@@ -17,6 +17,46 @@
 | 给可被施加状态的实体挂 `StatusEffectController` | `apply_status()` 按 `stack_rule` 叠加；`stat_modifiers` 自动挂到 `StatsComponent` |
 | 在技能 effect 链挂 `ApplyStatusEffect`（或用伤害的 `on_hit_statuses`）| 把 effect 派发到目标的 `StatusEffectController` |
 
+## 本篇路径
+
+### Minimal path：脚本直接给目标上状态
+
+1. 先按步骤 1 创建 `status.poison`，并把 `poison.tres` 加入 `ResourceDatabase`。
+2. 在会中毒的实体 `Controllers/` 下加 `StatusEffectController`。
+3. 测试脚本已拿到 `caster` 和 `target` 时，直接调用：
+
+```gdscript
+var status_ctrl := EntityContract.get_controller(target, "StatusEffectController") as StatusEffectController
+if status_ctrl != null:
+    status_ctrl.apply_status("status.poison", caster)
+```
+
+4. 运行后观察 `status_ctrl.has_status("status.poison")` 为 true，目标每秒掉血。
+5. 这条路径是同步施加状态；不要为了普通 `apply_status()` 包 `GameAction`。
+
+### Standard path：施法命令沿用 Recipe 05
+
+1. 打开 Recipe 05 的 `fireball.tres`，在 `effects` 数组末尾加入 `ApplyStatusEffect`，`status_id = "status.poison"`。
+2. 玩家输入仍然只发送 `cast_ability` 命令：
+
+```gdscript
+_send_command(BuiltinCommands.CAST_ABILITY, {"ability_id": "fireball"})
+```
+
+3. state 调 `AbilityController.cast("fireball", ctx)`；能力控制器检查冷却、费用和条件。
+4. 技能执行到 effects 时，`ApplyStatusEffect` 从 `ctx.target` 找 `StatusEffectController` 并上毒。
+5. 验证方式：火球命中后目标既受到直伤，又出现 `status.poison`。
+
+这里仍然不需要 `CommandService`：调用方已经拿到玩家实体，只需把命令交给自己的 `CommandReceiver`。
+
+### Advanced path：状态跟随 ability / action 生命周期
+
+1. 施法有读条时，把 `fireball.tres.cast_time` 改成 `0.8`；状态会在 `CastAction` 完成时才跟随 effects 触发。
+2. 普通攻击要附带中毒时，把 `ApplyStatusEffect` 放进 `TimedAttackAction.on_complete_effects` 或伤害 `on_hit_statuses`。
+3. 如果动作被取消，complete effects 不执行，状态也不会施加。
+4. 如果 effect 自身还有 `conditions`，`EffectService` 会在施加状态前先检查。
+5. 验证方式：读条期间打断施法，目标不应中毒；完整施法完成后才中毒。
+
 ## 步骤
 
 ### 步骤 1：创建中毒（DOT）StatusEffectDefinition

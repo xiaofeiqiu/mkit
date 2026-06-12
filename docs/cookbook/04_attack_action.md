@@ -19,6 +19,55 @@
 | 配置 `TimedAttackAction` 的时序参数 | startup → active（开 Hitbox）→ recovery → complete，自动 `_fire_effects` |
 | 声明 `on_complete_effects`（含 `DealDamageEffect`）| 每帧 update，钩子后自动执行 effect 链 |
 
+## 本篇路径
+
+### Minimal path：没有攻击时序，只触发一次伤害
+
+1. 按 Recipe 03 创建 `DealDamageEffect`，例如 `res://data/effects/player_melee_hit.tres`。
+2. 在测试脚本里拿到攻击者 `player` 和目标 `enemy`。
+3. 直接执行一次伤害：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, enemy)
+Mkit.effects().execute(melee_damage_effect, ctx)
+```
+
+4. 目标 HP 减少即验证通过。
+5. 这条路径只适合陷阱、环境伤害或调试按钮；没有 startup / active / recovery，也不会启用 hitbox。
+
+### Standard path：玩家按攻击键进入 Attack 状态
+
+1. 在 Recipe 02 的 `player_input.gd` 里增加攻击键判断：
+
+```gdscript
+if Input.is_action_just_pressed("attack"):
+    _send_command(BuiltinCommands.ATTACK)
+```
+
+2. 在 `PlayerIdleState.handle_command()` 和 `PlayerMoveState.handle_command()` 里处理 `BuiltinCommands.ATTACK`：
+
+```gdscript
+if command.command_type == BuiltinCommands.ATTACK:
+    return request_transition("Root/Attack")
+```
+
+3. 在 `StateMachine/Root/` 下新增 `Attack` state，脚本使用步骤 2 的 `PlayerAttackState`。
+4. 运行后按攻击键，状态应从 `Idle` / `Move` 切到 `Attack`。
+
+### Advanced path：Attack 状态启动跨帧 action
+
+1. 在 `PlayerAttackState.enter()` 里创建 `TimedAttackAction.new()`，设置 `startup_duration = 0.12`、`active_duration = 0.10`、`recovery_duration = 0.25`。
+2. 把 `hitbox_path` 设成 `NodePath("Components/HitboxComponent")`，并把 `DealDamageEffect` 放进 `on_complete_effects`。
+3. 用玩家作为 source 创建上下文：
+
+```gdscript
+var ctx := ActionContext.from_nodes(owner_entity, owner_entity)
+_current_action = Mkit.actions().start_action(attack, ctx)
+```
+
+4. 连接 `completed` / `cancelled` 信号，结束后 `request_transition("Root/Idle")`。
+5. 运行后按攻击键：startup 期间 hitbox 关闭，active 期间 hitbox 打开，recovery 后自动回 Idle。
+
 ## 步骤
 
 ### 步骤 1：添加 HitboxComponent 到玩家

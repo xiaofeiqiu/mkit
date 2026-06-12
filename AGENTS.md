@@ -145,7 +145,7 @@ The Godot binary is controlled by `GODOT`; the Makefile defaults to
 `/Applications/Godot.app/Contents/MacOS/Godot`.
 
 ```bash
-make check           # full local gate: layering, docs-check, and every test gate
+make check           # full local gate: layering, contract-check, docs-check, and every test gate
 make test            # run all test gates: unit tests, integration tests, and demo auto-run
 make run             # start the current game from res://game/bootstrap.tscn
 make editor          # open this project in the Godot editor
@@ -161,8 +161,9 @@ make docs-server     # serve docs/ locally on DOCS_PORT, default 8060
 make docs-xml        # regenerate Godot doctool XML for res://addons/mkit
 make docs-html       # rebuild static API HTML from generated doctool XML
 make docs-api        # regenerate both doctool XML and static API HTML
-make docs-check      # check doc comments, generated API freshness, links, nav, cookbook sections, and stale demo paths
+make docs-check      # check doc comments, generated API freshness, links, nav, event payload docs, cookbook sections, and stale demo paths
 make layering        # enforce kernel/modules/game dependency boundaries
+make contract-check  # check service ids, entity scene contracts, and save ids/scopes
 make cookbook-fields # audit cookbook field-documentation coverage
 ```
 
@@ -202,9 +203,9 @@ and run `make docs-api`.
 
 Run `make docs-check` after changing public docs or public addon APIs. The check
 first verifies doc comment coverage and generated API freshness, then validates
-Markdown links, `docs/index.html` navigation, required cookbook ownership
-sections headed `## 你负责 / mkit 负责`, and rejects user-facing docs that expose
-old `game/demo` paths.
+Markdown links, `docs/index.html` navigation, public event payload docs, required
+cookbook ownership sections headed `## 你负责 / mkit 负责`, and rejects
+user-facing docs that expose old `game/demo` paths.
 
 Keep conceptual docs in Chinese when the surrounding file is Chinese. Keep code,
 identifiers, resource paths, commands, and class names in English.

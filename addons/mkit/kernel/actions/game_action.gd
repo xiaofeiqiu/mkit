@@ -1,9 +1,9 @@
 class_name GameAction
 extends RefCounted
-## 说明：`GameAction` 是 动作管线 的动作基类，负责统一 action 的启动、更新、取消、完成和附带效果触发。
-## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
-## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
-## 使用：当项目需要在动作管线中复用这段契约或状态时使用它。
+## 说明：`GameAction` 是动作管线的行为基类，负责统一启动、更新、取消、完成和附带效果触发。
+## 上游：通常由需要前摇、持续时间、取消窗口或统一 effect 链的 controller、状态或内容资源创建。
+## 下游：会通过 `EffectService` 触发配置好的 `GameEffect`，不直接依赖具体游戏内容。
+## 使用：当行为需要跨帧生命周期、可取消流程或数据驱动效果链时使用；普通同步查询或数值变化可直接调用组件、领域服务或 `EffectService`。
 ## 示例：`var instance := GameAction.new()`
 
 ## 当 `GameAction` 发生 `completed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。

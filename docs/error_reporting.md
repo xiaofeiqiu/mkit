@@ -42,4 +42,4 @@ save_completed.connect(func(path: String):
 ## 当前收口建议
 
 - 新增降级提示统一使用模块前缀，便于 `make docs-check` 与回归日志检索。
-- runtime port 缺失、实体契约缺失、save scope 缺失这三类问题要保留可搜索上下文，例如 service id、entity name、scope name。
+- service lookup 缺失、实体契约缺失、save scope 缺失这三类问题要保留可搜索上下文，例如 service id、entity name、scope name。

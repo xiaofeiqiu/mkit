@@ -9,8 +9,8 @@ MODULE_LOG ?= /tmp/mkit_godot_modules.log
 INT_LOG ?= /tmp/mkit_godot_int.log
 DEMO_LOG ?= /tmp/mkit_demo_auto.log
 
-# Full local gate: dependency layering, docs validation, and every test gate.
-check: layering docs-check test
+# Full local gate: dependency layering, runtime contract validation, docs validation, and every test gate.
+check: layering contract-check docs-check test
 
 # Run all test gates: unit tests, integration tests, and demo auto-run smoke.
 test: ut int demo-test
@@ -87,9 +87,13 @@ docs-check:
 layering:
 	python3 tools/check_layering.py
 
+# Check stable runtime ids and entity scene contracts.
+contract-check:
+	python3 tools/check_runtime_contracts.py
+
 # Audit cookbook field-documentation coverage.
 cookbook-fields:
 	sh tools/audit_cookbook_fields.sh
 
 .NOTPARALLEL:
-.PHONY: check test run editor clean clean-cache reimport ut ut-kernel ut-modules int demo-test docs-server docs-xml docs-html docs-api docs-check layering cookbook-fields
+.PHONY: check test run editor clean clean-cache reimport ut ut-kernel ut-modules int demo-test docs-server docs-xml docs-html docs-api docs-check layering contract-check cookbook-fields

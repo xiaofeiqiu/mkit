@@ -19,6 +19,44 @@
 | 实现敌人 Attack 状态（类似玩家，使用 `TimedAttackAction`）| — |
 | 可选：继承 `Brain` 实现自定义决策逻辑 | `think()` 每帧由 `Brain._process` 按间隔调用 |
 
+## 本篇路径
+
+### Minimal path：AI 只读取世界和组件
+
+1. 先按步骤 1 搭好敌人实体，并把玩家加入 `"player"` group。
+2. 在 `SimpleAIEnemyBrain.target_group` 填 `"player"`，运行后 brain 会找到玩家节点。
+3. 如果你只是写感知或调试脚本，直接读距离和组件：
+
+```gdscript
+var target := get_tree().get_first_node_in_group("player") as Node2D
+var distance := (owner as Node2D).global_position.distance_to(target.global_position)
+var health := EntityContract.get_component(owner, "HealthComponent") as HealthComponent
+```
+
+4. 只显示警戒、巡逻或 UI 提示时，到这里就够了，不发 `GameCommand`。
+
+### Standard path：Brain 给自己发命令
+
+1. 给敌人 `CommandReceiver` 和 `StateMachine` 配好 Idle / Move / Attack state。
+2. `SimpleAIEnemyBrain` 每 `think_interval` 根据距离选择命令：远离时 `STOP_MOVE`，追击时 `MOVE`，进入攻击距离时 `ATTACK`。
+3. 命令的 source 和 target 都是敌人自己的 id；brain 直接调用敌人自己的 receiver。
+4. 运行验证：玩家走进 `detection_range` 后敌人移动，进入 `attack_range` 后敌人停止追击并切到 Attack。
+
+### Advanced path：敌人 Attack 状态启动 `TimedAttackAction`
+
+1. 在敌人 `Components/` 下加 `HitboxComponent`，并把 `target_factions` 设为 `["player"]`。
+2. 在 `EnemyAttackState.enter()` 里创建 `TimedAttackAction`，设置 startup / active / recovery 和 hitbox path。
+3. 找到玩家节点后构造上下文：
+
+```gdscript
+var target := get_tree().get_first_node_in_group("player")
+var ctx := ActionContext.from_nodes(owner_entity, target)
+Mkit.actions().start_action(attack, ctx)
+```
+
+4. 连接 action 完成信号，完成后回到 Idle 或 Move。
+5. 验证方式：敌人进入攻击距离后，active 窗口内玩家 `HealthComponent` 扣血。
+
 ## 步骤
 
 ### 步骤 1：构建敌人场景树

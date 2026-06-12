@@ -19,6 +19,43 @@
 | 用 `EffectService.execute(effect, ctx)` 触发伤害 | `DamageRequest -> DamageResult`、暴击、防御、闪避、广播 `damage_applied` 事件 |
 | 订阅 `EventService.entity_died` 信号，处理死亡逻辑 | 广播 `entity_died` 事件 |
 
+## 本篇路径
+
+### Minimal path：已有目标节点，直接改血或执行 effect
+
+1. 先按步骤 1 在 `PlayerEntity/Components/` 下加 `StatsComponent` 和 `HealthComponent`，并把 `max_hp` / `current_hp` 设成 `100`。
+2. 做治疗、脚本扣血或调试时，写一个临时函数直接取组件：
+
+```gdscript
+func heal_player(player: Node) -> void:
+    var health := EntityContract.get_component(player, "HealthComponent") as HealthComponent
+    if health != null:
+        health.heal(25.0, player)
+```
+
+3. 要走伤害结算时，把 `res://data/effects/test_damage_10.tres` 拖到脚本的 `damage_effect` 导出字段。
+4. 按键触发时执行：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, player)
+Mkit.effects().execute(damage_effect, ctx)
+```
+
+5. 看到玩家 HP 减少、`damage_applied` 事件出现，就完成了本篇 minimal path。
+
+### Standard path：伤害来自输入或 AI 命令
+
+1. 不要在输入脚本里直接扣目标 HP；输入脚本只发送 `attack` 或 `cast_ability` 命令给玩家自己的 `CommandReceiver`。
+2. 在 `Idle` / `Move` state 的 `handle_command()` 里判断是否允许攻击。
+3. 允许时，临时项目可以直接执行上面的 `DealDamageEffect`；正式攻击时继续到 Recipe 04，把伤害放到攻击 action / hitbox 命中后触发。
+4. 验证方式：按攻击键时 state 日志出现，HP 变化发生在 state 或后续 action 中，而不是输入脚本中。
+
+### Advanced path：本篇不启动 action
+
+1. 如果你只是在测试数值、治疗、陷阱伤害或脚本事件，停在 Minimal path。
+2. 如果攻击需要前摇、命中窗口、取消或恢复时间，不要在本篇临时拼 `_process()` 计时器。
+3. 继续到 [Recipe 04](04_attack_action.md)，在那里新建 `Attack` state 和 `TimedAttackAction`，由 `ActionService` 每帧推进。
+
 ## 步骤
 
 ### 步骤 1：在玩家场景树中添加组件

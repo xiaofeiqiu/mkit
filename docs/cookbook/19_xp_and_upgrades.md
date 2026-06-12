@@ -20,6 +20,64 @@
 | 创建 `UpgradeDefinition` (.tres)：花费 / 前置 / 效果 | `can_unlock()` 校验等级上限、前置、货币；`unlock_or_level_up()` 扣钱、跑 `effects`、记录解锁 |
 | UI 调 `get_definition()` / `state.get_upgrade_level()` 渲染 | 升级状态随 `ProgressionService`（`Saveable`）自动存档 |
 
+## 本篇路径
+
+### Minimal path：加 XP 和购买升级直接调组件 / 服务
+
+1. 先按步骤 3 创建 `UpgradeDefinition("upgrade.attack_up")`，并加入 `ResourceDatabase`。
+2. 给玩家一些技能点：
+
+```gdscript
+Mkit.progression().add_currency("skill_point", 3)
+```
+
+3. 已经拿到玩家节点时，构造升级效果上下文：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, player)
+```
+
+4. 购买前检查，点击确认后执行：
+
+```gdscript
+var progression := Mkit.progression()
+if progression.can_unlock("upgrade.attack_up"):
+    progression.unlock_or_level_up("upgrade.attack_up", ctx)
+```
+
+5. 验证方式：技能点减少，`upgrade.attack_up` 等级 +1，玩家 `attack_power` 增加。
+
+这是同步成长数据更新，不需要命令或 action。
+
+### Standard path：升级 UI 走 UIManager
+
+1. 按 Recipe 18 在 `UIManager.screen_scene_map` 注册 `"upgrades": "res://game/ui/upgrades_panel.tscn"`。
+2. 玩家按升级键时打开：
+
+```gdscript
+Mkit.ui().open_screen("upgrades", {"player": player}, true)
+```
+
+3. `UpgradesPanel.setup(data)` 里读取 `Mkit.progression()`，用 `get_definition()` 和 `state.get_upgrade_level()` 渲染按钮。
+4. 每个按钮的 `disabled` 绑定 `not progression.can_unlock(upgrade_id)`。
+5. 按钮点击后调用 Minimal path 的 `unlock_or_level_up(upgrade_id, ctx)`，再刷新面板。
+
+UI 按钮不是实体行为；不要把普通升级购买发给 `CommandReceiver`。
+
+### Advanced path：升级效果用 GameEffect，不用 GameAction
+
+1. 需要数据驱动升级时，把 `ApplyStatModifierEffect`、`GrantItemEffect` 等资源放进 `UpgradeDefinition.effects`。
+2. `unlock_or_level_up()` 成功扣费并升级后，会把这些 effects 交给 `EffectService.execute_many()`。
+3. effects 用传入的 `GameplayContext` 找 source / target，所以 UI 点击时必须传玩家：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, player)
+progression.unlock_or_level_up("upgrade.attack_up", ctx)
+```
+
+4. 如果 effect 失败，购买应返回失败并可在 UI 上显示错误。
+5. 除非购买升级本身需要读条、可取消或跨帧表现，否则不要把升级购买包装成 `GameAction`。
+
 ## 关键认知：两套并行的成长轴
 
 - **XP 等级**（`ExperienceComponent`，挂实体）：被动累积，杀敌得 XP，到阈值自动升。每个实体可以各有一个（玩家、宠物）。

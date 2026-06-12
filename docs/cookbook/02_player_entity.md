@@ -20,6 +20,93 @@
 | 挂 `CommandReceiver`，按需设置 `receiver_id` | 接收命令并交给 `StateMachine`；按 id 路由时可自动注册到 `CommandService` |
 | 发出 `GameCommand` → `CommandReceiver.receive_command` | 将命令交给同实体状态机入口 |
 
+## 本篇路径
+
+### Minimal path：只读取实体契约
+
+1. 先按步骤 1 把玩家场景搭成固定结构：根节点 `PlayerEntity`，子节点包含 `EntityIdentity`、`StateMachine`、`CommandReceiver`、`Components`、`Controllers`、`Presentation`。
+2. 在主场景里把玩家节点加入 `"player"` group，或把玩家拖到脚本导出的 `player_path`。
+3. 新建一个临时检查脚本 `res://game/debug/player_contract_probe.gd`，挂到主场景：
+
+```gdscript
+extends Node
+
+@export var player_path: NodePath
+
+func _ready() -> void:
+    var player := get_node(player_path)
+    var identity := EntityContract.get_identity(player)
+    var sm := EntityContract.get_state_machine(player)
+    print("player id=", identity.entity_id if identity != null else "<missing>")
+    print("state machine ok=", sm != null)
+```
+
+4. 运行后如果打印 `player id=player` 且 `state machine ok=true`，说明实体契约可读。
+5. 这条路径只做读取和验证；不移动玩家、不创建 `GameCommand`、不进入 `CommandReceiver`。
+
+### Standard path：本实体输入发给自己的 `CommandReceiver`
+
+1. 按步骤 2 / 3 写好 `Idle` 和 `Move` state，并把 `StateMachine.initial_state_path` 设成 `"Root/Idle"`。
+2. 新建 `res://game/player/player_input.gd`，挂到 `PlayerEntity` 根节点，`_ready()` 里缓存自己的 receiver 和 identity：
+
+```gdscript
+extends Node
+
+var _receiver: CommandReceiver
+var _entity_id: String = "player"
+
+func _ready() -> void:
+    _receiver = EntityContract.get_command_receiver(self)
+    var identity := EntityContract.get_identity(self)
+    if identity != null:
+        _entity_id = identity.entity_id
+```
+
+3. 在同一个脚本里读取 WASD，方向非零时发 `move`，方向归零时发 `stop_move`：
+
+```gdscript
+func _process(_delta: float) -> void:
+    var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+    if direction != Vector2.ZERO:
+        _send_command(BuiltinCommands.MOVE, {"direction": direction.normalized()})
+    else:
+        _send_command(BuiltinCommands.STOP_MOVE)
+
+func _send_command(command_type: String, payload: Dictionary = {}) -> void:
+    if _receiver == null:
+        return
+    var command := GameCommand.create(command_type, _entity_id, _entity_id, payload)
+    _receiver.receive_command(command)
+```
+
+4. 运行场景，按 WASD 应进入 `Move` state 并移动；松开后进入 `Idle` state。
+5. 因为输入脚本已经挂在玩家身上，直接调自己的 `CommandReceiver`，不要经过 `CommandService`。
+
+### Advanced path：只有目标 id 时才经过 `CommandService`
+
+1. 先确认 `PlayerEntity/CommandReceiver.auto_register = true`，并且 `receiver_id` 是 `"player"` 或能从 `EntityIdentity.entity_id` 自动读到 `"player"`。
+2. 剧情脚本、调试台或远程系统没有玩家节点，只知道目标 id 时，创建命令：
+
+```gdscript
+var command := GameCommand.create(
+    BuiltinCommands.MOVE,
+    "script",
+    "player",
+    {"direction": Vector2.RIGHT}
+)
+```
+
+3. 调用命令服务路由：
+
+```gdscript
+var commands := Mkit.commands()
+if commands != null:
+    commands.dispatch(command)
+```
+
+4. 如果玩家开始向右移动，说明 `CommandService` 找到了注册的 `CommandReceiver`。
+5. 如果脚本已经能拿到 `PlayerEntity` 节点，回到 Standard path 直接调用 receiver；`CommandService` 只解决“只知道 `target_id`”的问题。
+
 ## 步骤
 
 ### 步骤 1：构建玩家实体场景树

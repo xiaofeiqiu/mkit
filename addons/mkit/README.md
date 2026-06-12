@@ -35,6 +35,11 @@ The current implementation has landed the large architecture cleanup around:
 is no runtime module graph loader or module manifest layer in the current
 implementation.
 
+Mkit intentionally keeps the current runtime boundary small. The addon does not
+provide a second service-port container, an event DSL/catalog compiler, a
+generic save migration framework, or an ECS/component registry that replaces the
+`EntityRoot` / `EntityContract` scene contract.
+
 ## Layout
 
 ```text

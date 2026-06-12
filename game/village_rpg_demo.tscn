@@ -11,7 +11,6 @@
 [ext_resource type="Script" uid="uid://ticj2gby3di0" path="res://game/ui/damage_number_system.gd" id="11_damage_numbers"]
 [ext_resource type="Script" uid="uid://4q7tl2ksc527" path="res://game/ui/vfx_spawner.gd" id="12_vfx"]
 [ext_resource type="Script" uid="uid://c0ubv5dhkqofk" path="res://addons/mkit/kernel/debug/debug_overlay.gd" id="13_debug"]
-[ext_resource type="Script" uid="uid://g0xrotivu2ky" path="res://game/player_saveable.gd" id="14_player_saveable"]
 [ext_resource type="Script" path="res://game/ui/demo_hud_skin.gd" id="15_hud_skin"]
 
 [node name="VillageRpgDemo" type="Node2D" unique_id=2133037375]
@@ -32,11 +31,6 @@ first_floor_room_pool = Array[String](["room.demo.trial_01", "room.demo.trial_02
 
 [node name="Player" parent="." unique_id=176143253 instance=ExtResource("2_player")]
 position = Vector2(160, 260)
-
-[node name="PlayerSaveable" type="Node" parent="." unique_id=589456787]
-script = ExtResource("14_player_saveable")
-target_path = NodePath("../Player")
-save_id = "demo_player"
 
 [node name="FeedbackSystem" type="Node" parent="." unique_id=904721405]
 script = ExtResource("10_feedback")

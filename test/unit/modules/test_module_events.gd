@@ -10,13 +10,18 @@ func test_tc_me_01_room_cleared_records_source() -> void:
 
 
 func test_tc_me_02_entity_died_carries_id_ref_and_identity() -> void:
-	var node := Node.new()
+	var node := _make_entity("enemy_01", "entity.enemy", "enemy", ["beast"])
 	add_child_autofree(node)
 	var de := CombatEvents.entity_died("enemy_01", node)
 	assert_eq(de.event_type, CombatEvents.ENTITY_DIED)
 	assert_eq(de.source_id, "enemy_01")
 	assert_eq(de.payload.get("entity_id"), "enemy_01")
 	assert_eq(de.payload.get("entity_ref"), node)
+	assert_eq(de.payload.get("definition_id"), "entity.enemy")
+	assert_eq(de.payload.get("faction"), "enemy")
+	assert_eq(de.payload.get("tags"), ["beast"])
+	assert_eq(de.payload.get("killer_id"), "")
+	assert_null(de.payload.get("killer_ref"))
 
 
 func test_tc_me_03_inventory_changed_payload() -> void:
@@ -47,6 +52,34 @@ func test_tc_me_06_reward_selected_payload() -> void:
 	assert_eq(de.event_type, LootEvents.REWARD_SELECTED)
 	assert_eq(de.source_id, "chest_01")
 	assert_eq(de.payload.get("reward_id"), "hp_up")
+
+
+func test_tc_me_14_entity_died_carries_killer_identity() -> void:
+	var enemy := _make_entity("enemy_01", "entity.enemy", "enemy", ["beast"])
+	var player := _make_entity("player_01", "entity.player", "player", ["hero"])
+	add_child_autofree(enemy)
+	add_child_autofree(player)
+	var de := CombatEvents.entity_died("enemy_01", enemy, player)
+	assert_eq(de.payload.get("definition_id"), "entity.enemy")
+	assert_eq(de.payload.get("faction"), "enemy")
+	assert_eq(de.payload.get("tags"), ["beast"])
+	assert_eq(de.payload.get("killer_id"), "player_01")
+	assert_eq(de.payload.get("killer_ref"), player)
+	assert_eq(de.payload.get("killer_definition_id"), "entity.player")
+	assert_eq(de.payload.get("killer_faction"), "player")
+	assert_eq(de.payload.get("killer_tags"), ["hero"])
+
+
+func test_tc_me_15_loot_dropped_payload() -> void:
+	var drop := LootDropResult.new()
+	drop.entity_id = "enemy_01"
+	drop.killer_id = "player_01"
+	drop.rule_id = "death_loot.enemy"
+	var de := LootEvents.loot_dropped(drop)
+	assert_eq(de.event_type, LootEvents.LOOT_DROPPED)
+	assert_eq(de.source_id, "enemy_01")
+	assert_eq(de.target_id, "player_01")
+	assert_eq(de.payload.get("drop"), drop)
 
 
 func test_tc_me_07_damage_applied_carries_result() -> void:
@@ -101,3 +134,18 @@ func test_tc_me_13_shop_events_carry_quantity() -> void:
 	var sold := ShopEvents.item_sold("shop.village", "item.pelt", 3)
 	assert_eq(sold.event_type, ShopEvents.ITEM_SOLD)
 	assert_eq(sold.payload.get("quantity"), 3)
+
+
+func _make_entity(
+	entity_id: String, definition_id: String, faction: String, tags: Array[String]
+) -> EntityRoot:
+	var entity := EntityRoot.new()
+	entity.name = entity_id
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = entity_id
+	identity.definition_id = definition_id
+	identity.faction = faction
+	identity.tags = tags
+	entity.add_child(identity)
+	return entity

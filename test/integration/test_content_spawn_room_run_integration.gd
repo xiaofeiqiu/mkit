@@ -177,17 +177,23 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	assert_eq(room.active_enemies.size(), 1)
 	assert_eq(room.runtime.active_enemy_ids.size(), 1)
 
-	var loot := LootService.new()
-	var loot_context := GameplayContext.new().with_source(enemy)
-	var loot_result := loot.roll_table(LOOT_TABLE_ID, loot_context)
-	assert_eq(loot_result.item_instances.size(), 1)
-	assert_eq(loot_result.item_instances[0].definition_id, LOOT_ITEM_ID)
-	assert_eq(loot_result.item_instances[0].quantity, 3)
-	assert_false(loot_result.item_instances[0].definition_id == FILTERED_LOOT_ITEM_ID)
+	var death_loot := ServiceRegistry.get_port("death_loot") as DeathLootService
+	assert_not_null(death_loot)
 
 	watch_signals(room)
 	var enemy_id := room.runtime.active_enemy_ids[0]
 	events.emit_domain_event(CombatEvents.entity_died(enemy_id, enemy))
+
+	var evt_loot_dropped_2 := DomainEventAsserts.last_event(events, LootEvents.LOOT_DROPPED)
+	assert_not_null(evt_loot_dropped_2)
+	var drop := evt_loot_dropped_2.payload.get("drop") as LootDropResult
+	assert_not_null(drop)
+	assert_eq(drop.rule_id, "death_loot.int.enemy")
+	assert_eq(drop.loot_table_id, LOOT_TABLE_ID)
+	assert_eq(drop.roll_result.item_instances.size(), 1)
+	assert_eq(drop.roll_result.item_instances[0].definition_id, LOOT_ITEM_ID)
+	assert_eq(drop.roll_result.item_instances[0].quantity, 3)
+	assert_false(drop.roll_result.item_instances[0].definition_id == FILTERED_LOOT_ITEM_ID)
 
 	assert_true(room.runtime.cleared)
 	assert_eq(room.active_enemies.size(), 0)
@@ -283,6 +289,7 @@ func _make_content_database() -> ResourceDatabase:
 		_make_entity_definition(),
 		_make_room_definition(),
 		_make_loot_table(),
+		_make_death_loot_rule(),
 		_make_reward(REWARD_GOOD_ID, true),
 		_make_reward(REWARD_FILTERED_ID, false)
 	]
@@ -315,7 +322,6 @@ func _make_entity_definition() -> EntityDefinition:
 	definition.tags = ["int_enemy"]
 	definition.base_stats = {"max_hp": 44.0, "attack_power": 12.0}
 	definition.starting_ability_ids = [ENEMY_ABILITY_ID]
-	definition.loot_table_id = LOOT_TABLE_ID
 	return definition
 
 
@@ -337,6 +343,14 @@ func _make_loot_table() -> LootTableDefinition:
 	table.allow_empty = false
 	table.entries = [filtered, valid]
 	return table
+
+
+func _make_death_loot_rule() -> DeathLootRuleDefinition:
+	var rule := DeathLootRuleDefinition.new()
+	rule.rule_id = "death_loot.int.enemy"
+	rule.entity_definition_ids = [ENEMY_DEF_ID]
+	rule.loot_table_ids = [LOOT_TABLE_ID]
+	return rule
 
 
 func _make_loot_entry(

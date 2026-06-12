@@ -350,7 +350,7 @@ rule.loot_table_ids = ["loot.beast_materials"]
 验收：
 
 - `rg "loot_table_id" addons/mkit/modules/entity docs/cookbook/07_room.md` 不再出现旧字段。
-- `rg "EntityDefinition.loot_table_id" docs reviews addons/mkit game test` 只允许出现在迁移说明中，最终实现提交时应清空。
+- `rg "EntityDefinition.loot_table_id" docs reviews addons/mkit game test` 只允许出现在迁移说明或审查历史中；addon、game、test 和 cookbook 不再依赖旧字段。
 
 ### Phase 6：验证
 
@@ -375,13 +375,25 @@ make layering
 
 | 阶段 | 状态 | 产出 | 备注 |
 |------|------|------|------|
-| P0 | Pending | 迁移清单 | 实现前先做 `rg loot_table_id` 快照 |
-| P1 | Pending | 死亡事件 killer payload | 可独立提交，风险低 |
-| P2 | Pending | `DeathLootRuleDefinition` / `LootDropResult` / `LootEvents` | 需要 Godot import 生成 uid |
-| P3 | Pending | `DeathLootService` + unit tests | 核心行为，不做交付 |
-| P4 | Pending | ModuleBootstrap + demo migration | demo 只监听 drop event |
-| P5 | Pending | 删除 `EntityDefinition.loot_table_id` + docs/API sync | 不保留兼容字段 |
-| P6 | Pending | docs/test/layering/demo gates | 完成后才能关闭 |
+| P0 | Done | 迁移清单 | 旧字段只在迁移说明/审查历史中保留文本引用 |
+| P1 | Done | 死亡事件 killer payload | `CombatEvents.entity_died(..., killer_ref)` 已补齐 killer identity payload |
+| P2 | Done | `DeathLootRuleDefinition` / `LootDropResult` / `LootEvents` | `.gd.uid` 已由 Godot import 生成 |
+| P3 | Done | `DeathLootService` + unit tests | 核心行为只 roll + emit，不做交付 |
+| P4 | Done | ModuleBootstrap + demo migration | demo 只监听 `LootEvents.LOOT_DROPPED` 后交付到背包 |
+| P5 | Done | 删除 `EntityDefinition.loot_table_id` + docs/API sync | 不保留兼容字段 |
+| P6 | Done | docs/test/layering/demo gates | `make docs-check`、`make ut-modules`、`make int`、`make demo-test`、`make layering` 已通过 |
+
+## Implementation Result
+
+已按“更干净的方案”实现：
+
+- `EntityDefinition.loot_table_id` 已删除，entity 模块不再承载死亡掉落配置。
+- loot 模块新增 `DeathLootRuleDefinition`、`DeathLootService` 和 `LootDropResult`。
+- `ModuleBootstrap` 默认注册 `DeathLootService`；无规则时无副作用。
+- `CombatEvents.entity_died()` 补齐 killer payload，`HealthComponent.die(killer)` 会传入击杀者。
+- demo content 用 `DeathLootRuleDefinition` 绑定 field beast 的掉落表。
+- demo 只监听 `LootEvents.LOOT_DROPPED` 并决定把结果交付到玩家背包；具体交付仍归 game 侧。
+- cookbook 07、cookbook 08、pipeline 和 cookbook audit 已同步新边界。
 
 ## Open Questions
 

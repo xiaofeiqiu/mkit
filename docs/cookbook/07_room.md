@@ -152,7 +152,8 @@ func _ready() -> void:
 | `tags` | Array[String] = [] | 标签集合，供条件筛选、事件追踪、UI 分组 | 见步骤 1 |
 | `base_stats` | Dictionary = {} | `{stat_id: 初始值}`；spawn 时覆盖 `StatsComponent` 基础值 | 见步骤 1 |
 | `starting_ability_ids` | Array[String] = [] | spawn 时注册进该实体 `AbilityController` 的技能 id；每项需已入库 | 敌人要放技能时（配合 [Recipe 05](05_ability.md)）|
-| `loot_table_id` | String = "" | **预留字段，mkit 不读取**。内置掉落走 `RoomDefinition.reward_pool_ids`；可在游戏代码里读它做"按敌人种类掉落"（[Recipe 08 步骤 7](08_loot_and_rewards.md) 的 `roll_table` 改为查死亡实体的定义）| 自己接消费者时 |
+
+死亡掉落不配置在 `EntityDefinition` 上；见 [Recipe 22](22_enemy_death_loot.md) 用 `DeathLootRuleDefinition` 把实体死亡事件映射到掉落表。
 
 ### RoomDefinition
 
@@ -185,3 +186,4 @@ func _ready() -> void:
 - [EntitySpawner ref](../generated/html/classes/EntitySpawner.html) — spawn_entity 注入身份与属性
 - [pipeline.md — Room / Run](../pipeline.md#18-room--run)
 - [cookbook/08_loot_and_rewards.md](08_loot_and_rewards.md) — 房间清空后弹出奖励选择
+- [cookbook/22_enemy_death_loot.md](22_enemy_death_loot.md) — 杀死敌人按规则掉落

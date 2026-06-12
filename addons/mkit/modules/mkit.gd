@@ -97,6 +97,11 @@ static func loot() -> LootService:
 	return ServiceRegistry.get_port(LootService.SERVICE_ID) as LootService
 
 
+## 执行 `death_loot` 对应的公开操作，并保持 `Mkit` 的领域契约一致。
+static func death_loot() -> DeathLootService:
+	return ServiceRegistry.get_port(DeathLootService.SERVICE_ID) as DeathLootService
+
+
 ## 执行 `ui` 对应的公开操作，并保持 `Mkit` 的领域契约一致。
 static func ui() -> UIManager:
 	return _get_optional_port(UIManager.SERVICE_ID) as UIManager

@@ -14,8 +14,6 @@ const ITEM_CLAW := "item.demo.beast_claw"
 const ITEM_CHARM := "item.demo.village_charm"
 const ITEM_FIELD_BLADE := "item.demo.field_blade"
 const WEAPON_SLOT := "weapon"
-const LOOT_FIELD_BEAST := "loot.demo.field_beast"
-const LOOT_FIELD_BLADE := "loot.demo.field_blade"
 const ENTITY_FIELD_BEAST := "entity.demo.field_beast"
 const ENTITY_TRIAL_BEAST := "entity.demo.trial_beast"
 const ABILITY_FIREBOLT := "ability.demo.firebolt"
@@ -103,7 +101,6 @@ var _progression: ProgressionService = null
 var _audio: AudioService = null
 var _save_manager: SaveService = null
 var _entity_spawner: EntitySpawner = null
-var _loot_system := LootService.new()
 var _scene_router := EmbeddedSceneRouter.new()
 var _previous_scene_router: SceneService = null
 var _log_lines: Array[String] = []
@@ -369,6 +366,7 @@ func _connect_signals() -> void:
 	if _events != null:
 		_events.domain_event_emitted.connect(_on_domain_event)
 		_events.subscribe(LootEvents.REWARD_SELECTED, _on_reward_selected)
+		_events.subscribe(LootEvents.LOOT_DROPPED, _on_loot_dropped)
 		_events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 		_events.subscribe(CombatEvents.DAMAGE_APPLIED, _on_damage_applied)
 	if _run_director != null:
@@ -1755,36 +1753,29 @@ func _on_entity_died(event: DomainEvent) -> void:
 		"[COMBAT] defeated %s"
 		% (_entity_display_name(entity_ref) if entity_ref != null else _friendly_content_id(entity_id))
 	)
-	if entity_ref == null or _field_beast_looted:
+	if entity_ref == null:
 		return
 	var tags: Array = event.payload.get("tags", [])
 	if not tags.has("field_beast"):
 		return
-	_field_beast_looted = true
 	_field_beast_defeated = true
-	_grant_field_loot(entity_ref)
 	_grant_field_xp()
 	_field_beast_ref = null
 
 
-func _grant_field_loot(entity_ref: Node) -> void:
+func _on_loot_dropped(event: DomainEvent) -> void:
+	var drop := event.payload.get("drop") as LootDropResult
+	if drop == null or drop.roll_result == null:
+		return
 	var inventory := _inventory()
 	if inventory == null:
 		return
-	_roll_loot_into_bag(LOOT_FIELD_BEAST, entity_ref, inventory)
-	_roll_loot_into_bag(LOOT_FIELD_BLADE, entity_ref, inventory)
-	_play_sfx("sfx.demo.loot")
-
-
-func _roll_loot_into_bag(
-	table_id: String, entity_ref: Node, inventory: InventoryController
-) -> void:
-	var result := _loot_system.roll_table(
-		table_id, GameplayContext.new().with_source(entity_ref).with_target(_player)
-	)
-	for item in result.item_instances:
+	for item in drop.roll_result.item_instances:
 		if inventory.add_item(item):
 			_log("[LOOT] picked up %s x%d" % [_display_name(item.definition_id), item.quantity])
+	if not _field_beast_looted and drop.entity_definition_id == ENTITY_FIELD_BEAST:
+		_field_beast_looted = true
+		_play_sfx("sfx.demo.loot")
 
 
 func _toggle_field_blade() -> void:

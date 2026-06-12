@@ -183,4 +183,4 @@ Mkit.events().subscribe(InventoryEvents.INVENTORY_CHANGED, func(event: DomainEve
 - [ItemDefinition ref](../generated/html/classes/ItemDefinition.html) · [ItemInstance ref](../generated/html/classes/ItemInstance.html)
 - [InventoryController ref](../generated/html/classes/InventoryController.html) · [EquipmentController ref](../generated/html/classes/EquipmentController.html)
 - [GrantItemEffect ref](../generated/html/classes/GrantItemEffect.html) — 数据驱动发物品
-- [Recipe 08](08_loot_and_rewards.md) 物品作为奖励 · [Recipe 14](14_shop.md) 物品买卖
+- [Recipe 08](08_loot_and_rewards.md) 物品作为奖励 · [Recipe 22](22_enemy_death_loot.md) 杀敌掉落 · [Recipe 14](14_shop.md) 物品买卖

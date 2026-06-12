@@ -1,6 +1,6 @@
 # Cookbook
 
-Cookbook 是一条**单一项目的累进构建主线**。每篇 Recipe 在上一篇已有场景的基础上新增一层，做完 Recipe 01–11 就得到一个完整可玩的 RPG loop。Recipe 12–20 是独立扩展，可按需选做。
+Cookbook 是一条**单一项目的累进构建主线**。每篇 Recipe 在上一篇已有场景的基础上新增一层，做完 Recipe 01–11 就得到一个完整可玩的 RPG loop。Recipe 12–23 是独立扩展，可按需选做。
 
 ---
 
@@ -72,6 +72,8 @@ Recipe 18  → 常驻 HUD 与 UIManager 面板                  ★★☆  约 2
 Recipe 19  → XP 曲线与花货币的升级树配置                 ★★☆  约 20 min  [扩展]
 Recipe 20  → 自定义服务 + 事件目录 + bootstrap 注册      ★★★  约 30 min  [扩展]
 Recipe 21  → 条件门禁（Condition）横切所有内容入口       ★★☆  约 20 min  [扩展]
+Recipe 22  → 杀死敌人触发掉落（DeathLootRule）           ★★☆  约 20 min  [扩展]
+Recipe 23  → 房间清空后的升级三选一 reward               ★★☆  约 25 min  [扩展]
 ```
 
 ---

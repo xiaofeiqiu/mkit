@@ -16,4 +16,5 @@ func _build_services() -> Dictionary:
 	services[DialogueService.SERVICE_ID] = DialogueService.new()
 	services[WorldService.SERVICE_ID] = WorldService.new()
 	services[LootService.SERVICE_ID] = LootService.new()
+	services[DeathLootService.SERVICE_ID] = DeathLootService.new()
 	return services

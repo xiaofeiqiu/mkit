@@ -20,8 +20,6 @@ extends ContentDefinition
 @export var base_stats: Dictionary = {}
 ## 初始化时授予实体的 AbilityDefinition id 列表；每项需已在 ContentService 注册。
 @export var starting_ability_ids: Array[String] = []
-## 实体死亡或结算奖励时引用的 LootTableDefinition id；为空表示没有默认掉落表。
-@export var loot_table_id: String = ""
 
 
 ## 返回 ContentService 用于注册和查找的稳定内容 id，并保持 `EntityDefinition` 的领域契约一致。

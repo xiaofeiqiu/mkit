@@ -169,4 +169,4 @@ if progression.state.unlocked_content_ids.has("ability.fireball"):
 - [ExperienceCurve ref](../generated/html/classes/ExperienceCurve.html) · [ExperienceComponent ref](../generated/html/classes/ExperienceComponent.html)
 - [UpgradeDefinition ref](../generated/html/classes/UpgradeDefinition.html) · [ProgressionService ref](../generated/html/classes/ProgressionService.html)
 - [pipeline.md — Progression / Level Up](../pipeline.md#17-progression--level-up)
-- [Recipe 11](11_progression_and_save.md) — XP 接线与存档 · [Recipe 14](14_shop.md) — 货币的另一个出口
+- [Recipe 11](11_progression_and_save.md) — XP 接线与存档 · [Recipe 23](23_upgrade_choice_rewards.md) — 升级三选一 reward · [Recipe 14](14_shop.md) — 货币的另一个出口

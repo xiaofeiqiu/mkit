@@ -489,7 +489,7 @@ sequenceDiagram
     DDE->>HS: apply_damage(result)
     Note over HS: [mkit modules] current_hp -= final_amount
     alt hp <= 0
-        HS->>EV: CombatEvents.entity_died(entity_id, entity_ref)
+        HS->>EV: CombatEvents.entity_died(entity_id, entity_ref, killer_ref)
         EV-->>: entity_died 信号
     end
     HS->>EV: CombatEvents.damage_applied(result)
@@ -836,27 +836,31 @@ if not save.save_game(get_tree().root):
 
 ## P3-14：Loot Roll
 
-**触发点：** `LootService.roll_table(table_id, ctx)` 或 `generate_options(pool_ids, count, ctx)`
-**涉及系统：** `LootService`、`LootTableDefinition`、`LootEntry`、`LootRollResult`、`RewardSystem`、`RandomService`
-**输出：** 掉落物 `LootRollResult.item_instances` 或可选奖励 `Array[RewardOption]`
+**触发点：** `LootService.roll_table(table_id, ctx)`、`DeathLootService` 监听 `entity_died`，或 `generate_options(pool_ids, count, ctx)`
+**涉及系统：** `DeathLootService`、`DeathLootRuleDefinition`、`LootService`、`LootTableDefinition`、`LootEntry`、`LootRollResult`、`LootDropResult`、`RewardSystem`、`RandomService`
+**输出：** 掉落物 `LootRollResult.item_instances`、死亡掉落事件 `LootEvents.LOOT_DROPPED`，或可选奖励 `Array[RewardOption]`
 
 ### 流程
 
 ```mermaid
 flowchart TB
-    A["roll_table(table_id, ctx)"]:::userOwned -->
+    Z["CombatEvents.entity_died"]:::mkitCore -->
+    Y["DeathLootService<br/>匹配 DeathLootRuleDefinition"]:::mkitCore -->
+    A["roll_table(table_id, ctx)"]:::mkitCore -->
     B["按 table.rolls 循环"]:::mkitCore -->
     C["_get_valid_entries：过 conditions"]:::mkitCore -->
     D["累加权重 + empty_weight"]:::mkitCore -->
     E["RandomService.randf_range(0, total)"]:::mkitCore -->
     F["命中区间 → _roll_quantity →<br/>ItemInstance.create"]:::mkitCore -->
-    G["LootRollResult.item_instances"]:::mkitCore
+    G["LootRollResult.item_instances"]:::mkitCore -->
+    H["LootEvents.LOOT_DROPPED"]:::mkitCore -->
+    I["游戏侧交付：背包 / 地面拾取 / UI"]:::userOwned
 
     classDef mkitCore  fill:#4A90D9,color:#fff,stroke:#2C6FAC
     classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
 ```
 
-**两个入口：** `roll_table` 走掉落表（权重 + 数量 + 可空）；`generate_options` 走 `RewardSystem`，从 `RewardDefinition` 池**无放回**加权抽 `count` 个 `RewardOption`（房间清空奖励用这条）。`apply_selected(option, ctx)` 再执行选中项的 effect 链。
+**三个入口：** `roll_table` 直接走掉落表（权重 + 数量 + 可空）；`DeathLootService` 把死亡事件按 `DeathLootRuleDefinition` 映射到一个或多个掉落表，并只发 `LOOT_DROPPED` 事件，不负责交付；`generate_options` 走 `RewardSystem`，从 `RewardDefinition` 池**无放回**加权抽 `count` 个 `RewardOption`（房间清空奖励用这条）。`apply_selected(option, ctx)` 再执行选中项的 effect 链。
 
 ### 关键代码
 
@@ -869,10 +873,21 @@ for item in result.item_instances:
     print("掉落 %s × %d" % [item.definition_id, item.quantity])
 ```
 
+死亡掉落交付由游戏侧监听事件：
+
+```gdscript
+Mkit.events().subscribe(LootEvents.LOOT_DROPPED, _on_loot_dropped)
+
+func _on_loot_dropped(event: DomainEvent) -> void:
+    var drop := event.payload.get("drop") as LootDropResult
+    for item in drop.roll_result.item_instances:
+        $Player/Controllers/InventoryController.add_item(item)
+```
+
 ### 相关文档
 
-→ [generated/html/classes/LootService.html](generated/html/classes/LootService.html) · [generated/html/classes/LootTableDefinition.html](generated/html/classes/LootTableDefinition.html) · [generated/html/classes/RewardSystem.html](generated/html/classes/RewardSystem.html)
-→ [cookbook/08_loot_and_rewards.md](cookbook/08_loot_and_rewards.md)
+→ [generated/html/classes/DeathLootService.html](generated/html/classes/DeathLootService.html) · [generated/html/classes/DeathLootRuleDefinition.html](generated/html/classes/DeathLootRuleDefinition.html) · [generated/html/classes/LootService.html](generated/html/classes/LootService.html) · [generated/html/classes/LootTableDefinition.html](generated/html/classes/LootTableDefinition.html) · [generated/html/classes/RewardSystem.html](generated/html/classes/RewardSystem.html)
+→ [cookbook/08_loot_and_rewards.md](cookbook/08_loot_and_rewards.md) · [cookbook/22_enemy_death_loot.md](cookbook/22_enemy_death_loot.md) · [cookbook/23_upgrade_choice_rewards.md](cookbook/23_upgrade_choice_rewards.md)
 
 ---
 

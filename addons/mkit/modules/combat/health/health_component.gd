@@ -94,7 +94,7 @@ func die(killer: Node = null) -> void:
 	var entity_id: String = identity.entity_id if identity != null else str(owner.name)
 	var events := Mkit.events()
 	if events != null:
-		events.emit_domain_event(CombatEvents.entity_died(entity_id, owner))
+		events.emit_domain_event(CombatEvents.entity_died(entity_id, owner, killer))
 	if destroy_on_death:
 		owner.queue_free()
 

@@ -23,14 +23,25 @@ static func damage_applied(result: DamageResult) -> DomainEvent:
 
 
 ## 执行 `entity_died` 对应的公开操作，并保持 `CombatEvents` 的领域契约一致。
-static func entity_died(entity_id: String, entity_ref: Node) -> DomainEvent:
-	var payload: Dictionary = {"entity_id": entity_id, "entity_ref": entity_ref}
+static func entity_died(entity_id: String, entity_ref: Node, killer_ref: Node = null) -> DomainEvent:
+	var payload: Dictionary = {
+		"entity_id": entity_id,
+		"entity_ref": entity_ref,
+		"killer_id": entity_id_of(killer_ref),
+		"killer_ref": killer_ref,
+	}
 	if entity_ref != null:
 		var identity := EntityContract.get_identity(entity_ref)
 		if identity != null:
 			payload["tags"] = identity.tags
 			payload["faction"] = identity.faction
 			payload["definition_id"] = identity.definition_id
+	if killer_ref != null:
+		var killer_identity := EntityContract.get_identity(killer_ref)
+		if killer_identity != null:
+			payload["killer_tags"] = killer_identity.tags
+			payload["killer_faction"] = killer_identity.faction
+			payload["killer_definition_id"] = killer_identity.definition_id
 	return DomainEvent.create(ENTITY_DIED, entity_id, "", payload)
 
 

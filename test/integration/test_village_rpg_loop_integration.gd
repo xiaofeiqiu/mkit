@@ -89,6 +89,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	var shop := ServiceRegistry.get_port("shop") as ShopService
 	var progression := ServiceRegistry.get_port("progression") as ProgressionService
 	var save := ServiceRegistry.get_port("save") as SaveService
+	var death_loot := ServiceRegistry.get_port("death_loot") as DeathLootService
 	assert_not_null(content)
 	assert_not_null(events)
 	assert_not_null(effects)
@@ -97,6 +98,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_not_null(shop)
 	assert_not_null(progression)
 	assert_not_null(save)
+	assert_not_null(death_loot)
 	assert_true(content.validate_all().success)
 	save.save_path = _save_path
 
@@ -125,7 +127,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	var experience := player.get_node("Components/ExperienceComponent") as ExperienceComponent
 	var elder := _make_elder()
 	var beast := _make_beast()
-	var loot_system := LootService.new()
+	events.subscribe(LootEvents.LOOT_DROPPED, _add_drop_to_inventory.bind(inventory))
 
 	watch_signals(dialogue)
 	watch_signals(quest)
@@ -204,12 +206,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_not_null(inventory.find_item_by_definition(ITEM_CHARM))
 	assert_eq(progression.get_currency(CURRENCY), STARTER_GOLD + REWARD_GOLD)
 
-	# the game responds to the kill by rolling the beast loot table and granting field XP
-	var loot := loot_system.roll_table(
-		LOOT_FIELD_BEAST, GameplayContext.new().with_source(beast).with_target(player)
-	)
-	for item in loot.item_instances:
-		assert_true(inventory.add_item(item))
+	# the game responds to LootEvents.LOOT_DROPPED by deciding how to deliver the rolled items.
 	var claw := inventory.find_item_by_definition(ITEM_CLAW)
 	assert_not_null(claw)
 	assert_eq(claw.quantity, 1)
@@ -353,9 +350,13 @@ func _make_database() -> ResourceDatabase:
 	loot.rolls = 1
 	loot.entries = loot_entries
 	loot.allow_empty = false
+	var death_loot_rule := DeathLootRuleDefinition.new()
+	death_loot_rule.rule_id = "death_loot.int.loop.field_beast"
+	death_loot_rule.required_tags = [BEAST_TAG]
+	death_loot_rule.loot_table_ids = [LOOT_FIELD_BEAST]
 
 	var resources: Array[Resource] = [
-		village, field, potion, claw, charm, quest, elder_dialogue, shop, loot
+		village, field, potion, claw, charm, quest, elder_dialogue, shop, loot, death_loot_rule
 	]
 	return IntTestHelpers.make_resource_database("village_rpg_loop_int", resources)
 
@@ -415,6 +416,14 @@ func _make_beast() -> Node:
 	var beast := IntTestHelpers.make_health_entity("FieldBeast", BEAST_ID, 10.0, tags)
 	add_child_autofree(beast)
 	return beast
+
+
+func _add_drop_to_inventory(event: DomainEvent, inventory: InventoryController) -> void:
+	var drop := event.payload.get("drop") as LootDropResult
+	if drop == null or drop.roll_result == null or inventory == null:
+		return
+	for item in drop.roll_result.item_instances:
+		inventory.add_item(item)
 
 
 func _save_village_scene() -> void:

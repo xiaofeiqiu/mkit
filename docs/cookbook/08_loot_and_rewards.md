@@ -121,6 +121,8 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 
 `RewardDefinition` 是"三选一"奖励；loot 模块的另一半是 **`LootTableDefinition` + `LootEntry`** ——按权重 roll 的掉落表（敌人掉材料、宝箱出装备）。两者都由 `LootService` 驱动，但入口不同：奖励走 `generate_options()`（无放回抽 N 个供玩家选择），掉落表走 `roll_table()`（独立 roll N 次，直接给出 `ItemInstance` 结果）。
 
+本节是把死亡掉落接到当前主线的快速版；完整做法、调试和常见错误见 [Recipe 22](22_enemy_death_loot.md)。
+
 新建 Resource → `LootTableDefinition`，存为 `res://data/loot/field_beast_drops.tres` 并入库：
 
 | 字段 | 值 |
@@ -136,26 +138,46 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 - 兽皮：`content_id="item.beast_hide"`, `weight=3.0`, `min_quantity=1`, `max_quantity=2`
 - 兽牙：`content_id="item.beast_fang"`, `weight=1.0`（每次 roll 选中概率 = 1.0 / (1.0+3.0+1.0) = 20%）
 
-`content_id` 指向 `ItemDefinition`（按步骤 6 的方式创建并入库），玩家需有 `InventoryController` 接收。监听敌人死亡并 roll：
+`content_id` 指向 `ItemDefinition`（按步骤 6 的方式创建并入库）。接下来新建 Resource → `DeathLootRuleDefinition`，存为 `res://data/loot/field_beast_death_loot.tres` 并入库：
+
+| 字段 | 值 |
+|------|----|
+| `rule_id` | `"death_loot.field_beast"` |
+| `entity_definition_ids` | `["entity.field_beast"]`（若敌人由 `EntitySpawner` 生成，推荐按 definition id 匹配）|
+| `required_tags` | `[]`（手摆敌人也可改用 `["field_beast"]` 按 tag 匹配）|
+| `loot_table_ids` | `["loot.field_beast"]` |
+| `stop_after_match` | `false` |
+
+`ModuleBootstrap` 默认注册 `DeathLootService`。敌人死亡时：
+
+```text
+HealthComponent.die()
+  -> CombatEvents.ENTITY_DIED
+  -> DeathLootService 匹配 DeathLootRuleDefinition
+  -> LootService.roll_table()
+  -> LootEvents.LOOT_DROPPED
+```
+
+mkit 到这里为止只负责 **roll 出结果并发事件**。物品进背包、掉到地上、弹 UI、播放音效都属于你的游戏逻辑。监听 `loot_dropped` 后决定交付方式：
 
 ```gdscript
 # res://game/main.gd（在 _ready 中追加）
-Mkit.events().subscribe(CombatEvents.ENTITY_DIED, _on_enemy_died)
+Mkit.events().subscribe(LootEvents.LOOT_DROPPED, _on_loot_dropped)
 
 
-func _on_enemy_died(event: DomainEvent) -> void:
-    if event.payload.get("faction", "") != "enemy":
+func _on_loot_dropped(event: DomainEvent) -> void:
+    var drop := event.payload.get("drop") as LootDropResult
+    if drop == null or drop.roll_result == null:
         return
     var player := get_tree().get_first_node_in_group("player")
-    var result := Mkit.loot().roll_table(
-        "loot.field_beast", GameplayContext.from_nodes(player, player)
-    )
     var inventory := EntityContract.get_controller(player, "InventoryController") as InventoryController
-    for item in result.item_instances:
+    if inventory == null:
+        return
+    for item in drop.roll_result.item_instances:
         inventory.add_item(item)  # ItemInstance：definition_id + 已 roll 好的 quantity
 ```
 
-`roll()` 每次先用 `ConditionEvaluator` 过滤 entries（条件失败的不进掉落池），再把 `empty_weight`（若 `allow_empty`）与各 entry 的 `weight` 加总抽签；选中后在 `min_quantity..max_quantity` 间随机数量。`result.debug_rolls` 记录每次 roll 的明细，调概率时直接 print 它。
+`roll()` 每次先用 `ConditionEvaluator` 过滤 entries（条件失败的不进掉落池），再把 `empty_weight`（若 `allow_empty`）与各 entry 的 `weight` 加总抽签；选中后在 `min_quantity..max_quantity` 间随机数量。`drop.roll_result.debug_rolls` 记录每次 roll 的明细，调概率时直接 print 它。
 
 ## 运行验证
 
@@ -164,7 +186,7 @@ func _on_enemy_died(event: DomainEvent) -> void:
 3. 控制台可见 `reward_selected` 事件（`EventService.recent_events`）
 4. 选择后界面关闭，加载下一个房间
 5. 没有 UIManager 时（调试退化路径）：自动选第一个并继续
-6. （做了步骤 7）杀敌后背包出现 `item.beast_hide` / `item.beast_fang`；`result.debug_rolls` 可见每次 roll 的权重明细
+6. （做了步骤 7）杀敌后 `LootEvents.LOOT_DROPPED` 触发，背包出现 `item.beast_hide` / `item.beast_fang`；`drop.roll_result.debug_rolls` 可见每次 roll 的权重明细
 
 ## 字段参考
 
@@ -200,6 +222,21 @@ func _on_enemy_died(event: DomainEvent) -> void:
 | `min_quantity` / `max_quantity` | int = 1 / 1 | 掉落数量的随机区间（含两端）；写反了会自动交换 | 材料类掉落给区间 |
 | `conditions` | Array[Condition] = [] | 每次 roll 前求值，失败则本条目不进掉落池（如"困难难度才掉稀有材料"）| 详见 [Recipe 21](21_conditions.md) |
 
+### DeathLootRuleDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `rule_id` | String = "" | ContentService 注册用的稳定 id | 必填，全局唯一（见步骤 7）|
+| `enabled` | bool = true | 关闭后规则不参与死亡匹配 | 临时禁用某套掉落规则 |
+| `priority` | int = 0 | 多条规则同时匹配时高优先级先处理 | 需要先处理 boss / 特殊事件规则时 |
+| `entity_definition_ids` | Array[String] = [] | 非空时只匹配这些 `EntityIdentity.definition_id` | 由 `EntitySpawner` 生成的敌人，推荐用它精确匹配 |
+| `factions` | Array[String] = [] | 非空时只匹配这些死亡实体阵营 | 所有敌方单位共享一张基础掉落表 |
+| `required_tags` | Array[String] = [] | 非空时死亡实体必须包含全部 tag | 按 `"beast"` / `"undead"` / `"elite"` 分类掉落 |
+| `excluded_tags` | Array[String] = [] | 非空时死亡实体包含任一 tag 则排除 | 排除召唤物、训练假人等 |
+| `conditions` | Array[Condition] = [] | 额外死亡上下文条件；失败则本规则不匹配 | 按难度、区域、任务状态控制掉落 |
+| `loot_table_ids` | Array[String] = [] | 匹配后依次 roll 的 `LootTableDefinition` id | 一只敌人可同时掉材料表、装备表 |
+| `stop_after_match` | bool = false | 本规则匹配后是否停止处理后续低优先级规则 | boss 专属表不想叠加普通敌人表时 |
+
 ## 常见错误
 
 | 现象 | 原因 | 修复 |
@@ -213,7 +250,10 @@ func _on_enemy_died(event: DomainEvent) -> void:
 ## 延伸阅读
 
 - [LootService ref](../generated/html/classes/LootService.html) — roll_table / generate_options / apply_selected
+- [DeathLootService ref](../generated/html/classes/DeathLootService.html) · [DeathLootRuleDefinition ref](../generated/html/classes/DeathLootRuleDefinition.html) · [LootDropResult ref](../generated/html/classes/LootDropResult.html)
 - [RewardDefinition ref](../generated/html/classes/RewardDefinition.html) · [RewardOption ref](../generated/html/classes/RewardOption.html)
 - [LootTableDefinition ref](../generated/html/classes/LootTableDefinition.html) · [LootEntry ref](../generated/html/classes/LootEntry.html) · [LootRollResult ref](../generated/html/classes/LootRollResult.html)
 - [pipeline.md — Loot Roll](../pipeline.md#14-loot-roll)
+- [cookbook/22_enemy_death_loot.md](22_enemy_death_loot.md) — 杀死敌人触发掉落
+- [cookbook/23_upgrade_choice_rewards.md](23_upgrade_choice_rewards.md) — 升级三选一 reward
 - [cookbook/14_shop.md](14_shop.md) — 用 `LootRollResult` 之外的方式获取物品（购买）

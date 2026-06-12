@@ -113,8 +113,10 @@ func test_tc_ar_08_cancel_ignores_actions_from_other_sources() -> void:
 
 
 func test_tc_ar_09_cancel_with_null_source_is_safe() -> void:
+	watch_signals(runner)
 	runner.cancel_actions_for_source(null)
-	assert_true(true)
+	assert_eq(runner.active_actions.size(), 0)
+	assert_signal_not_emitted(runner, "action_cancelled")
 
 
 # --- multiple concurrent actions ---

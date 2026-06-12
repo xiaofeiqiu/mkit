@@ -273,6 +273,18 @@ func test_tc_loot_18_death_loot_service_ignores_empty_roll_results() -> void:
 	assert_true(events.recent_events.is_empty())
 
 
+func test_tc_loot_19_roll_result_keeps_items_currency_and_debug_rolls() -> void:
+	var result := LootRollResult.new()
+	var item := ItemInstance.create("item.unit.loot", 2)
+	result.item_instances.append(item)
+	result.currency["gold"] = 5
+	result.debug_rolls.append({"roll": 0.25, "result": "item.unit.loot"})
+
+	assert_eq(result.item_instances, [item] as Array[ItemInstance])
+	assert_eq(result.currency.get("gold"), 5)
+	assert_eq(result.debug_rolls[0].get("result"), "item.unit.loot")
+
+
 func _make_death_rule(
 	rule_id: String,
 	definition_ids: Array[String],

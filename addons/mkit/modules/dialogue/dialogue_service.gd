@@ -32,6 +32,9 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 	var definition := get_definition(dialogue_id)
 	if definition == null:
 		return false
+	var start_node := _resolve_start_node(definition)
+	if start_node == null:
+		return false
 	runtime = DialogueRuntime.new()
 	runtime.dialogue_id = dialogue_id
 	runtime.context = GameplayContext.from_context(context)
@@ -39,7 +42,7 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(DialogueEvents.dialogue_started(dialogue_id))
-	_enter_node(definition.start_node_id)
+	_enter_node(start_node.node_id)
 	return is_active()
 
 
@@ -108,6 +111,15 @@ func get_definition(dialogue_id: String) -> DialogueDefinition:
 	if content == null:
 		return null
 	return content.get_resource(dialogue_id) as DialogueDefinition
+
+
+func _resolve_start_node(definition: DialogueDefinition) -> DialogueNode:
+	if definition.start_node_id != "":
+		return definition.get_node(definition.start_node_id)
+	for node in definition.nodes:
+		if node != null:
+			return node
+	return null
 
 
 func _enter_node(node_id: String) -> void:

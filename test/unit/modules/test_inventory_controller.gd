@@ -60,6 +60,37 @@ func _make_entity_root() -> EntityRoot:
 	return entity_root
 
 
+func test_tc_inv_25_inventory_model_setup_creates_indexed_empty_slots() -> void:
+	var model := InventoryModel.new()
+	model.owner_id = "bag.unit"
+	model.setup(3)
+
+	assert_eq(model.capacity, 3)
+	assert_eq(model.slots.size(), 3)
+	assert_true(model.slots[0] is InventorySlot)
+	assert_eq(model.slots[0].index, 0)
+	assert_eq(model.slots[2].index, 2)
+	assert_eq(model.find_first_empty_slot(), model.slots[0])
+	assert_true(model.get_items().is_empty())
+
+
+func test_tc_inv_26_inventory_model_finds_stackable_slot_and_items() -> void:
+	var model := InventoryModel.new()
+	model.setup(2)
+	var potion_def := _make_item_def("potion", true, 5)
+	var potion := ItemInstance.create("potion", 3)
+	model.slots[0].item = potion
+
+	var stackable := model.find_stackable_slot(potion_def, ItemInstance.create("potion", 1))
+	assert_eq(stackable, model.slots[0])
+	assert_eq(model.get_items(), [potion] as Array[ItemInstance])
+
+	model.slots[0].clear()
+	assert_true(model.slots[0].is_empty())
+	assert_null(model.find_stackable_slot(potion_def, ItemInstance.create("potion", 1)))
+	assert_null(model.find_stackable_slot(_make_item_def("sword", false, 1), ItemInstance.create("sword", 1)))
+
+
 # --- add_item (non-stackable) ---
 
 

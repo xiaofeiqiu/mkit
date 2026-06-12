@@ -329,5 +329,8 @@ func test_tc_ab_23_unregister_removes_ability() -> void:
 
 
 func test_tc_ab_24_unregister_nonexistent_is_safe() -> void:
+	content._defs["slash"] = _make_ability("slash")
+	ctrl.register_ability("slash")
 	ctrl.unregister_ability("ghost_ability")
-	assert_true(true)
+	assert_true(ctrl.has_ability("slash"))
+	assert_eq(ctrl.abilities.size(), 1)

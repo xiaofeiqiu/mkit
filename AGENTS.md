@@ -145,16 +145,25 @@ The Godot binary is controlled by `GODOT`; the Makefile defaults to
 `/Applications/Godot.app/Contents/MacOS/Godot`.
 
 ```bash
-make reimport      # remove temp integration scenes, then Godot --headless --import
-make ut            # unit tests: kernel then modules
-make ut-kernel     # GUT tests under test/unit/kernel
-make ut-modules    # GUT tests under test/unit/modules
-make int           # GUT tests under test/integration
-make demo-test     # run game/bootstrap.tscn with --demo-auto-run
-make docs-server   # serve docs/ on DOCS_PORT, default 8060
-make docs-api      # generate Godot doctool XML and static API HTML
-make docs-check    # check docs links, nav sync, cookbook sections, stale demo paths
-make layering      # enforce kernel/modules/game layering rules
+make check           # full local gate: layering, docs-check, and every test gate
+make test            # run all test gates: unit tests, integration tests, and demo auto-run
+make run             # start the current game from res://game/bootstrap.tscn
+make editor          # open this project in the Godot editor
+make clean           # remove generated API docs, temp integration scenes, and test logs
+make clean-cache     # delete the .godot import cache, then rebuild imports headlessly
+make reimport        # remove temp integration scenes, then refresh Godot imports
+make ut              # run addon unit tests after the layering check: kernel then modules
+make ut-kernel       # run GUT unit tests under test/unit/kernel
+make ut-modules      # run GUT unit tests under test/unit/modules
+make int             # run integration tests under test/integration after layering and reimport
+make demo-test       # run game/bootstrap.tscn headlessly with --demo-auto-run
+make docs-server     # serve docs/ locally on DOCS_PORT, default 8060
+make docs-xml        # regenerate Godot doctool XML for res://addons/mkit
+make docs-html       # rebuild static API HTML from generated doctool XML
+make docs-api        # regenerate both doctool XML and static API HTML
+make docs-check      # check doc comments, generated API freshness, links, nav, cookbook sections, and stale demo paths
+make layering        # enforce kernel/modules/game dependency boundaries
+make cookbook-fields # audit cookbook field-documentation coverage
 ```
 
 Focused GUT examples:
@@ -199,6 +208,12 @@ old `game/demo` paths.
 
 Keep conceptual docs in Chinese when the surrounding file is Chinese. Keep code,
 identifiers, resource paths, commands, and class names in English.
+
+When creating any document under `reviews/`, include a `## Progress Tracker`
+section for the proposals, issues, fixes, or follow-up items described by that
+review document. This tracker is not for the agent's current writing task; it is
+for later implementation/resolution status. When a documented item is addressed,
+return to the same review document and mark that item checked.
 
 ## Code Style
 

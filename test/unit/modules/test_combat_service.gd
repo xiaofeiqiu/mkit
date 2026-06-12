@@ -371,3 +371,31 @@ func test_tc_cmbt_17_evade_chance_0_never_evades() -> void:
 	var result := resolver.resolve(req)
 	assert_false(result.was_evaded)
 	assert_true(result.final_amount > 0.0)
+
+
+func test_tc_cmbt_18_resource_set_clamps_spends_restores_and_roundtrips() -> void:
+	var resources := ResourceSet.new()
+	resources.set_max_provider(_resource_max)
+
+	resources.set_current("mana", 15.0)
+	assert_eq(resources.get_current("mana"), 10.0)
+	assert_true(resources.has("mana", 10.0))
+	assert_true(resources.spend("mana", 4.5))
+	assert_eq(resources.get_current("mana"), 5.5)
+	assert_false(resources.spend("mana", 6.0))
+	assert_eq(resources.get_current("mana"), 5.5)
+	resources.restore("mana", 99.0)
+	assert_eq(resources.get_current("mana"), 10.0)
+	assert_true(resources.spend("mana", 0.0))
+
+	var restored := ResourceSet.new()
+	restored.from_save_data(resources.to_save_data())
+	assert_eq(restored.get_current("mana"), 10.0)
+	restored.clear()
+	assert_true(restored.current.is_empty())
+
+
+func _resource_max(resource_id: String) -> float:
+	if resource_id == "mana":
+		return 10.0
+	return 0.0

@@ -114,6 +114,73 @@ func test_tc_prog_21_spend_currency_rejects_empty_id() -> void:
 	assert_false(progression.spend_currency("", 10))
 
 
+func test_tc_prog_22_wallet_clamps_spends_and_roundtrips_balances() -> void:
+	var wallet := Wallet.new()
+	wallet.set_balance("gold", -5)
+	assert_eq(wallet.get_balance("gold"), 0)
+
+	wallet.add("gold", 12)
+	wallet.add("   ", 99)
+	assert_eq(wallet.get_balance("gold"), 12)
+	assert_eq(wallet.get_balance(""), 0)
+	assert_true(wallet.can_spend("gold", 5))
+	assert_true(wallet.spend("gold", 5))
+	assert_eq(wallet.get_balance("gold"), 7)
+	assert_false(wallet.spend("gold", 99))
+	assert_eq(wallet.get_balance("gold"), 7)
+	assert_true(wallet.spend("gold", 0))
+	assert_eq(wallet.get_balance("gold"), 7)
+
+	var restored := Wallet.new()
+	restored.from_save_data(wallet.to_save_data())
+	assert_eq(restored.get_balance("gold"), 7)
+
+
+func test_tc_prog_23_add_currency_effect_updates_registered_progression() -> void:
+	ServiceRegistry.register_service(ProgressionService.SERVICE_ID, progression)
+	var effect := AddCurrencyEffect.new()
+	effect.effect_id = "fx.unit.add_gold"
+	effect.currency_id = "gold"
+	effect.amount = 9
+
+	var result := effect.apply(GameplayContext.new())
+
+	assert_true(result.success)
+	assert_eq(result.effect_id, "fx.unit.add_gold")
+	assert_eq(progression.get_currency("gold"), 9)
+
+
+func test_tc_prog_24_spend_currency_effect_deducts_registered_progression() -> void:
+	ServiceRegistry.register_service(ProgressionService.SERVICE_ID, progression)
+	progression.add_currency("gold", 10)
+	var effect := SpendCurrencyEffect.new()
+	effect.effect_id = "fx.unit.spend_gold"
+	effect.currency_id = "gold"
+	effect.amount = 4
+
+	assert_true(SpendCurrencyEffect.can_spend("gold", 4))
+	var result := effect.apply(GameplayContext.new())
+
+	assert_true(result.success)
+	assert_eq(result.effect_id, "fx.unit.spend_gold")
+	assert_eq(progression.get_currency("gold"), 6)
+
+
+func test_tc_prog_25_spend_currency_effect_fails_without_mutating_on_insufficient_funds() -> void:
+	ServiceRegistry.register_service(ProgressionService.SERVICE_ID, progression)
+	progression.add_currency("gold", 3)
+	var effect := SpendCurrencyEffect.new()
+	effect.effect_id = "fx.unit.spend_too_much"
+	effect.currency_id = "gold"
+	effect.amount = 4
+
+	var result := effect.apply(GameplayContext.new())
+
+	assert_false(result.success)
+	assert_eq(result.failure_reason, "Insufficient currency")
+	assert_eq(progression.get_currency("gold"), 3)
+
+
 # --- can_unlock ---
 
 

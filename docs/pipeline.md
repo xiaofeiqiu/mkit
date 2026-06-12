@@ -906,7 +906,8 @@ sequenceDiagram
     participant UI as DialogueUI
 
     Caller->>DS: start("dialogue.elder_intro", ctx)
-    DS->>DS: _enter_node(start_node_id)
+    DS->>DS: 校验 definition 并解析 start_node_id（为空则取第一个节点）
+    DS->>DS: _enter_node(resolved_node_id)
     DS->>DS: 跑 node.on_enter_effects
     DS->>UI: node_entered(node)
     alt 节点有 choices
@@ -917,6 +918,8 @@ sequenceDiagram
     end
     Note over DS: next 为空 → end() → dialogue_ended
 ```
+
+> 如果 `dialogue_id` 或解析后的起始节点无效，`start()` 返回 `false`，不会创建 `DialogueRuntime`，也不会发 `dialogue_started` / `dialogue_ended`。
 
 > 选项的 `conditions` 决定是否在 UI 出现（`get_available_choices` 过滤）；`choose(index)` 的 index 是**可用选项**的下标，不是原始下标。
 

@@ -78,8 +78,13 @@ func test_tc_sr_09_unregister_removes_service() -> void:
 
 
 func test_tc_sr_10_unregister_missing_is_safe() -> void:
+	var obj := Node.new()
+	reg.register_service("kept", obj)
 	reg.unregister_service("does_not_exist")
-	assert_true(true)
+	assert_true(reg.has_service("kept"))
+	assert_eq(reg.get_port("kept"), obj)
+	assert_eq(reg.get_registered_service_ids(), ["kept"])
+	obj.free()
 
 
 # --- clear ---

@@ -169,8 +169,11 @@ func test_tc_rc_09_check_clear_already_cleared_is_noop() -> void:
 
 
 func test_tc_rc_10_check_clear_null_runtime_no_crash() -> void:
+	watch_signals(ctrl)
 	ctrl.check_clear_condition()
-	assert_true(true)
+	assert_null(ctrl.runtime)
+	assert_signal_not_emitted(ctrl, "room_cleared")
+	assert_signal_not_emitted(ctrl, "reward_ready")
 
 
 func test_tc_rc_11_room_cleared_fires_event_router() -> void:

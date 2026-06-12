@@ -6,9 +6,9 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := CompleteQuestEffect.new()`
 
-## 编辑器配置：`quest_id` 表示稳定 id，由 `CompleteQuestEffect` 的公开 API 读取或维护。
+## 引用的 QuestDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var quest_id: String = ""
-## 编辑器配置：`turn_in` 表示 `CompleteQuestEffect` 的字段值，由 `CompleteQuestEffect` 的公开 API 读取或维护。
+## 完成任务时是否同时进入交付状态；关闭后仅标记目标完成。
 @export var turn_in: bool = true
 
 

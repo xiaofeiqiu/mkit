@@ -9,6 +9,23 @@ MODULE_LOG ?= /tmp/mkit_godot_modules.log
 INT_LOG ?= /tmp/mkit_godot_int.log
 DEMO_LOG ?= /tmp/mkit_demo_auto.log
 
+check: layering docs-check ut int
+
+run:
+	$(GODOT) --path . res://game/bootstrap.tscn
+
+editor:
+	$(GODOT) --path . -e
+
+clean:
+	rm -rf $(DOC_XML_DIR) $(DOC_HTML_DIR)
+	rm -f test/integration/tmp_mkit_int_*.tscn
+	rm -f $(DOC_XML_LOG) $(KERNEL_LOG) $(MODULE_LOG) $(INT_LOG) $(DEMO_LOG)
+
+clean-cache:
+	rm -rf .godot
+	$(GODOT) --headless --import
+
 reimport:
 	@rm -f test/integration/tmp_mkit_int_*.tscn
 	$(GODOT) --headless --import
@@ -50,5 +67,8 @@ docs-check:
 layering:
 	python3 tools/check_layering.py
 
+cookbook-fields:
+	sh tools/audit_cookbook_fields.sh
+
 .NOTPARALLEL:
-.PHONY: reimport ut ut-kernel ut-modules int demo-test docs-server docs-xml docs-html docs-api docs-check layering
+.PHONY: check run editor clean clean-cache reimport ut ut-kernel ut-modules int demo-test docs-server docs-xml docs-html docs-api docs-check layering cookbook-fields

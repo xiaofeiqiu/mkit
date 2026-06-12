@@ -6,11 +6,11 @@ extends RefCounted
 ## 使用：当项目需要在成长系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := ProgressionState.new()`
 
-## 运行时状态：`wallet` 表示 `ProgressionState` 的字段值，由 `ProgressionState` 的公开 API 读取或维护。
+## 玩家或进度系统持有的钱包状态。
 var wallet: Wallet = Wallet.new()
-## 运行时状态：`upgrade_levels` 表示 `ProgressionState` 的字段值，由 `ProgressionState` 的公开 API 读取或维护。
+## 已购买升级等级表；key 为 upgrade id，value 为当前等级。
 var upgrade_levels: Dictionary = {}
-## 运行时状态：`unlocked_content_ids` 表示稳定 id 列表，由 `ProgressionState` 的公开 API 读取或维护。
+## 已经解锁的内容 id 列表；可被商店、掉落或 UI 过滤使用。
 var unlocked_content_ids: Array[String] = []
 
 

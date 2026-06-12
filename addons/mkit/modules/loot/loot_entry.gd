@@ -6,13 +6,13 @@ extends Resource
 ## 使用：当项目需要在掉落与奖励系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := LootEntry.new()`
 
-## 编辑器配置：`content_id` 表示稳定 id，由 `LootEntry` 的公开 API 读取或维护。
+## 掉落项引用的内容 id；通常指向 ItemDefinition 或其他可奖励内容。
 @export var content_id: String = ""
-## 编辑器配置：`weight` 表示 `LootEntry` 的字段值，由 `LootEntry` 的公开 API 读取或维护。
+## 随机选择权重；值越大被选中的概率越高，0 表示不会自然选中。
 @export var weight: float = 1.0
-## 编辑器配置：`min_quantity` 表示最小值，由 `LootEntry` 的公开 API 读取或维护。
+## 一次掉落的最小数量；应小于或等于 max_quantity。
 @export var min_quantity: int = 1
-## 编辑器配置：`max_quantity` 表示最大值，由 `LootEntry` 的公开 API 读取或维护。
+## 一次掉落的最大数量；应大于或等于 min_quantity。
 @export var max_quantity: int = 1
-## 编辑器配置：`conditions` 表示执行条件列表，由 `LootEntry` 的公开 API 读取或维护。
+## 执行前按顺序求值的条件列表；任一条件失败时阻止本对象继续产生效果。
 @export var conditions: Array[Condition] = []

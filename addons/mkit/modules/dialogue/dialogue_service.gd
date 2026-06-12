@@ -16,7 +16,7 @@ signal choices_presented(node: DialogueNode, available: Array[DialogueChoice])
 signal dialogue_ended(dialogue_id: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `DialogueService`。
 const SERVICE_ID: String = "dialogue"
-## 运行时状态：`runtime` 表示运行时数据，由 `DialogueService` 的公开 API 读取或维护。
+## 当前领域运行时对象；服务方法会在创建后复用它。
 var runtime: DialogueRuntime = null
 
 

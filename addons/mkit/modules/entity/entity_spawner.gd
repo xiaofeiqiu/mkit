@@ -10,7 +10,7 @@ extends Node
 signal entity_spawned(entity: Node, definition_id: String)
 ## 当 `EntitySpawner` 发生 `entity spawn failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal entity_spawn_failed(definition_id: String, reason: String)
-## 运行时状态：`content` 表示 `EntitySpawner` 的字段值，由 `EntitySpawner` 的公开 API 读取或维护。
+## 缓存的 ContentService 引用；生成实体前用于按 id 查找定义资源。
 var content: ContentService = null
 
 

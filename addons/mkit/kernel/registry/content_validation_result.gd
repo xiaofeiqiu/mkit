@@ -6,11 +6,11 @@ extends RefCounted
 ## 使用：当项目需要在内容注册中复用这段契约或状态时使用它。
 ## 示例：`var instance := ContentValidationResult.new()`
 
-## 运行时状态：`success` 表示 `ContentValidationResult` 的字段值，由 `ContentValidationResult` 的公开 API 读取或维护。
+## 执行或校验是否成功；失败时同时查看 errors、warnings 或 failure_reason。
 var success: bool = true
-## 运行时状态：`errors` 表示 `ContentValidationResult` 的字段值，由 `ContentValidationResult` 的公开 API 读取或维护。
+## 阻止内容通过校验的错误列表；为空表示没有致命问题。
 var errors: Array[String] = []
-## 运行时状态：`warnings` 表示 `ContentValidationResult` 的字段值，由 `ContentValidationResult` 的公开 API 读取或维护。
+## 允许继续运行但需要设计者检查的警告列表。
 var warnings: Array[String] = []
 
 

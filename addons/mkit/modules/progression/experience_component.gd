@@ -10,13 +10,13 @@ extends Saveable
 signal level_up(old_level: int, new_level: int)
 ## 当 `ExperienceComponent` 发生 `xp changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal xp_changed(current_xp: int, xp_to_next: int)
-## 编辑器配置：`curve` 表示 `ExperienceComponent` 的字段值，由 `ExperienceComponent` 的公开 API 读取或维护。
+## 经验曲线资源；为 null 时组件只能使用默认等级规则。
 @export var curve: ExperienceCurve = null
-## 编辑器配置：`starting_level` 表示 `ExperienceComponent` 的字段值，由 `ExperienceComponent` 的公开 API 读取或维护。
+## 初始化时的等级；应在 1 到曲线最大等级之间。
 @export var starting_level: int = 1
-## 运行时状态：`current_level` 表示当前值，由 `ExperienceComponent` 的公开 API 读取或维护。
+## 当前等级；获得经验后由 ExperienceComponent 更新。
 var current_level: int = 1
-## 运行时状态：`current_xp` 表示当前值，由 `ExperienceComponent` 的公开 API 读取或维护。
+## 当前等级内或累计的经验值；具体解释由 ExperienceCurve 约定。
 var current_xp: int = 0
 
 

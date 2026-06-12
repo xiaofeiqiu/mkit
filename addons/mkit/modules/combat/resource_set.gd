@@ -6,9 +6,9 @@ extends RefCounted
 ## 使用：当项目需要在战斗系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := ResourceSet.new()`
 
-## 运行时状态：`current` 表示当前值，由 `ResourceSet` 的公开 API 读取或维护。
+## 资源当前值表；key 为资源 id，value 为数值。
 var current: Dictionary = {}
-## 运行时状态：`max_value_provider` 表示最大值，由 `ResourceSet` 的公开 API 读取或维护。
+## 查询资源上限的回调；未设置时 ResourceSet 只能使用传入的默认上限。
 var max_value_provider: Callable = Callable()
 
 

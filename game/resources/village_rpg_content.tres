@@ -435,7 +435,6 @@ cooldown = 2.0
 cost_type = "mana"
 cost_amount = 10.0
 cast_time = 0.4
-range = 120.0
 tags = Array[String](["fire", "spell"])
 conditions = Array[ExtResource("3_5kn3j")]([SubResource("Resource_firebolt_cooldown_cond")])
 effects = Array[ExtResource("4_aj5jo")]([SubResource("Resource_firebolt_damage"), SubResource("Resource_firebolt_burn")])

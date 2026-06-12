@@ -6,17 +6,17 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `StatDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`stat_id` 表示稳定 id，由 `StatDefinition` 的公开 API 读取或维护。
+## ContentService 注册属性定义时使用的稳定 id；StatsComponent 的 base_stats 按它取值。
 @export var stat_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `StatDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`default_value` 表示 `StatDefinition` 的字段值，由 `StatDefinition` 的公开 API 读取或维护。
+## 该属性未被组件显式配置时使用的基础值。
 @export var default_value: float = 0.0
-## 编辑器配置：`min_value` 表示最小值，由 `StatDefinition` 的公开 API 读取或维护。
+## 属性计算后的最小允许值；使用 -INF 表示不限制下界。
 @export var min_value: float = -INF
-## 编辑器配置：`max_value` 表示最大值，由 `StatDefinition` 的公开 API 读取或维护。
+## 属性计算后的最大允许值；使用 INF 表示不限制上界。
 @export var max_value: float = INF
-## 编辑器配置：`is_percent` 表示 `StatDefinition` 的字段值，由 `StatDefinition` 的公开 API 读取或维护。
+## 该属性是否按百分比展示；只影响显示约定，不改变内部数值单位。
 @export var is_percent: bool = false
 
 

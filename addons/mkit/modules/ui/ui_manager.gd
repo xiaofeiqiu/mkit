@@ -12,15 +12,15 @@ signal screen_opened(screen_id: String)
 signal screen_closed(screen_id: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `UIManager`。
 const SERVICE_ID: String = "ui"
-## 编辑器配置：`screen_root_path` 表示资源或节点路径，由 `UIManager` 的公开 API 读取或维护。
+## 承载 UI screen 实例的根节点路径。
 @export var screen_root_path: NodePath = NodePath("ScreenRoot")
-## 编辑器配置：`screen_scene_map` 表示 `UIManager` 的字段值，由 `UIManager` 的公开 API 读取或维护。
+## UI screen id 到 PackedScene 路径或资源的映射表。
 @export var screen_scene_map: Dictionary = {}
-## 运行时状态：`screen_stack` 表示 `UIManager` 的字段值，由 `UIManager` 的公开 API 读取或维护。
+## 已打开 screen 的堆栈；最后一项是当前顶层 screen。
 var screen_stack: Array[String] = []
-## 运行时状态：`active_screens` 表示是否启用或当前激活状态，由 `UIManager` 的公开 API 读取或维护。
+## 当前实例化的 screen 表；key 为 screen id，value 为节点实例。
 var active_screens: Dictionary = {}
-## 运行时状态：`modal_screens` 表示 `UIManager` 的字段值，由 `UIManager` 的公开 API 读取或维护。
+## 以模态方式打开的 screen id 列表；用于阻止底层输入。
 var modal_screens: Array[String] = []
 
 

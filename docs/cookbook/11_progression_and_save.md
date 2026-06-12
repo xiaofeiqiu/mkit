@@ -154,6 +154,39 @@ func _unhandled_input(event: InputEvent) -> void:
 4. 关掉游戏重开 → `GameBootstrap` 自动载入，进度还在
 5. 打开 `user://save.json`（`%APPDATA%/Godot/app_userdata/...`）能看到 `roots.progression`、`roots.experience`、`entities.player.components` 等字段
 
+## 字段参考
+
+### Saveable
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `save_id` | String | 写入 `roots` 的 key；留空时回退到 owner（或自身）节点名 | 必填思维对待：多角色/多实例时务必各自唯一（见步骤 2）|
+| `save_scope` | String = "" | 存档分组名；空 = `"global"`。同 scope 的 payload 写入 `scopes.<scope>`，读档时按 scope 局部恢复——场景树缺失（还没进那个区域）也能先把数据灌回注册的 provider | 世界/区域状态想独立于全局恢复时（如 `"zone:village"`）|
+| `restore_order` | int = 0 | 读档时的恢复顺序，**数值小的先恢复** | B 的恢复依赖 A 已就位时，给 A 更小的值（如 ProgressionService 先于依赖货币的 UI 状态）|
+
+### EntitySaveAgent
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `entity_id` | String | 写入 `entities` 的 key，必须稳定且唯一 | 见步骤 4 |
+| `scene_path` | String = "" | 实体场景路径（`res://...tscn`），随存档记录，供实体重建 | 见步骤 4 |
+| `zone_id` | String = "" | 实体所属 `ZoneDefinition` id，随存档记录，供按区域恢复 | 见步骤 4 |
+| `root_path` | NodePath = "" | 收集组件的子树根；**留空取 owner**（整个实体场景）。agent 从这棵子树收集 `SaveableComponent` | agent 没挂在实体场景内，或只想收集某个子分支时显式指定 |
+| `restore_order` | int = 0 | 多个实体间的恢复顺序，小的先恢复 | 实体 A 的组件状态被实体 B 读档逻辑依赖时 |
+| `include_duck_participants` | bool = true | 是否收集加入 `ENTITY_SAVE_PARTICIPANT_GROUP` group 的 duck-typed 节点（步骤 4 的 `StanceState` 写法）| 想只认 `SaveableComponent`、屏蔽 group 成员时关掉 |
+
+### SaveService
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `save_path` | String = "user://save.json" | 存档文件路径；写入时先写 `.tmp` 再原子替换 | 多存档槽：按槽位换路径（如 `user://save_%s.json`）|
+| `save_version` | int = 1 | **应用层**存档版本号，原样写入 envelope；mkit 不解释它，供你的游戏做迁移或显示 | 你的存档内容结构变更时自增 |
+| `schema_version` | int = 2 | **mkit 结构**版本（roots/entities/scopes 布局）；读档时校验，旧版本走内置迁移，比 `CURRENT_SCHEMA_VERSION` 新则拒载 | 不要改，跟随 mkit |
+| `game_version` | String = "0.1.0" | 游戏版本字符串，原样写入 envelope，排查跨版本存档问题用 | 跟随你的发版号 |
+| `profile_id` | String = "profile_001" | 档案 id，原样写入 envelope；配合 `save_path` 实现多档案 | 多玩家档案系统：切换档案时一起换 `save_path` |
+
+> envelope 即 `user://save.json` 顶层结构：`schema_version / save_version / game_version / timestamp / profile_id / roots / entities / scopes`。
+
 ## 常见错误
 
 | 现象 | 原因 | 修复 |

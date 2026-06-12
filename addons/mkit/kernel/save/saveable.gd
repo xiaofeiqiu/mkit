@@ -6,11 +6,11 @@ extends Node
 ## 使用：当项目节点或对象需要参与 SaveService 的保存与恢复流程时使用它。
 ## 示例：`var instance := Saveable.new()`
 
-## 编辑器配置：`save_id` 表示稳定 id，由 `Saveable` 的公开 API 读取或维护。
+## 存档系统定位该对象时使用的稳定 id；同一 save_scope 内应保持唯一。
 @export var save_id: String = ""
-## 编辑器配置：`save_scope` 表示 `Saveable` 的字段值，由 `Saveable` 的公开 API 读取或维护。
+## 保存分组名称；为空时使用 SaveService 的默认范围。
 @export var save_scope: String = ""
-## 编辑器配置：`restore_order` 表示 `Saveable` 的字段值，由 `Saveable` 的公开 API 读取或维护。
+## 恢复存档时的排序权重；数值越小越早恢复。
 @export var restore_order: int = 0
 
 

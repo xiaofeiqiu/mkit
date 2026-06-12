@@ -6,7 +6,7 @@ extends RefCounted
 ## 使用：当项目需要在成长系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := Wallet.new()`
 
-## 运行时状态：`balances` 表示 `Wallet` 的字段值，由 `Wallet` 的公开 API 读取或维护。
+## 钱包余额表；key 为 currency id，value 为当前数量。
 var balances: Dictionary = {}
 
 

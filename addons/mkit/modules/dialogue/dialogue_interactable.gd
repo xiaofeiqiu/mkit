@@ -6,9 +6,9 @@ extends Interactable
 ## 使用：当项目需要在对话系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := DialogueInteractable.new()`
 
-## 编辑器配置：`dialogue_id` 表示稳定 id，由 `DialogueInteractable` 的公开 API 读取或维护。
+## 引用的 DialogueDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var dialogue_id: String = ""
-## 编辑器配置：`npc_id` 表示稳定 id，由 `DialogueInteractable` 的公开 API 读取或维护。
+## 触发对话的 NPC 或实体 id；用于事件归因和条件判断。
 @export var npc_id: String = ""
 
 

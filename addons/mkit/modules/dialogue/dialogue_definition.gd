@@ -6,11 +6,11 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `DialogueDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`dialogue_id` 表示稳定 id，由 `DialogueDefinition` 的公开 API 读取或维护。
+## ContentService 注册对话定义时使用的稳定 id；DialogueService 和交互点按它启动对话。
 @export var dialogue_id: String = ""
-## 编辑器配置：`start_node_id` 表示稳定 id，由 `DialogueDefinition` 的公开 API 读取或维护。
+## 对话开始时进入的 DialogueNode id；为空时由 DialogueService 选择默认节点。
 @export var start_node_id: String = ""
-## 编辑器配置：`nodes` 表示 `DialogueDefinition` 的字段值，由 `DialogueDefinition` 的公开 API 读取或维护。
+## 对话包含的节点列表；node_id 应在同一个 DialogueDefinition 内唯一。
 @export var nodes: Array[DialogueNode] = []
 
 

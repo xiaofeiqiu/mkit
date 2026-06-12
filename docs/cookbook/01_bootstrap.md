@@ -28,6 +28,16 @@
    - `database_id` = `"main"`
    - `resources` 暂时留空（后续 Recipe 会添加内容）
 
+`ResourceDatabase` 有两种放内容的方式，可以混用：
+
+| 字段 | 用法 | 什么时候用 |
+|------|------|-----------|
+| `database_id` | 数据库自身的稳定 id，只用于区分来源和排查重复配置 | 每个数据库都填一个短 id，如 `"main"`、`"dlc_1"` |
+| `resources` | 直接拖入 `.tres` Resource；编辑器会保存硬引用 | 入门、少量内容、希望在 Inspector 里直接看见资源时用 |
+| `resource_paths` | 填 `res://.../*.tres` 路径字符串，启动时由 `ResourceDatabase.get_all_resources()` 延迟 `load()` | 内容很多、想用文本 diff 管理路径、或不想逐个拖资源时用 |
+
+两者最终都会交给 `ContentService` 注册。`resource_paths` 里的路径必须能被 `load()` 成功加载；加载失败会输出 warning，该条资源不会注册。
+
 ### 步骤 2：创建 Bootstrap 场景
 
 1. 新建场景 → 根节点选 `Node`（或继承 `GameBootstrap`）

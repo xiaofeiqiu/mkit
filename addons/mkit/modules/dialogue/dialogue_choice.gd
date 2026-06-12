@@ -6,11 +6,11 @@ extends Resource
 ## 使用：当项目需要在对话系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := DialogueChoice.new()`
 
-## 编辑器配置：`text` 表示 `DialogueChoice` 的字段值，由 `DialogueChoice` 的公开 API 读取或维护。
+## 对话选项或节点展示文本；可为空但 UI 应处理空文本。
 @export_multiline var text: String = ""
-## 编辑器配置：`next_node_id` 表示稳定 id，由 `DialogueChoice` 的公开 API 读取或维护。
+## 选择后跳转到的 DialogueNode id；为空表示对话结束或保持在当前节点。
 @export var next_node_id: String = ""
-## 编辑器配置：`conditions` 表示执行条件列表，由 `DialogueChoice` 的公开 API 读取或维护。
+## 执行前按顺序求值的条件列表；任一条件失败时阻止本对象继续产生效果。
 @export var conditions: Array[Condition] = []
-## 编辑器配置：`effects` 表示效果列表，由 `DialogueChoice` 的公开 API 读取或维护。
+## 条件通过后按顺序执行的效果列表；每个元素应为 GameEffect 资源。
 @export var effects: Array[GameEffect] = []

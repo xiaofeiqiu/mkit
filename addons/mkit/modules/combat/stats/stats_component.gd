@@ -8,7 +8,7 @@ extends SaveableComponent
 
 ## 当 `StatsComponent` 发生 `stat changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal stat_changed(stat_id: String, old_value: float, new_value: float)
-## 编辑器配置：`base_stats` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
+## 实体基础属性表；key 为 stat id，value 为初始数值。
 @export var base_stats: Dictionary = {
 	"max_hp": 100.0,
 	"attack_power": 10.0,
@@ -24,11 +24,11 @@ signal stat_changed(stat_id: String, old_value: float, new_value: float)
 	"damage_multiplier": 1.0,
 	"healing_multiplier": 1.0
 }
-## 运行时状态：`modifiers_by_stat` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
+## 按 stat id 分组的运行时修饰器表。
 var modifiers_by_stat: Dictionary = {}
-## 运行时状态：`cached_values` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
+## 属性计算缓存；dirty_stats 标记后会在下次读取时刷新。
 var cached_values: Dictionary[String, float] = {}
-## 运行时状态：`dirty_stats` 表示 `StatsComponent` 的字段值，由 `StatsComponent` 的公开 API 读取或维护。
+## 需要重新计算的属性标记表；key 为 stat id。
 var dirty_stats: Dictionary[String, bool] = {}
 var _initial_base_stats: Dictionary = {}
 

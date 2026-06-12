@@ -14,11 +14,11 @@ const STATUS_ACTIVE: String = "active"
 const STATUS_COMPLETED: String = "completed"
 ## 公开常量 `STATUS_TURNED_IN`，作为 `QuestState` 对外暴露的类型、事件或命令标识。
 const STATUS_TURNED_IN: String = "turned_in"
-## 运行时状态：`quest_id` 表示稳定 id，由 `QuestState` 的公开 API 读取或维护。
+## 引用的 QuestDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var quest_id: String = ""
-## 运行时状态：`status` 表示 `QuestState` 的字段值，由 `QuestState` 的公开 API 读取或维护。
+## 任务当前状态；应使用 QuestState 提供的 STATUS_* 常量。
 var status: String = STATUS_AVAILABLE
-## 运行时状态：`objective_progress` 表示 `QuestState` 的字段值，由 `QuestState` 的公开 API 读取或维护。
+## 任务目标进度表；key 为 objective id，value 为累计数量。
 var objective_progress: Dictionary = {}
 
 

@@ -10,7 +10,7 @@ extends Area2D
 signal interactable_focused(interactable: Interactable)
 ## 当 `InteractionComponent` 发生 `interactable unfocused` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal interactable_unfocused(interactable: Interactable)
-## 运行时状态：`current_interactable` 表示当前值，由 `InteractionComponent` 的公开 API 读取或维护。
+## 当前处于可交互范围内的对象；没有目标时为 null。
 var current_interactable: Interactable = null
 
 

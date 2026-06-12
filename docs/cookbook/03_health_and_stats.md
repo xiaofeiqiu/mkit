@@ -159,6 +159,55 @@ Entity died: player_12345               ← 10次后 HP 归零
 
 在 Remote 调试器可查看 `HealthComponent.current_hp` 的实时变化。
 
+## 字段参考
+
+### StatsComponent
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `base_stats` | Dictionary（默认含 max_hp / attack_power / defense / move_speed / max_mana / max_stamina / attack_speed / crit_chance / crit_damage / cooldown_reduction / luck / damage_multiplier / healing_multiplier）| 实体基础属性表，key 为 stat id。`max_<资源id>` 还兼任 `ResourcePoolComponent` 对应池的上限（如 `max_mana`，[Recipe 05](05_ability.md) 步骤 3 依赖它）| 见步骤 1；可自由加自定义 stat id |
+
+### HealthComponent
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `current_hp` | float = 100.0 | 当前生命值；`_ready` 时被夹到 `max_hp`（来自 StatsComponent，无则 100）以内 | 见步骤 1 |
+| `destroy_on_death` | bool = false | 死亡时是否自动 `queue_free()` 拥有者实体。敌人通常 `true`（掉落/事件已在释放前广播）；玩家保持 `false`，由游戏逻辑接管死亡演出（步骤 5）| 敌人实体设 `true`（[Recipe 06](06_ai_enemy.md)）|
+
+### StatDefinition（可选——用 .tres 描述属性的元信息）
+
+`base_stats` 直接用字符串 key 即可工作；当你需要给属性面板、编辑器校验或游戏侧规则提供元信息时，才建一个 `StatDefinition` 入库。当前 `StatsComponent` 的数值计算**不自动读取** `StatDefinition.default_value/min_value/max_value`：运行时基础值来自 `base_stats`，夹取要靠 `StatModifierDefinition.CLAMP_MIN/CLAMP_MAX` 或你的游戏代码执行。
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `stat_id` | String = "" | 稳定 id，对应 `base_stats` 的 key | 必填 |
+| `display_name` | String = "" | UI 显示名 | 做属性面板时填 |
+| `default_value` | float = 0.0 | 属性的设计默认值/显示默认值。**当前 `StatsComponent.get_stat_value()` 不会自动回退到这里**；需要时由 UI、内容校验或你的游戏代码读取 | 给属性面板、模板生成器或自定义校验用 |
+| `min_value` / `max_value` | float = -INF / INF | 属性允许范围的元信息；±INF = 不限制。**当前运行时不会自动按它 clamp** | UI 输入限制、内容校验；运行时夹取请用 `CLAMP_MIN/CLAMP_MAX` modifier |
+| `is_percent` | bool = false | 是否按百分比**显示**（0.05 → "5%"）；只影响 UI 约定，不改变数值计算 | `crit_chance`、`cooldown_reduction` 等设 `true` |
+
+### StatModifierDefinition（buff / 装备改属性的最小单元）
+
+挂在 `StatusEffectDefinition.stat_modifiers`（[Recipe 12](12_status_effects.md)）或装备上，由 `StatsComponent.add_modifier` 参与计算：
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `modifier_id` | String = "" | 修饰器 id；`remove_modifier` 按它移除，`UNIQUE` 等叠加规则按它判重 | 必填 |
+| `stat_id` | String = "" | 修改哪个属性（`base_stats` 的 key）| 必填 |
+| `operation` | enum = FLAT_ADD | 运算类型，6 个取值（计算顺序固定，见下）：<br>`FLAT_ADD` — 加法：所有 FLAT_ADD 先求和加到基础值<br>`PERCENT_ADD` — 加法百分比：所有 PERCENT_ADD 求和后 `×(1 + 总和)`（0.1 = +10%，两个 0.1 = +20%）<br>`PERCENT_MULTIPLY` — 乘法百分比：逐个连乘（两个 1.1 = ×1.21）<br>`OVERRIDE` — 无视前面全部计算直接覆盖为 value（多个 OVERRIDE 时 priority 最大的生效）<br>`CLAMP_MIN` / `CLAMP_MAX` — 最后把结果夹到下限/上限（多个时取最严格的）<br>完整公式：`(base + ΣFLAT) × (1 + ΣPERCENT_ADD) × ΠPERCENT_MULTIPLY → OVERRIDE → CLAMP` | buff 加攻用 FLAT_ADD；"伤害提高 20%" 用 PERCENT_ADD；"虚弱：攻击减半" 用 PERCENT_MULTIPLY(0.5) |
+| `value` | float = 0.0 | 数值；含义随 operation 变化（FLAT_ADD 是加量，PERCENT_MULTIPLY 是倍率）| 必填 |
+| `priority` | int = 0 | 排序优先级，数值小的先参与。对 FLAT_ADD / PERCENT_ADD（求和）和 CLAMP（取最严）**没有影响**；只影响多个 `OVERRIDE` 之间谁最终生效（排序靠后者赢）| 多 OVERRIDE 冲突时才需要 |
+| `stacking_rule` | enum = STACK | 重复 `add_modifier` 时的去重规则，5 个取值：<br>`STACK` — 无脑共存，全部参与计算<br>`REPLACE_SAME_SOURCE` — 同 `source_id` + 同 `modifier_id` 的旧条目被替换（同一来源刷新自己的 buff）<br>`HIGHEST_ONLY` — 同 `modifier_id` 只留 value 最大的（新值更小则拒绝加入）<br>`LOWEST_ONLY` — 同上但留最小<br>`UNIQUE` — 同 `modifier_id` 只留最新一条，无视来源 | 可叠的毒用 STACK；不同来源的同名光环不叠加用 UNIQUE |
+| `tags` | Array[String] = [] | 标签；供查询/事件过滤，mkit 不做规则判定 | 一般留空 |
+
+> `StatModifierDefinition` 是静态定义；运行时实际挂到组件上的是 `StatModifier`（带 `source_id`、`remaining_duration`）。状态效果到期时按 `source_id`（= 状态实例 id）整组移除。
+
+### ResourcePoolComponent
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `starting_values` | Dictionary = {} | 资源池**当前值**初值表，如 `{"mana": 50.0}`。上限不在这里配——来自 StatsComponent 的 `max_<资源id>` stat；不写的资源默认满值开局。它是技能 `cost_type` 的扣费来源（[Recipe 05](05_ability.md) 步骤 3 完整演示）| 半蓝/空怒气开局时填 |
+
 ## 常见错误
 
 | 现象 | 原因 | 修复 |

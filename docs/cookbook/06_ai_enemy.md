@@ -52,6 +52,7 @@ EnemyEntity  (EntityRoot)
 - `detection_range` = `240.0`（像素）
 - `attack_range` = `48.0`
 - `target_group` = `"player"`（通过 `get_first_node_in_group("player")` 找玩家）
+- `enabled` = `true`（运行时关掉后 Brain 保留在场景树里，但不再思考或发命令）
 - `think_interval` = `0.2`（每 0.2 秒决策一次）
 
 `SimpleAIEnemyBrain` 内部逻辑：
@@ -60,6 +61,8 @@ EnemyEntity  (EntityRoot)
 - 距离 ≤ attack_range → `ATTACK`
 
 命令发给**自身**（`target_id = self.entity_id`），由敌人自己的 `CommandReceiver` 直接接收。
+
+`Brain.enabled` 是剧情、暂停、过场冻结敌人的开关：设为 `false` 后 `_process()` 会直接返回，不会累计 `think_interval`，也不会调用 `think()`。重新设回 `true` 后会从当前计时继续思考；如果希望立即重算，可在你的游戏代码里直接调用 `think()`。
 
 ### 步骤 3：实现敌人状态
 

@@ -20,15 +20,15 @@ const SERVICE_ID: String = "save"
 const DEFAULT_SCOPE: String = "global"
 ## 公开常量 `CURRENT_SCHEMA_VERSION`，作为 `SaveService` 对外暴露的类型、事件或命令标识。
 const CURRENT_SCHEMA_VERSION: int = 2
-## 编辑器配置：`save_path` 表示资源或节点路径，由 `SaveService` 的公开 API 读取或维护。
+## 存档文件路径；通常使用 user://，为空时调用方应显式决定是否跳过读写。
 @export var save_path: String = "user://save.json"
-## 编辑器配置：`save_version` 表示 `SaveService` 的字段值，由 `SaveService` 的公开 API 读取或维护。
+## 写入存档的应用存档版本；用于迁移或显示。
 @export var save_version: int = 1
-## 编辑器配置：`schema_version` 表示 `SaveService` 的字段值，由 `SaveService` 的公开 API 读取或维护。
+## 存档结构版本；SaveService 用它判断当前读取逻辑是否兼容。
 @export var schema_version: int = CURRENT_SCHEMA_VERSION
-## 编辑器配置：`game_version` 表示 `SaveService` 的字段值，由 `SaveService` 的公开 API 读取或维护。
+## 写入存档的游戏版本字符串；用于排查跨版本存档问题。
 @export var game_version: String = "0.1.0"
-## 编辑器配置：`profile_id` 表示稳定 id，由 `SaveService` 的公开 API 读取或维护。
+## 默认存档档案 id；多档案系统可用它区分玩家档案。
 @export var profile_id: String = "profile_001"
 var _registered_scopes: Dictionary = {}
 

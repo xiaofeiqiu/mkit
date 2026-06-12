@@ -6,19 +6,19 @@ extends RefCounted
 ## 使用：当项目需要在能力系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := AbilityInstance.new()`
 
-## 运行时状态：`definition_id` 表示稳定 id，由 `AbilityInstance` 的公开 API 读取或维护。
+## 该能力实例来源的 AbilityDefinition id。
 var definition_id: String = ""
-## 运行时状态：`owner` 表示 `AbilityInstance` 的字段值，由 `AbilityInstance` 的公开 API 读取或维护。
+## 拥有该运行时对象的节点；通常是发起能力、物品或状态的实体。
 var owner: Node = null
-## 运行时状态：`cooldown_remaining` 表示冷却时间，由 `AbilityInstance` 的公开 API 读取或维护。
+## 距离下一次可回充或可施放的剩余秒数。
 var cooldown_remaining: float = 0.0
-## 运行时状态：`current_charges` 表示当前值，由 `AbilityInstance` 的公开 API 读取或维护。
+## 当前可用层数；施放时减少，冷却周期结束后回充但不超过定义上限。
 var current_charges: int = 1
-## 运行时状态：`runtime_level` 表示运行时数据，由 `AbilityInstance` 的公开 API 读取或维护。
+## 运行时能力等级；可用于按等级缩放效果或消耗。
 var runtime_level: int = 1
-## 运行时状态：`enabled` 表示是否启用，由 `AbilityInstance` 的公开 API 读取或维护。
+## 是否启用该运行逻辑；关闭后节点保留但不主动思考或执行。
 var enabled: bool = true
-## 运行时状态：`temporary_modifiers` 表示 `AbilityInstance` 的字段值，由 `AbilityInstance` 的公开 API 读取或维护。
+## 能力实例上的临时覆盖值；key 由调用方约定，用于短期强化或削弱。
 var temporary_modifiers: Dictionary = {}
 var _definition: AbilityDefinition = null
 var _recharge_duration: float = 0.0

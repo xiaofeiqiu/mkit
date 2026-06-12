@@ -14,21 +14,21 @@ signal room_enter_requested(room_id: String)
 signal choosing_reward(options: Array[RewardOption])
 ## 当 `RunDirector` 发生 `run finished` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal run_finished(result: String)
-## 编辑器配置：`first_floor_room_pool` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
+## 第一层可抽取的 RoomDefinition id 列表。
 @export var first_floor_room_pool: Array[String] = []
-## 编辑器配置：`room_scene_container_path` 表示资源或节点路径，由 `RunDirector` 的公开 API 读取或维护。
+## 承载当前房间场景实例的容器节点路径。
 @export var room_scene_container_path: NodePath = NodePath("../RoomRoot")
-## 编辑器配置：`player_group` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
+## 查找玩家实体时使用的 Godot 分组名称。
 @export var player_group: String = "player"
-## 编辑器配置：`player_entity_id` 表示稳定 id，由 `RunDirector` 的公开 API 读取或维护。
+## 进入本局时使用的玩家实体 id；应指向已注册的 EntityDefinition 或场景实体。
 @export var player_entity_id: String = "player_001"
-## 编辑器配置：`run_length` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
+## 本局包含的房间或楼层数量。
 @export var run_length: int = 3
-## 运行时状态：`run_state` 表示运行时状态，由 `RunDirector` 的公开 API 读取或维护。
+## 当前本局的运行状态；未开始时为 null。
 var run_state: RunState = null
-## 运行时状态：`room_graph` 表示 `RunDirector` 的字段值，由 `RunDirector` 的公开 API 读取或维护。
+## 当前本局生成的房间图。
 var room_graph: RoomGraph = null
-## 运行时状态：`current_room_controller` 表示当前值，由 `RunDirector` 的公开 API 读取或维护。
+## 当前正在运行的房间控制器；离开房间后更新。
 var current_room_controller: RoomController = null
 var _events_connected: bool = false
 var _pending_room_runtime: RoomRuntime = null

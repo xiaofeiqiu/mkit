@@ -10,9 +10,9 @@ extends RefCounted
 const SERVICE_ID: String = "effects"
 ## 已执行 effect 的调试环形缓冲区；默认关闭，调试 UI 或测试可显式开启。
 var trace_enabled: bool = false
-## 运行时状态：`recent_results` 表示执行结果集合，由 `EffectService` 的公开 API 读取或维护。
+## EffectService 最近执行结果的环形历史；用于调试和测试观察。
 var recent_results: Array[EffectResult] = []
-## 运行时状态：`max_recent_results` 表示执行结果集合，由 `EffectService` 的公开 API 读取或维护。
+## EffectService 保留的结果数量上限；超过后丢弃最旧结果。
 var max_recent_results: int = 100
 
 

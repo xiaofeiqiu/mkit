@@ -16,7 +16,7 @@ signal item_sold(item_id: String, quantity: int, total_gain: int)
 signal transaction_failed(item_id: String, reason: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `ShopService`。
 const SERVICE_ID: String = "shop"
-## 运行时状态：`current_shop` 表示当前值，由 `ShopService` 的公开 API 读取或维护。
+## 当前打开或操作的商店定义；没有商店会话时为 null。
 var current_shop: ShopDefinition = null
 
 

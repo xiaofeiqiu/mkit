@@ -6,17 +6,17 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `ZoneDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`zone_id` 表示稳定 id，由 `ZoneDefinition` 的公开 API 读取或维护。
+## ContentService 注册区域定义时使用的稳定 id；WorldService 切换区域时按它查找场景。
 @export var zone_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `ZoneDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`scene_path` 表示资源或节点路径，由 `ZoneDefinition` 的公开 API 读取或维护。
+## 要加载或实例化的场景路径；应填写 res:// 开头的 .tscn 资源。
 @export var scene_path: String = ""
-## 编辑器配置：`bgm_id` 表示稳定 id，由 `ZoneDefinition` 的公开 API 读取或维护。
+## 进入区域时播放的 AudioDefinition id；为空表示不切换音乐。
 @export var bgm_id: String = ""
-## 编辑器配置：`default_spawn_id` 表示稳定 id，由 `ZoneDefinition` 的公开 API 读取或维护。
+## 区域默认出生点 id；Portal 没有指定 spawn 时使用。
 @export var default_spawn_id: String = "default"
-## 编辑器配置：`tags` 表示标签集合，由 `ZoneDefinition` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
 
 

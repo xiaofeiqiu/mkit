@@ -6,13 +6,13 @@ extends Area2D
 ## 使用：当项目实体需要持有可保存或可被 controller 查询的局部状态时使用它。
 ## 示例：`var instance := HurtboxComponent.new()`
 
-## 编辑器配置：`owner_path` 表示资源或节点路径，由 `HurtboxComponent` 的公开 API 读取或维护。
+## Hurtbox 向上查找拥有者的 NodePath；默认指向实体根节点。
 @export var owner_path: NodePath = NodePath("../..")
-## 编辑器配置：`can_receive_damage` 表示 `HurtboxComponent` 的字段值，由 `HurtboxComponent` 的公开 API 读取或维护。
+## 是否允许该 Hurtbox 接收伤害；关闭后忽略传入命中。
 @export var can_receive_damage: bool = true
-## 编辑器配置：`damage_multiplier` 表示 `HurtboxComponent` 的字段值，由 `HurtboxComponent` 的公开 API 读取或维护。
+## 受到伤害时应用的倍率；1 为原始伤害，0 表示免疫。
 @export var damage_multiplier: float = 1.0
-## 编辑器配置：`damage_tags` 表示标签集合，由 `HurtboxComponent` 的公开 API 读取或维护。
+## Hurtbox 为传入伤害补充的标签；可用于部位、护甲或弱点规则。
 @export var damage_tags: Array[String] = []
 
 

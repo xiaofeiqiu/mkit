@@ -6,11 +6,11 @@ extends Resource
 ## 使用：当项目需要在效果管线中复用这段契约或状态时使用它。
 ## 示例：`var instance := GameEffect.new()`
 
-## 编辑器配置：`effect_id` 表示稳定 id，由 `GameEffect` 的公开 API 读取或维护。
+## 效果的稳定 id；用于日志、调试和需要按 id 引用效果的配置。
 @export var effect_id: String = ""
-## 编辑器配置：`conditions` 表示执行条件列表，由 `GameEffect` 的公开 API 读取或维护。
+## 执行前按顺序求值的条件列表；任一条件失败时阻止本对象继续产生效果。
 @export var conditions: Array[Condition] = []
-## 编辑器配置：`tags` 表示标签集合，由 `GameEffect` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
 
 

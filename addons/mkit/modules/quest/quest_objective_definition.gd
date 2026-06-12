@@ -6,19 +6,19 @@ extends Resource
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `QuestObjectiveDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`objective_id` 表示稳定 id，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## 任务内部引用该目标的稳定 id；同一 QuestDefinition 的 objectives 中应保持唯一。
 @export var objective_id: String = ""
-## 编辑器配置：`description` 表示说明文本，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## 面向玩家或设计者的说明文本；用于 UI、提示和文档，不参与规则判定。
 @export_multiline var description: String = ""
-## 编辑器配置：`event_type` 表示 `QuestObjectiveDefinition` 的字段值，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## 事件类型字符串；发布或匹配 DomainEvent 时必须与订阅方约定一致。
 @export var event_type: String = ""
-## 编辑器配置：`match_key` 表示 `QuestObjectiveDefinition` 的字段值，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## 匹配 DomainEvent.payload 时读取的 key；为空表示不检查 payload key。
 @export var match_key: String = ""
-## 编辑器配置：`match_value` 表示 `QuestObjectiveDefinition` 的字段值，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## payload 对应 key 需要匹配的字符串值；为空表示只检查 key 是否存在或跳过值检查。
 @export var match_value: String = ""
-## 编辑器配置：`count_payload_key` 表示事件或存档载荷，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## 从 DomainEvent.payload 读取进度增量的 key；为空时使用固定 amount 或 1。
 @export var count_payload_key: String = ""
-## 编辑器配置：`required_count` 表示数量上限或计数，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## 目标完成所需累计数量；达到或超过该值即完成。
 @export var required_count: int = 1
-## 编辑器配置：`optional` 表示 `QuestObjectiveDefinition` 的字段值，由 `QuestObjectiveDefinition` 的公开 API 读取或维护。
+## 是否为可选目标；可选目标不阻止任务完成。
 @export var optional: bool = false

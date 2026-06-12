@@ -6,33 +6,33 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `ItemDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`item_id` 表示稳定 id，由 `ItemDefinition` 的公开 API 读取或维护。
+## ContentService 注册物品定义时使用的稳定 id；背包、掉落和商店按它查找物品。
 @export var item_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `ItemDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`description` 表示说明文本，由 `ItemDefinition` 的公开 API 读取或维护。
+## 面向玩家或设计者的说明文本；用于 UI、提示和文档，不参与规则判定。
 @export_multiline var description: String = ""
-## 编辑器配置：`item_type` 表示 `ItemDefinition` 的字段值，由 `ItemDefinition` 的公开 API 读取或维护。
+## 物品类型字符串；例如 material、consumable、equipment，由游戏约定扩展。
 @export var item_type: String = "material"
-## 编辑器配置：`rarity` 表示 `ItemDefinition` 的字段值，由 `ItemDefinition` 的公开 API 读取或维护。
+## 稀有度字符串；用于 UI 样式、掉落权重或奖励展示。
 @export var rarity: String = "common"
-## 编辑器配置：`value` 表示 `ItemDefinition` 的字段值，由 `ItemDefinition` 的公开 API 读取或维护。
+## 物品基础货币价值；商店买卖会在此基础上应用价格倍率或覆盖价。
 @export var value: int = 0
-## 编辑器配置：`icon` 表示 `ItemDefinition` 的字段值，由 `ItemDefinition` 的公开 API 读取或维护。
+## UI 展示用图标资源；为 null 时界面应使用默认图标或隐藏图标位。
 @export var icon: Texture2D
-## 编辑器配置：`stackable` 表示 `ItemDefinition` 的字段值，由 `ItemDefinition` 的公开 API 读取或维护。
+## 物品是否可以堆叠；关闭后每个实例独占一个槽位。
 @export var stackable: bool = true
-## 编辑器配置：`max_stack` 表示最大值，由 `ItemDefinition` 的公开 API 读取或维护。
+## 单槽最大堆叠数量；仅在 stackable 为 true 时生效。
 @export var max_stack: int = 99
-## 编辑器配置：`equipment_slot` 表示 `ItemDefinition` 的字段值，由 `ItemDefinition` 的公开 API 读取或维护。
+## 装备物品可放入的槽位 id；为空表示不可装备。
 @export var equipment_slot: String = ""
-## 编辑器配置：`tags` 表示标签集合，由 `ItemDefinition` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
-## 编辑器配置：`use_conditions` 表示执行条件列表，由 `ItemDefinition` 的公开 API 读取或维护。
+## 使用物品前需要通过的条件列表。
 @export var use_conditions: Array[Condition] = []
-## 编辑器配置：`use_effects` 表示效果列表，由 `ItemDefinition` 的公开 API 读取或维护。
+## 物品使用成功后执行的效果列表。
 @export var use_effects: Array[GameEffect] = []
-## 编辑器配置：`stat_modifiers` 表示 `ItemDefinition` 的字段值，由 `ItemDefinition` 的公开 API 读取或维护。
+## 状态或装备提供的属性修饰列表；应用后由 StatsComponent 参与计算。
 @export var stat_modifiers: Array[StatModifierDefinition] = []
 
 

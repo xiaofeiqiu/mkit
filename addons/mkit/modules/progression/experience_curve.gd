@@ -6,13 +6,13 @@ extends Resource
 ## 使用：当项目需要在成长系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := ExperienceCurve.new()`
 
-## 编辑器配置：`max_level` 表示最大值，由 `ExperienceCurve` 的公开 API 读取或维护。
+## 可达到的最高等级；达到后继续获得经验不再提升等级。
 @export var max_level: int = 20
-## 编辑器配置：`xp_thresholds` 表示 `ExperienceCurve` 的字段值，由 `ExperienceCurve` 的公开 API 读取或维护。
+## 各等级所需经验阈值；非空时优先于 base_xp/growth_factor 公式。
 @export var xp_thresholds: Array[int] = []
-## 编辑器配置：`base_xp` 表示 `ExperienceCurve` 的字段值，由 `ExperienceCurve` 的公开 API 读取或维护。
+## 公式生成经验阈值时的基础经验。
 @export var base_xp: int = 100
-## 编辑器配置：`growth_factor` 表示 `ExperienceCurve` 的字段值，由 `ExperienceCurve` 的公开 API 读取或维护。
+## 公式生成经验阈值时的成长倍率；值越大后期升级越慢。
 @export var growth_factor: float = 1.5
 
 

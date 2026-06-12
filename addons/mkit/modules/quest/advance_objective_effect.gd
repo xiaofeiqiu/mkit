@@ -6,11 +6,11 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := AdvanceObjectiveEffect.new()`
 
-## 编辑器配置：`quest_id` 表示稳定 id，由 `AdvanceObjectiveEffect` 的公开 API 读取或维护。
+## 引用的 QuestDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var quest_id: String = ""
-## 编辑器配置：`objective_id` 表示稳定 id，由 `AdvanceObjectiveEffect` 的公开 API 读取或维护。
+## 引用的 QuestObjectiveDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var objective_id: String = ""
-## 编辑器配置：`amount` 表示数量值，由 `AdvanceObjectiveEffect` 的公开 API 读取或维护。
+## 要增加的任务目标进度；通常为正整数。
 @export var amount: int = 1
 
 

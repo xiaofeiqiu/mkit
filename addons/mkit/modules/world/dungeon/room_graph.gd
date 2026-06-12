@@ -6,11 +6,11 @@ extends RefCounted
 ## 使用：当项目需要在房间与一局流程系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := RoomGraph.new()`
 
-## 运行时状态：`nodes` 表示 `RoomGraph` 的字段值，由 `RoomGraph` 的公开 API 读取或维护。
+## 房间图中的节点列表；每个 RoomNode 代表一个可进入房间。
 var nodes: Array[RoomNode] = []
-## 运行时状态：`start_node` 表示 `RoomGraph` 的字段值，由 `RoomGraph` 的公开 API 读取或维护。
+## 本局房间图的起点节点。
 var start_node: RoomNode = null
-## 运行时状态：`boss_node` 表示 `RoomGraph` 的字段值，由 `RoomGraph` 的公开 API 读取或维护。
+## 本局房间图的终点或 Boss 节点；没有 Boss 时可为 null。
 var boss_node: RoomNode = null
 
 

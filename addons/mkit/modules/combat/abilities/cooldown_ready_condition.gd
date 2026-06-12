@@ -6,7 +6,7 @@ extends Condition
 ## 使用：当项目内容入口需要在执行前做可复用的规则判断时使用它。
 ## 示例：`var instance := CooldownReadyCondition.new()`
 
-## 编辑器配置：`ability_id` 表示稳定 id，由 `CooldownReadyCondition` 的公开 API 读取或维护。
+## 引用的 AbilityDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var ability_id: String = ""
 
 

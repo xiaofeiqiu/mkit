@@ -6,15 +6,15 @@ extends Node
 ## 使用：当项目需要在实体系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := EntityIdentity.new()`
 
-## 编辑器配置：`entity_id` 表示稳定 id，由 `EntityIdentity` 的公开 API 读取或维护。
+## 运行时实体 id；保存、命令路由和事件归因使用它定位同一个实体。
 @export var entity_id: String = ""
-## 编辑器配置：`definition_id` 表示稳定 id，由 `EntityIdentity` 的公开 API 读取或维护。
+## 实体使用的 EntityDefinition id；为空表示该实体没有绑定静态定义。
 @export var definition_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `EntityIdentity` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`faction` 表示 `EntityIdentity` 的字段值，由 `EntityIdentity` 的公开 API 读取或维护。
+## 实体阵营标识；战斗过滤、AI 和交互规则可用它判断敌友。
 @export var faction: String = "neutral"
-## 编辑器配置：`tags` 表示标签集合，由 `EntityIdentity` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
 
 

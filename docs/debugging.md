@@ -26,6 +26,15 @@ if overlay != null:
     overlay.toggle()
 ```
 
+配置项语义：
+
+| 字段 | 含义 | 什么时候改 |
+|------|------|-----------|
+| `watch_entity_path` | 指向要观察的实体节点；DebugOverlay 会显示该实体的 `StateMachine` 当前路径、最近命令和 HP | 主要看玩家时填玩家；排查敌人/交互对象时临时改到对应节点 |
+| `status_provider_path` | 指向一个实现 `get_debug_status_lines() -> Array[String]` 的节点；返回的每行文本会插入 overlay | 想把 zone、run、交互 focus、最近失败 effect 等项目自定义诊断合进同一块面板时填 |
+| `visible_on_start` | overlay 进树后是否默认可见；无论初始值如何，都可用 `toggle()` 切换 | 正常开发设 `true`，录屏或发版调试场景设 `false` |
+| `show_registered_services` | 是否显示 `ServiceRegistry.get_registered_service_ids()` 的结果 | 服务注册排查时开；屏幕空间紧张时关 |
+
 也可实现 `get_debug_status_lines() -> Array[String]` 方法挂到 `status_provider_path`，注入自定义行。
 
 demo 的 `game/village_rpg_demo.gd` 已通过 `status_provider_path` 聚合当前 zone、run 状态、交互 focus、最近 failed command、最近 failed effect 和 missing service。普通 HUD 保留玩家信息，开发诊断优先看 DebugOverlay。

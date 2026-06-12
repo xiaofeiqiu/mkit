@@ -6,9 +6,9 @@ extends GameAction
 ## 使用：当项目行为需要跨帧执行、可取消，或在开始/完成时触发效果时使用它。
 ## 示例：`var instance := CastAction.new()`
 
-## 运行时状态：`duration` 表示持续时间，由 `CastAction` 的公开 API 读取或维护。
+## 施放动作持续时间，单位为秒；到时后触发能力效果。
 var duration: float = 0.0
-## 运行时状态：`animation_name` 表示 `CastAction` 的字段值，由 `CastAction` 的公开 API 读取或维护。
+## 施放或动作播放的动画名称；目标 AnimationPlayer 不存在该动画时应安全跳过。
 var animation_name: String = "cast"
 var _started_animation: bool = false
 

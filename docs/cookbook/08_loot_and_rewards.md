@@ -117,6 +117,46 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 
 `GrantItemEffect` 找不到 `Controllers/InventoryController` 会返回失败，奖励链中断且不推进房间——所以背包必须先就位。
 
+### 步骤 7：（可选）敌人死亡掉落（LootTable）
+
+`RewardDefinition` 是"三选一"奖励；loot 模块的另一半是 **`LootTableDefinition` + `LootEntry`** ——按权重 roll 的掉落表（敌人掉材料、宝箱出装备）。两者都由 `LootService` 驱动，但入口不同：奖励走 `generate_options()`（无放回抽 N 个供玩家选择），掉落表走 `roll_table()`（独立 roll N 次，直接给出 `ItemInstance` 结果）。
+
+新建 Resource → `LootTableDefinition`，存为 `res://data/loot/field_beast_drops.tres` 并入库：
+
+| 字段 | 值 |
+|------|----|
+| `loot_table_id` | `"loot.field_beast"` |
+| `rolls` | `2`（独立 roll 两次）|
+| `allow_empty` | `true` |
+| `empty_weight` | `1.0`（"什么都不掉"占 1.0 权重参与抽签）|
+| `entries` | 两个 `LootEntry`（Inspector 内嵌创建，见下）|
+
+两个 `LootEntry`：
+
+- 兽皮：`content_id="item.beast_hide"`, `weight=3.0`, `min_quantity=1`, `max_quantity=2`
+- 兽牙：`content_id="item.beast_fang"`, `weight=1.0`（每次 roll 选中概率 = 1.0 / (1.0+3.0+1.0) = 20%）
+
+`content_id` 指向 `ItemDefinition`（按步骤 6 的方式创建并入库），玩家需有 `InventoryController` 接收。监听敌人死亡并 roll：
+
+```gdscript
+# res://game/main.gd（在 _ready 中追加）
+Mkit.events().subscribe(CombatEvents.ENTITY_DIED, _on_enemy_died)
+
+
+func _on_enemy_died(event: DomainEvent) -> void:
+    if event.payload.get("faction", "") != "enemy":
+        return
+    var player := get_tree().get_first_node_in_group("player")
+    var result := Mkit.loot().roll_table(
+        "loot.field_beast", GameplayContext.from_nodes(player, player)
+    )
+    var inventory := EntityContract.get_controller(player, "InventoryController") as InventoryController
+    for item in result.item_instances:
+        inventory.add_item(item)  # ItemInstance：definition_id + 已 roll 好的 quantity
+```
+
+`roll()` 每次先用 `ConditionEvaluator` 过滤 entries（条件失败的不进掉落池），再把 `empty_weight`（若 `allow_empty`）与各 entry 的 `weight` 加总抽签；选中后在 `min_quantity..max_quantity` 间随机数量。`result.debug_rolls` 记录每次 roll 的明细，调概率时直接 print 它。
+
 ## 运行验证
 
 1. 清空房间 → 弹出奖励界面，列出 3 个选项的 `display_name` + `description`
@@ -124,6 +164,41 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 3. 控制台可见 `reward_selected` 事件（`EventService.recent_events`）
 4. 选择后界面关闭，加载下一个房间
 5. 没有 UIManager 时（调试退化路径）：自动选第一个并继续
+6. （做了步骤 7）杀敌后背包出现 `item.beast_hide` / `item.beast_fang`；`result.debug_rolls` 可见每次 roll 的权重明细
+
+## 字段参考
+
+### RewardDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `reward_id` | String | ContentService 注册与查询用的稳定 id | 必填，全局唯一（见步骤 1）|
+| `display_name` | String | 选项按钮标题等 UI 文案，不参与规则 | 见步骤 1 |
+| `description` | String | 面向玩家的说明文本，UI 展示用 | 见步骤 1 |
+| `icon` | Texture2D = null | 奖励图标；mkit 不读取，随 `RewardOption.icon` 透传给你的 UI 渲染（参考 [Recipe 18](18_ui_hud.md)）| 自绘奖励卡片时 |
+| `rarity` | String = "common" | 稀有度字符串；随 `RewardOption.rarity` 透传，供 UI 样式（描边颜色等）使用，内置抽取逻辑不读取 | UI 想按稀有度区分样式时 |
+| `weight` | float = 1.0 | `generate_options()` 无放回抽取的权重，越大越常出现；0 = 不会被自然抽中 | 见步骤 1 |
+| `conditions` | Array[Condition] = [] | 生成选项前求值，任一失败则该奖励不进候选池（如"持有钥匙才出现宝箱奖励"）| 奖励要按条件出现时，详见 [Recipe 21](21_conditions.md) |
+| `effects` | Array[GameEffect] = [] | 玩家选中后按顺序执行；**全部成功**才推进房间 | 见步骤 1 |
+
+### LootTableDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `loot_table_id` | String | ContentService 注册与查询用的稳定 id，`roll_table()` 按它找表 | 必填，全局唯一（见步骤 7）|
+| `rolls` | int = 1 | 抽取次数；每次独立按权重 roll，互不影响 | 想一次掉多件时调大 |
+| `entries` | Array[LootEntry] = [] | 可被抽取的条目；条目 `conditions` 失败时本次 roll 被过滤 | 见步骤 7 |
+| `allow_empty` | bool = true | 是否允许单次 roll 空手而归；关闭后 `empty_weight` 被忽略，每次必出一项 | 保底掉落设 false |
+| `empty_weight` | float = 0.0 | "什么都不掉"作为一个权重项参与抽签；默认 0 即开着 `allow_empty` 也必出 | 想控制空手概率时（见步骤 7）|
+
+### LootEntry
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `content_id` | String | 掉什么；通常指向 `ItemDefinition` 的 content id | 必填（见步骤 7）|
+| `weight` | float = 1.0 | 随机权重，越大越容易掉；0 = 不会被自然选中 | 见步骤 7 |
+| `min_quantity` / `max_quantity` | int = 1 / 1 | 掉落数量的随机区间（含两端）；写反了会自动交换 | 材料类掉落给区间 |
+| `conditions` | Array[Condition] = [] | 每次 roll 前求值，失败则本条目不进掉落池（如"困难难度才掉稀有材料"）| 详见 [Recipe 21](21_conditions.md) |
 
 ## 常见错误
 
@@ -139,5 +214,6 @@ func _on_choosing_reward(options: Array[RewardOption]) -> void:
 
 - [LootService ref](../generated/html/classes/LootService.html) — roll_table / generate_options / apply_selected
 - [RewardDefinition ref](../generated/html/classes/RewardDefinition.html) · [RewardOption ref](../generated/html/classes/RewardOption.html)
+- [LootTableDefinition ref](../generated/html/classes/LootTableDefinition.html) · [LootEntry ref](../generated/html/classes/LootEntry.html) · [LootRollResult ref](../generated/html/classes/LootRollResult.html)
 - [pipeline.md — Loot Roll](../pipeline.md#14-loot-roll)
 - [cookbook/14_shop.md](14_shop.md) — 用 `LootRollResult` 之外的方式获取物品（购买）

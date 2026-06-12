@@ -6,7 +6,7 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := AcceptQuestEffect.new()`
 
-## 编辑器配置：`quest_id` 表示稳定 id，由 `AcceptQuestEffect` 的公开 API 读取或维护。
+## 引用的 QuestDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var quest_id: String = ""
 
 

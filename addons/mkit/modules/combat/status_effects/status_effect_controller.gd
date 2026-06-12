@@ -12,7 +12,7 @@ signal status_applied(status_id: String, stacks: int)
 signal status_removed(status_id: String)
 ## 当 `StatusEffectController` 发生 `status ticked` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal status_ticked(status_id: String)
-## 运行时状态：`active_statuses` 表示是否启用或当前激活状态，由 `StatusEffectController` 的公开 API 读取或维护。
+## 当前生效的状态实例表；key 通常为 status id 或实例 id。
 var active_statuses: Dictionary = {}
 
 

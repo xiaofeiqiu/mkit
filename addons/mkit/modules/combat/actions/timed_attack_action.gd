@@ -6,15 +6,15 @@ extends GameAction
 ## 使用：当项目行为需要跨帧执行、可取消，或在开始/完成时触发效果时使用它。
 ## 示例：`var instance := TimedAttackAction.new()`
 
-## 运行时状态：`startup_duration` 表示持续时间，由 `TimedAttackAction` 的公开 API 读取或维护。
+## 攻击启动前摇秒数；期间通常不启用 hitbox。
 var startup_duration: float = 0.12
-## 运行时状态：`active_duration` 表示是否启用或当前激活状态，由 `TimedAttackAction` 的公开 API 读取或维护。
+## 攻击判定保持启用的秒数。
 var active_duration: float = 0.10
-## 运行时状态：`recovery_duration` 表示持续时间，由 `TimedAttackAction` 的公开 API 读取或维护。
+## 攻击收招秒数；结束后动作才算完成。
 var recovery_duration: float = 0.25
-## 运行时状态：`hitbox_component_name` 表示 `TimedAttackAction` 的字段值，由 `TimedAttackAction` 的公开 API 读取或维护。
+## 默认查找的 HitboxComponent 节点名；hitbox_path 为空时使用。
 var hitbox_component_name: StringName = &"HitboxComponent"
-## 运行时状态：`hitbox_path` 表示资源或节点路径，由 `TimedAttackAction` 的公开 API 读取或维护。
+## 显式指定的 HitboxComponent NodePath；为空时按 hitbox_component_name 查找。
 var hitbox_path: NodePath = NodePath("")
 var _hitbox_enabled: bool = false
 

@@ -6,19 +6,19 @@ extends RefCounted
 ## 使用：当项目一次动作、效果或服务调用需要携带来源、目标和附加数据时使用它。
 ## 示例：`var instance := GameplayContext.new()`
 
-## 运行时状态：`source` 表示 `GameplayContext` 的字段值，由 `GameplayContext` 的公开 API 读取或维护。
+## 产生本次行为或结果的节点引用；为空表示来源未绑定或不需要来源。
 var source: Node = null
-## 运行时状态：`target` 表示 `GameplayContext` 的字段值，由 `GameplayContext` 的公开 API 读取或维护。
+## 本次行为或结果作用的目标节点；为空表示尚未选定目标。
 var target: Node = null
-## 运行时状态：`instigator` 表示 `GameplayContext` 的字段值，由 `GameplayContext` 的公开 API 读取或维护。
+## 间接触发本次行为的节点；与 source 不同时可用于归因、仇恨或奖励。
 var instigator: Node = null
-## 运行时状态：`position` 表示 `GameplayContext` 的字段值，由 `GameplayContext` 的公开 API 读取或维护。
+## 本次行为发生的世界坐标；未提供时保持 Vector2.ZERO。
 var position: Vector2 = Vector2.ZERO
-## 运行时状态：`direction` 表示 `GameplayContext` 的字段值，由 `GameplayContext` 的公开 API 读取或维护。
+## 本次行为的朝向或移动方向；调用方应按需要传入归一化向量。
 var direction: Vector2 = Vector2.ZERO
-## 运行时状态：`tags` 表示标签集合，由 `GameplayContext` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 var tags: Array[String] = []
-## 运行时状态：`payload` 表示事件或存档载荷，由 `GameplayContext` 的公开 API 读取或维护。
+## 附加上下文数据；key 由创建该对象的系统约定，读取前应检查是否存在。
 var payload: Dictionary = {}
 
 

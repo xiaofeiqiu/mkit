@@ -6,13 +6,13 @@ extends RefCounted
 ## 使用：当项目需要在房间与一局流程系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := RoomNode.new()`
 
-## 运行时状态：`node_id` 表示稳定 id，由 `RoomNode` 的公开 API 读取或维护。
+## RoomGraph 内部使用的节点 id；同一房间图中应保持唯一。
 var node_id: String = ""
-## 运行时状态：`room_definition_id` 表示稳定 id，由 `RoomNode` 的公开 API 读取或维护。
+## 引用的 RoomDefinition id；房间控制器或节点按它加载静态配置。
 var room_definition_id: String = ""
-## 运行时状态：`room_type` 表示 `RoomNode` 的字段值，由 `RoomNode` 的公开 API 读取或维护。
+## 房间类型字符串；例如 combat、shop、event，由游戏内容约定。
 var room_type: String = "combat"
-## 运行时状态：`next_nodes` 表示 `RoomNode` 的字段值，由 `RoomNode` 的公开 API 读取或维护。
+## 当前房间图节点可前往的后继节点列表。
 var next_nodes: Array[RoomNode] = []
-## 运行时状态：`previous_nodes` 表示 `RoomNode` 的字段值，由 `RoomNode` 的公开 API 读取或维护。
+## 当前房间图节点的前置节点列表。
 var previous_nodes: Array[RoomNode] = []

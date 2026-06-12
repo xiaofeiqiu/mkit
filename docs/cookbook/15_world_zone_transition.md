@@ -114,9 +114,9 @@ Village  (Node2D)
 | `target_zone_id` | `"zone.forest"` |
 | `target_spawn_id` | `"from_village"` |
 | `display_text` | `"前往森林"` |
-| `conditions` | 可留空；需要钥匙/任务门槛时再加 |
+| `conditions` | `[TargetInRangeCondition(condition_id="forest_gate_close", range=64.0)]` |
 
-玩家需要有 `InteractionComponent`，并且玩家交互 Area2D 与 `ForestGate` 的 collision layer / mask 有交集。
+玩家需要有 `InteractionComponent`，并且玩家交互 Area2D 与 `ForestGate` 的 collision layer / mask 有交集。上面的 `conditions` 是二次门禁：提示范围可以做得宽一点，但真正跳转要求玩家离 `ForestGate` owner 64 像素内。`InteractionComponent.try_interact()` 构造的 context 是 `source=玩家`、`target=Portal owner`；更多条件写法见 [Recipe 21](21_conditions.md)。如果需要钥匙/任务门槛，按 Recipe 21 步骤 4 写自定义「持有钥匙」条件后挂在同一个数组里。
 
 ### 步骤 5：按交互键触发跳转
 

@@ -42,6 +42,18 @@ progression.add_currency("gold", 200)
 
 加入 `ResourceDatabase.resources`。
 
+再建一个高级商品 `res://data/items/elixir.tres`，用于演示条件门禁：
+
+| 字段 | 值 |
+|------|----|
+| `item_id` | `"item.elixir"` |
+| `display_name` | `"秘制灵药"` |
+| `item_type` | `"consumable"` |
+| `value` | `120` |
+| `stackable` | `true`, `max_stack` = `9` |
+
+同样加入 `ResourceDatabase.resources`。
+
 ### 步骤 2：创建 ShopDefinition
 
 新建 Resource → `ShopDefinition`，存为 `res://data/shops/village_shop.tres`：
@@ -64,9 +76,17 @@ entry_potion:
   price_override = -1     # -1 → 用 value*buy_price_multiplier 算价；>=0 则固定此价
   stock          = 5      # -1 = 无限库存
   conditions     = []
+
+entry_elixir:
+  item_id        = "item.elixir"
+  price_override = 120
+  stock          = 1
+  conditions     = [ReputationCondition(faction_id="faction.village", required=50)]
 ```
 
 加入 `ResourceDatabase.resources`。
+
+> `entry_elixir.conditions` 演示的是游戏自定义 `Condition`：按 [Recipe 20](20_custom_service.md) 的声望服务写一个 `ReputationCondition`，再按 [Recipe 21](21_conditions.md) 步骤 4 覆写 `_evaluate_impl()`。`ShopService` 求值时 `context.source` 是买家实体、`context.target` 为 null；条件不满足时购买被拒，失败原因是 `"Entry locked"`。
 
 ### 步骤 3：确认玩家有背包和货币
 

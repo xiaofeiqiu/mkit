@@ -6,11 +6,11 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := SpawnSceneEffect.new()`
 
-## 编辑器配置：`scene_path` 表示场景路径，由 `SpawnSceneEffect` 的公开 API 读取或维护。
+## 要加载或实例化的场景路径；应填写 res:// 开头的 .tscn 资源。
 @export var scene_path: String = ""
-## 编辑器配置：`spawn_at_target` 表示 `SpawnSceneEffect` 的字段值，由 `SpawnSceneEffect` 的公开 API 读取或维护。
+## 是否把生成场景放在上下文 target 的位置；关闭时使用 source 或效果自身约定的位置。
 @export var spawn_at_target: bool = false
-## 编辑器配置：`use_pool` 表示 `SpawnSceneEffect` 的字段值，由 `SpawnSceneEffect` 的公开 API 读取或维护。
+## 是否优先通过 PoolService 复用场景实例；关闭时直接实例化新节点。
 @export var use_pool: bool = false
 
 

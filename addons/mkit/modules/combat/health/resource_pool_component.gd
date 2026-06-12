@@ -12,11 +12,11 @@ signal resource_changed(resource_id: String, current: float, max_value: float)
 signal resource_spent(resource_id: String, amount: float)
 ## 当 `ResourcePoolComponent` 发生 `resource restored` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal resource_restored(resource_id: String, amount: float)
-## 编辑器配置：`starting_values` 表示 `ResourcePoolComponent` 的字段值，由 `ResourcePoolComponent` 的公开 API 读取或维护。
+## 资源池初始值表；key 为资源 id，value 为当前值或最大值约定。
 @export var starting_values: Dictionary = {}
-## 运行时状态：`resources` 表示 `ResourcePoolComponent` 的字段值，由 `ResourcePoolComponent` 的公开 API 读取或维护。
+## 运行时 ResourceSet；保存各资源当前值并通过 stats 查询上限。
 var resources: ResourceSet = null
-## 运行时状态：`stats` 表示 `ResourcePoolComponent` 的字段值，由 `ResourcePoolComponent` 的公开 API 读取或维护。
+## 同一实体上的 StatsComponent 引用；用于读取最大生命值或资源上限。
 var stats: StatsComponent = null
 
 

@@ -8,7 +8,7 @@ extends Marker2D
 
 ## 公开常量 `GROUP`，作为 `SpawnPoint` 对外暴露的类型、事件或命令标识。
 const GROUP: String = "spawn_point"
-## 编辑器配置：`spawn_id` 表示稳定 id，由 `SpawnPoint` 的公开 API 读取或维护。
+## SpawnPoint 在当前区域内的稳定 id；Portal 和 WorldService 按它定位出生位置。
 @export var spawn_id: String = "default"
 
 

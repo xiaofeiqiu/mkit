@@ -7,9 +7,9 @@ extends GameEffect
 ## 示例：`var instance := SpendCurrencyEffect.new()`
 
 
-## 运行时状态：`currency_id` 表示稳定 id，由 `SpendCurrencyEffect` 的公开 API 读取或维护。
+## 使用的钱包货币 id；需与 Wallet 或 ProgressionState 中的余额 key 一致。
 var currency_id: String = ""
-## 运行时状态：`amount` 表示数量值，由 `SpendCurrencyEffect` 的公开 API 读取或维护。
+## 要消耗的钱包货币数量；应为非负数且不超过当前余额。
 var amount: int = 0
 
 

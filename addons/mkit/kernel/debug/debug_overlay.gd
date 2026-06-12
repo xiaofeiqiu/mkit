@@ -6,13 +6,13 @@ extends CanvasLayer
 ## 使用：当项目需要在调试界面中复用这段契约或状态时使用它。
 ## 示例：`var instance := DebugOverlay.new()`
 
-## 编辑器配置：`watch_entity_path` 表示资源或节点路径，由 `DebugOverlay` 的公开 API 读取或维护。
+## DebugOverlay 观察的实体 NodePath；为空时不显示实体状态。
 @export var watch_entity_path: NodePath
-## 编辑器配置：`status_provider_path` 表示资源或节点路径，由 `DebugOverlay` 的公开 API 读取或维护。
+## 可提供调试状态文本的节点路径；目标节点需暴露约定的状态接口。
 @export var status_provider_path: NodePath
-## 编辑器配置：`visible_on_start` 表示 `DebugOverlay` 的字段值，由 `DebugOverlay` 的公开 API 读取或维护。
+## 调试覆盖层是否在启动时可见；关闭后仍可由外部逻辑切换显示。
 @export var visible_on_start: bool = true
-## 编辑器配置：`show_registered_services` 表示 `DebugOverlay` 的字段值，由 `DebugOverlay` 的公开 API 读取或维护。
+## 是否显示 ServiceRegistry 中已注册的服务列表。
 @export var show_registered_services: bool = true
 var _label: Label = null
 var _events: EventService = null

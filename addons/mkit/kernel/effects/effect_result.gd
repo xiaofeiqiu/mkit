@@ -6,15 +6,15 @@ extends RefCounted
 ## 使用：当项目需要在效果管线中复用这段契约或状态时使用它。
 ## 示例：`var instance := EffectResult.new()`
 
-## 运行时状态：`success` 表示 `EffectResult` 的字段值，由 `EffectResult` 的公开 API 读取或维护。
+## 执行或校验是否成功；失败时同时查看 errors、warnings 或 failure_reason。
 var success: bool = true
-## 运行时状态：`effect_id` 表示稳定 id，由 `EffectResult` 的公开 API 读取或维护。
+## 引用的 effect id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var effect_id: String = ""
-## 运行时状态：`failure_reason` 表示 `EffectResult` 的字段值，由 `EffectResult` 的公开 API 读取或维护。
+## 失败原因文本；success 为 false 时用于日志、测试断言或 UI 提示。
 var failure_reason: String = ""
-## 运行时状态：`payload` 表示事件或存档载荷，由 `EffectResult` 的公开 API 读取或维护。
+## 附加上下文数据；key 由创建该对象的系统约定，读取前应检查是否存在。
 var payload: Dictionary = {}
-## 运行时状态：`child_results` 表示执行结果集合，由 `EffectResult` 的公开 API 读取或维护。
+## 复合效果产生的子结果列表；用于追踪每个子效果的成功与失败。
 var child_results: Array[EffectResult] = []
 
 

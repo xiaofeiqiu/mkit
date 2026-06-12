@@ -18,7 +18,7 @@ signal quest_completed(quest_id: String)
 signal quest_turned_in(quest_id: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `QuestService`。
 const SERVICE_ID: String = "quest"
-## 运行时状态：`log` 表示 `QuestService` 的字段值，由 `QuestService` 的公开 API 读取或维护。
+## QuestService 持有的任务日志状态。
 var log: QuestLog = QuestLog.new()
 var _quest_contexts: Dictionary = {}
 var _content: ContentService = null

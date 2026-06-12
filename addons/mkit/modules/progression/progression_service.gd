@@ -14,7 +14,7 @@ signal upgrade_level_changed(upgrade_id: String, level: int)
 signal content_unlocked(content_id: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `ProgressionService`。
 const SERVICE_ID: String = "progression"
-## 运行时状态：`state` 表示运行时状态，由 `ProgressionService` 的公开 API 读取或维护。
+## ProgressionService 持有的全局进度状态；包含钱包、升级等级和解锁内容。
 var state := ProgressionState.new()
 
 

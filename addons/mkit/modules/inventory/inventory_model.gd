@@ -6,11 +6,11 @@ extends RefCounted
 ## 使用：当项目需要在背包与装备系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := InventoryModel.new()`
 
-## 运行时状态：`owner_id` 表示稳定 id，由 `InventoryModel` 的公开 API 读取或维护。
+## 背包拥有者 id；用于存档、事件归因和多背包区分。
 var owner_id: String = ""
-## 运行时状态：`capacity` 表示 `InventoryModel` 的字段值，由 `InventoryModel` 的公开 API 读取或维护。
+## 背包容量，单位为槽位数量；0 或负数表示不能存放物品。
 var capacity: int = 30
-## 运行时状态：`slots` 表示 `InventoryModel` 的字段值，由 `InventoryModel` 的公开 API 读取或维护。
+## 背包槽位列表；长度通常等于 capacity。
 var slots: Array[InventorySlot] = []
 
 

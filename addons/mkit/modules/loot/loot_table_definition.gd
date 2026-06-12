@@ -6,15 +6,15 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `LootTableDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`loot_table_id` 表示稳定 id，由 `LootTableDefinition` 的公开 API 读取或维护。
+## ContentService 注册掉落表时使用的稳定 id；LootService 按它执行掉落。
 @export var loot_table_id: String = ""
-## 编辑器配置：`rolls` 表示 `LootTableDefinition` 的字段值，由 `LootTableDefinition` 的公开 API 读取或维护。
+## 执行掉落表抽取的次数；每次都会重新按 entries 权重选择。
 @export var rolls: int = 1
-## 编辑器配置：`entries` 表示 `LootTableDefinition` 的字段值，由 `LootTableDefinition` 的公开 API 读取或维护。
+## 可被抽取的条目列表；条目条件失败时会被过滤。
 @export var entries: Array[LootEntry] = []
-## 编辑器配置：`allow_empty` 表示 `LootTableDefinition` 的字段值，由 `LootTableDefinition` 的公开 API 读取或维护。
+## 是否允许本次抽取没有奖励；开启后 empty_weight 会参与权重计算。
 @export var allow_empty: bool = true
-## 编辑器配置：`empty_weight` 表示 `LootTableDefinition` 的字段值，由 `LootTableDefinition` 的公开 API 读取或维护。
+## 空奖励的权重；allow_empty 为 false 时忽略。
 @export var empty_weight: float = 0.0
 
 

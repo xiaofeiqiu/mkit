@@ -9,17 +9,17 @@ extends Node
 
 ## 公开常量 `ENTITY_SAVE_PARTICIPANT_GROUP`，作为 `EntitySaveAgent` 对外暴露的类型、事件或命令标识。
 const ENTITY_SAVE_PARTICIPANT_GROUP: String = "mkit_entity_save_participant"
-## 编辑器配置：`entity_id` 表示稳定 id，由 `EntitySaveAgent` 的公开 API 读取或维护。
+## 运行时实体 id；保存、命令路由和事件归因使用它定位同一个实体。
 @export var entity_id: String = ""
-## 编辑器配置：`scene_path` 表示资源或节点路径，由 `EntitySaveAgent` 的公开 API 读取或维护。
+## 要加载或实例化的场景路径；应填写 res:// 开头的 .tscn 资源。
 @export var scene_path: String = ""
-## 编辑器配置：`zone_id` 表示稳定 id，由 `EntitySaveAgent` 的公开 API 读取或维护。
+## ZoneDefinition 在 ContentService 中的稳定 id。
 @export var zone_id: String = ""
-## 编辑器配置：`root_path` 表示资源或节点路径，由 `EntitySaveAgent` 的公开 API 读取或维护。
+## 参与保存的根节点路径；为空时使用 EntitySaveAgent 所在节点。
 @export var root_path: NodePath = NodePath("")
-## 编辑器配置：`restore_order` 表示 `EntitySaveAgent` 的字段值，由 `EntitySaveAgent` 的公开 API 读取或维护。
+## 恢复存档时的排序权重；数值越小越早恢复。
 @export var restore_order: int = 0
-## 编辑器配置：`include_duck_participants` 表示 `EntitySaveAgent` 的字段值，由 `EntitySaveAgent` 的公开 API 读取或维护。
+## 保存实体时是否包含符合 save/load duck typing 的参与节点。
 @export var include_duck_participants: bool = true
 var _last_errors: Array[String] = []
 

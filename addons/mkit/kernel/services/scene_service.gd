@@ -14,9 +14,9 @@ signal scene_changed(scene_path: String)
 signal scene_change_failed(scene_path: String, reason: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `SceneService`。
 const SERVICE_ID: String = "scenes"
-## 运行时状态：`current_scene_path` 表示资源或节点路径，由 `SceneService` 的公开 API 读取或维护。
+## SceneService 当前加载场景的 res:// 路径；切换完成后更新。
 var current_scene_path: String = ""
-## 运行时状态：`transition_locked` 表示 `SceneService` 的字段值，由 `SceneService` 的公开 API 读取或维护。
+## 场景切换锁；为 true 时拒绝重入式切换请求。
 var transition_locked: bool = false
 
 

@@ -6,19 +6,19 @@ extends RefCounted
 ## 使用：当项目需要在掉落与奖励系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := RewardOption.new()`
 
-## 运行时状态：`reward_id` 表示稳定 id，由 `RewardOption` 的公开 API 读取或维护。
+## 奖励定义 id；用于奖励池、UI 选择和事件归因。
 var reward_id: String = ""
-## 运行时状态：`display_name` 表示面向玩家或编辑器的显示名，由 `RewardOption` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 var display_name: String = ""
-## 运行时状态：`description` 表示说明文本，由 `RewardOption` 的公开 API 读取或维护。
+## 面向玩家或设计者的说明文本；用于 UI、提示和文档，不参与规则判定。
 var description: String = ""
-## 运行时状态：`icon` 表示 `RewardOption` 的字段值，由 `RewardOption` 的公开 API 读取或维护。
+## UI 展示用图标资源；为 null 时界面应使用默认图标或隐藏图标位。
 var icon: Texture2D = null
-## 运行时状态：`rarity` 表示 `RewardOption` 的字段值，由 `RewardOption` 的公开 API 读取或维护。
+## 稀有度字符串；用于 UI 样式、掉落权重或奖励展示。
 var rarity: String = "common"
-## 运行时状态：`source` 表示 `RewardOption` 的字段值，由 `RewardOption` 的公开 API 读取或维护。
+## 奖励来源标识；用于 UI 或调试区分来自房间、任务、商店等来源。
 var source: String = ""
-## 运行时状态：`effects` 表示效果列表，由 `RewardOption` 的公开 API 读取或维护。
+## 条件通过后按顺序执行的效果列表；每个元素应为 GameEffect 资源。
 var effects: Array[GameEffect] = []
-## 运行时状态：`payload` 表示事件或存档载荷，由 `RewardOption` 的公开 API 读取或维护。
+## 附加上下文数据；key 由创建该对象的系统约定，读取前应检查是否存在。
 var payload: Dictionary = {}

@@ -6,11 +6,11 @@ extends Resource
 ## 使用：当项目需要在内容注册中复用这段契约或状态时使用它。
 ## 示例：`var instance := ResourceDatabase.new()`
 
-## 编辑器配置：`database_id` 表示稳定 id，由 `ResourceDatabase` 的公开 API 读取或维护。
+## 资源数据库自身的稳定 id；用于区分资源来源和校验重复配置。
 @export var database_id: String = ""
-## 编辑器配置：`resources` 表示 `ResourceDatabase` 的字段值，由 `ResourceDatabase` 的公开 API 读取或维护。
+## 直接内嵌注册的资源列表；每个资源应能提供非空 content id。
 @export var resources: Array[Resource] = []
-## 编辑器配置：`resource_paths` 表示资源或节点路径列表，由 `ResourceDatabase` 的公开 API 读取或维护。
+## 延迟加载并注册的资源路径列表；每项应指向可 load 的 Resource。
 @export var resource_paths: Array[String] = []
 
 

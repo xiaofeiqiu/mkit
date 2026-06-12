@@ -150,6 +150,39 @@ func enter(context: Dictionary = {}) -> void:
     print("Enter Idle")
 ```
 
+## 字段参考
+
+### EntityIdentity
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `entity_id` | String | 运行时实体 id；存档、命令路由、事件归因都用它定位实体。留空时自动生成唯一 id | 长期实体（玩家、Boss）填稳定值（见步骤 1）；一次性小怪可留空 |
+| `definition_id` | String = "" | 绑定的 `EntityDefinition` id；由 `EntitySpawner` spawn 时自动写入（[Recipe 07](07_room.md)），任务"击杀某种敌人"按它匹配 | 手摆的实体想参与定义匹配时手填 |
+| `display_name` | String = "" | UI 显示名，不参与路由 | 需要在 UI 上显示实体名时 |
+| `faction` | String = "neutral" | 阵营标识；`HitboxComponent.target_factions` 过滤、AI 敌友判断都读它 | 玩家 `"player"`、敌人 `"enemy"`（[Recipe 04](04_attack_action.md)）|
+| `tags` | Array[String] = [] | 标签集合，供条件筛选、事件追踪、UI 分组 | 自定义 Condition / 查询要按标签过滤时 |
+
+### StateMachine
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `initial_state_path` | String = "" | 启动时进入的状态路径（`"Root/Idle"` 格式，按 `state_id` 用 `/` 拼接）；留空进第一个子状态 | 见步骤 1 |
+| `auto_start` | bool = true | 进入场景树后是否自动启动；关掉后状态机保持未启动，需手动调 `start()` | 进入初始状态前有前置流程时（如等出生动画播完再 `state_machine.start()`）|
+
+### State
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `state_id` | String = "" | StateMachine 内引用该状态的 id，transition 路径由它拼成；同级状态必须唯一 | 必填（见步骤 1）|
+| `initial_child_state_id` | String = "" | HFSM 复合状态：transition 只到达本状态（如 `"Root/Combat"`）时，默认进入的子状态 id；留空则停在本状态不下钻 | 复合状态有多个子状态、想要默认入口时（如 Combat 默认进 `"Approach"`）|
+
+### CommandReceiver
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `receiver_id` | String = "" | `CommandService.dispatch(target_id, ...)` 按它路由命令；留空时 `_ready` 自动取 `EntityIdentity.entity_id` | 跨实体按 id 发命令（AI 指挥单位、剧情控制 NPC）且想用别名时显式填 |
+| `auto_register` | bool = true | 进入场景树时是否自动注册到 `CommandService`；关掉后该实体收不到按 id 路由的命令，只能直接调 `receive_command()` | 临时实体不想占用全局 id 注册表时关掉 |
+
 ## 常见错误
 
 | 现象 | 原因 | 修复 |

@@ -6,27 +6,27 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `QuestDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`quest_id` 表示稳定 id，由 `QuestDefinition` 的公开 API 读取或维护。
+## ContentService 注册任务时使用的稳定 id；QuestLog 和任务效果按它查找任务状态。
 @export var quest_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `QuestDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`description` 表示说明文本，由 `QuestDefinition` 的公开 API 读取或维护。
+## 面向玩家或设计者的说明文本；用于 UI、提示和文档，不参与规则判定。
 @export_multiline var description: String = ""
-## 编辑器配置：`quest_type` 表示 `QuestDefinition` 的字段值，由 `QuestDefinition` 的公开 API 读取或维护。
+## 任务类型字符串；例如 main、side、repeatable，由游戏内容约定。
 @export var quest_type: String = "side"
-## 编辑器配置：`objectives` 表示 `QuestDefinition` 的字段值，由 `QuestDefinition` 的公开 API 读取或维护。
+## 任务目标定义列表；objective_id 应在同一任务内唯一。
 @export var objectives: Array[QuestObjectiveDefinition] = []
-## 编辑器配置：`prerequisite_quest_ids` 表示稳定 id 列表，由 `QuestDefinition` 的公开 API 读取或维护。
+## 接受任务前必须完成或满足的任务 id 列表。
 @export var prerequisite_quest_ids: Array[String] = []
-## 编辑器配置：`accept_conditions` 表示执行条件列表，由 `QuestDefinition` 的公开 API 读取或维护。
+## 接受任务前需要通过的条件列表。
 @export var accept_conditions: Array[Condition] = []
-## 编辑器配置：`reward_effects` 表示效果列表，由 `QuestDefinition` 的公开 API 读取或维护。
+## 任务完成或交付时执行的奖励效果列表。
 @export var reward_effects: Array[GameEffect] = []
-## 编辑器配置：`auto_complete` 表示 `QuestDefinition` 的字段值，由 `QuestDefinition` 的公开 API 读取或维护。
+## 所有必需目标完成后是否自动完成任务。
 @export var auto_complete: bool = false
-## 编辑器配置：`repeatable` 表示 `QuestDefinition` 的字段值，由 `QuestDefinition` 的公开 API 读取或维护。
+## 任务是否允许重复接受；关闭后完成状态会阻止再次开始。
 @export var repeatable: bool = false
-## 编辑器配置：`tags` 表示标签集合，由 `QuestDefinition` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
 
 

@@ -6,9 +6,9 @@ extends GameplayContext
 ## 使用：当项目一次动作、效果或服务调用需要携带来源、目标和附加数据时使用它。
 ## 示例：`var instance := ActionContext.new()`
 
-## 运行时状态：`duration` 表示持续时间，由 `ActionContext` 的公开 API 读取或维护。
+## 动作请求的持续时间，单位为秒；0 表示调用方没有指定持续时间。
 var duration: float = 0.0
-## 运行时状态：`phase` 表示 `ActionContext` 的字段值，由 `ActionContext` 的公开 API 读取或维护。
+## 动作或上下文当前阶段名称；空字符串表示没有显式阶段。
 var phase: String = ""
 
 

@@ -12,21 +12,21 @@ signal room_entered(room_id: String)
 signal room_cleared(room_id: String)
 ## 当 `RoomController` 发生 `reward ready` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal reward_ready(options: Array[RewardOption])
-## 编辑器配置：`room_definition_id` 表示稳定 id，由 `RoomController` 的公开 API 读取或维护。
+## 引用的 RoomDefinition id；房间控制器或节点按它加载静态配置。
 @export var room_definition_id: String = ""
-## 编辑器配置：`enemy_container_path` 表示资源或节点路径，由 `RoomController` 的公开 API 读取或维护。
+## 房间内敌人容器节点路径；用于统计清场和生成敌人。
 @export var enemy_container_path: NodePath = NodePath("../Enemies")
-## 编辑器配置：`entity_spawner_path` 表示资源或节点路径，由 `RoomController` 的公开 API 读取或维护。
+## 房间使用的 EntitySpawner 节点路径；为空或无效时无法自动生成实体。
 @export var entity_spawner_path: NodePath = NodePath("../EntitySpawner")
-## 编辑器配置：`reward_count` 表示数量上限或计数，由 `RoomController` 的公开 API 读取或维护。
+## 清场后生成的奖励选项数量。
 @export var reward_count: int = 3
-## 编辑器配置：`spawn_positions` 表示 `RoomController` 的字段值，由 `RoomController` 的公开 API 读取或维护。
+## 房间内可用生成坐标列表；为空时生成器需使用自身默认位置。
 @export var spawn_positions: Array[Vector2] = []
-## 运行时状态：`runtime` 表示运行时数据，由 `RoomController` 的公开 API 读取或维护。
+## 当前领域运行时对象；服务方法会在创建后复用它。
 var runtime: RoomRuntime = null
-## 运行时状态：`active_enemies` 表示是否启用或当前激活状态，由 `RoomController` 的公开 API 读取或维护。
+## 当前房间仍存活或未清理的敌人表。
 var active_enemies: Dictionary = {}
-## 运行时状态：`entity_spawner` 表示 `RoomController` 的字段值，由 `RoomController` 的公开 API 读取或维护。
+## 房间用于生成实体的 EntitySpawner 引用；准备阶段由 entity_spawner_path 解析。
 var entity_spawner: EntitySpawner = null
 
 

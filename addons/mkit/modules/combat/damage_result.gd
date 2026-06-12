@@ -6,31 +6,31 @@ extends RefCounted
 ## 使用：当项目需要在战斗系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := DamageResult.new()`
 
-## 运行时状态：`source` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 产生本次行为或结果的节点引用；为空表示来源未绑定或不需要来源。
 var source: Node = null
-## 运行时状态：`target` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 本次行为或结果作用的目标节点；为空表示尚未选定目标。
 var target: Node = null
-## 运行时状态：`base_amount` 表示数量值，由 `DamageResult` 的公开 API 读取或维护。
+## 基础数值；在伤害或治疗结算中会被属性、倍率或规则进一步调整。
 var base_amount: float = 0.0
-## 运行时状态：`final_amount` 表示数量值，由 `DamageResult` 的公开 API 读取或维护。
+## 完成所有加成、减免和倍率后的最终伤害数值。
 var final_amount: float = 0.0
-## 运行时状态：`damage_type` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 伤害类型 id；用于抗性、格挡、事件标签或 UI 展示。
 var damage_type: String = "physical"
-## 运行时状态：`element_type` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 元素类型 id；`none` 表示无元素，可用于弱点和抗性规则。
 var element_type: String = "none"
-## 运行时状态：`was_critical` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 结算结果是否暴击；用于 UI、音效和后续事件。
 var was_critical: bool = false
-## 运行时状态：`was_evaded` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 结算结果是否被闪避；为 true 时通常不会造成生命值变化。
 var was_evaded: bool = false
-## 运行时状态：`was_blocked` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 结算结果是否被格挡；可与 final_amount 一起表达减伤后结果。
 var was_blocked: bool = false
-## 运行时状态：`was_lethal` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 本次伤害是否使目标死亡或达到死亡阈值。
 var was_lethal: bool = false
-## 运行时状态：`applied_status_effects` 表示效果列表，由 `DamageResult` 的公开 API 读取或维护。
+## 本次结算成功施加的状态 id 列表。
 var applied_status_effects: Array[String] = []
-## 运行时状态：`status_applications` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 状态施加明细列表；每项 Dictionary 记录 status_id、stacks、source 等约定 key。
 var status_applications: Array[Dictionary] = []
-## 运行时状态：`trace` 表示 `DamageResult` 的字段值，由 `DamageResult` 的公开 API 读取或维护。
+## 伤害结算追踪数据；key 由 CombatService 写入，用于调试公式和测试。
 var trace: Dictionary = {}
 
 

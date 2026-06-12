@@ -6,11 +6,11 @@ extends Node
 ## 使用：当项目项目启动时需要注册服务、加载内容和进入初始场景时使用它。
 ## 示例：`var instance := GameBootstrap.new()`
 
-## 编辑器配置：`resource_databases` 表示 `GameBootstrap` 的字段值，由 `GameBootstrap` 的公开 API 读取或维护。
+## 启动时加载进 ContentService 的资源数据库列表；顺序会影响重复 id 的报错位置。
 @export var resource_databases: Array[ResourceDatabase] = []
-## 编辑器配置：`initial_scene_path` 表示资源或节点路径，由 `GameBootstrap` 的公开 API 读取或维护。
+## 启动完成后进入的主场景路径；应填写 res:// 开头的 .tscn 路径。
 @export var initial_scene_path: String = ""
-## 编辑器配置：`save_path` 表示资源或节点路径，由 `GameBootstrap` 的公开 API 读取或维护。
+## 存档文件路径；通常使用 user://，为空时调用方应显式决定是否跳过读写。
 @export var save_path: String = ""
 
 

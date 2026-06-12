@@ -28,16 +28,16 @@
 |------|----|
 | `dialogue_id` | `"dialogue.elder_intro"` |
 | `start_node_id` | `"greet"` |
-| `nodes` | 见下（3 个 `DialogueNode`）|
+| `nodes` | 见下（4 个 `DialogueNode`）|
 
-`nodes` 里建 3 个 `DialogueNode`（内联 Resource）：
+`nodes` 里建 4 个 `DialogueNode`（内联 Resource）：
 
 ```
-# node[0] —— 开场，带 2 个选项
+# node[0] —— 开场，带 3 个选项
 node_id      = "greet"
 speaker_id   = "村长"
 text         = "勇者，村子最近被野兽侵扰…"
-choices      = [choice_ask, choice_leave]
+choices      = [choice_ask, choice_whisper, choice_leave]
 next_node_id = ""        # 有 choices 时忽略 next_node_id
 
 # node[1] —— 回答，无选项，按键继续
@@ -45,9 +45,16 @@ node_id      = "info"
 speaker_id   = "村长"
 text         = "它们藏在东边的房间里。"
 choices      = []
-next_node_id = ""        # 空 → 此节点后对话结束
+next_node_id = "bye"     # 无 choices 时，advance() 会进入这个节点
 
-# node[2] —— 告别
+# node[2] —— 近距离低声线索
+node_id      = "secret"
+speaker_id   = "村长"
+text         = "别告诉别人：旧井旁有一条近路。"
+choices      = []
+next_node_id = "bye"
+
+# node[3] —— 告别
 node_id      = "bye"
 speaker_id   = "村长"
 text         = "保重。"
@@ -55,14 +62,23 @@ choices      = []
 next_node_id = ""
 ```
 
-两个 `DialogueChoice`（内联 Resource）：
+`DialogueNode.next_node_id` 只在 `choices` 为空时生效：UI 调 `DialogueService.advance()` 后，如果 `next_node_id` 非空就进入对应节点；如果为空就结束对话。有选项的节点由 `DialogueChoice.next_node_id` 决定跳转，节点自己的 `next_node_id` 会被忽略。
+
+三个 `DialogueChoice`（内联 Resource）：
 
 ```
 choice_ask:   text = "野兽在哪？"  next_node_id = "info"   conditions = []   effects = []
+choice_whisper:
+  text         = "悄声问：你还知道什么？"
+  next_node_id = "secret"
+  conditions   = [TargetInRangeCondition(condition_id="elder_close_talk", range=48.0)]
+  effects      = []
 choice_leave: text = "再见。"      next_node_id = "bye"    conditions = []   effects = []
 ```
 
 > `DialogueChoice.effects` 就是挂"对话后果"的地方——[Recipe 10](10_quest.md) 会在某个选项上挂 `AcceptQuestEffect`，让"答应帮忙"直接接下任务。`DialogueNode.on_enter_effects` 则在进入节点时触发（如播放音效、给提示）。
+>
+> `DialogueChoice.conditions` 是选项的**显示门禁**：`get_available_choices()` 会静默隐藏不满足条件的选项（不会显示成灰色）。上面的 `choice_whisper` 只有玩家离 NPC owner 48 像素内才显示；context 来自 `DialogueInteractable.interact(ctx)`，所以 `source=玩家`、`target=NPC owner`。更复杂的"声望够才显示"可按 [Recipe 20](20_custom_service.md) 写 `ReputationCondition`。条件系统详见 [Recipe 21](21_conditions.md)。
 
 把 `elder_intro.tres` 加入 `ResourceDatabase.resources`。
 
@@ -161,8 +177,8 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 运行验证
 
 1. 玩家走近 NPC → `interactable_focused` 触发（可打 log 确认聚焦）
-2. 按交互键 → 对话框出现，显示"村长：勇者，村子最近被野兽侵扰…" + 两个选项按钮
-3. 点"野兽在哪？" → 进入 `info` 节点，显示新台词，按交互键继续 → 对话结束、面板隐藏
+2. 按交互键 → 对话框出现，显示"村长：勇者，村子最近被野兽侵扰…"；48 像素内显示 3 个选项，较远时 `choice_whisper` 被条件隐藏
+3. 点"野兽在哪？" → 进入 `info` 节点，按交互键继续 → 进入 `bye`，再按一次 → 对话结束、面板隐藏
 4. `EventService.recent_events` 里能看到 `npc_talked`、`dialogue_started`、`dialogue_ended`
 
 ## 常见错误

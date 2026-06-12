@@ -6,21 +6,21 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `EntityDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`entity_definition_id` 表示稳定 id，由 `EntityDefinition` 的公开 API 读取或维护。
+## ContentService 注册实体定义时使用的稳定 id；EntitySpawner 按它实例化实体场景。
 @export var entity_definition_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `EntityDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`scene_path` 表示资源或节点路径，由 `EntityDefinition` 的公开 API 读取或维护。
+## 要加载或实例化的场景路径；应填写 res:// 开头的 .tscn 资源。
 @export var scene_path: String = ""
-## 编辑器配置：`default_faction` 表示 `EntityDefinition` 的字段值，由 `EntityDefinition` 的公开 API 读取或维护。
+## 生成实体时写入 EntityIdentity 的默认阵营。
 @export var default_faction: String = "neutral"
-## 编辑器配置：`tags` 表示标签集合，由 `EntityDefinition` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
-## 编辑器配置：`base_stats` 表示 `EntityDefinition` 的字段值，由 `EntityDefinition` 的公开 API 读取或维护。
+## 实体基础属性表；key 为 stat id，value 为初始数值。
 @export var base_stats: Dictionary = {}
-## 编辑器配置：`starting_ability_ids` 表示稳定 id 列表，由 `EntityDefinition` 的公开 API 读取或维护。
+## 初始化时授予实体的 AbilityDefinition id 列表；每项需已在 ContentService 注册。
 @export var starting_ability_ids: Array[String] = []
-## 编辑器配置：`loot_table_id` 表示稳定 id，由 `EntityDefinition` 的公开 API 读取或维护。
+## 实体死亡或结算奖励时引用的 LootTableDefinition id；为空表示没有默认掉落表。
 @export var loot_table_id: String = ""
 
 

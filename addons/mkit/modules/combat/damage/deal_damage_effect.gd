@@ -6,17 +6,17 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := DealDamageEffect.new()`
 
-## 编辑器配置：`base_amount` 表示数量值，由 `DealDamageEffect` 的公开 API 读取或维护。
+## 基础数值；在伤害或治疗结算中会被属性、倍率或规则进一步调整。
 @export var base_amount: float = 10.0
-## 编辑器配置：`damage_type` 表示 `DealDamageEffect` 的字段值，由 `DealDamageEffect` 的公开 API 读取或维护。
+## 伤害类型 id；用于抗性、格挡、事件标签或 UI 展示。
 @export var damage_type: String = "physical"
-## 编辑器配置：`element_type` 表示 `DealDamageEffect` 的字段值，由 `DealDamageEffect` 的公开 API 读取或维护。
+## 元素类型 id；`none` 表示无元素，可用于弱点和抗性规则。
 @export var element_type: String = "none"
-## 编辑器配置：`can_crit` 表示 `DealDamageEffect` 的字段值，由 `DealDamageEffect` 的公开 API 读取或维护。
+## 本次伤害是否允许暴击；关闭后暴击率相关规则应跳过。
 @export var can_crit: bool = true
-## 编辑器配置：`hit_tags` 表示标签集合，由 `DealDamageEffect` 的公开 API 读取或维护。
+## 随本次命中传递的标签；用于触发条件、状态和事件过滤。
 @export var hit_tags: Array[String] = []
-## 编辑器配置：`on_hit_statuses` 表示 `DealDamageEffect` 的字段值，由 `DealDamageEffect` 的公开 API 读取或维护。
+## 命中后尝试施加的状态配置列表；每项 Dictionary 应包含 status_id 等约定 key。
 @export var on_hit_statuses: Array[Dictionary] = []
 
 

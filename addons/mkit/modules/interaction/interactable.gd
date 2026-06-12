@@ -6,11 +6,11 @@ extends Node
 ## 使用：当项目需要在交互系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := Interactable.new()`
 
-## 编辑器配置：`interaction_id` 表示稳定 id，由 `Interactable` 的公开 API 读取或维护。
+## 交互点的稳定 id；事件、存档或测试可用它定位交互对象。
 @export var interaction_id: String = ""
-## 编辑器配置：`display_text` 表示 `Interactable` 的字段值，由 `Interactable` 的公开 API 读取或维护。
+## 交互提示文本；UI 可直接显示给玩家。
 @export var display_text: String = "Interact"
-## 编辑器配置：`conditions` 表示执行条件列表，由 `Interactable` 的公开 API 读取或维护。
+## 执行前按顺序求值的条件列表；任一条件失败时阻止本对象继续产生效果。
 @export var conditions: Array[Condition] = []
 
 

@@ -6,16 +6,16 @@ extends Node
 ## 使用：当项目需要在AI 系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := Brain.new()`
 
-## 编辑器配置：`enabled` 表示是否启用，由 `Brain` 的公开 API 读取或维护。
+## 是否启用该运行逻辑；关闭后节点保留但不主动思考或执行。
 @export var enabled: bool = true
-## 编辑器配置：`think_interval` 表示时间间隔，由 `Brain` 的公开 API 读取或维护。
+## AI 思考间隔，单位为秒；值越小响应越快但调用越频繁。
 @export var think_interval: float = 0.2
 var _timer: float = 0.0
-## 运行时状态：`command_receiver` 表示 `Brain` 的字段值，由 `Brain` 的公开 API 读取或维护。
+## AI 发送命令时使用的 CommandReceiver；准备阶段从拥有者节点解析。
 var command_receiver: CommandReceiver = null
-## 运行时状态：`target` 表示 `Brain` 的字段值，由 `Brain` 的公开 API 读取或维护。
+## 本次行为或结果作用的目标节点；为空表示尚未选定目标。
 var target: Node = null
-## 运行时状态：`blackboard` 表示 `Brain` 的字段值，由 `Brain` 的公开 API 读取或维护。
+## 跨状态或 AI 决策共享的临时键值数据；同一拥有者生命周期内复用。
 var blackboard: Blackboard = Blackboard.new()
 
 

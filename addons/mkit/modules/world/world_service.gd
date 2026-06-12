@@ -12,13 +12,13 @@ signal zone_changed(from_zone_id: String, to_zone_id: String)
 const SERVICE_ID: String = "world"
 ## 公开常量 `_MAX_FINALIZE_RETRIES`，作为 `WorldService` 对外暴露的类型、事件或命令标识。
 const _MAX_FINALIZE_RETRIES: int = 1
-## 编辑器配置：`player_group` 表示 `WorldService` 的字段值，由 `WorldService` 的公开 API 读取或维护。
+## 查找玩家实体时使用的 Godot 分组名称。
 @export var player_group: String = "player"
-## 运行时状态：`current_zone_id` 表示稳定 id，由 `WorldService` 的公开 API 读取或维护。
+## WorldService 当前所在 ZoneDefinition id。
 var current_zone_id: String = ""
 var _pending_zone_id: String = ""
 var _pending_spawn_id: String = ""
-## 运行时状态：`scene_router` 表示 `WorldService` 的字段值，由 `WorldService` 的公开 API 读取或维护。
+## WorldService 使用的 SceneService 引用；切换区域时通过它加载场景。
 var scene_router: SceneService = null
 var _connected_scene_router: SceneService = null
 

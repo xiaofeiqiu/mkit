@@ -6,19 +6,19 @@ extends Node
 ## 使用：当项目需要在状态机中复用这段契约或状态时使用它。
 ## 示例：`var instance := State.new()`
 
-## 编辑器配置：`state_id` 表示稳定 id，由 `State` 的公开 API 读取或维护。
+## StateMachine 内部引用该状态的稳定 id；同级状态应保持唯一。
 @export var state_id: String = ""
-## 编辑器配置：`initial_child_state_id` 表示稳定 id，由 `State` 的公开 API 读取或维护。
+## 进入复合状态时默认激活的子状态 id；为空时不自动进入子状态。
 @export var initial_child_state_id: String = ""
-## 运行时状态：`parent_state` 表示运行时状态，由 `State` 的公开 API 读取或维护。
+## 父状态引用；根状态为空。
 var parent_state: State = null
-## 运行时状态：`state_machine` 表示运行时状态，由 `State` 的公开 API 读取或维护。
+## 绑定到同一实体的 StateMachine 引用；准备阶段解析后用于转发命令。
 var state_machine: StateMachine = null
-## 运行时状态：`owner_entity` 表示 `State` 的字段值，由 `State` 的公开 API 读取或维护。
+## 拥有该运行时对象的实体节点；通常是 EntityRoot 或其子节点。
 var owner_entity: Node = null
-## 运行时状态：`active_child` 表示是否启用或当前激活状态，由 `State` 的公开 API 读取或维护。
+## 复合状态当前激活的直接子状态；无子状态时为 null。
 var active_child: State = null
-## 运行时状态：`blackboard` 表示 `State` 的字段值，由 `State` 的公开 API 读取或维护。
+## 跨状态或 AI 决策共享的临时键值数据；同一拥有者生命周期内复用。
 var blackboard: Blackboard = null
 
 

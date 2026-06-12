@@ -6,19 +6,19 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `ShopDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`shop_id` 表示稳定 id，由 `ShopDefinition` 的公开 API 读取或维护。
+## ContentService 注册商店定义时使用的稳定 id；ShopService 按它打开商品列表。
 @export var shop_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `ShopDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`currency_id` 表示稳定 id，由 `ShopDefinition` 的公开 API 读取或维护。
+## 使用的钱包货币 id；需与 Wallet 或 ProgressionState 中的余额 key 一致。
 @export var currency_id: String = "gold"
-## 编辑器配置：`entries` 表示 `ShopDefinition` 的字段值，由 `ShopDefinition` 的公开 API 读取或维护。
+## 商店出售的商品条目列表；每项 ShopEntry 指向一个 ItemDefinition。
 @export var entries: Array[ShopEntry] = []
-## 编辑器配置：`buy_price_multiplier` 表示价格配置，由 `ShopDefinition` 的公开 API 读取或维护。
+## 购买价格倍率；1 表示使用条目基础价格。
 @export var buy_price_multiplier: float = 1.0
-## 编辑器配置：`sell_price_multiplier` 表示价格配置，由 `ShopDefinition` 的公开 API 读取或维护。
+## 出售价格倍率；1 表示按物品基础价值全价出售。
 @export var sell_price_multiplier: float = 0.5
-## 编辑器配置：`allow_sell` 表示 `ShopDefinition` 的字段值，由 `ShopDefinition` 的公开 API 读取或维护。
+## 商店是否允许玩家出售物品。
 @export var allow_sell: bool = true
 
 

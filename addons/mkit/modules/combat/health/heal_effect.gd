@@ -6,7 +6,7 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := HealEffect.new()`
 
-## 编辑器配置：`base_amount` 表示数量值，由 `HealEffect` 的公开 API 读取或维护。
+## 基础数值；在伤害或治疗结算中会被属性、倍率或规则进一步调整。
 @export var base_amount: float = 20.0
 
 

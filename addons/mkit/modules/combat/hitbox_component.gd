@@ -6,25 +6,25 @@ extends Area2D
 ## 使用：当项目实体需要持有可保存或可被 controller 查询的局部状态时使用它。
 ## 示例：`var instance := HitboxComponent.new()`
 
-## 编辑器配置：`active` 表示是否启用或当前激活状态，由 `HitboxComponent` 的公开 API 读取或维护。
+## Hitbox 是否当前参与命中检测；关闭时进入区域也不会结算伤害。
 @export var active: bool = false
-## 编辑器配置：`base_damage` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 命中造成的基础伤害；CombatService 会继续应用伤害规则。
 @export var base_damage: float = 1.0
-## 编辑器配置：`damage_type` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 伤害类型 id；用于抗性、格挡、事件标签或 UI 展示。
 @export var damage_type: String = "physical"
-## 编辑器配置：`element_type` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 元素类型 id；`none` 表示无元素，可用于弱点和抗性规则。
 @export var element_type: String = "none"
-## 编辑器配置：`hit_once_per_activation` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 同一次激活期间是否每个目标只命中一次。
 @export var hit_once_per_activation: bool = true
-## 编辑器配置：`target_factions` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 允许命中的目标阵营列表；为空时调用方可选择不做阵营过滤。
 @export var target_factions: Array[String] = ["enemy"]
-## 编辑器配置：`hit_tags` 表示标签集合，由 `HitboxComponent` 的公开 API 读取或维护。
+## 随本次命中传递的标签；用于触发条件、状态和事件过滤。
 @export var hit_tags: Array[String] = []
-## 编辑器配置：`on_hit_statuses` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 命中后尝试施加的状态配置列表；每项 Dictionary 应包含 status_id 等约定 key。
 @export var on_hit_statuses: Array[Dictionary] = []
-## 运行时状态：`source_entity` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 产生该 hitbox 的实体节点；用于伤害归因和状态来源。
 var source_entity: Node = null
-## 运行时状态：`already_hit` 表示 `HitboxComponent` 的字段值，由 `HitboxComponent` 的公开 API 读取或维护。
+## 本次激活已经命中过的目标表；hit_once_per_activation 开启时用于去重。
 var already_hit: Dictionary = {}
 
 

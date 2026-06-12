@@ -12,9 +12,9 @@ signal domain_event_emitted(event: DomainEvent)
 const SERVICE_ID: String = "events"
 ## 公开常量 `ANY_EVENT`，作为 `EventService` 对外暴露的类型、事件或命令标识。
 const ANY_EVENT: String = "*"
-## 运行时状态：`recent_events` 表示 `EventService` 的字段值，由 `EventService` 的公开 API 读取或维护。
+## EventService 最近发布的事件历史；用于调试、测试和轻量观察。
 var recent_events: Array[DomainEvent] = []
-## 运行时状态：`max_recent_events` 表示最大值，由 `EventService` 的公开 API 读取或维护。
+## EventService 保留的事件数量上限；超过后丢弃最旧事件。
 var max_recent_events: int = 100
 var _subscribers: Dictionary = {}
 

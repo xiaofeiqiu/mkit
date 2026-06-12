@@ -10,23 +10,23 @@ extends Node
 signal state_changed(previous_path: String, current_path: String)
 ## 当 `StateMachine` 发生 `transition failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal transition_failed(from_path: String, to_path: String, reason: String)
-## 编辑器配置：`initial_state_path` 表示资源或节点路径，由 `StateMachine` 的公开 API 读取或维护。
+## 状态机启动时进入的状态节点路径；为空时使用第一个子状态或保持未启动。
 @export var initial_state_path: String = ""
-## 编辑器配置：`auto_start` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
+## 进入场景树后是否自动启动状态机；关闭后由调用方显式 start。
 @export var auto_start: bool = true
-## 运行时状态：`owner_entity` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
+## 拥有该运行时对象的实体节点；通常是 EntityRoot 或其子节点。
 var owner_entity: Node = null
-## 运行时状态：`root_state` 表示运行时状态，由 `StateMachine` 的公开 API 读取或维护。
+## 状态机根状态节点；启动时解析并作为转移入口。
 var root_state: State = null
-## 运行时状态：`current_leaf_state` 表示运行时状态，由 `StateMachine` 的公开 API 读取或维护。
+## 当前处于激活链末端的叶子状态；命令优先交给它处理。
 var current_leaf_state: State = null
-## 运行时状态：`blackboard` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
+## 跨状态或 AI 决策共享的临时键值数据；同一拥有者生命周期内复用。
 var blackboard: Blackboard = Blackboard.new()
-## 运行时状态：`previous_path` 表示资源或节点路径，由 `StateMachine` 的公开 API 读取或维护。
+## 上一次激活状态的路径字符串；用于调试转移和回退逻辑。
 var previous_path: String = ""
-## 运行时状态：`last_transition_reason` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
+## 最近一次成功转移的原因文本；用于调试和测试断言。
 var last_transition_reason: String = ""
-## 运行时状态：`last_failed_transition_reason` 表示 `StateMachine` 的字段值，由 `StateMachine` 的公开 API 读取或维护。
+## 最近一次失败转移的原因文本；为空表示没有失败记录。
 var last_failed_transition_reason: String = ""
 
 

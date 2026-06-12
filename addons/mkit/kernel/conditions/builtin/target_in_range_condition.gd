@@ -6,7 +6,7 @@ extends Condition
 ## 使用：当项目内容入口需要在执行前做可复用的规则判断时使用它。
 ## 示例：`var instance := TargetInRangeCondition.new()`
 
-## 编辑器配置：`range` 表示距离或范围，由 `TargetInRangeCondition` 的公开 API 读取或维护。
+## 有效距离，单位为像素；0 或负数通常表示不做距离限制。
 @export var range: float = 64.0
 
 

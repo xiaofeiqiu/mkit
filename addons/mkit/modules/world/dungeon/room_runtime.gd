@@ -6,17 +6,17 @@ extends RefCounted
 ## 使用：当项目需要在房间与一局流程系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := RoomRuntime.new()`
 
-## 运行时状态：`room_runtime_id` 表示稳定 id，由 `RoomRuntime` 的公开 API 读取或维护。
+## 房间运行实例 id；用于区分同一 RoomDefinition 的多次出现。
 var room_runtime_id: String = ""
-## 运行时状态：`definition_id` 表示稳定 id，由 `RoomRuntime` 的公开 API 读取或维护。
+## 该房间实例来源的 RoomDefinition id；恢复和调试时用它回查静态配置。
 var definition_id: String = ""
-## 运行时状态：`cleared` 表示 `RoomRuntime` 的字段值，由 `RoomRuntime` 的公开 API 读取或维护。
+## 房间是否已清场；清场后通常允许选择奖励或前往下个房间。
 var cleared: bool = false
-## 运行时状态：`entered` 表示 `RoomRuntime` 的字段值，由 `RoomRuntime` 的公开 API 读取或维护。
+## 玩家是否已经进入过该房间实例。
 var entered: bool = false
-## 运行时状态：`active_enemy_ids` 表示稳定 id 列表，由 `RoomRuntime` 的公开 API 读取或维护。
+## 当前房间仍活跃的敌人实体 id 列表。
 var active_enemy_ids: Array[String] = []
-## 运行时状态：`reward_options` 表示 `RoomRuntime` 的字段值，由 `RoomRuntime` 的公开 API 读取或维护。
+## 当前房间可选择的奖励选项列表。
 var reward_options: Array[RewardOption] = []
 
 

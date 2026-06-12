@@ -6,19 +6,19 @@ extends RefCounted
 ## 使用：当项目调用方只想表达意图，并交给 pipeline 决定如何处理时使用它。
 ## 示例：`var instance := GameCommand.new()`
 
-## 运行时状态：`command_id` 表示稳定 id，由 `GameCommand` 的公开 API 读取或维护。
+## 引用的 命令 id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var command_id: String = ""
-## 运行时状态：`command_type` 表示 `GameCommand` 的字段值，由 `GameCommand` 的公开 API 读取或维护。
+## 命令类型字符串；接收方按该值选择处理逻辑。
 var command_type: String = ""
-## 运行时状态：`source_id` 表示稳定 id，由 `GameCommand` 的公开 API 读取或维护。
+## 事件、命令或修饰器来源 id；通常对应 EntityIdentity、系统或内容定义。
 var source_id: String = ""
-## 运行时状态：`target_id` 表示稳定 id，由 `GameCommand` 的公开 API 读取或维护。
+## 事件或命令目标 id；CommandService 可用它定位接收者。
 var target_id: String = ""
-## 运行时状态：`timestamp` 表示 `GameCommand` 的字段值，由 `GameCommand` 的公开 API 读取或维护。
+## 事件或命令创建时的时间戳，单位为秒；用于排序、调试和历史记录。
 var timestamp: float = 0.0
-## 运行时状态：`payload` 表示事件或存档载荷，由 `GameCommand` 的公开 API 读取或维护。
+## 附加上下文数据；key 由创建该对象的系统约定，读取前应检查是否存在。
 var payload: Dictionary = {}
-## 运行时状态：`consumed` 表示 `GameCommand` 的字段值，由 `GameCommand` 的公开 API 读取或维护。
+## 命令是否已经被接收方消费；为 true 后调用方不应重复路由。
 var consumed: bool = false
 
 

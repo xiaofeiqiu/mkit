@@ -6,9 +6,9 @@ extends RefCounted
 ## 使用：当项目需要在背包与装备系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := InventorySlot.new()`
 
-## 运行时状态：`index` 表示 `InventorySlot` 的字段值，由 `InventorySlot` 的公开 API 读取或维护。
+## 槽位在背包中的位置；-1 表示尚未放入模型。
 var index: int = -1
-## 运行时状态：`item` 表示 `InventorySlot` 的字段值，由 `InventorySlot` 的公开 API 读取或维护。
+## 槽位内的物品实例；为 null 表示空槽。
 var item: ItemInstance = null
 
 

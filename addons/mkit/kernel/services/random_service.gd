@@ -8,9 +8,9 @@ extends RefCounted
 
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `RandomService`。
 const SERVICE_ID: String = "random"
-## 运行时状态：`seed_value` 表示 `RandomService` 的字段值，由 `RandomService` 的公开 API 读取或维护。
+## RandomService 当前使用的随机种子；用于可复现的随机流程。
 var seed_value: int = 0
-## 运行时状态：`rng` 表示 `RandomService` 的字段值，由 `RandomService` 的公开 API 读取或维护。
+## RandomNumberGenerator 实例；所有服务级随机值都应从这里取得。
 var rng := RandomNumberGenerator.new()
 
 

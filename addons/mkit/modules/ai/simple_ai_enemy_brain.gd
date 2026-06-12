@@ -6,11 +6,11 @@ extends Brain
 ## 使用：当项目需要在AI 系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := SimpleAIEnemyBrain.new()`
 
-## 编辑器配置：`detection_range` 表示距离或范围，由 `SimpleAIEnemyBrain` 的公开 API 读取或维护。
+## AI 搜索目标的距离，单位为像素；超出范围的目标会被忽略。
 @export var detection_range: float = 240.0
-## 编辑器配置：`attack_range` 表示距离或范围，由 `SimpleAIEnemyBrain` 的公开 API 读取或维护。
+## AI 触发攻击的距离，单位为像素；目标更远时通常改为追击。
 @export var attack_range: float = 48.0
-## 编辑器配置：`target_group` 表示 `SimpleAIEnemyBrain` 的字段值，由 `SimpleAIEnemyBrain` 的公开 API 读取或维护。
+## AI 搜索目标时使用的 Godot 分组名称。
 @export var target_group: String = "player"
 
 

@@ -6,23 +6,23 @@ extends RefCounted
 ## 使用：当项目需要在属性系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := StatModifier.new()`
 
-## 运行时状态：`modifier_id` 表示稳定 id，由 `StatModifier` 的公开 API 读取或维护。
+## 引用的 StatModifier id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var modifier_id: String = ""
-## 运行时状态：`stat_id` 表示稳定 id，由 `StatModifier` 的公开 API 读取或维护。
+## 引用的 StatDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var stat_id: String = ""
-## 运行时状态：`source_id` 表示稳定 id，由 `StatModifier` 的公开 API 读取或维护。
+## 事件、命令或修饰器来源 id；通常对应 EntityIdentity、系统或内容定义。
 var source_id: String = ""
-## 运行时状态：`operation` 表示 `StatModifier` 的字段值，由 `StatModifier` 的公开 API 读取或维护。
+## 属性修饰运算类型；决定 value 是加法、倍率还是覆盖等规则。
 var operation: StatModifierDefinition.Operation
-## 运行时状态：`value` 表示 `StatModifier` 的字段值，由 `StatModifier` 的公开 API 读取或维护。
+## 属性或修饰器数值；具体含义由 operation 或所在定义决定。
 var value: float = 0.0
-## 运行时状态：`priority` 表示 `StatModifier` 的字段值，由 `StatModifier` 的公开 API 读取或维护。
+## 属性修饰应用优先级；数值越小越早参与计算。
 var priority: int = 0
-## 运行时状态：`stacking_rule` 表示 `StatModifier` 的字段值，由 `StatModifier` 的公开 API 读取或维护。
+## 同源或同类修饰叠加规则；决定重复应用时覆盖、刷新还是累加。
 var stacking_rule: StatModifierDefinition.StackingRule
-## 运行时状态：`remaining_duration` 表示持续时间，由 `StatModifier` 的公开 API 读取或维护。
+## 剩余持续时间，单位为秒；负数通常表示永久效果。
 var remaining_duration: float = -1.0
-## 运行时状态：`tags` 表示标签集合，由 `StatModifier` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 var tags: Array[String] = []
 
 

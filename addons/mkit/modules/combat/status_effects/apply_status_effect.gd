@@ -6,11 +6,11 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := ApplyStatusEffect.new()`
 
-## 编辑器配置：`status_id` 表示稳定 id，由 `ApplyStatusEffect` 的公开 API 读取或维护。
+## 引用的 StatusEffectDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var status_id: String = ""
-## 编辑器配置：`stacks` 表示 `ApplyStatusEffect` 的字段值，由 `ApplyStatusEffect` 的公开 API 读取或维护。
+## 状态或效果层数；应大于 0，并受定义的最大层数限制。
 @export var stacks: int = 1
-## 编辑器配置：`duration_override` 表示持续时间，由 `ApplyStatusEffect` 的公开 API 读取或维护。
+## 覆盖状态默认持续时间的秒数；负数表示使用 StatusEffectDefinition.duration。
 @export var duration_override: float = -1.0
 
 

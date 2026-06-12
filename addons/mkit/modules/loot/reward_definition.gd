@@ -6,21 +6,21 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `RewardDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`reward_id` 表示稳定 id，由 `RewardDefinition` 的公开 API 读取或维护。
+## ContentService 注册奖励定义时使用的稳定 id；奖励池和 UI 选项按它引用。
 @export var reward_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `RewardDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`description` 表示说明文本，由 `RewardDefinition` 的公开 API 读取或维护。
+## 面向玩家或设计者的说明文本；用于 UI、提示和文档，不参与规则判定。
 @export_multiline var description: String = ""
-## 编辑器配置：`icon` 表示 `RewardDefinition` 的字段值，由 `RewardDefinition` 的公开 API 读取或维护。
+## UI 展示用图标资源；为 null 时界面应使用默认图标或隐藏图标位。
 @export var icon: Texture2D
-## 编辑器配置：`rarity` 表示 `RewardDefinition` 的字段值，由 `RewardDefinition` 的公开 API 读取或维护。
+## 稀有度字符串；用于 UI 样式、掉落权重或奖励展示。
 @export var rarity: String = "common"
-## 编辑器配置：`weight` 表示 `RewardDefinition` 的字段值，由 `RewardDefinition` 的公开 API 读取或维护。
+## 随机选择权重；值越大被选中的概率越高，0 表示不会自然选中。
 @export var weight: float = 1.0
-## 编辑器配置：`conditions` 表示执行条件列表，由 `RewardDefinition` 的公开 API 读取或维护。
+## 执行前按顺序求值的条件列表；任一条件失败时阻止本对象继续产生效果。
 @export var conditions: Array[Condition] = []
-## 编辑器配置：`effects` 表示效果列表，由 `RewardDefinition` 的公开 API 读取或维护。
+## 条件通过后按顺序执行的效果列表；每个元素应为 GameEffect 资源。
 @export var effects: Array[GameEffect] = []
 
 

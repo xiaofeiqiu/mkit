@@ -6,18 +6,18 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := ApplyStatModifierEffect.new()`
 
-## 编辑器配置：`stat_id` 表示稳定 id，由 `ApplyStatModifierEffect` 的公开 API 读取或维护。
+## 引用的 StatDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var stat_id: String = ""
-## 编辑器配置：`operation` 表示 `ApplyStatModifierEffect` 的字段值，由 `ApplyStatModifierEffect` 的公开 API 读取或维护。
+## 属性修饰运算类型；决定 value 是加法、倍率还是覆盖等规则。
 @export var operation: StatModifierDefinition.Operation = StatModifierDefinition.Operation.FLAT_ADD
-## 编辑器配置：`value` 表示 `ApplyStatModifierEffect` 的字段值，由 `ApplyStatModifierEffect` 的公开 API 读取或维护。
+## 属性或修饰器数值；具体含义由 operation 或所在定义决定。
 @export var value: float = 0.0
-## 编辑器配置：`duration` 表示持续时间，由 `ApplyStatModifierEffect` 的公开 API 读取或维护。
+## 持续时间，单位为秒；0 通常表示立即完成，负数是否有效由具体子类约定。
 @export var duration: float = -1.0
-## 编辑器配置：`stacking_rule` 表示 `ApplyStatModifierEffect` 的字段值，由 `ApplyStatModifierEffect` 的公开 API 读取或维护。
+## 同源或同类修饰叠加规则；决定重复应用时覆盖、刷新还是累加。
 @export
 var stacking_rule: StatModifierDefinition.StackingRule = StatModifierDefinition.StackingRule.STACK
-## 编辑器配置：`apply_to_source` 表示 `ApplyStatModifierEffect` 的字段值，由 `ApplyStatModifierEffect` 的公开 API 读取或维护。
+## 是否把属性修饰施加到上下文 source；关闭时施加到 target。
 @export var apply_to_source: bool = true
 
 

@@ -8,21 +8,21 @@ extends Saveable
 
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `AudioService`。
 const SERVICE_ID: String = "audio"
-## 编辑器配置：`sfx_map` 表示 `AudioService` 的字段值，由 `AudioService` 的公开 API 读取或维护。
+## 音效 id 到 AudioDefinition 的快速表；启动或注册音频资源时填充。
 @export var sfx_map: Dictionary = {}
-## 编辑器配置：`music_map` 表示 `AudioService` 的字段值，由 `AudioService` 的公开 API 读取或维护。
+## 音乐 id 到 AudioDefinition 的快速表；play_music 按此表查找资源。
 @export var music_map: Dictionary = {}
-## 编辑器配置：`sfx_bus` 表示 `AudioService` 的字段值，由 `AudioService` 的公开 API 读取或维护。
+## 音效播放使用的音频总线名称；需与项目 Audio Bus 配置一致。
 @export var sfx_bus: String = "SFX"
-## 编辑器配置：`music_bus` 表示 `AudioService` 的字段值，由 `AudioService` 的公开 API 读取或维护。
+## 音乐播放使用的音频总线名称；需与项目 Audio Bus 配置一致。
 @export var music_bus: String = "Music"
-## 编辑器配置：`music_fade_floor_db` 表示 `AudioService` 的字段值，由 `AudioService` 的公开 API 读取或维护。
+## 音乐淡出结束时的最低分贝；通常保持足够低以近似静音。
 @export var music_fade_floor_db: float = -80.0
-## 运行时状态：`music_player` 表示 `AudioService` 的字段值，由 `AudioService` 的公开 API 读取或维护。
+## AudioService 持有的音乐播放器节点；首次播放音乐时创建。
 var music_player: AudioStreamPlayer = null
-## 运行时状态：`current_music_id` 表示稳定 id，由 `AudioService` 的公开 API 读取或维护。
+## 当前音乐的 AudioDefinition id；空字符串表示没有正在播放的音乐。
 var current_music_id: String = ""
-## 运行时状态：`bus_volumes` 表示 `AudioService` 的字段值，由 `AudioService` 的公开 API 读取或维护。
+## 记录各音频总线的目标音量；key 为 bus 名称，value 为分贝值。
 var bus_volumes: Dictionary = {}
 var _music_tween: Tween = null
 

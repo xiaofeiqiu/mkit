@@ -12,9 +12,9 @@ signal inventory_changed
 signal item_added(item: ItemInstance)
 ## 当 `InventoryController` 发生 `item removed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal item_removed(item: ItemInstance)
-## 编辑器配置：`capacity` 表示 `InventoryController` 的字段值，由 `InventoryController` 的公开 API 读取或维护。
+## 背包容量，单位为槽位数量；0 或负数表示不能存放物品。
 @export var capacity: int = 30
-## 运行时状态：`model` 表示 `InventoryController` 的字段值，由 `InventoryController` 的公开 API 读取或维护。
+## InventoryController 持有的运行时背包模型。
 var model := InventoryModel.new()
 
 

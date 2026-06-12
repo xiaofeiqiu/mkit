@@ -6,17 +6,17 @@ extends Node
 ## 使用：当项目实体需要被 CommandService 通过 target_id 路由命令时使用它。
 ## 示例：`var instance := CommandReceiver.new()`
 
-## 编辑器配置：`receiver_id` 表示稳定 id，由 `CommandReceiver` 的公开 API 读取或维护。
+## CommandService 路由命令时使用的接收者 id；同一运行场景内应保持唯一。
 @export var receiver_id: String = ""
-## 编辑器配置：`auto_register` 表示 `CommandReceiver` 的字段值，由 `CommandReceiver` 的公开 API 读取或维护。
+## 进入场景树时是否自动注册到 CommandService；关闭后需要手动注册接收者。
 @export var auto_register: bool = true
-## 运行时状态：`owner_entity` 表示 `CommandReceiver` 的字段值，由 `CommandReceiver` 的公开 API 读取或维护。
+## 拥有该运行时对象的实体节点；通常是 EntityRoot 或其子节点。
 var owner_entity: Node = null
-## 运行时状态：`state_machine` 表示运行时状态，由 `CommandReceiver` 的公开 API 读取或维护。
+## 绑定到同一实体的 StateMachine 引用；准备阶段解析后用于转发命令。
 var state_machine: StateMachine = null
-## 运行时状态：`command_history` 表示 `CommandReceiver` 的字段值，由 `CommandReceiver` 的公开 API 读取或维护。
+## 最近接收的命令列表；用于调试、测试和有限历史回放。
 var command_history: Array[GameCommand] = []
-## 运行时状态：`max_history` 表示最大值，由 `CommandReceiver` 的公开 API 读取或维护。
+## 保留的历史命令数量上限；超过后丢弃最旧记录。
 var max_history: int = 20
 var _registered_router: CommandService = null
 

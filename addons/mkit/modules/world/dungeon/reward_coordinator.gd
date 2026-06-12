@@ -7,7 +7,7 @@ extends RefCounted
 ## 示例：`var instance := RewardCoordinator.new()`
 
 
-## 运行时状态：`player_group` 表示 `RewardCoordinator` 的字段值，由 `RewardCoordinator` 的公开 API 读取或维护。
+## 查找玩家实体时使用的 Godot 分组名称。
 var player_group: String = "player"
 
 

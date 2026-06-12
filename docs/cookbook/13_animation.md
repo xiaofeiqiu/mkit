@@ -109,6 +109,68 @@ Feedback  (Node)
 
 如果你把 `audio_manager_path` 指向本地 `AudioService` 节点，也可以直接在那个本地服务上配置 `sfx_map`，但项目级音效推荐走 `AudioDefinition`。
 
+### 步骤 6：（可选）BGM 与音频总线路径
+
+音效和 BGM 走同一个 `AudioService`，但注册表不同：
+
+```text
+AudioDefinition(kind=SFX)   -> AudioService.sfx_map   -> play_sfx("hit")
+AudioDefinition(kind=MUSIC) -> AudioService.music_map -> play_music("forest_theme")
+ZoneDefinition.bgm_id       -> WorldService           -> play_music(bgm_id)
+```
+
+区域 BGM 的完整接线见 [Recipe 15](15_world_zone_transition.md#步骤-3给区域配置-bgm可选)：`ZoneDefinition.bgm_id` 必须匹配一个 `AudioDefinition(kind=MUSIC).audio_id`。`GameBootstrap` 启动时会把已注册的 `AudioDefinition` 分流进 `sfx_map` / `music_map`；`WorldService` 进入区域后读取 `bgm_id` 并调用 `AudioService.play_music()`。
+
+`sfx_bus` / `music_bus` 是 Godot Audio Bus 名称，需和 Project Settings 里的总线一致。`music_fade_floor_db` 是淡出时压到的最低音量；`WorldService` 默认无淡入淡出，若你在游戏代码里手动 `play_music(id, 0.5)`，这个值会影响交叉淡出的底线。
+
+### 步骤 7：（可选）用 effect 生成 VFX / 打调试事件
+
+如果 VFX 是技能、状态、任务或物品效果链的一部分，可以直接用内置 effect，而不是只靠 `FeedbackSystem` 监听事件：
+
+```gdscript
+var hit_vfx := SpawnSceneEffect.new()
+hit_vfx.effect_id = "spawn_hit_vfx"
+hit_vfx.scene_path = "res://game/vfx/hit.tscn"
+hit_vfx.spawn_at_target = true
+hit_vfx.use_pool = true
+
+var trace := LogEffect.new()
+trace.effect_id = "trace_hit_vfx"
+trace.message = "hit vfx spawned"
+trace.event_type = "debug.vfx"
+```
+
+`SpawnSceneEffect` 会把场景加到当前场景树；`spawn_at_target=true` 时落在 `context.target.global_position`，否则优先落在 `context.source.global_position`。`use_pool=true` 时优先通过 `PoolService.acquire(scene_path, parent)` 复用实例，适合命中特效、弹道残影这类频繁出现的短生命周期场景。
+
+`LogEffect` 会 `print()` 一行日志，并通过 `EventService` 发出一个 `DomainEvent`：`event_type` 是事件名，payload 里包含 `message`。它适合临时验证 effect 链顺序，也适合让 DebugOverlay 或测试订阅调试事件。
+
+## 字段参考
+
+### AudioService
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `sfx_map` | Dictionary = `{}` | 音效 id 到 `AudioStream` 的注册表；`play_sfx(audio_id)` 按它查找一次性音效 | 项目级音效通常由 `AudioDefinition(kind=SFX)` 自动填；本地 `AudioService` 可手动填 |
+| `music_map` | Dictionary = `{}` | 音乐 id 到 `AudioStream` 的注册表；`play_music(music_id)` 按它查找 BGM | `ZoneDefinition.bgm_id` 要匹配这里的 key；见 Recipe 15 |
+| `sfx_bus` | String = `"SFX"` | 一次性音效播放到的 Godot Audio Bus | 项目总线名不是 `"SFX"` 时改 |
+| `music_bus` | String = `"Music"` | BGM 播放器使用的 Godot Audio Bus | 项目总线名不是 `"Music"` 时改 |
+| `music_fade_floor_db` | float = `-80.0` | 音乐淡出或交叉淡出时压到的最低分贝 | 想让淡出保留一点环境底噪时调高；通常保持默认 |
+
+### SpawnSceneEffect
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `scene_path` | String = `""` | 要实例化的 `.tscn` 路径；为空会返回 `missing_scene_path` | 每个 VFX / 投射物 / 场景生成 effect 都要填 |
+| `spawn_at_target` | bool = `false` | `true` 时使用 target 位置；`false` 时优先使用 source 位置，再回退到 context position | 命中特效、治疗数字这类落在目标身上的效果设 `true` |
+| `use_pool` | bool = `false` | 是否通过 `PoolService` 复用场景实例；没有 pool 或关闭时直接实例化 | 高频短效场景设 `true`，一次性剧情物件保持 `false` |
+
+### LogEffect
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `message` | String = `"log"` | 打印到 Output、同时写入事件 payload 的调试文本 | 验证 effect 链是否执行到某一步时填 |
+| `event_type` | String = `"log"` | 发出的 `DomainEvent.event_type` | 需要测试、DebugOverlay 或录制工具订阅特定调试事件时改 |
+
 ## 运行验证
 
 1. 玩家攻击 → 播放 `"attack"` 动画，挥砍帧与 Hitbox 激活窗口对齐

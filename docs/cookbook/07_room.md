@@ -139,6 +139,34 @@ func _ready() -> void:
 4. 清空全部 3 个房间 → `Run finished: completed`
 5. 中途让玩家死亡 → `Run finished: failed:player_died`
 
+## 字段参考
+
+### EntityDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `entity_definition_id` | String | ContentService 注册用的稳定 id；`enemy_spawn_ids` 引用它，spawn 后写入 `EntityIdentity.definition_id` | 必填，全局唯一（见步骤 1）|
+| `display_name` | String = "" | UI 显示名，不参与注册 | 见步骤 1 |
+| `scene_path` | String = "" | 实体场景路径（`res://...tscn`），`EntitySpawner` 按它实例化 | 必填（见步骤 1）|
+| `default_faction` | String = "neutral" | spawn 时写入 `EntityIdentity.faction`，决定敌友判定与 hitbox 过滤 | 敌人 `"enemy"`（见步骤 1）|
+| `tags` | Array[String] = [] | 标签集合，供条件筛选、事件追踪、UI 分组 | 见步骤 1 |
+| `base_stats` | Dictionary = {} | `{stat_id: 初始值}`；spawn 时覆盖 `StatsComponent` 基础值 | 见步骤 1 |
+| `starting_ability_ids` | Array[String] = [] | spawn 时注册进该实体 `AbilityController` 的技能 id；每项需已入库 | 敌人要放技能时（配合 [Recipe 05](05_ability.md)）|
+| `loot_table_id` | String = "" | **预留字段，mkit 不读取**。内置掉落走 `RoomDefinition.reward_pool_ids`；可在游戏代码里读它做"按敌人种类掉落"（[Recipe 08 步骤 7](08_loot_and_rewards.md) 的 `roll_table` 改为查死亡实体的定义）| 自己接消费者时 |
+
+### RoomDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `room_id` | String | ContentService 注册用的稳定 id；`first_floor_room_pool` 引用它 | 必填，全局唯一（见步骤 2）|
+| `scene_path` | String = "" | 房间场景路径，`RoomLoader` 按它实例化 | 必填（见步骤 2）|
+| `room_type` | String = "combat" | 房间类型字符串（`combat` / `shop` / `event`…），由游戏内容约定语义 | 做非战斗房间时 |
+| `difficulty_rating` | int = 1 | 难度等级。**mkit 内置生成器不读取**——`DungeonGenerator.generate_linear()` 只做有放回随机；供你的选房/缩放逻辑使用（如按楼层过滤房间池、按难度加成敌人属性）| 自写选房算法时 |
+| `size` | Vector2i = (1, 1) | 房间逻辑尺寸。**mkit 不读取**，供布局/地图/生成约束使用 | 自写布局算法时 |
+| `tags` | Array[String] = [] | 标签集合。**mkit 不读取**，供条件筛选与自定义房间池过滤 | 自写选房算法时 |
+| `enemy_spawn_ids` | Array[String] = [] | 进房时 spawn 的 `EntityDefinition` id 列表，重复 id = 多只；按 `spawn_positions` 顺序落点 | 见步骤 2 |
+| `reward_pool_ids` | Array[String] = [] | 清房后供三选一抽取的 `RewardDefinition` 或奖励池 id；空 = 直接进下一间 | 本篇留空，[Recipe 08](08_loot_and_rewards.md) 填上 |
+
 ## 常见错误
 
 | 现象 | 原因 | 修复 |

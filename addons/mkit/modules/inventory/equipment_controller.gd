@@ -8,9 +8,9 @@ extends SaveableComponent
 
 ## 当 `EquipmentController` 发生 `equipment changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal equipment_changed(slot_id: String, item: ItemInstance)
-## 编辑器配置：`allowed_slots` 表示 `EquipmentController` 的字段值，由 `EquipmentController` 的公开 API 读取或维护。
+## 该装备控制器允许使用的槽位 id 列表。
 @export var allowed_slots: Array[String] = ["weapon", "helmet", "armor", "ring", "amulet"]
-## 运行时状态：`equipped` 表示 `EquipmentController` 的字段值，由 `EquipmentController` 的公开 API 读取或维护。
+## 已装备物品表；key 为槽位 id，value 为 ItemInstance。
 var equipped: Dictionary = {}
 
 

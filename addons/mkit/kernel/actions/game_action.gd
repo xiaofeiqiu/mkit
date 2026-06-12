@@ -10,23 +10,23 @@ extends RefCounted
 signal completed(action: GameAction)
 ## 当 `GameAction` 发生 `cancelled` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal cancelled(action: GameAction, reason: String)
-## 运行时状态：`action_id` 表示稳定 id，由 `GameAction` 的公开 API 读取或维护。
+## 引用的 action id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var action_id: String = ""
-## 运行时状态：`context` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
+## 当前执行上下文；动作启动后供阶段逻辑、条件和效果读取。
 var context: ActionContext = null
-## 运行时状态：`elapsed` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
+## 动作已运行的秒数；每次 update 后累加，用于判断持续时间和阶段切换。
 var elapsed: float = 0.0
-## 运行时状态：`finished` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
+## 动作是否已经完成；完成后 ActionService 会从 active_actions 中移除它。
 var finished: bool = false
-## 运行时状态：`cancelled_flag` 表示 `GameAction` 的字段值，由 `GameAction` 的公开 API 读取或维护。
+## 动作是否已经被取消；取消完成后不会再触发正常完成逻辑。
 var cancelled_flag: bool = false
-## 运行时状态：`cancel_tags` 表示标签集合，由 `GameAction` 的公开 API 读取或维护。
+## 取消动作时可匹配的标签；用于按类型批量终止动作。
 var cancel_tags: Array[String] = []
-## 运行时状态：`on_start_effects` 表示效果列表，由 `GameAction` 的公开 API 读取或维护。
+## 动作启动时按顺序执行的效果列表。
 var on_start_effects: Array[GameEffect] = []
-## 运行时状态：`on_complete_effects` 表示效果列表，由 `GameAction` 的公开 API 读取或维护。
+## 动作正常完成时按顺序执行的效果列表。
 var on_complete_effects: Array[GameEffect] = []
-## 运行时状态：`on_cancel_effects` 表示效果列表，由 `GameAction` 的公开 API 读取或维护。
+## 动作被取消时按顺序执行的效果列表。
 var on_cancel_effects: Array[GameEffect] = []
 var _effect_service: EffectService = null
 

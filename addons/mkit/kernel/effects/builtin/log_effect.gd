@@ -6,9 +6,9 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := LogEffect.new()`
 
-## 编辑器配置：`message` 表示 `LogEffect` 的字段值，由 `LogEffect` 的公开 API 读取或维护。
+## 写入日志事件的文本内容；用于调试效果链或测试执行顺序。
 @export var message: String = "log"
-## 编辑器配置：`event_type` 表示 `LogEffect` 的字段值，由 `LogEffect` 的公开 API 读取或维护。
+## 事件类型字符串；发布或匹配 DomainEvent 时必须与订阅方约定一致。
 @export var event_type: String = "log"
 
 

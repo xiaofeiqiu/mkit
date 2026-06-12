@@ -6,11 +6,11 @@ extends CharacterBody2D
 ## 使用：当项目需要在实体系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := EntityRoot.new()`
 
-## 运行时状态：`identity` 表示 `EntityRoot` 的字段值，由 `EntityRoot` 的公开 API 读取或维护。
+## EntityRoot 缓存的 EntityIdentity 子节点；准备阶段解析 Components/Controllers 会使用它。
 var identity: EntityIdentity
-## 运行时状态：`state_machine` 表示运行时状态，由 `EntityRoot` 的公开 API 读取或维护。
+## 绑定到同一实体的 StateMachine 引用；准备阶段解析后用于转发命令。
 var state_machine: StateMachine
-## 运行时状态：`command_receiver` 表示 `EntityRoot` 的字段值，由 `EntityRoot` 的公开 API 读取或维护。
+## EntityRoot 缓存的 CommandReceiver 子节点；命令管线通过它进入状态机。
 var command_receiver: CommandReceiver
 
 

@@ -6,11 +6,11 @@ extends Resource
 ## 使用：当项目需要在商店系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := ShopEntry.new()`
 
-## 编辑器配置：`item_id` 表示稳定 id，由 `ShopEntry` 的公开 API 读取或维护。
+## 引用的 ItemDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var item_id: String = ""
-## 编辑器配置：`price_override` 表示价格配置，由 `ShopEntry` 的公开 API 读取或维护。
+## 覆盖商品价格；-1 表示使用 ItemDefinition.value 和商店倍率计算。
 @export var price_override: int = -1
-## 编辑器配置：`stock` 表示 `ShopEntry` 的字段值，由 `ShopEntry` 的公开 API 读取或维护。
+## 可购买库存数量；-1 表示无限库存。
 @export var stock: int = -1
-## 编辑器配置：`conditions` 表示执行条件列表，由 `ShopEntry` 的公开 API 读取或维护。
+## 执行前按顺序求值的条件列表；任一条件失败时阻止本对象继续产生效果。
 @export var conditions: Array[Condition] = []

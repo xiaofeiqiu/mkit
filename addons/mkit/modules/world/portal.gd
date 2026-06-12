@@ -6,9 +6,9 @@ extends Interactable
 ## 使用：当项目需要在世界与场景系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := Portal.new()`
 
-## 编辑器配置：`target_zone_id` 表示稳定 id，由 `Portal` 的公开 API 读取或维护。
+## 传送目标 ZoneDefinition id；为空时 Portal 不应执行切区。
 @export var target_zone_id: String = ""
-## 编辑器配置：`target_spawn_id` 表示稳定 id，由 `Portal` 的公开 API 读取或维护。
+## 目标区域内的 SpawnPoint id；为空或 default 使用默认出生点。
 @export var target_spawn_id: String = "default"
 
 

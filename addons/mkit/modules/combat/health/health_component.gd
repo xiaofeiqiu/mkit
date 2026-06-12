@@ -14,13 +14,13 @@ signal damaged(result: DamageResult)
 signal healed(amount: float, source: Node)
 ## 当 `HealthComponent` 发生 `died` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal died(owner_entity: Node)
-## 编辑器配置：`current_hp` 表示当前值，由 `HealthComponent` 的公开 API 读取或维护。
+## 当前生命值；通常会被限制在 0 到最大生命值之间。
 @export var current_hp: float = 100.0
-## 编辑器配置：`destroy_on_death` 表示 `HealthComponent` 的字段值，由 `HealthComponent` 的公开 API 读取或维护。
+## 死亡时是否直接 queue_free 拥有者；关闭后仅发出死亡事件并保留节点。
 @export var destroy_on_death: bool = false
-## 运行时状态：`dead` 表示 `HealthComponent` 的字段值，由 `HealthComponent` 的公开 API 读取或维护。
+## 生命值是否已经进入死亡状态；避免重复触发死亡逻辑。
 var dead: bool = false
-## 运行时状态：`stats` 表示 `HealthComponent` 的字段值，由 `HealthComponent` 的公开 API 读取或维护。
+## 同一实体上的 StatsComponent 引用；用于读取最大生命值或资源上限。
 var stats: StatsComponent = null
 
 

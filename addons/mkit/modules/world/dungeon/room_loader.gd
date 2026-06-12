@@ -7,7 +7,7 @@ extends RefCounted
 ## 示例：`var instance := RoomLoader.new()`
 
 
-## 运行时状态：`last_error` 表示 `RoomLoader` 的字段值，由 `RoomLoader` 的公开 API 读取或维护。
+## 最近一次加载房间失败的错误文本；成功后应清空。
 var last_error: String = ""
 
 

@@ -14,7 +14,7 @@ signal action_completed(action: GameAction)
 signal action_cancelled(action: GameAction, reason: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `ActionService`。
 const SERVICE_ID: String = "actions"
-## 运行时状态：`active_actions` 表示是否启用或当前激活状态，由 `ActionService` 的公开 API 读取或维护。
+## ActionService 当前推进中的动作实例；动作完成或取消后会从列表移除。
 var active_actions: Array[GameAction] = []
 var _time: TimeService = null
 var _effects: EffectService = null

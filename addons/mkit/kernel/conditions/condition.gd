@@ -6,9 +6,9 @@ extends Resource
 ## 使用：当项目内容入口需要在执行前做可复用的规则判断时使用它。
 ## 示例：`var instance := Condition.new()`
 
-## 编辑器配置：`condition_id` 表示稳定 id，由 `Condition` 的公开 API 读取或维护。
+## 条件资源的稳定 id；日志、调试和需要按 id 引用条件的配置会使用它。
 @export var condition_id: String = ""
-## 编辑器配置：`invert` 表示 `Condition` 的字段值，由 `Condition` 的公开 API 读取或维护。
+## 是否反转条件结果；开启后 true/false 会在返回前互换。
 @export var invert: bool = false
 
 

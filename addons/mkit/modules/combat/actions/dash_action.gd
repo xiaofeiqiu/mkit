@@ -6,11 +6,11 @@ extends GameAction
 ## 使用：当项目行为需要跨帧执行、可取消，或在开始/完成时触发效果时使用它。
 ## 示例：`var instance := DashAction.new()`
 
-## 运行时状态：`duration` 表示持续时间，由 `DashAction` 的公开 API 读取或维护。
+## 持续时间，单位为秒；0 通常表示立即完成，负数是否有效由具体子类约定。
 var duration: float = 0.18
-## 运行时状态：`speed` 表示 `DashAction` 的字段值，由 `DashAction` 的公开 API 读取或维护。
+## 移动速度，单位为像素/秒。
 var speed: float = 480.0
-## 运行时状态：`direction` 表示 `DashAction` 的字段值，由 `DashAction` 的公开 API 读取或维护。
+## 本次行为的朝向或移动方向；调用方应按需要传入归一化向量。
 var direction: Vector2 = Vector2.ZERO
 
 

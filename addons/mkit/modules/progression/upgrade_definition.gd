@@ -6,27 +6,27 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `UpgradeDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`upgrade_id` 表示稳定 id，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## ContentService 注册升级定义时使用的稳定 id；购买、前置条件和解锁记录按它引用。
 @export var upgrade_id: String = ""
-## 编辑器配置：`display_name` 表示面向玩家或编辑器的显示名，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## UI 和编辑器中显示的名称；不参与内容 id 注册，留空时调用方可回退到稳定 id。
 @export var display_name: String = ""
-## 编辑器配置：`description` 表示说明文本，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 面向玩家或设计者的说明文本；用于 UI、提示和文档，不参与规则判定。
 @export_multiline var description: String = ""
-## 编辑器配置：`max_level` 表示最大值，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 可达到的最高等级；达到后继续获得经验不再提升等级。
 @export var max_level: int = 1
-## 编辑器配置：`currency_id` 表示稳定 id，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 使用的钱包货币 id；需与 Wallet 或 ProgressionState 中的余额 key 一致。
 @export var currency_id: String = "meta_currency"
-## 编辑器配置：`cost_by_level` 表示消耗配置，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 每一级升级需要的货币数量；索引 0 对应购买第 1 级。
 @export var cost_by_level: Array[int] = [100]
-## 编辑器配置：`prerequisite_upgrade_ids` 表示稳定 id 列表，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 购买前必须达到要求的升级 id 列表。
 @export var prerequisite_upgrade_ids: Array[String] = []
-## 编辑器配置：`unlock_content_ids` 表示稳定 id 列表，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 购买该升级后解锁的内容 id 列表。
 @export var unlock_content_ids: Array[String] = []
-## 编辑器配置：`effects` 表示效果列表，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 条件通过后按顺序执行的效果列表；每个元素应为 GameEffect 资源。
 @export var effects: Array[GameEffect] = []
-## 编辑器配置：`tags` 表示标签集合，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
-## 编辑器配置：`is_meta_upgrade` 表示 `UpgradeDefinition` 的字段值，由 `UpgradeDefinition` 的公开 API 读取或维护。
+## 是否属于局外永久升级；关闭时可作为本局内升级处理。
 @export var is_meta_upgrade: bool = true
 
 

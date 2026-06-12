@@ -6,25 +6,25 @@ extends RefCounted
 ## 使用：当项目需要在战斗系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := DamageRequest.new()`
 
-## 运行时状态：`source` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 产生本次行为或结果的节点引用；为空表示来源未绑定或不需要来源。
 var source: Node = null
-## 运行时状态：`target` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 本次行为或结果作用的目标节点；为空表示尚未选定目标。
 var target: Node = null
-## 运行时状态：`base_amount` 表示数量值，由 `DamageRequest` 的公开 API 读取或维护。
+## 基础数值；在伤害或治疗结算中会被属性、倍率或规则进一步调整。
 var base_amount: float = 0.0
-## 运行时状态：`damage_type` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 伤害类型 id；用于抗性、格挡、事件标签或 UI 展示。
 var damage_type: String = "physical"
-## 运行时状态：`element_type` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 元素类型 id；`none` 表示无元素，可用于弱点和抗性规则。
 var element_type: String = "none"
-## 运行时状态：`can_crit` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 本次伤害是否允许暴击；关闭后暴击率相关规则应跳过。
 var can_crit: bool = true
-## 运行时状态：`can_evade` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 本次伤害是否允许闪避；关闭后闪避相关规则应跳过。
 var can_evade: bool = true
-## 运行时状态：`can_block` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 本次伤害是否允许格挡；关闭后格挡相关规则应跳过。
 var can_block: bool = true
-## 运行时状态：`tags` 表示标签集合，由 `DamageRequest` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 var tags: Array[String] = []
-## 运行时状态：`on_hit_statuses` 表示 `DamageRequest` 的字段值，由 `DamageRequest` 的公开 API 读取或维护。
+## 命中后尝试施加的状态配置列表；每项 Dictionary 应包含 status_id 等约定 key。
 var on_hit_statuses: Array[Dictionary] = []
-## 运行时状态：`payload` 表示事件或存档载荷，由 `DamageRequest` 的公开 API 读取或维护。
+## 附加上下文数据；key 由创建该对象的系统约定，读取前应检查是否存在。
 var payload: Dictionary = {}

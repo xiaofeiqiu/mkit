@@ -6,21 +6,21 @@ extends ContentDefinition
 ## 使用：当项目需要用资源配置可复用内容，而不是把具体数值写死在代码里时使用它。
 ## 示例：在 ResourceDatabase 中加入 `RoomDefinition` 资源，再通过 ContentService 按 id 查询。
 
-## 编辑器配置：`room_id` 表示稳定 id，由 `RoomDefinition` 的公开 API 读取或维护。
+## ContentService 注册房间定义时使用的稳定 id；RunDirector 和 RoomController 按它加载房间。
 @export var room_id: String = ""
-## 编辑器配置：`scene_path` 表示资源或节点路径，由 `RoomDefinition` 的公开 API 读取或维护。
+## 要加载或实例化的场景路径；应填写 res:// 开头的 .tscn 资源。
 @export var scene_path: String = ""
-## 编辑器配置：`room_type` 表示 `RoomDefinition` 的字段值，由 `RoomDefinition` 的公开 API 读取或维护。
+## 房间类型字符串；例如 combat、shop、event，由游戏内容约定。
 @export var room_type: String = "combat"
-## 编辑器配置：`difficulty_rating` 表示 `RoomDefinition` 的字段值，由 `RoomDefinition` 的公开 API 读取或维护。
+## 房间难度等级；生成器和奖励系统可用它缩放内容。
 @export var difficulty_rating: int = 1
-## 编辑器配置：`size` 表示 `RoomDefinition` 的字段值，由 `RoomDefinition` 的公开 API 读取或维护。
+## 房间在逻辑网格中的尺寸；用于布局、地图或生成约束。
 @export var size: Vector2i = Vector2i(1, 1)
-## 编辑器配置：`tags` 表示标签集合，由 `RoomDefinition` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []
-## 编辑器配置：`enemy_spawn_ids` 表示稳定 id 列表，由 `RoomDefinition` 的公开 API 读取或维护。
+## 房间可生成敌人的 EntityDefinition id 列表。
 @export var enemy_spawn_ids: Array[String] = []
-## 编辑器配置：`reward_pool_ids` 表示稳定 id 列表，由 `RoomDefinition` 的公开 API 读取或维护。
+## 房间可使用的奖励池或 LootTableDefinition id 列表。
 @export var reward_pool_ids: Array[String] = []
 
 

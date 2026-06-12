@@ -34,7 +34,7 @@
 | `effects_on_tick` | `[res://data/effects/poison_tick.tres]` |
 
 `poison_tick.tres` 是一个 `DealDamageEffect`：
-- `effect_id` = `"poison_tick"`, `base_amount` = `5.0`, `damage_type` = `"poison"`
+- `effect_id` = `"poison_tick"`, `base_amount` = `5.0`, `damage_type` = `"poison"`, `can_crit` = `false`（DOT 跳伤不吃暴击）
 
 > tick 时 `StatusEffectController` 用 `source=施加者`、`target=被施加者（owner）` 构造 context 执行 `effects_on_tick`，所以 `DealDamageEffect` 正好打在中毒目标自己身上。
 
@@ -95,6 +95,41 @@ on_hit_statuses = [{"status_id": "status.poison", "chance": 0.5, "stacks": 1, "d
 3. 5 秒后 `status_removed` 触发，状态消失
 4. 施加 `status.rage` → 目标 `attack_power` +10，8 秒后自动回落
 5. `StatusEffectController` 的 `status_applied` / `status_ticked` / `status_removed` 信号可打 log 观察
+
+## 字段参考
+
+### StatusEffectDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `status_id` | String = "" | ContentService 注册用稳定 id；同一实体上同 id 状态只存在一个实例 | 必填，见步骤 1 |
+| `display_name` | String = "" | UI 显示名（状态图标栏等）；mkit 不读取 | 做 buff 栏 UI 时填 |
+| `duration` | float = 5.0 | 默认持续秒数；可被 `ApplyStatusEffect.duration_override` 覆盖。**注意：负数当前不会永久——`_process` 每帧减时长，≤0 即移除**，"永久状态"需设一个超大值 | 见步骤 1 |
+| `tick_interval` | float = 1.0 | 每隔几秒触发一次 `effects_on_tick`；≤ 0 = 从不 tick（纯属性 buff 用）| DOT 设 0.5–2，buff 设 0（步骤 2）|
+| `max_stacks` | int = 1 | `ADD_STACK` 规则下的层数上限；1 = 不可叠加 | 见步骤 1 |
+| `stack_rule` | enum = REFRESH_DURATION | 状态**已存在**时再次施加的处理规则，6 个取值：<br>`REFRESH_DURATION` — 层数不变，剩余时间重置为 duration（buff 续杯）<br>`ADD_STACK` — 层数 +stacks（夹到 max_stacks）**且**重置剩余时间（可叠 DOT）<br>`REPLACE` — 层数直接改成本次的 stacks、时间重置（覆盖式，新施加无视旧层数）<br>`IGNORE` — 完全忽略本次施加，旧状态原样继续<br>`EXTEND_DURATION` — 层数不变，剩余时间**累加** duration（续时不刷新）<br>`INDEPENDENT_STACKS` — **预留值，当前实现等同 IGNORE**（实例按 status_id 单槽存储，暂不支持同 id 多实例）| DOT 用 ADD_STACK，buff 用 REFRESH_DURATION，霸体类一次性状态用 IGNORE |
+| `tags` | Array[String] = [] | 标签；供"驱散所有 debuff"之类的自定义逻辑查询，mkit 不做规则判定 | 设 `["debuff"]` 等 |
+| `effects_on_apply` | Array[GameEffect] = [] | 状态**首次施加**瞬间执行的 effect 链（叠层/刷新不会再触发）| 冰冻上身时播放定身 effect |
+| `effects_on_tick` | Array[GameEffect] = [] | 每个 tick 周期执行的 effect 链 | 见步骤 1 |
+| `effects_on_remove` | Array[GameEffect] = [] | 到期或被 `remove_status()` 移除瞬间执行的 effect 链 | 死亡绽放：中毒结束时爆炸 |
+| `stat_modifiers` | Array[StatModifierDefinition] = [] | 状态期间挂到 `StatsComponent` 的属性修饰；施加时自动挂上、移除时自动卸下（字段语义见 [Recipe 03 字段参考](03_health_and_stats.md#字段参考)）| 见步骤 2 |
+
+三段 effect 钩子的生命周期对比：
+
+| 钩子 | 触发时机 | 触发次数 | context 内容 |
+|------|---------|---------|-------------|
+| `effects_on_apply` | 首次 `apply_status()`，挂上 stat_modifiers 之后 | 整个状态生命周期 1 次（叠层不重触发）| `source`=施加者，`target`=持有者，payload 带 `status_id` / `stacks` / `source_id` |
+| `effects_on_tick` | 每 `tick_interval` 秒 | duration / tick_interval 次 | 同上（`stacks` 是当下层数，DOT 想按层数加伤就在自定义 effect 里读它）|
+| `effects_on_remove` | 到期或手动移除，卸下 stat_modifiers 之前 | 1 次 | 同上 |
+
+### ApplyStatusEffect（往 effect 链里塞"上状态"）
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `effect_id` / `conditions` / `tags` | 继承 GameEffect | 同所有 effect：id 用于日志，conditions 是 apply 前门禁（[Recipe 21](21_conditions.md)）| — |
+| `status_id` | String = "" | 要施加的 `StatusEffectDefinition` id；目标（`context.target`）需挂 `StatusEffectController`，否则失败 `no_status_controller` | 必填，见步骤 4 |
+| `stacks` | int = 1 | 一次施加几层；首次施加直接成为初始层数，已存在时按 `stack_rule` 处理（`ADD_STACK` 下加这么多层）| "重毒"技能一次上 3 层毒 |
+| `duration_override` | float = -1.0 | 覆盖定义的 `duration`；负数 = 用定义默认值 | 同一个毒，精英怪上 10 秒、小怪上 5 秒 |
 
 ## 常见错误
 

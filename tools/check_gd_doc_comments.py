@@ -21,6 +21,11 @@ CONST_RE = re.compile(r"^const\s+([A-Za-z_][A-Za-z0-9_]*)\b")
 ENUM_RE = re.compile(r"^enum(?:\s+([A-Za-z_][A-Za-z0-9_]*))?\b")
 VAR_RE = re.compile(r"^(?:@[A-Za-z_][A-Za-z0-9_]*(?:\([^)]*\))?\s+)*var\s+([A-Za-z_][A-Za-z0-9_]*)\b")
 ANNOTATION_RE = re.compile(r"^@[A-Za-z_][A-Za-z0-9_]*(?:\([^)]*\))?\b")
+BANNED_DOC_PATTERNS = (
+    (re.compile(r"读取或维护。"), "generated maintenance boilerplate"),
+    (re.compile(r"^(编辑器配置|运行时状态)：`[^`]+` 表示"), "generated field template"),
+    (re.compile(r"字段值"), "placeholder field-value wording"),
+)
 
 LIFECYCLE_METHODS = {
     "_ready",
@@ -262,6 +267,14 @@ def requires_doc(declaration: Declaration) -> bool:
     return False
 
 
+def banned_doc_issue(doc: tuple[str, ...]) -> str:
+    for line in doc:
+        for pattern, label in BANNED_DOC_PATTERNS:
+            if pattern.search(line):
+                return label
+    return ""
+
+
 def main() -> int:
     issues: list[str] = []
 
@@ -272,11 +285,18 @@ def main() -> int:
                 continue
             if not class_api.doc:
                 issues.append(f"{rel(path)}:{class_api.line} class {class_api.name} missing doc")
+            elif issue := banned_doc_issue(class_api.doc):
+                issues.append(f"{rel(path)}:{class_api.line} class {class_api.name} has {issue}")
             for declaration in class_api.declarations:
                 if requires_doc(declaration) and not declaration.doc:
                     issues.append(
                         f"{rel(path)}:{declaration.line} {declaration.kind} "
                         f"{declaration.name} missing doc"
+                    )
+                elif declaration.doc and (issue := banned_doc_issue(declaration.doc)):
+                    issues.append(
+                        f"{rel(path)}:{declaration.line} {declaration.kind} "
+                        f"{declaration.name} has {issue}"
                     )
 
     if issues:

@@ -6,11 +6,11 @@ extends GameEffect
 ## 使用：当项目内容资源需要以数据驱动方式改变世界、实体或服务状态时使用它。
 ## 示例：`var instance := GrantItemEffect.new()`
 
-## 编辑器配置：`item_id` 表示稳定 id，由 `GrantItemEffect` 的公开 API 读取或维护。
+## 引用的 ItemDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var item_id: String = ""
-## 编辑器配置：`quantity` 表示 `GrantItemEffect` 的字段值，由 `GrantItemEffect` 的公开 API 读取或维护。
+## 物品或奖励数量；应为正数，堆叠物品会按该值合并。
 @export var quantity: int = 1
-## 编辑器配置：`give_to_source` 表示 `GrantItemEffect` 的字段值，由 `GrantItemEffect` 的公开 API 读取或维护。
+## 是否把物品授予上下文 source；关闭时授予 target。
 @export var give_to_source: bool = true
 
 

@@ -10,17 +10,17 @@ extends Resource
 enum Operation { FLAT_ADD, PERCENT_ADD, PERCENT_MULTIPLY, OVERRIDE, CLAMP_MIN, CLAMP_MAX }
 ## 公开枚举 `StackingRule`，限定 `StatModifierDefinition` 可接受的配置或运行时状态取值。
 enum StackingRule { STACK, REPLACE_SAME_SOURCE, HIGHEST_ONLY, LOWEST_ONLY, UNIQUE }
-## 编辑器配置：`modifier_id` 表示稳定 id，由 `StatModifierDefinition` 的公开 API 读取或维护。
+## 属性修饰定义的稳定 id；生成 StatModifier 时用于来源追踪和重复叠加判断。
 @export var modifier_id: String = ""
-## 编辑器配置：`stat_id` 表示稳定 id，由 `StatModifierDefinition` 的公开 API 读取或维护。
+## 引用的 StatDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 @export var stat_id: String = ""
-## 编辑器配置：`operation` 表示 `StatModifierDefinition` 的字段值，由 `StatModifierDefinition` 的公开 API 读取或维护。
+## 属性修饰运算类型；决定 value 是加法、倍率还是覆盖等规则。
 @export var operation: Operation = Operation.FLAT_ADD
-## 编辑器配置：`value` 表示 `StatModifierDefinition` 的字段值，由 `StatModifierDefinition` 的公开 API 读取或维护。
+## 属性或修饰器数值；具体含义由 operation 或所在定义决定。
 @export var value: float = 0.0
-## 编辑器配置：`priority` 表示 `StatModifierDefinition` 的字段值，由 `StatModifierDefinition` 的公开 API 读取或维护。
+## 属性修饰应用优先级；数值越小越早参与计算。
 @export var priority: int = 0
-## 编辑器配置：`stacking_rule` 表示 `StatModifierDefinition` 的字段值，由 `StatModifierDefinition` 的公开 API 读取或维护。
+## 同源或同类修饰叠加规则；决定重复应用时覆盖、刷新还是累加。
 @export var stacking_rule: StackingRule = StackingRule.STACK
-## 编辑器配置：`tags` 表示标签集合，由 `StatModifierDefinition` 的公开 API 读取或维护。
+## 标签集合，用于条件筛选、事件追踪和 UI 分组；建议使用短小稳定的 String 标识。
 @export var tags: Array[String] = []

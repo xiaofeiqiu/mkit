@@ -6,19 +6,19 @@ extends RefCounted
 ## 使用：当项目需要在背包与装备系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := ItemInstance.new()`
 
-## 运行时状态：`instance_id` 表示稳定 id，由 `ItemInstance` 的公开 API 读取或维护。
+## 运行时实例 id；用于区分同一内容定义产生的多个实例。
 var instance_id: String = ""
-## 运行时状态：`definition_id` 表示稳定 id，由 `ItemInstance` 的公开 API 读取或维护。
+## 该物品实例来源的 ItemDefinition id。
 var definition_id: String = ""
-## 运行时状态：`quantity` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
+## 物品或奖励数量；应为正数，堆叠物品会按该值合并。
 var quantity: int = 1
-## 运行时状态：`rolled_affixes` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
+## 运行时随机出的词缀修饰列表；不会回写到 ItemDefinition。
 var rolled_affixes: Array[StatModifier] = []
-## 运行时状态：`durability` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
+## 物品耐久比例或数值；默认 1.0 表示满耐久。
 var durability: float = 1.0
-## 运行时状态：`upgrade_level` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
+## 物品强化等级；0 表示未强化。
 var upgrade_level: int = 0
-## 运行时状态：`metadata` 表示 `ItemInstance` 的字段值，由 `ItemInstance` 的公开 API 读取或维护。
+## 物品实例扩展数据；key 由具体游戏或系统约定。
 var metadata: Dictionary = {}
 
 

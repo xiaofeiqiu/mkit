@@ -16,11 +16,11 @@ signal ability_cast_finished(ability_id: String)
 signal ability_failed(ability_id: String, reason: String)
 ## 当 `AbilityController` 发生 `cooldown started` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal cooldown_started(ability_id: String, duration: float)
-## 编辑器配置：`starting_ability_ids` 表示稳定 id 列表，由 `AbilityController` 的公开 API 读取或维护。
+## 初始化时授予实体的 AbilityDefinition id 列表；每项需已在 ContentService 注册。
 @export var starting_ability_ids: Array[String] = []
-## 运行时状态：`abilities` 表示 `AbilityController` 的字段值，由 `AbilityController` 的公开 API 读取或维护。
+## 已实例化的能力表；key 为 ability id，value 为 AbilityInstance。
 var abilities: Dictionary = {}
-## 运行时状态：`active_cast_actions` 表示是否启用或当前激活状态，由 `AbilityController` 的公开 API 读取或维护。
+## 当前未结束的施放动作列表；施放完成或取消后移除。
 var active_cast_actions: Array[GameAction] = []
 
 

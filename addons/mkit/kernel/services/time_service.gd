@@ -8,11 +8,11 @@ extends RefCounted
 
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `TimeService`。
 const SERVICE_ID: String = "time"
-## 运行时状态：`paused` 表示 `TimeService` 的字段值，由 `TimeService` 的公开 API 读取或维护。
+## 玩法时间是否暂停；暂停时 get_scaled_delta 返回 0。
 var paused: bool = false
-## 运行时状态：`gameplay_time_scale` 表示 `TimeService` 的字段值，由 `TimeService` 的公开 API 读取或维护。
+## 玩法时间缩放倍率；1 为原速，0 等价于暂停。
 var gameplay_time_scale: float = 1.0
-## 运行时状态：`elapsed_gameplay_time` 表示 `TimeService` 的字段值，由 `TimeService` 的公开 API 读取或维护。
+## 按玩法时间缩放累计的运行秒数；暂停时不会增加。
 var elapsed_gameplay_time: float = 0.0
 
 

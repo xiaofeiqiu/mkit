@@ -13,13 +13,13 @@ enum AudioKind { SFX, MUSIC }
 ## 公开常量 `TYPE_NAME`，作为 `AudioDefinition` 对外暴露的类型、事件或命令标识。
 const TYPE_NAME := "AudioDefinition"
 
-## 编辑器配置：`audio_id` 表示稳定 id，由 `AudioDefinition` 的公开 API 读取或维护。
+## ContentService 注册音频资源时使用的稳定 id；AudioService 播放音效或音乐时按它查找。
 @export var audio_id: String = ""
-## 编辑器配置：`stream` 表示 `AudioDefinition` 的字段值，由 `AudioDefinition` 的公开 API 读取或维护。
+## 要播放的音频流资源；为 null 时 AudioService 会跳过播放请求。
 @export var stream: AudioStream = null
-## 编辑器配置：`kind` 表示 `AudioDefinition` 的字段值，由 `AudioDefinition` 的公开 API 读取或维护。
+## 音频分类；决定默认播放通道和一次性/音乐类处理方式。
 @export var kind: AudioKind = AudioKind.SFX
-## 编辑器配置：`loop` 表示 `AudioDefinition` 的字段值，由 `AudioDefinition` 的公开 API 读取或维护。
+## 是否循环播放该音频；通常只对音乐或环境声开启。
 @export var loop: bool = false
 
 

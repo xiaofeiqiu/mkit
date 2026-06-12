@@ -118,6 +118,24 @@ func _ready() -> void:
 
 把 `QuestDefinition.auto_complete` 设为 `false`，则集满目标只触发 `quest_completed`（状态变 `completed`），需要玩家回 NPC 处用一个挂了 `CompleteQuestEffect`（`turn_in = true`）的对话选项才上交、发奖励。`CompleteQuestEffect` 会在 `completed` 状态下自动走 `turn_in_quest()`。
 
+## 字段参考
+
+### QuestDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `quest_type` | String = `"side"` | 任务分类字符串；mkit 不按它分支，只保存给 UI、筛选、日志或游戏代码使用 | 主线填 `"main"`，日常/循环任务可填 `"daily"`、`"repeatable"` 等项目约定值 |
+| `auto_complete` | bool = `false` | 所有非 `optional` 目标达标后，`QuestService` 是否立刻 `complete_quest()`；为 `true` 时还会自动 `turn_in_quest()` 并执行 `reward_effects` | 击杀/收集达标即领奖时设 `true`；需要回 NPC 交付时设 `false` |
+| `repeatable` | bool = `false` | 已上交任务是否允许再次接取。上交后若为 `true`，状态会重置为 `available` 并清空进度；活跃或已完成未上交时仍不能重复接 | 日常、刷怪悬赏、可重复挑战设 `true` |
+| `accept_conditions` | Array[Condition] = [] | `can_accept()` 的最后一道门禁（在前置任务、重复性检查之后求值），任一失败则接取被拒 | 等级/声望门槛任务；条件写法见 [Recipe 21](21_conditions.md) |
+
+### QuestObjectiveDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `optional` | bool = `false` | 可选目标不会阻止 `is_quest_complete()` 返回 true；它仍可被事件推进、显示在 UI、发出进度信号 | 额外奖励、支线挑战、"可救可不救"目标设 `true` |
+| `count_payload_key` | String = `""` | 匹配事件后，从 `DomainEvent.payload` 的这个 key 读取本次增加量；为空时每个事件固定 +1。读取到 ≤0 时忽略本次事件 | 一次事件代表多个数量时使用，如 `{"quantity": 5}` 对应填 `"quantity"` |
+
 ## 运行验证
 
 1. 与 NPC 对话，点"我来帮忙" → 控制台 `接受任务: quest.cull_beasts`

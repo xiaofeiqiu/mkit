@@ -6,9 +6,9 @@ extends RefCounted
 ## 使用：当项目需要在掉落与奖励系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := LootRollResult.new()`
 
-## 运行时状态：`item_instances` 表示 `LootRollResult` 的字段值，由 `LootRollResult` 的公开 API 读取或维护。
+## 本次掉落实际生成的物品实例列表。
 var item_instances: Array[ItemInstance] = []
-## 运行时状态：`currency` 表示 `LootRollResult` 的字段值，由 `LootRollResult` 的公开 API 读取或维护。
+## 本次掉落生成的货币表；key 为 currency id，value 为数量。
 var currency: Dictionary = {}
-## 运行时状态：`debug_rolls` 表示 `LootRollResult` 的字段值，由 `LootRollResult` 的公开 API 读取或维护。
+## 掉落随机过程记录；用于调试权重、空掉落和条件过滤。
 var debug_rolls: Array[Dictionary] = []

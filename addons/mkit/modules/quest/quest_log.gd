@@ -6,7 +6,7 @@ extends RefCounted
 ## 使用：当项目需要在任务系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := QuestLog.new()`
 
-## 运行时状态：`states` 表示 `QuestLog` 的字段值，由 `QuestLog` 的公开 API 读取或维护。
+## 任务运行状态表；key 为 quest id，value 为 QuestState。
 var states: Dictionary = {}
 
 

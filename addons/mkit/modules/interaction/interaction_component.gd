@@ -19,7 +19,7 @@ func _ready() -> void:
 	area_exited.connect(_on_area_exited)
 
 
-## 执行 `try_interact` 对应的公开操作，并保持 `InteractionComponent` 的领域契约一致。
+## 执行 `try_interact` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func try_interact() -> bool:
 	if current_interactable == null:
 		return false

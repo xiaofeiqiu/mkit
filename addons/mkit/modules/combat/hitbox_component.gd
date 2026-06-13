@@ -34,7 +34,7 @@ func _ready() -> void:
 	monitoring = true
 
 
-## 设置 `active` 对应的数据或对象，并保持 `HitboxComponent` 的领域契约一致。
+## 更新当前对象中的 `active`；输入值按该对象规则校验或夹取。
 func set_active(value: bool) -> void:
 	active = value
 	if value:

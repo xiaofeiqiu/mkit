@@ -23,12 +23,12 @@ func _ready() -> void:
 		entity_id = "%s_%d" % [name.to_snake_case(), Time.get_ticks_usec()]
 
 
-## 判断是否存在 `tag`，并保持 `EntityIdentity` 的领域契约一致。
+## 检查当前集合或对象是否包含 `tag`；缺失或空值时返回 false。
 func has_tag(tag: String) -> bool:
 	return tags.has(tag)
 
 
-## 判断是否存在 `any_tag`，并保持 `EntityIdentity` 的领域契约一致。
+## 检查当前集合或对象是否包含 `any_tag`；缺失或空值时返回 false。
 func has_any_tag(input_tags: Array[String]) -> bool:
 	for tag in input_tags:
 		if tags.has(tag):
@@ -36,6 +36,6 @@ func has_any_tag(input_tags: Array[String]) -> bool:
 	return false
 
 
-## 判断 `faction` 当前是否成立，并保持 `EntityIdentity` 的领域契约一致。
+## 检查当前对象是否满足 `faction` 状态；调用方可据此选择后续流程。
 func is_faction(value: String) -> bool:
 	return faction == value

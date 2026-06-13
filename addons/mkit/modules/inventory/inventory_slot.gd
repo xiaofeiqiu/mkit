@@ -12,11 +12,11 @@ var index: int = -1
 var item: ItemInstance = null
 
 
-## 判断 `empty` 当前是否成立，并保持 `InventorySlot` 的领域契约一致。
+## 检查当前对象是否满足 `empty` 状态；调用方可据此选择后续流程。
 func is_empty() -> bool:
 	return item == null
 
 
-## 清理当前保存的运行时状态或缓存，并保持 `InventorySlot` 的领域契约一致。
+## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。
 func clear() -> void:
 	item = null

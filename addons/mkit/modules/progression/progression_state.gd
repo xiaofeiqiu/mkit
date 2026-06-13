@@ -14,17 +14,17 @@ var upgrade_levels: Dictionary = {}
 var unlocked_content_ids: Array[String] = []
 
 
-## 返回 `currency` 对应的数据或对象，并保持 `ProgressionState` 的领域契约一致。
+## 读取当前对象中的 `currency`；未找到时返回 null、空集合或该 API 的默认值。
 func get_currency(currency_id: String) -> int:
 	return wallet.get_balance(currency_id)
 
 
-## 向当前集合或状态中增加数据，并保持 `ProgressionState` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_currency(currency_id: String, amount: int) -> void:
 	wallet.add(currency_id, amount)
 
 
-## 扣除指定资源或货币，并保持 `ProgressionState` 的领域契约一致。
+## 尝试扣除指定资源或货币；成功会更新余额，失败保持原状态。
 func spend_currency(currency_id: String, amount: int) -> bool:
 	if not wallet.can_spend(currency_id, amount):
 		return false
@@ -32,23 +32,23 @@ func spend_currency(currency_id: String, amount: int) -> bool:
 	return true
 
 
-## 返回 `upgrade_level` 对应的数据或对象，并保持 `ProgressionState` 的领域契约一致。
+## 读取当前对象中的 `upgrade_level`；未找到时返回 null、空集合或该 API 的默认值。
 func get_upgrade_level(upgrade_id: String) -> int:
 	return int(upgrade_levels.get(upgrade_id, 0))
 
 
-## 设置 `upgrade_level` 对应的数据或对象，并保持 `ProgressionState` 的领域契约一致。
+## 更新当前对象中的 `upgrade_level`；输入值按该对象规则校验或夹取。
 func set_upgrade_level(upgrade_id: String, level: int) -> void:
 	upgrade_levels[upgrade_id] = max(0, level)
 
 
-## 执行 `unlock_content` 对应的公开操作，并保持 `ProgressionState` 的领域契约一致。
+## 执行 `unlock_content` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func unlock_content(content_id: String) -> void:
 	if not unlocked_content_ids.has(content_id):
 		unlocked_content_ids.append(content_id)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ProgressionState` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"currencies": wallet.to_save_data(),
@@ -57,7 +57,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ProgressionState` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	var raw_currencies := data.get("currencies", {})
 	if raw_currencies is Dictionary:

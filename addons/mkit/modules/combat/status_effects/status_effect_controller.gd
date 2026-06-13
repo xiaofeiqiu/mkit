@@ -31,7 +31,7 @@ func _process(delta: float) -> void:
 			remove_status(status_id)
 
 
-## 把输入数据或效果应用到目标对象，并保持 `StatusEffectController` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_status(
 	status_id: String, source: Node, stacks: int = 1, duration_override: float = -1.0
 ) -> bool:
@@ -53,7 +53,7 @@ func apply_status(
 	return true
 
 
-## 从当前集合或状态中移除数据，并保持 `StatusEffectController` 的领域契约一致。
+## 从当前集合或状态移除传入数据；目标不存在时安全返回。
 func remove_status(status_id: String) -> void:
 	if not active_statuses.has(status_id):
 		return
@@ -66,12 +66,12 @@ func remove_status(status_id: String) -> void:
 	status_removed.emit(status_id)
 
 
-## 判断是否存在 `status`，并保持 `StatusEffectController` 的领域契约一致。
+## 检查当前集合或对象是否包含 `status`；缺失或空值时返回 false。
 func has_status(status_id: String) -> bool:
 	return active_statuses.has(status_id)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `StatusEffectController` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	var active: Array = []
 	for status_id in active_statuses.keys():
@@ -88,7 +88,7 @@ func to_save_data() -> Dictionary:
 	return {"active": active}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `StatusEffectController` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	_clear_statuses_for_load()
 	for raw in data.get("active", []):
@@ -96,7 +96,7 @@ func from_save_data(data: Dictionary) -> void:
 			_restore_status_entry(raw)
 
 
-## 返回 `definition` 对应的数据或对象，并保持 `StatusEffectController` 的领域契约一致。
+## 读取当前对象中的 `definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_definition(status_id: String) -> StatusEffectDefinition:
 	var content := Mkit.content()
 	if content == null:

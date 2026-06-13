@@ -37,7 +37,7 @@ func _ready() -> void:
 		events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 
 
-## 初始化运行时依赖和起始状态，并保持 `RoomController` 的领域契约一致。
+## 绑定运行时依赖并初始化内部状态；通常由 controller 或 service 在流程开始前调用。
 func setup(definition_id: String) -> void:
 	if definition_id.strip_edges() == "":
 		push_warning("RoomController.setup: definition_id is empty")
@@ -46,7 +46,7 @@ func setup(definition_id: String) -> void:
 	runtime = RoomRuntime.create(definition_id)
 
 
-## 进入对应状态、房间或节点，并保持 `RoomController` 的领域契约一致。
+## 进入目标状态、房间或节点；会更新内部运行时字段并发出相关 signal 或 event。
 func enter_room() -> void:
 	if runtime == null:
 		if room_definition_id.strip_edges() == "":
@@ -59,7 +59,7 @@ func enter_room() -> void:
 	room_entered.emit(runtime.room_runtime_id)
 
 
-## 执行 `spawn_enemies` 对应的公开操作，并保持 `RoomController` 的领域契约一致。
+## 执行 `spawn_enemies` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func spawn_enemies() -> void:
 	if runtime == null:
 		push_error("RoomController.spawn_enemies: runtime is null")
@@ -95,7 +95,7 @@ func spawn_enemies() -> void:
 		runtime.active_enemy_ids.append(entity_id)
 
 
-## 执行 `check_clear_condition` 对应的公开操作，并保持 `RoomController` 的领域契约一致。
+## 执行 `check_clear_condition` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func check_clear_condition() -> void:
 	if runtime == null or runtime.cleared:
 		return
@@ -108,7 +108,7 @@ func check_clear_condition() -> void:
 			events.emit_domain_event(WorldEvents.room_cleared(runtime.room_runtime_id))
 
 
-## 根据配置生成运行时结果，并保持 `RoomController` 的领域契约一致。
+## 读取配置资源生成运行时对象或结果；输入为空或无效时返回空结果。
 func generate_reward() -> void:
 	if runtime == null:
 		reward_ready.emit([])
@@ -132,7 +132,7 @@ func generate_reward() -> void:
 	reward_ready.emit(options)
 
 
-## 返回 `definition` 对应的数据或对象，并保持 `RoomController` 的领域契约一致。
+## 读取当前对象中的 `definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_definition() -> RoomDefinition:
 	var content := Mkit.content()
 	if content == null:
@@ -162,7 +162,7 @@ func _get_entity_id(entity: Node) -> String:
 	return EntityContract.get_entity_id(entity)
 
 
-## 执行 `restore_runtime` 对应的公开操作，并保持 `RoomController` 的领域契约一致。
+## 执行 `restore_runtime` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func restore_runtime(runtime_data: Dictionary) -> void:
 	runtime = RoomRuntime.new()
 	runtime.from_save_data(runtime_data)

@@ -34,7 +34,7 @@ func _ready() -> void:
 	_apply_bus_volumes()
 
 
-## 注册 `audio_definition`，让后续查询或路由可以找到它，并保持 `AudioService` 的领域契约一致。
+## 注册 `audio_definition` 到运行时表；后续查询、路由或 facade 会使用该实例。
 func register_audio_definition(definition: AudioDefinition) -> bool:
 	if definition == null or definition.audio_id == "" or definition.stream == null:
 		return false
@@ -48,7 +48,7 @@ func register_audio_definition(definition: AudioDefinition) -> bool:
 	return true
 
 
-## 注册 `audio_definitions`，让后续查询或路由可以找到它，并保持 `AudioService` 的领域契约一致。
+## 注册 `audio_definitions` 到运行时表；后续查询、路由或 facade 会使用该实例。
 func register_audio_definitions(definitions: Array) -> int:
 	var count := 0
 	for raw in definitions:
@@ -57,7 +57,7 @@ func register_audio_definitions(definitions: Array) -> int:
 	return count
 
 
-## 执行 `play_sfx` 对应的公开操作，并保持 `AudioService` 的领域契约一致。
+## 按 AudioDefinition id 播放一次性音效；缺失定义或 stream 时返回 null。
 func play_sfx(audio_id: String, volume_db: float = 0.0) -> void:
 	if not sfx_map.has(audio_id):
 		return
@@ -73,7 +73,7 @@ func play_sfx(audio_id: String, volume_db: float = 0.0) -> void:
 	player.play()
 
 
-## 执行 `play_music` 对应的公开操作，并保持 `AudioService` 的领域契约一致。
+## 按 AudioDefinition id 切换音乐；会复用或创建播放器并停止旧音乐。
 func play_music(music_id: String, fade_seconds: float = 0.0) -> void:
 	if not music_map.has(music_id):
 		return
@@ -105,7 +105,7 @@ func play_music(music_id: String, fade_seconds: float = 0.0) -> void:
 	_music_tween.tween_callback(_clear_music_tween)
 
 
-## 执行 `stop_music` 对应的公开操作，并保持 `AudioService` 的领域契约一致。
+## 停止当前音乐播放器；没有正在播放的音乐时安全返回。
 func stop_music() -> void:
 	if music_player != null:
 		_stop_music_tween()
@@ -114,7 +114,7 @@ func stop_music() -> void:
 	current_music_id = ""
 
 
-## 设置 `bus_volume` 对应的数据或对象，并保持 `AudioService` 的领域契约一致。
+## 更新当前对象中的 `bus_volume`；输入值按该对象规则校验或夹取。
 func set_bus_volume(bus: String, db: float) -> bool:
 	var bus_name := bus.strip_edges()
 	if bus_name == "":
@@ -125,7 +125,7 @@ func set_bus_volume(bus: String, db: float) -> bool:
 	return true
 
 
-## 返回 `bus_volume` 对应的数据或对象，并保持 `AudioService` 的领域契约一致。
+## 读取当前对象中的 `bus_volume`；未找到时返回 null、空集合或该 API 的默认值。
 func get_bus_volume(bus: String) -> float:
 	var bus_name := bus.strip_edges()
 	if bus_name == "":
@@ -138,12 +138,12 @@ func get_bus_volume(bus: String) -> float:
 	return AudioServer.get_bus_volume_db(index)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `AudioService` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {"bus_volumes": bus_volumes.duplicate(true)}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `AudioService` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	var raw: Dictionary = data.get("bus_volumes", {})
 	bus_volumes.clear()

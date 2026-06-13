@@ -29,7 +29,7 @@ func _ready() -> void:
 		ServiceRegistry.register_service(SERVICE_ID, self)
 
 
-## 打开对应 UI 或流程入口，并保持 `UIManager` 的领域契约一致。
+## 打开指定 UI 或流程入口；会记录当前状态并连接必要 signal。
 func open_screen(screen_id: String, data: Dictionary = {}, modal: bool = false) -> Node:
 	if active_screens.has(screen_id):
 		return active_screens[screen_id]
@@ -53,7 +53,7 @@ func open_screen(screen_id: String, data: Dictionary = {}, modal: bool = false) 
 	return screen
 
 
-## 关闭对应 UI 或流程入口，并保持 `UIManager` 的领域契约一致。
+## 关闭指定 UI 或流程入口；会清理当前状态并断开临时连接。
 func close_screen(screen_id: String) -> void:
 	if not active_screens.has(screen_id):
 		return
@@ -67,14 +67,14 @@ func close_screen(screen_id: String) -> void:
 	screen_closed.emit(screen_id)
 
 
-## 关闭对应 UI 或流程入口，并保持 `UIManager` 的领域契约一致。
+## 关闭指定 UI 或流程入口；会清理当前状态并断开临时连接。
 func close_top_screen() -> void:
 	if screen_stack.is_empty():
 		return
 	close_screen(screen_stack[-1])
 
 
-## 判断 `screen_open` 当前是否成立，并保持 `UIManager` 的领域契约一致。
+## 检查当前对象是否满足 `screen_open` 状态；调用方可据此选择后续流程。
 func is_screen_open(screen_id: String) -> bool:
 	return active_screens.has(screen_id)
 

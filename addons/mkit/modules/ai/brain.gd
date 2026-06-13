@@ -32,12 +32,12 @@ func _process(delta: float) -> void:
 		think()
 
 
-## 执行 `think` 对应的公开操作，并保持 `Brain` 的领域契约一致。
+## 执行 `think` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func think() -> void:
 	pass
 
 
-## 执行 `issue_command` 对应的公开操作，并保持 `Brain` 的领域契约一致。
+## 执行 `issue_command` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func issue_command(command_type: String, payload: Dictionary = {}) -> bool:
 	if command_receiver == null:
 		command_receiver = EntityContract.get_command_receiver(self)

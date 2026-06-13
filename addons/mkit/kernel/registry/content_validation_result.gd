@@ -14,12 +14,12 @@ var errors: Array[String] = []
 var warnings: Array[String] = []
 
 
-## 向当前集合或状态中增加数据，并保持 `ContentValidationResult` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_error(message: String) -> void:
 	success = false
 	errors.append(message)
 
 
-## 向当前集合或状态中增加数据，并保持 `ContentValidationResult` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_warning(message: String) -> void:
 	warnings.append(message)

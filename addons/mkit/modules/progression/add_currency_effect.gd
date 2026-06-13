@@ -13,7 +13,7 @@ var currency_id: String = ""
 var amount: int = 0
 
 
-## 子类覆写的实际效果入口，并保持 `AddCurrencyEffect` 的领域契约一致。
+## GameEffect 子类实现此 hook 完成实际效果；apply() 会调用它并返回 EffectResult。
 func _apply_impl(_context: GameplayContext) -> EffectResult:
 	var progression := Mkit.progression()
 	if progression != null:

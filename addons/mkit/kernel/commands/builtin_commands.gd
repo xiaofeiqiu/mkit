@@ -6,29 +6,29 @@ extends Object
 ## 使用：当项目需要在命令路由中复用这段契约或状态时使用它。
 ## 示例：`var instance := BuiltinCommands.new()`
 
-## 公开常量 `MOVE`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `MOVE`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const MOVE := "move"
-## 公开常量 `STOP_MOVE`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `STOP_MOVE`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const STOP_MOVE := "stop_move"
-## 公开常量 `ATTACK`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `ATTACK`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const ATTACK := "attack"
-## 公开常量 `CAST_ABILITY`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `CAST_ABILITY`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const CAST_ABILITY := "cast_ability"
-## 公开常量 `DASH`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `DASH`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const DASH := "dash"
-## 公开常量 `INTERACT`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `INTERACT`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const INTERACT := "interact"
-## 公开常量 `SELECT_REWARD`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `SELECT_REWARD`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const SELECT_REWARD := "select_reward"
-## 公开常量 `OPEN_INVENTORY`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `OPEN_INVENTORY`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const OPEN_INVENTORY := "open_inventory"
-## 公开常量 `CLOSE_INVENTORY`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `CLOSE_INVENTORY`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const CLOSE_INVENTORY := "close_inventory"
-## 公开常量 `EQUIP_ITEM`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `EQUIP_ITEM`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const EQUIP_ITEM := "equip_item"
-## 公开常量 `UNEQUIP_ITEM`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `UNEQUIP_ITEM`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const UNEQUIP_ITEM := "unequip_item"
-## 公开常量 `PAUSE`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `PAUSE`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const PAUSE := "pause"
-## 公开常量 `RESUME`，作为 `BuiltinCommands` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `RESUME`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const RESUME := "resume"

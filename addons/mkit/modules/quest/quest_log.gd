@@ -10,17 +10,17 @@ extends RefCounted
 var states: Dictionary = {}
 
 
-## 返回 `state` 对应的数据或对象，并保持 `QuestLog` 的领域契约一致。
+## 读取当前对象中的 `state`；未找到时返回 null、空集合或该 API 的默认值。
 func get_state(quest_id: String) -> QuestState:
 	return states.get(quest_id, null)
 
 
-## 执行 `has` 对应的公开操作，并保持 `QuestLog` 的领域契约一致。
+## 执行 `has` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func has(quest_id: String) -> bool:
 	return states.has(quest_id)
 
 
-## 返回 `active` 对应的数据或对象，并保持 `QuestLog` 的领域契约一致。
+## 读取当前对象中的 `active`；未找到时返回 null、空集合或该 API 的默认值。
 func get_active() -> Array[QuestState]:
 	var result: Array[QuestState] = []
 	for quest_id in states:
@@ -30,7 +30,7 @@ func get_active() -> Array[QuestState]:
 	return result
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `QuestLog` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	var serialized: Dictionary = {}
 	for quest_id in states:
@@ -38,7 +38,7 @@ func to_save_data() -> Dictionary:
 	return {"states": serialized}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `QuestLog` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	states = {}
 	var raw: Dictionary = data.get("states", {})

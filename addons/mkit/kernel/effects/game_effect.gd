@@ -14,7 +14,7 @@ extends Resource
 @export var tags: Array[String] = []
 
 
-## 把输入数据或效果应用到目标对象，并保持 `GameEffect` 的领域契约一致。
+## 执行 effect 前置条件；任一 condition 失败时返回失败 EffectResult，全部通过后调用 `_apply_impl()`。
 func apply(context: GameplayContext) -> EffectResult:
 	if not ConditionEvaluator.evaluate_all(conditions, context):
 		var failures := ConditionEvaluator.collect_failures(conditions, context)
@@ -22,6 +22,6 @@ func apply(context: GameplayContext) -> EffectResult:
 	return _apply_impl(context)
 
 
-## 子类覆写的实际效果入口，并保持 `GameEffect` 的领域契约一致。
+## GameEffect 子类实现此 hook 完成实际效果；apply() 会调用它并返回 EffectResult。
 func _apply_impl(context: GameplayContext) -> EffectResult:
 	return EffectResult.ok(effect_id)

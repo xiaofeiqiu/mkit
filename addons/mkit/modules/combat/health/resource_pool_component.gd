@@ -27,28 +27,28 @@ func _ready() -> void:
 	resources.from_save_data(starting_values)
 
 
-## 返回 `current` 对应的数据或对象，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 读取当前对象中的 `current`；未找到时返回 null、空集合或该 API 的默认值。
 func get_current(resource_id: String) -> float:
 	if resources == null:
 		return get_max_resource(resource_id)
 	return resources.get_current(resource_id)
 
 
-## 返回 `max_resource` 对应的数据或对象，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 读取当前对象中的 `max_resource`；未找到时返回 null、空集合或该 API 的默认值。
 func get_max_resource(resource_id: String) -> float:
 	if stats == null:
 		return 0.0
 	return stats.get_stat_value("max_%s" % resource_id, 0.0)
 
 
-## 判断是否存在 `resource`，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 检查当前集合或对象是否包含 `resource`；缺失或空值时返回 false。
 func has_resource(resource_id: String, amount: float) -> bool:
 	if resources == null:
 		return amount <= 0.0
 	return resources.has(resource_id, amount)
 
 
-## 扣除指定资源或货币，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 尝试扣除指定资源或货币；成功会更新余额，失败保持原状态。
 func spend(resource_id: String, amount: float) -> bool:
 	if resources == null:
 		return false
@@ -59,7 +59,7 @@ func spend(resource_id: String, amount: float) -> bool:
 	return true
 
 
-## 执行 `restore` 对应的公开操作，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 执行 `restore` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func restore(resource_id: String, amount: float) -> void:
 	if resources == null:
 		return
@@ -70,7 +70,7 @@ func restore(resource_id: String, amount: float) -> void:
 	resource_restored.emit(resource_id, after - before)
 
 
-## 设置 `current` 对应的数据或对象，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 更新当前对象中的 `current`；输入值按该对象规则校验或夹取。
 func set_current(resource_id: String, value: float) -> void:
 	var max_value := get_max_resource(resource_id)
 	if resources == null:
@@ -80,14 +80,14 @@ func set_current(resource_id: String, value: float) -> void:
 	resource_changed.emit(resource_id, resources.get_current(resource_id), max_value)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	if resources == null:
 		return {}
 	return resources.to_save_data()
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ResourcePoolComponent` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	if resources == null:
 		resources = ResourceSet.new()

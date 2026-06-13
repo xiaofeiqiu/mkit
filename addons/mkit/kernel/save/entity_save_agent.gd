@@ -7,7 +7,7 @@ extends Node
 ## 示例：`var instance := EntitySaveAgent.new()`
 
 
-## 公开常量 `ENTITY_SAVE_PARTICIPANT_GROUP`，作为 `EntitySaveAgent` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `ENTITY_SAVE_PARTICIPANT_GROUP`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const ENTITY_SAVE_PARTICIPANT_GROUP: String = "mkit_entity_save_participant"
 ## 运行时实体 id；保存、命令路由和事件归因使用它定位同一个实体。
 @export var entity_id: String = ""
@@ -24,12 +24,12 @@ const ENTITY_SAVE_PARTICIPANT_GROUP: String = "mkit_entity_save_participant"
 var _last_errors: Array[String] = []
 
 
-## 返回 `entity_id` 对应的数据或对象，并保持 `EntitySaveAgent` 的领域契约一致。
+## 读取当前对象中的 `entity_id`；未找到时返回 null、空集合或该 API 的默认值。
 func get_entity_id() -> String:
 	return entity_id.strip_edges()
 
 
-## 执行 `to_entity_save_record` 对应的公开操作，并保持 `EntitySaveAgent` 的领域契约一致。
+## 执行 `to_entity_save_record` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func to_entity_save_record() -> Dictionary:
 	_last_errors.clear()
 	var root := _resolve_root()
@@ -58,7 +58,7 @@ func to_entity_save_record() -> Dictionary:
 	return _make_record(components)
 
 
-## 把输入数据或效果应用到目标对象，并保持 `EntitySaveAgent` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_entity_save_record(record: Dictionary) -> void:
 	_last_errors.clear()
 	var root := _resolve_root()
@@ -86,12 +86,12 @@ func apply_entity_save_record(record: Dictionary) -> void:
 			)
 
 
-## 判断是否存在 `save_errors`，并保持 `EntitySaveAgent` 的领域契约一致。
+## 检查当前集合或对象是否包含 `save_errors`；缺失或空值时返回 false。
 func has_save_errors() -> bool:
 	return not _last_errors.is_empty()
 
 
-## 返回 `save_errors` 对应的数据或对象，并保持 `EntitySaveAgent` 的领域契约一致。
+## 读取当前对象中的 `save_errors`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_errors() -> Array[String]:
 	var result: Array[String] = []
 	for error in _last_errors:

@@ -13,7 +13,7 @@ var currency_id: String = ""
 var amount: int = 0
 
 
-## 检查当前上下文是否允许 `spend`，并保持 `SpendCurrencyEffect` 的领域契约一致。
+## 用 GameplayContext 和当前运行时状态判断是否允许 `spend`；失败原因由对应查询 API 提供。
 static func can_spend(check_currency_id: String, check_amount: int) -> bool:
 	var progression := Mkit.progression()
 	if progression == null:
@@ -21,7 +21,7 @@ static func can_spend(check_currency_id: String, check_amount: int) -> bool:
 	return progression.get_currency(check_currency_id) >= check_amount
 
 
-## 子类覆写的实际效果入口，并保持 `SpendCurrencyEffect` 的领域契约一致。
+## GameEffect 子类实现此 hook 完成实际效果；apply() 会调用它并返回 EffectResult。
 func _apply_impl(_context: GameplayContext) -> EffectResult:
 	var progression := Mkit.progression()
 	if progression == null:

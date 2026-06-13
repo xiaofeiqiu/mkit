@@ -16,9 +16,9 @@ signal save_failed(path: String, reason: String)
 signal load_failed(path: String, reason: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `SaveService`。
 const SERVICE_ID: String = "save"
-## 公开常量 `DEFAULT_SCOPE`，作为 `SaveService` 对外暴露的类型、事件或命令标识。
+## 默认 scope 名；Saveable 未提供专用 scope 时会归入这个存档范围。
 const DEFAULT_SCOPE: String = "global"
-## 公开常量 `CURRENT_SCHEMA_VERSION`，作为 `SaveService` 对外暴露的类型、事件或命令标识。
+## 当前 SaveService 支持的 envelope schema；读取存档时用于拒绝不兼容结构。
 const CURRENT_SCHEMA_VERSION: int = 2
 ## 存档文件路径；通常使用 user://，为空时调用方应显式决定是否跳过读写。
 @export var save_path: String = "user://save.json"
@@ -33,7 +33,9 @@ const CURRENT_SCHEMA_VERSION: int = 2
 var _registered_scopes: Dictionary = {}
 
 
-## 保存当前运行时状态，并保持 `SaveService` 的领域契约一致。
+## 从 root 下收集 Saveable roots、EntitySaveAgent entities 和 scope providers，
+## 写出 schema_version、roots、entities、scopes 到 `save_path`；重复 id、文件打开或临时文件替换失败时发 `save_failed` 并返回 false。
+## 写入成功后发 `save_completed` 并返回 true。
 func save_game(root: Node) -> bool:
 	var roots: Dictionary = {}
 	var saveables := _collect_saveables(root)
@@ -87,7 +89,8 @@ func save_game(root: Node) -> bool:
 	return true
 
 
-## 加载配置、资源或运行时状态，并保持 `SaveService` 的领域契约一致。
+## 从 `save_path` 读取 JSON envelope，校验 schema_version、roots、entities、scopes 后恢复 root saveables 和 entity agents。
+## 文件缺失、JSON 无效、重复 id 或 restore 错误会发 `load_failed` 并返回 false；全部恢复成功时发 `load_completed`。
 func load_game(root: Node) -> bool:
 	if not FileAccess.file_exists(save_path):
 		load_failed.emit(save_path, "Save file does not exist")
@@ -233,7 +236,7 @@ func _restore_entities(root: Node, entities: Dictionary) -> String:
 	return ""
 
 
-## 注册 `saveable_scope`，让后续查询或路由可以找到它，并保持 `SaveService` 的领域契约一致。
+## 注册一个多 scope Saveable provider；save_game 会把 provider 的每个 scope payload 写入 `scopes`。
 func register_saveable_scope(provider: Saveable) -> void:
 	if provider == null:
 		push_warning("SaveService.register_saveable_scope: provider is null")
@@ -246,7 +249,7 @@ func register_saveable_scope(provider: Saveable) -> void:
 		_registered_scopes[normalized_scope] = providers
 
 
-## 注销 `saveable_scope`，停止后续查询或路由使用它，并保持 `SaveService` 的领域契约一致。
+## 注销多 scope Saveable provider；之后 save_game 不再从它收集 scoped payload。
 func unregister_saveable_scope(provider: Saveable) -> void:
 	if provider == null:
 		return
@@ -260,7 +263,7 @@ func unregister_saveable_scope(provider: Saveable) -> void:
 			_registered_scopes[scope_name] = providers
 
 
-## 返回 `registered_scope_snapshot` 对应的数据或对象，并保持 `SaveService` 的领域契约一致。
+## 返回当前 scope 注册表的只读快照；key 是 scope 名，value 是 provider save id 列表。
 func get_registered_scope_snapshot() -> Dictionary:
 	var snapshot: Dictionary = {}
 	for scope_name in _registered_scopes.keys():

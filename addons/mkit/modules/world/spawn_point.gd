@@ -6,7 +6,7 @@ extends Marker2D
 ## 使用：当项目需要在世界与场景系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := SpawnPoint.new()`
 
-## 公开常量 `GROUP`，作为 `SpawnPoint` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `GROUP`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const GROUP: String = "spawn_point"
 ## SpawnPoint 在当前区域内的稳定 id；Portal 和 WorldService 按它定位出生位置。
 @export var spawn_id: String = "default"

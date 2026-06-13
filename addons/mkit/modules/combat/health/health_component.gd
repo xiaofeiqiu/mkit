@@ -32,14 +32,14 @@ func _ready() -> void:
 	current_hp = min(current_hp, get_max_hp())
 
 
-## 返回 `max_hp` 对应的数据或对象，并保持 `HealthComponent` 的领域契约一致。
+## 读取当前对象中的 `max_hp`；未找到时返回 null、空集合或该 API 的默认值。
 func get_max_hp() -> float:
 	if stats != null:
 		return stats.get_stat_value("max_hp", 100.0)
 	return 100.0
 
 
-## 把输入数据或效果应用到目标对象，并保持 `HealthComponent` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_damage(result: DamageResult) -> void:
 	if dead:
 		return
@@ -72,7 +72,7 @@ func _apply_on_hit_statuses(result: DamageResult) -> void:
 		)
 
 
-## 执行 `heal` 对应的公开操作，并保持 `HealthComponent` 的领域契约一致。
+## 执行 `heal` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func heal(amount: float, source: Node = null) -> void:
 	if dead:
 		return
@@ -83,7 +83,7 @@ func heal(amount: float, source: Node = null) -> void:
 	health_changed.emit(current_hp, get_max_hp())
 
 
-## 执行 `die` 对应的公开操作，并保持 `HealthComponent` 的领域契约一致。
+## 执行 `die` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func die(killer: Node = null) -> void:
 	if dead:
 		return
@@ -99,19 +99,19 @@ func die(killer: Node = null) -> void:
 		owner.queue_free()
 
 
-## 执行 `revive` 对应的公开操作，并保持 `HealthComponent` 的领域契约一致。
+## 执行 `revive` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func revive(percent: float = 1.0) -> void:
 	dead = false
 	current_hp = get_max_hp() * clamp(percent, 0.0, 1.0)
 	health_changed.emit(current_hp, get_max_hp())
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `HealthComponent` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {"current_hp": current_hp, "dead": dead}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `HealthComponent` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	dead = bool(data.get("dead", dead))
 	current_hp = clamp(float(data.get("current_hp", current_hp)), 0.0, get_max_hp())

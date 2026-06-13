@@ -10,7 +10,7 @@ extends Condition
 @export var ability_id: String = ""
 
 
-## 子类覆写的实际条件判断入口，并保持 `CooldownReadyCondition` 的领域契约一致。
+## Condition 子类实现此 hook 完成实际判断；evaluate() 会调用它并记录失败原因。
 func _evaluate_impl(context: GameplayContext) -> bool:
 	var id := ability_id if ability_id != "" else str(context.get_payload_value("ability_id", ""))
 	if id == "" or context.source == null:
@@ -23,7 +23,7 @@ func _evaluate_impl(context: GameplayContext) -> bool:
 	return controller.is_cooldown_ready(id)
 
 
-## 返回 `failure_reason` 对应的数据或对象，并保持 `CooldownReadyCondition` 的领域契约一致。
+## 读取当前对象中的 `failure_reason`；未找到时返回 null、空集合或该 API 的默认值。
 func get_failure_reason(context: GameplayContext) -> String:
 	var id := ability_id if ability_id != "" else str(context.get_payload_value("ability_id", ""))
 	return "Cooldown not ready: %s" % id

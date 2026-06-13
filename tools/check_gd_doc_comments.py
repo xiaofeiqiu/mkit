@@ -25,6 +25,11 @@ BANNED_DOC_PATTERNS = (
     (re.compile(r"读取或维护。"), "generated maintenance boilerplate"),
     (re.compile(r"^(编辑器配置|运行时状态)：`[^`]+` 表示"), "generated field template"),
     (re.compile(r"字段值"), "placeholder field-value wording"),
+    (re.compile(r"领域契约一致"), "generated method template"),
+    (re.compile(r"对应的公开操作"), "generated method template"),
+    (re.compile(r"对应的数据或对象"), "generated method template"),
+    (re.compile(r"当前是否成立"), "generated predicate template"),
+    (re.compile(r"公开常量 `[^`]+`，作为"), "generated constant template"),
 )
 
 LIFECYCLE_METHODS = {

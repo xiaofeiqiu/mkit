@@ -20,7 +20,7 @@ const SERVICE_ID: String = "shop"
 var current_shop: ShopDefinition = null
 
 
-## 打开对应 UI 或流程入口，并保持 `ShopService` 的领域契约一致。
+## 打开指定 UI 或流程入口；会记录当前状态并连接必要 signal。
 func open_shop(shop_id: String) -> bool:
 	var definition := get_definition(shop_id)
 	if definition == null:
@@ -30,12 +30,12 @@ func open_shop(shop_id: String) -> bool:
 	return true
 
 
-## 关闭对应 UI 或流程入口，并保持 `ShopService` 的领域契约一致。
+## 关闭指定 UI 或流程入口；会清理当前状态并断开临时连接。
 func close_shop() -> void:
 	current_shop = null
 
 
-## 返回 `buy_price` 对应的数据或对象，并保持 `ShopService` 的领域契约一致。
+## 读取当前对象中的 `buy_price`；未找到时返回 null、空集合或该 API 的默认值。
 func get_buy_price(item_id: String) -> int:
 	if current_shop == null:
 		return -1
@@ -49,7 +49,7 @@ func get_buy_price(item_id: String) -> int:
 	return int(round(base * current_shop.buy_price_multiplier))
 
 
-## 返回 `sell_price` 对应的数据或对象，并保持 `ShopService` 的领域契约一致。
+## 读取当前对象中的 `sell_price`；未找到时返回 null、空集合或该 API 的默认值。
 func get_sell_price(item_id: String) -> int:
 	if current_shop == null:
 		return -1
@@ -59,12 +59,12 @@ func get_sell_price(item_id: String) -> int:
 	return int(round(item_def.value * current_shop.sell_price_multiplier))
 
 
-## 检查当前上下文是否允许 `buy`，并保持 `ShopService` 的领域契约一致。
+## 用 GameplayContext 和当前运行时状态判断是否允许 `buy`；失败原因由对应查询 API 提供。
 func can_buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	return _buy_block_reason(item_id, quantity, buyer) == ""
 
 
-## 执行 `buy` 对应的公开操作，并保持 `ShopService` 的领域契约一致。
+## 尝试从商店购买条目；会检查价格、库存和钱包，成功后发出购买事件。
 func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	var reason := _buy_block_reason(item_id, quantity, buyer)
 	if reason != "":
@@ -99,7 +99,7 @@ func buy(item_id: String, quantity: int, buyer: Node) -> bool:
 	return true
 
 
-## 执行 `sell` 对应的公开操作，并保持 `ShopService` 的领域契约一致。
+## 尝试向商店出售物品；会扣除库存、增加货币并发出出售事件。
 func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	if current_shop == null:
 		transaction_failed.emit("", "No shop open")
@@ -140,7 +140,7 @@ func sell(item_instance_id: String, quantity: int, seller: Node) -> bool:
 	return true
 
 
-## 返回 `definition` 对应的数据或对象，并保持 `ShopService` 的领域契约一致。
+## 读取当前对象中的 `definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_definition(shop_id: String) -> ShopDefinition:
 	var content := Mkit.content()
 	if content == null:

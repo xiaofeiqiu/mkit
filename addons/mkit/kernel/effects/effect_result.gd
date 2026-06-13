@@ -18,7 +18,7 @@ var payload: Dictionary = {}
 var child_results: Array[EffectResult] = []
 
 
-## 执行 `ok` 对应的公开操作，并保持 `EffectResult` 的领域契约一致。
+## 执行 `ok` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 static func ok(id: String = "", data: Dictionary = {}) -> EffectResult:
 	var r := EffectResult.new()
 	r.success = true
@@ -27,7 +27,7 @@ static func ok(id: String = "", data: Dictionary = {}) -> EffectResult:
 	return r
 
 
-## 执行 `fail` 对应的公开操作，并保持 `EffectResult` 的领域契约一致。
+## 执行 `fail` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 static func fail(id: String, reason: String) -> EffectResult:
 	var r := EffectResult.new()
 	r.success = false

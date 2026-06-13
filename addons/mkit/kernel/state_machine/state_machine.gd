@@ -49,7 +49,7 @@ func _physics_process(delta: float) -> void:
 		_update_state_chain(current_leaf_state, delta, true)
 
 
-## 处理传入命令、事件或状态变化，并保持 `StateMachine` 的领域契约一致。
+## 从当前叶子状态开始向父状态冒泡 GameCommand；任一 State.handle_command 返回 true 即停止并表示命令已消费。
 func handle_command(command: GameCommand) -> bool:
 	if current_leaf_state == null:
 		return false
@@ -61,7 +61,8 @@ func handle_command(command: GameCommand) -> bool:
 	return false
 
 
-## 执行 `transition_to` 对应的公开操作，并保持 `StateMachine` 的领域契约一致。
+## 按层级 path 切换到目标 State；会验证目标存在、当前链可退出、目标链可进入。
+## 成功时执行最近公共祖先转移、更新 current_leaf_state 并发 `state_changed`；失败时记录 reason 并发 `transition_failed`。
 func transition_to(target_path: String, context: Dictionary = {}) -> bool:
 	var target := find_state_by_path(target_path)
 	if target == null:
@@ -84,14 +85,14 @@ func transition_to(target_path: String, context: Dictionary = {}) -> bool:
 	return true
 
 
-## 返回 `current_path` 对应的数据或对象，并保持 `StateMachine` 的领域契约一致。
+## 返回当前叶子状态的完整层级路径；状态机尚未进入状态时返回空字符串。
 func get_current_path() -> String:
 	if current_leaf_state == null:
 		return ""
 	return current_leaf_state.get_full_path()
 
 
-## 执行 `find_state_by_path` 对应的公开操作，并保持 `StateMachine` 的领域契约一致。
+## 按层级路径查找状态节点；任一片段缺失时返回 null。
 func find_state_by_path(path: String) -> State:
 	if root_state == null:
 		return null

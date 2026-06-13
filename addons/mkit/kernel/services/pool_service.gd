@@ -11,7 +11,7 @@ const SERVICE_ID: String = "pool"
 var _pools: Dictionary = {}
 
 
-## 执行 `warmup` 对应的公开操作，并保持 `PoolService` 的领域契约一致。
+## 预实例化指定数量的 PackedScene 节点并放入池中；后续 acquire 可直接复用。
 func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 	for i in range(count):
 		var node := _instantiate(scene_path)
@@ -23,7 +23,7 @@ func warmup(scene_path: String, count: int, parent: Node = null) -> void:
 		release(scene_path, node)
 
 
-## 执行 `acquire` 对应的公开操作，并保持 `PoolService` 的领域契约一致。
+## 从池中取出节点或实例化新节点；scene 为空时返回 null。
 func acquire(scene_path: String, parent: Node = null) -> Node:
 	var pool: Array = _pools.get(scene_path, [])
 	var node: Node = null
@@ -41,7 +41,7 @@ func acquire(scene_path: String, parent: Node = null) -> Node:
 	return node
 
 
-## 执行 `release` 对应的公开操作，并保持 `PoolService` 的领域契约一致。
+## 把节点归还到对应池并从当前父节点移除；无效节点会被忽略。
 func release(scene_path: String, node: Node) -> void:
 	if node == null:
 		return
@@ -53,7 +53,7 @@ func release(scene_path: String, node: Node) -> void:
 	_pools[scene_path] = pool
 
 
-## 清理当前保存的运行时状态或缓存，并保持 `PoolService` 的领域契约一致。
+## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。
 func clear_pool(scene_path: String) -> void:
 	if not _pools.has(scene_path):
 		return

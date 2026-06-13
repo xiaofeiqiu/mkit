@@ -7,6 +7,6 @@ extends Resource
 ## 示例：`var instance := ContentDefinition.new()`
 
 
-## 返回 ContentService 用于注册和查找的稳定内容 id，并保持 `ContentDefinition` 的领域契约一致。
+## 返回 ContentService 注册和查找使用的稳定 content id；id 为空时按该资源定义的备用字段处理。
 func get_content_id() -> String:
 	return ""

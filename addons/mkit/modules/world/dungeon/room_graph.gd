@@ -14,14 +14,14 @@ var start_node: RoomNode = null
 var boss_node: RoomNode = null
 
 
-## 返回 `room_at` 对应的数据或对象，并保持 `RoomGraph` 的领域契约一致。
+## 读取当前对象中的 `room_at`；未找到时返回 null、空集合或该 API 的默认值。
 func get_room_at(index: int) -> RoomNode:
 	if index < 0 or index >= nodes.size():
 		return null
 	return nodes[index]
 
 
-## 清理当前保存的运行时状态或缓存，并保持 `RoomGraph` 的领域契约一致。
+## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。
 func clear() -> void:
 	for node in nodes:
 		node.next_nodes.clear()

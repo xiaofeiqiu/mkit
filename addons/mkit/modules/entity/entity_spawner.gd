@@ -18,7 +18,7 @@ func _ready() -> void:
 	content = Mkit.content()
 
 
-## 执行 `spawn_entity` 对应的公开操作，并保持 `EntitySpawner` 的领域契约一致。
+## 根据 EntityDefinition 实例化实体场景；会写入 identity 并返回新节点。
 func spawn_entity(
 	definition_id: String, parent: Node, position: Vector2 = Vector2.ZERO, runtime_id: String = ""
 ) -> Node:

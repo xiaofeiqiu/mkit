@@ -46,7 +46,7 @@ func _exit_tree() -> void:
 	_registered_router = null
 
 
-## 执行 `configure_receiver_id` 对应的公开操作，并保持 `CommandReceiver` 的领域契约一致。
+## 运行时改写 receiver_id；如果已经注册到 CommandService，会先注销旧 id 再用新 id 注册。
 func configure_receiver_id(id: String) -> void:
 	if id == "":
 		return
@@ -57,7 +57,8 @@ func configure_receiver_id(id: String) -> void:
 	_register_with_router()
 
 
-## 接收外部传入的数据并交给本地处理，并保持 `CommandReceiver` 的领域契约一致。
+## 接收 GameCommand、记录 history，并优先转发给 StateMachine；状态机未处理时调用 handle_unhandled_command。
+## 任一路径处理成功都会 mark_consumed 并返回 true。
 func receive_command(command: GameCommand) -> bool:
 	if command == null:
 		push_warning("CommandReceiver.receive_command: command is null")
@@ -76,7 +77,7 @@ func receive_command(command: GameCommand) -> bool:
 	return fallback_handled
 
 
-## 处理传入命令、事件或状态变化，并保持 `CommandReceiver` 的领域契约一致。
+## 子类覆写的兜底命令处理入口；默认不消费命令。
 func handle_unhandled_command(command: GameCommand) -> bool:
 	return false
 

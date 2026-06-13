@@ -14,7 +14,7 @@ extends Resource
 @export var resource_paths: Array[String] = []
 
 
-## 返回 `all_resources` 对应的数据或对象，并保持 `ResourceDatabase` 的领域契约一致。
+## 读取当前对象中的 `all_resources`；未找到时返回 null、空集合或该 API 的默认值。
 func get_all_resources() -> Array[Resource]:
 	var result: Array[Resource] = []
 	result.append_array(resources)

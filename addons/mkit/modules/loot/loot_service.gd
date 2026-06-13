@@ -10,7 +10,7 @@ extends RefCounted
 const SERVICE_ID: String = "loot"
 
 
-## 根据权重或随机服务生成结果，并保持 `LootService` 的领域契约一致。
+## 根据权重或随机服务生成结果；返回值、signal 或事件会表达实际执行结果。
 func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 	if table_id.strip_edges() == "":
 		push_warning("LootService.roll_table: table_id is empty")
@@ -26,7 +26,7 @@ func roll_table(table_id: String, context: GameplayContext) -> LootRollResult:
 	return roll(table, GameplayContext.from_context(context))
 
 
-## 根据权重或随机服务生成结果，并保持 `LootService` 的领域契约一致。
+## 根据权重或随机服务生成结果；返回值、signal 或事件会表达实际执行结果。
 func roll(table: LootTableDefinition, context: GameplayContext) -> LootRollResult:
 	var result := LootRollResult.new()
 	if table == null:
@@ -91,13 +91,13 @@ func _roll_quantity(entry: LootEntry, random: RandomService) -> int:
 	return max(0, randi_range(min_quantity, max_quantity))
 
 
-## 根据配置生成运行时结果，并保持 `LootService` 的领域契约一致。
+## 读取配置资源生成运行时对象或结果；输入为空或无效时返回空结果。
 func generate_options(
 	pool_ids: Array[String], count: int, context: GameplayContext
 ) -> Array[RewardOption]:
 	return RewardSystem.new().generate_options(pool_ids, count, context)
 
 
-## 把输入数据或效果应用到目标对象，并保持 `LootService` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	return RewardSystem.new().apply_selected(option, context)

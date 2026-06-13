@@ -11,7 +11,7 @@ extends RefCounted
 var last_error: String = ""
 
 
-## 加载配置、资源或运行时状态，并保持 `RoomLoader` 的领域契约一致。
+## 读取传入配置、资源或存档 payload 并写入运行时表；无效输入会返回失败或被跳过。
 func load_room(room_definition_id: String, container: Node) -> RoomController:
 	last_error = ""
 	if room_definition_id.strip_edges() == "":

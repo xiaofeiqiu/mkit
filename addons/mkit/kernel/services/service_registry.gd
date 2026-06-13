@@ -9,7 +9,7 @@ extends Node
 var _services: Dictionary = {}
 
 
-## 注册 `service`，让后续查询或路由可以找到它，并保持 `ServiceRegistry` 的领域契约一致。
+## 以 service_id 注册服务实例；重复 id 会替换旧实例并输出 warning，空 id 或 null service 会被忽略。
 func register_service(service_id: String, service: Object) -> void:
 	var id := service_id.strip_edges()
 	if id == "":
@@ -23,7 +23,7 @@ func register_service(service_id: String, service: Object) -> void:
 	_services[id] = service
 
 
-## 判断是否存在 `service`，并保持 `ServiceRegistry` 的领域契约一致。
+## 检查去空白后的 service_id 是否已经注册；不会输出 missing-service warning。
 func has_service(service_id: String) -> bool:
 	return _services.has(service_id.strip_edges())
 
@@ -41,7 +41,7 @@ func get_port(service_id: String) -> Object:
 	return service
 
 
-## 返回 `registered_service_ids` 对应的数据或对象，并保持 `ServiceRegistry` 的领域契约一致。
+## 返回当前已注册 service id 的排序列表，供调试、文档示例和测试断言使用。
 func get_registered_service_ids() -> Array[String]:
 	var ids: Array[String] = []
 	for service_id in _services.keys():
@@ -50,7 +50,7 @@ func get_registered_service_ids() -> Array[String]:
 	return ids
 
 
-## 注销 `service`，停止后续查询或路由使用它，并保持 `ServiceRegistry` 的领域契约一致。
+## 移除指定 service_id；空 id 会输出 warning，缺失 id 不报错。
 func unregister_service(service_id: String) -> void:
 	if service_id.strip_edges() == "":
 		push_warning("ServiceRegistry.unregister_service: service_id is empty")
@@ -58,6 +58,6 @@ func unregister_service(service_id: String) -> void:
 	_services.erase(service_id)
 
 
-## 清理当前保存的运行时状态或缓存，并保持 `ServiceRegistry` 的领域契约一致。
+## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。
 func clear() -> void:
 	_services.clear()

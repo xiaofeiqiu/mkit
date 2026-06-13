@@ -24,7 +24,7 @@ var _definition: AbilityDefinition = null
 var _recharge_duration: float = 0.0
 
 
-## 初始化运行时依赖和起始状态，并保持 `AbilityInstance` 的领域契约一致。
+## 绑定运行时依赖并初始化内部状态；通常由 controller 或 service 在流程开始前调用。
 func setup(definition: AbilityDefinition, owner_entity: Node) -> void:
 	definition_id = definition.ability_id
 	owner = owner_entity
@@ -34,7 +34,7 @@ func setup(definition: AbilityDefinition, owner_entity: Node) -> void:
 	_definition = definition
 
 
-## 执行 `tick` 对应的公开操作，并保持 `AbilityInstance` 的领域契约一致。
+## 执行 `tick` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func tick(delta: float) -> void:
 	if cooldown_remaining > 0.0:
 		cooldown_remaining = max(0.0, cooldown_remaining - delta)
@@ -44,22 +44,22 @@ func tick(delta: float) -> void:
 				cooldown_remaining = _recharge_duration
 
 
-## 判断 `cooldown_ready` 当前是否成立，并保持 `AbilityInstance` 的领域契约一致。
+## 检查当前对象是否满足 `cooldown_ready` 状态；调用方可据此选择后续流程。
 func is_cooldown_ready() -> bool:
 	return current_charges > 0
 
 
-## 返回 `recharge_duration` 对应的数据或对象，并保持 `AbilityInstance` 的领域契约一致。
+## 读取当前对象中的 `recharge_duration`；未找到时返回 null、空集合或该 API 的默认值。
 func get_recharge_duration() -> float:
 	return _recharge_duration
 
 
-## 设置 `recharge_duration` 对应的数据或对象，并保持 `AbilityInstance` 的领域契约一致。
+## 更新当前对象中的 `recharge_duration`；输入值按该对象规则校验或夹取。
 func set_recharge_duration(value: float) -> void:
 	_recharge_duration = max(0.0, value)
 
 
-## 启动 `cooldown` 流程，并保持 `AbilityInstance` 的领域契约一致。
+## 启动 `cooldown` 流程并记录运行时状态；后续由 update、service 或 signal 推进。
 func start_cooldown(definition: AbilityDefinition, cooldown_reduction: float = 0.0) -> void:
 	var max_charges := _max_charges(definition)
 	var final_cd := max(0.0, definition.cooldown * (1.0 - cooldown_reduction))
@@ -75,7 +75,7 @@ func start_cooldown(definition: AbilityDefinition, cooldown_reduction: float = 0
 		cooldown_remaining = 0.0
 
 
-## 执行 `restore_charge` 对应的公开操作，并保持 `AbilityInstance` 的领域契约一致。
+## 执行 `restore_charge` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func restore_charge(definition: AbilityDefinition) -> void:
 	var max_charges := _max_charges(definition)
 	current_charges = min(max_charges, current_charges + 1)

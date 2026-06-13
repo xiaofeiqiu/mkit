@@ -14,7 +14,7 @@ signal equipment_changed(slot_id: String, item: ItemInstance)
 var equipped: Dictionary = {}
 
 
-## 检查当前上下文是否允许 `equip`，并保持 `EquipmentController` 的领域契约一致。
+## 用 GameplayContext 和当前运行时状态判断是否允许 `equip`；失败原因由对应查询 API 提供。
 func can_equip(item: ItemInstance, slot_id: String) -> bool:
 	if item == null:
 		return false
@@ -26,7 +26,7 @@ func can_equip(item: ItemInstance, slot_id: String) -> bool:
 	return definition.equipment_slot == slot_id
 
 
-## 执行 `equip` 对应的公开操作，并保持 `EquipmentController` 的领域契约一致。
+## 执行 `equip` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func equip(item: ItemInstance, slot_id: String) -> bool:
 	if not can_equip(item, slot_id):
 		return false
@@ -38,7 +38,7 @@ func equip(item: ItemInstance, slot_id: String) -> bool:
 	return true
 
 
-## 执行 `unequip` 对应的公开操作，并保持 `EquipmentController` 的领域契约一致。
+## 执行 `unequip` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func unequip(slot_id: String) -> ItemInstance:
 	if not equipped.has(slot_id):
 		return null
@@ -49,12 +49,12 @@ func unequip(slot_id: String) -> ItemInstance:
 	return item
 
 
-## 返回 `equipped` 对应的数据或对象，并保持 `EquipmentController` 的领域契约一致。
+## 读取当前对象中的 `equipped`；未找到时返回 null、空集合或该 API 的默认值。
 func get_equipped(slot_id: String) -> ItemInstance:
 	return equipped.get(slot_id, null)
 
 
-## 返回 `item_definition` 对应的数据或对象，并保持 `EquipmentController` 的领域契约一致。
+## 读取当前对象中的 `item_definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_item_definition(item_id: String) -> ItemDefinition:
 	var content := Mkit.content()
 	if content == null:
@@ -62,7 +62,7 @@ func get_item_definition(item_id: String) -> ItemDefinition:
 	return content.get_resource(item_id) as ItemDefinition
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `EquipmentController` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	var slots: Dictionary = {}
 	for slot_id in equipped.keys():
@@ -72,7 +72,7 @@ func to_save_data() -> Dictionary:
 	return {"slots": slots}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `EquipmentController` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	for item in equipped.values():
 		if item is ItemInstance:

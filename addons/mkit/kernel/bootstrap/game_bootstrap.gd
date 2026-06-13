@@ -18,7 +18,8 @@ func _ready() -> void:
 	boot()
 
 
-## 执行 `boot` 对应的公开操作，并保持 `GameBootstrap` 的领域契约一致。
+## 启动 runtime：注册 kernel services、加载 ResourceDatabase、配置内容驱动服务、校验 content、尝试读取 save，并延迟进入 initial_scene_path。
+## ServiceRegistry 已有 EventService 时会跳过重复注册，避免测试或热重载重复创建服务。
 func boot() -> void:
 	_register_kernel_services()
 	_load_content()

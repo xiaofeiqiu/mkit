@@ -14,12 +14,12 @@ extends Node
 @export var conditions: Array[Condition] = []
 
 
-## 检查当前上下文是否允许 `interact`，并保持 `Interactable` 的领域契约一致。
+## 用 GameplayContext 和当前运行时状态判断是否允许 `interact`；失败原因由对应查询 API 提供。
 func can_interact(context: GameplayContext) -> bool:
 	return ConditionEvaluator.evaluate_all(conditions, context)
 
 
-## 执行 `interact` 对应的公开操作，并保持 `Interactable` 的领域契约一致。
+## 执行 `interact` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func interact(context: GameplayContext) -> bool:
 	if not can_interact(context):
 		return false

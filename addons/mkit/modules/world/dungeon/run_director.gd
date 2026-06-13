@@ -54,12 +54,12 @@ func _connect_events() -> void:
 		_events_connected = true
 
 
-## 返回 `save_scopes` 对应的数据或对象，并保持 `RunDirector` 的领域契约一致。
+## 读取当前对象中的 `save_scopes`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_scopes() -> Array[String]:
 	return ["world.run", "world.room", "world.reward"]
 
 
-## 返回 `save_payload_for_scope` 对应的数据或对象，并保持 `RunDirector` 的领域契约一致。
+## 读取当前对象中的 `save_payload_for_scope`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_payload_for_scope(scope: String) -> Dictionary:
 	match scope.strip_edges():
 		"world.run":
@@ -71,7 +71,7 @@ func get_save_payload_for_scope(scope: String) -> Dictionary:
 	return {}
 
 
-## 把输入数据或效果应用到目标对象，并保持 `RunDirector` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
 	match scope.strip_edges():
 		"world.run":
@@ -274,14 +274,14 @@ func _restore_room_graph(data: Dictionary) -> void:
 	room_graph = graph
 
 
-## 执行 `run_graph_is_empty` 对应的公开操作，并保持 `RunDirector` 的领域契约一致。
+## 检查当前 run graph 是否为空；用于决定是否可以开始或恢复 run。
 func run_graph_is_empty() -> bool:
 	if room_graph == null:
 		return true
 	return room_graph.nodes.is_empty()
 
 
-## 启动 `run` 流程，并保持 `RunDirector` 的领域契约一致。
+## 启动 `run` 流程并记录运行时状态；后续由 update、service 或 signal 推进。
 func start_run(seed: int = 0) -> void:
 	if first_floor_room_pool.is_empty():
 		fail_run("empty_room_pool")
@@ -313,7 +313,7 @@ func _on_entity_died(event: DomainEvent) -> void:
 		fail_run("player_died")
 
 
-## 进入对应状态、房间或节点，并保持 `RunDirector` 的领域契约一致。
+## 进入目标状态、房间或节点；会更新内部运行时字段并发出相关 signal 或 event。
 func enter_next_room() -> void:
 	if run_state == null:
 		fail_run("missing_run_state")
@@ -331,7 +331,7 @@ func enter_next_room() -> void:
 	_load_room(room_node.room_definition_id)
 
 
-## 执行 `on_room_cleared` 对应的公开操作，并保持 `RunDirector` 的领域契约一致。
+## 处理房间清理结果；会推进奖励、出口或 run 完成流程。
 func on_room_cleared(room_controller: RoomController) -> void:
 	if run_state == null:
 		return
@@ -347,7 +347,7 @@ func on_room_cleared(room_controller: RoomController) -> void:
 	choosing_reward.emit(options)
 
 
-## 选择指定选项并推进对应流程，并保持 `RunDirector` 的领域契约一致。
+## 选择指定 option 并推进当前流程；非法选择返回 false 或保持状态。
 func select_reward(option: RewardOption) -> void:
 	if run_state == null:
 		fail_run("missing_run_state")
@@ -365,7 +365,7 @@ func select_reward(option: RewardOption) -> void:
 		enter_next_room()
 
 
-## 完成 `run` 流程，并保持 `RunDirector` 的领域契约一致。
+## 完成 `run` 流程并发出完成结果；调用方可据此结算奖励或 UI。
 func complete_run() -> void:
 	if run_state == null:
 		push_warning("RunDirector.complete_run: run_state is null")
@@ -380,7 +380,7 @@ func complete_run() -> void:
 		events.emit_domain_event(WorldEvents.run_finished(run_state.run_id, "completed"))
 
 
-## 标记 `run` 流程失败，并保持 `RunDirector` 的领域契约一致。
+## 把 `run` 流程标记为失败并发出结果；保留可保存的最终状态。
 func fail_run(reason: String) -> void:
 	if reason.strip_edges() == "":
 		reason = "unknown"

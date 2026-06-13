@@ -8,7 +8,7 @@ extends RefCounted
 
 
 
-## 根据配置生成运行时结果，并保持 `RewardSystem` 的领域契约一致。
+## 读取配置资源生成运行时对象或结果；输入为空或无效时返回空结果。
 func generate_options(
 	pool_ids: Array[String], count: int, context: GameplayContext
 ) -> Array[RewardOption]:
@@ -36,7 +36,7 @@ func generate_options(
 	return result
 
 
-## 把输入数据或效果应用到目标对象，并保持 `RewardSystem` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
 	if option == null:
 		return false

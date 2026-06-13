@@ -22,7 +22,7 @@ var upgrade_level: int = 0
 var metadata: Dictionary = {}
 
 
-## 创建并返回新的运行时对象，并保持 `ItemInstance` 的领域契约一致。
+## 创建并返回新的运行时对象；返回值、signal 或事件会表达实际执行结果。
 static func create(def_id: String, qty: int = 1) -> ItemInstance:
 	var item := ItemInstance.new()
 	item.instance_id = "item_%d" % Time.get_ticks_usec()
@@ -31,7 +31,7 @@ static func create(def_id: String, qty: int = 1) -> ItemInstance:
 	return item
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ItemInstance` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	var affixes: Array = []
 	for modifier in rolled_affixes:
@@ -48,7 +48,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ItemInstance` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 static func from_save_data(data: Dictionary) -> ItemInstance:
 	var item := ItemInstance.new()
 	item.instance_id = str(data.get("instance_id", ""))

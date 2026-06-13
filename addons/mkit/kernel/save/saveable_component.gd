@@ -8,16 +8,16 @@ extends Node
 
 
 
-## 返回 `save_key` 对应的数据或对象，并保持 `SaveableComponent` 的领域契约一致。
+## 读取当前对象中的 `save_key`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_key() -> String:
 	return name
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `SaveableComponent` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `SaveableComponent` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	pass

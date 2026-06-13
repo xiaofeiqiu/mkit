@@ -38,7 +38,7 @@ var rng_state: Dictionary = {}
 var status: String = "not_started"
 
 
-## 创建并返回新的运行时对象，并保持 `RunState` 的领域契约一致。
+## 创建并返回新的运行时对象；返回值、signal 或事件会表达实际执行结果。
 static func create(seed_value: int) -> RunState:
 	var s := RunState.new()
 	s.run_id = "run_%d" % Time.get_ticks_usec()
@@ -46,7 +46,7 @@ static func create(seed_value: int) -> RunState:
 	return s
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `RunState` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"run_id": run_id,
@@ -67,7 +67,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `RunState` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	run_id = str(data.get("run_id", run_id))
 	seed = int(data.get("seed", seed))

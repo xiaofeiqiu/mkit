@@ -16,7 +16,7 @@ var recent_results: Array[EffectResult] = []
 var max_recent_results: int = 100
 
 
-## 执行传入的动作、效果或规则集合，并保持 `EffectService` 的领域契约一致。
+## 执行单个 GameEffect；effect 为空时返回失败 EffectResult，成功路径由 effect.apply(context) 决定。
 func execute(effect: GameEffect, context: GameplayContext) -> EffectResult:
 	if effect == null:
 		return EffectResult.fail("null_effect", "Effect is null")
@@ -25,7 +25,7 @@ func execute(effect: GameEffect, context: GameplayContext) -> EffectResult:
 	return result
 
 
-## 执行传入的动作、效果或规则集合，并保持 `EffectService` 的领域契约一致。
+## 按顺序执行 GameEffect 列表并返回每个 EffectResult；stop_on_failure 为 true 时遇到失败立即停止。
 func execute_many(
 	effects: Array[GameEffect], context: GameplayContext, stop_on_failure: bool = false
 ) -> Array[EffectResult]:
@@ -38,7 +38,7 @@ func execute_many(
 	return results
 
 
-## 清理当前保存的运行时状态或缓存，并保持 `EffectService` 的领域契约一致。
+## 清空 recent_results 调试历史；不会影响 effect 执行逻辑或 trace_enabled 设置。
 func clear_recent_results() -> void:
 	recent_results.clear()
 

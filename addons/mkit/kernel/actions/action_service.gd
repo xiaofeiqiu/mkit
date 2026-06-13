@@ -25,7 +25,8 @@ func _on_services_ready() -> void:
 	_resolve_effect_service()
 
 
-## 启动 `action` 流程，并保持 `ActionService` 的领域契约一致。
+## 启动 GameAction 并加入 active_actions；会注入 EffectService、连接取消信号、调用 action.start() 并发 `action_started`。
+## action 或 context 为空时返回 null 且不改变队列。
 func start_action(action: GameAction, context: ActionContext) -> GameAction:
 	if action == null:
 		push_warning("ActionService.start_action: action is null")
@@ -57,7 +58,7 @@ func _process(delta: float) -> void:
 				action_completed.emit(action)
 
 
-## 取消当前或匹配条件的运行时流程，并保持 `ActionService` 的领域契约一致。
+## 取消 source 匹配的所有 active action；每个 action 会触发自身 cancel 流程和 ActionService 的 `action_cancelled`。
 func cancel_actions_for_source(source: Node, reason: String = "") -> void:
 	if source == null:
 		push_warning("ActionService.cancel_actions_for_source: source is null")

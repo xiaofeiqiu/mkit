@@ -10,7 +10,7 @@ extends ContentDefinition
 ## 公开枚举 `AudioKind`，限定 `AudioDefinition` 可接受的配置或运行时状态取值。
 enum AudioKind { SFX, MUSIC }
 
-## 公开常量 `TYPE_NAME`，作为 `AudioDefinition` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `TYPE_NAME`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const TYPE_NAME := "AudioDefinition"
 
 ## ContentService 注册音频资源时使用的稳定 id；AudioService 播放音效或音乐时按它查找。
@@ -23,6 +23,6 @@ const TYPE_NAME := "AudioDefinition"
 @export var loop: bool = false
 
 
-## 返回 ContentService 用于注册和查找的稳定内容 id，并保持 `AudioDefinition` 的领域契约一致。
+## 返回 ContentService 注册和查找使用的稳定 content id；id 为空时按该资源定义的备用字段处理。
 func get_content_id() -> String:
 	return audio_id

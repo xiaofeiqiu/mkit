@@ -22,7 +22,7 @@ var tags: Array[String] = []
 var payload: Dictionary = {}
 
 
-## 执行 `from_nodes` 对应的公开操作，并保持 `GameplayContext` 的领域契约一致。
+## 从 source/target Node 创建上下文对象；payload 初始化为空，由后续 pipeline 写入字段。
 static func from_nodes(source_node: Node = null, target_node: Node = null) -> GameplayContext:
 	var ctx := GameplayContext.new()
 	ctx.source = source_node
@@ -30,12 +30,12 @@ static func from_nodes(source_node: Node = null, target_node: Node = null) -> Ga
 	return ctx
 
 
-## 执行 `from_context` 对应的公开操作，并保持 `GameplayContext` 的领域契约一致。
+## 复制已有上下文的 source、target 和 payload；传入 null 时返回空上下文。
 static func from_context(context: GameplayContext = null) -> GameplayContext:
 	return context if context != null else GameplayContext.new()
 
 
-## 执行 `from_command` 对应的公开操作，并保持 `GameplayContext` 的领域契约一致。
+## 从 GameCommand 构造执行上下文；会把 command payload 复制给 action/effect 使用。
 static func from_command(
 	command: GameCommand, source_node: Node = null, target_node: Node = null
 ) -> GameplayContext:
@@ -46,31 +46,31 @@ static func from_command(
 	return ctx
 
 
-## 执行 `with_source` 对应的公开操作，并保持 `GameplayContext` 的领域契约一致。
+## 写入 source_node 并返回当前上下文，便于 action/effect 链式传递调用者。
 func with_source(node: Node) -> GameplayContext:
 	source = node
 	return self
 
 
-## 执行 `with_target` 对应的公开操作，并保持 `GameplayContext` 的领域契约一致。
+## 写入 target_node 并返回当前上下文，便于 action/effect 链式传递目标。
 func with_target(node: Node) -> GameplayContext:
 	target = node
 	return self
 
 
-## 执行 `with_payload_value` 对应的公开操作，并保持 `GameplayContext` 的领域契约一致。
+## 把键值写入 payload 并返回当前上下文；后续 condition、action 和 effect 可读取该字段。
 func with_payload_value(key: String, value) -> GameplayContext:
 	payload[key] = value
 	return self
 
 
-## 返回 `payload_value` 对应的数据或对象，并保持 `GameplayContext` 的领域契约一致。
+## 读取 payload 指定 key；字段缺失时返回 default_value。
 func get_payload_value(key: String, default_value = null):
 	if payload.has(key):
 		return payload[key]
 	return default_value
 
 
-## 判断是否存在 `tag`，并保持 `GameplayContext` 的领域契约一致。
+## 检查 tags 是否包含指定 tag；tag 为空或未加入时返回 false。
 func has_tag(tag: String) -> bool:
 	return tags.has(tag)

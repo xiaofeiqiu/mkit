@@ -20,12 +20,12 @@ const SERVICE_ID: String = "dialogue"
 var runtime: DialogueRuntime = null
 
 
-## 判断 `active` 当前是否成立，并保持 `DialogueService` 的领域契约一致。
+## 检查当前对象是否满足 `active` 状态；调用方可据此选择后续流程。
 func is_active() -> bool:
 	return runtime != null
 
 
-## 执行 `start` 对应的公开操作，并保持 `DialogueService` 的领域契约一致。
+## 启动对象流程并记录上下文；成功后进入运行中状态并触发生命周期 hook。
 func start(dialogue_id: String, context: GameplayContext) -> bool:
 	if is_active():
 		return false
@@ -46,7 +46,7 @@ func start(dialogue_id: String, context: GameplayContext) -> bool:
 	return is_active()
 
 
-## 返回 `available_choices` 对应的数据或对象，并保持 `DialogueService` 的领域契约一致。
+## 读取当前对象中的 `available_choices`；未找到时返回 null、空集合或该 API 的默认值。
 func get_available_choices() -> Array[DialogueChoice]:
 	var available: Array[DialogueChoice] = []
 	var node := _current_node()
@@ -60,7 +60,7 @@ func get_available_choices() -> Array[DialogueChoice]:
 	return available
 
 
-## 选择指定分支并推进对应流程，并保持 `DialogueService` 的领域契约一致。
+## 选择指定分支并推进对应流程；返回值、signal 或事件会表达实际执行结果。
 func choose(choice_index: int) -> void:
 	if runtime == null:
 		return
@@ -77,7 +77,7 @@ func choose(choice_index: int) -> void:
 	_enter_node(choice.next_node_id)
 
 
-## 推进对应目标或流程进度，并保持 `DialogueService` 的领域契约一致。
+## 推进对应目标或流程进度；返回值、signal 或事件会表达实际执行结果。
 func advance() -> void:
 	if runtime == null:
 		return
@@ -93,7 +93,7 @@ func advance() -> void:
 	_enter_node(node.next_node_id)
 
 
-## 执行 `end` 对应的公开操作，并保持 `DialogueService` 的领域契约一致。
+## 执行 `end` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func end() -> void:
 	if runtime == null:
 		return
@@ -105,7 +105,7 @@ func end() -> void:
 		events.emit_domain_event(DialogueEvents.dialogue_ended(ended_id))
 
 
-## 返回 `definition` 对应的数据或对象，并保持 `DialogueService` 的领域契约一致。
+## 读取当前对象中的 `definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_definition(dialogue_id: String) -> DialogueDefinition:
 	var content := Mkit.content()
 	if content == null:

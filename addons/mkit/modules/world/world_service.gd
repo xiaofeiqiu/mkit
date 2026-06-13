@@ -10,7 +10,7 @@ extends Saveable
 signal zone_changed(from_zone_id: String, to_zone_id: String)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `WorldService`。
 const SERVICE_ID: String = "world"
-## 公开常量 `_MAX_FINALIZE_RETRIES`，作为 `WorldService` 对外暴露的类型、事件或命令标识。
+## 场景切换后延迟查找 spawn point 的最大重试次数；只供 WorldService 内部 finalize 使用。
 const _MAX_FINALIZE_RETRIES: int = 1
 ## 查找玩家实体时使用的 Godot 分组名称。
 @export var player_group: String = "player"
@@ -34,12 +34,12 @@ func _exit_tree() -> void:
 	unregister_save_scopes()
 
 
-## 返回 `save_scopes` 对应的数据或对象，并保持 `WorldService` 的领域契约一致。
+## 声明 WorldService 写入 `scopes` 的 zone scope；由 SaveService.save_game 调用。
 func get_save_scopes() -> Array[String]:
 	return ["world.zone"]
 
 
-## 返回 `save_payload_for_scope` 对应的数据或对象，并保持 `WorldService` 的领域契约一致。
+## 导出当前 zone、pending zone 和 pending spawn；scope 不是 `world.zone` 时返回空 Dictionary。
 func get_save_payload_for_scope(scope: String) -> Dictionary:
 	if scope.strip_edges() != "world.zone":
 		return {}
@@ -50,7 +50,7 @@ func get_save_payload_for_scope(scope: String) -> Dictionary:
 	}
 
 
-## 把输入数据或效果应用到目标对象，并保持 `WorldService` 的领域契约一致。
+## 从 `world.zone` scope 恢复 zone 状态；必要时通过 SceneService 切回保存的 zone scene。
 func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
 	if scope.strip_edges() != "world.zone":
 		return false
@@ -81,7 +81,8 @@ func _bind_scene_router() -> void:
 		scene_router.scene_changed.connect(_on_scene_changed)
 
 
-## 执行 `go_to_zone` 对应的公开操作，并保持 `WorldService` 的领域契约一致。
+## 按 ZoneDefinition id 请求切换场景；会记录 pending zone/spawn，并通过 SceneService.change_scene 进入目标 scene_path。
+## 当前已有 pending 切换、zone 缺失或 SceneService 缺失时返回 false。
 func go_to_zone(zone_id: String, spawn_id: String = "") -> bool:
 	_resolve_services()
 	if _pending_zone_id != "":
@@ -100,12 +101,12 @@ func go_to_zone(zone_id: String, spawn_id: String = "") -> bool:
 	return true
 
 
-## 返回 `current_zone` 对应的数据或对象，并保持 `WorldService` 的领域契约一致。
+## 返回 current_zone_id 对应的 ZoneDefinition；尚未进入 zone 或 content 缺失时返回 null。
 func get_current_zone() -> ZoneDefinition:
 	return get_zone(current_zone_id)
 
 
-## 返回 `zone` 对应的数据或对象，并保持 `WorldService` 的领域契约一致。
+## 从 ContentService 读取 ZoneDefinition；ContentService 未注册或 zone id 缺失时返回 null。
 func get_zone(zone_id: String) -> ZoneDefinition:
 	var content := Mkit.content()
 	if content == null:
@@ -113,7 +114,8 @@ func get_zone(zone_id: String) -> ZoneDefinition:
 	return content.get_resource(zone_id) as ZoneDefinition
 
 
-## 执行 `place_player_at_spawn` 对应的公开操作，并保持 `WorldService` 的领域契约一致。
+## 查找指定 SpawnPoint 和 player_group 中的玩家节点，并把玩家 global_position 移到 spawn。
+## spawn 或玩家缺失时返回 false，不改变 current_zone_id。
 func place_player_at_spawn(spawn_id: String) -> bool:
 	var spawn := _find_spawn_point(spawn_id)
 	if spawn == null:

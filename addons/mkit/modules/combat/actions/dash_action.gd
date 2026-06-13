@@ -14,7 +14,7 @@ var speed: float = 480.0
 var direction: Vector2 = Vector2.ZERO
 
 
-## 动作启动时的覆写 hook，并保持 `DashAction` 的领域契约一致。
+## GameAction 启动 hook；ActionService 调用后子类可初始化移动、计时或效果状态。
 func _on_start() -> void:
 	action_id = "dash"
 	cancel_tags = ["stun", "death"]
@@ -23,7 +23,7 @@ func _on_start() -> void:
 		direction = Vector2.RIGHT
 
 
-## 动作更新时的覆写 hook，并保持 `DashAction` 的领域契约一致。
+## GameAction 更新 hook；ActionService 每帧传入 delta，子类可推进计时或移动。
 func _on_update(delta: float) -> void:
 	if context.source == null:
 		complete()
@@ -36,7 +36,7 @@ func _on_update(delta: float) -> void:
 		complete()
 
 
-## 动作完成时的覆写 hook，并保持 `DashAction` 的领域契约一致。
+## GameAction 完成 hook；流程成功结束时调用，子类可提交最终效果或清理状态。
 func _on_complete() -> void:
 	var body := context.source as CharacterBody2D
 	if body != null:

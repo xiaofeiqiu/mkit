@@ -8,7 +8,7 @@ extends RefCounted
 
 
 
-## 执行 `evaluate_all` 对应的公开操作，并保持 `ConditionEvaluator` 的领域契约一致。
+## 按顺序执行 condition 列表；任一条件失败就返回 false。
 static func evaluate_all(conditions: Array[Condition], context: GameplayContext) -> bool:
 	for condition in conditions:
 		if condition == null:
@@ -18,7 +18,7 @@ static func evaluate_all(conditions: Array[Condition], context: GameplayContext)
 	return true
 
 
-## 执行 `collect_failures` 对应的公开操作，并保持 `ConditionEvaluator` 的领域契约一致。
+## 收集 condition 失败原因；只返回非空 reason，供 UI 或日志展示。
 static func collect_failures(
 	conditions: Array[Condition], context: GameplayContext
 ) -> Array[String]:

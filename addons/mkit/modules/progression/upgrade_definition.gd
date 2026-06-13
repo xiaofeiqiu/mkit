@@ -30,12 +30,12 @@ extends ContentDefinition
 @export var is_meta_upgrade: bool = true
 
 
-## 返回 ContentService 用于注册和查找的稳定内容 id，并保持 `UpgradeDefinition` 的领域契约一致。
+## 返回 ContentService 注册和查找使用的稳定 content id；id 为空时按该资源定义的备用字段处理。
 func get_content_id() -> String:
 	return upgrade_id
 
 
-## 返回 `cost_for_level` 对应的数据或对象，并保持 `UpgradeDefinition` 的领域契约一致。
+## 读取当前对象中的 `cost_for_level`；未找到时返回 null、空集合或该 API 的默认值。
 func get_cost_for_level(next_level: int) -> int:
 	var index := max(0, next_level - 1)
 	if index >= cost_by_level.size():

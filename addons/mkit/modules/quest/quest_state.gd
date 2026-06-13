@@ -6,13 +6,13 @@ extends RefCounted
 ## 使用：当项目需要在任务系统中复用这段契约或状态时使用它。
 ## 示例：`var instance := QuestState.new()`
 
-## 公开常量 `STATUS_AVAILABLE`，作为 `QuestState` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `STATUS_AVAILABLE`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const STATUS_AVAILABLE: String = "available"
-## 公开常量 `STATUS_ACTIVE`，作为 `QuestState` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `STATUS_ACTIVE`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const STATUS_ACTIVE: String = "active"
-## 公开常量 `STATUS_COMPLETED`，作为 `QuestState` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `STATUS_COMPLETED`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const STATUS_COMPLETED: String = "completed"
-## 公开常量 `STATUS_TURNED_IN`，作为 `QuestState` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `STATUS_TURNED_IN`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const STATUS_TURNED_IN: String = "turned_in"
 ## 引用的 QuestDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var quest_id: String = ""
@@ -22,24 +22,24 @@ var status: String = STATUS_AVAILABLE
 var objective_progress: Dictionary = {}
 
 
-## 创建并返回新的运行时对象，并保持 `QuestState` 的领域契约一致。
+## 创建并返回新的运行时对象；返回值、signal 或事件会表达实际执行结果。
 static func create(quest_id: String) -> QuestState:
 	var state := QuestState.new()
 	state.quest_id = quest_id
 	return state
 
 
-## 返回 `progress` 对应的数据或对象，并保持 `QuestState` 的领域契约一致。
+## 读取当前对象中的 `progress`；未找到时返回 null、空集合或该 API 的默认值。
 func get_progress(objective_id: String) -> int:
 	return int(objective_progress.get(objective_id, 0))
 
 
-## 设置 `progress` 对应的数据或对象，并保持 `QuestState` 的领域契约一致。
+## 更新当前对象中的 `progress`；输入值按该对象规则校验或夹取。
 func set_progress(objective_id: String, value: int) -> void:
 	objective_progress[objective_id] = max(0, value)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `QuestState` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"quest_id": quest_id,
@@ -48,7 +48,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `QuestState` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	quest_id = str(data.get("quest_id", quest_id))
 	status = str(data.get("status", status))

@@ -14,40 +14,40 @@ var seed_value: int = 0
 var rng := RandomNumberGenerator.new()
 
 
-## 设置 `seed` 对应的数据或对象，并保持 `RandomService` 的领域契约一致。
+## 更新当前对象中的 `seed`；输入值按该对象规则校验或夹取。
 func set_seed(value: int) -> void:
 	seed_value = value
 	rng.seed = value
 
 
-## 执行 `randomize_seed` 对应的公开操作，并保持 `RandomService` 的领域契约一致。
+## 使用系统随机源重置 RNG；之后的随机结果不再可复现。
 func randomize_seed() -> int:
 	rng.randomize()
 	seed_value = rng.seed
 	return seed_value
 
 
-## 执行 `randf` 对应的公开操作，并保持 `RandomService` 的领域契约一致。
+## 返回 0 到 1 之间的浮点随机数；使用服务持有的 RandomNumberGenerator。
 func randf() -> float:
 	return rng.randf()
 
 
-## 执行 `randi_range` 对应的公开操作，并保持 `RandomService` 的领域契约一致。
+## 返回闭区间内的整数随机数；min/max 由调用方提供。
 func randi_range(from: int, to: int) -> int:
 	return rng.randi_range(from, to)
 
 
-## 执行 `randf_range` 对应的公开操作，并保持 `RandomService` 的领域契约一致。
+## 返回闭区间内的浮点随机数；min/max 由调用方提供。
 func randf_range(from: float, to: float) -> float:
 	return rng.randf_range(from, to)
 
 
-## 执行 `chance` 对应的公开操作，并保持 `RandomService` 的领域契约一致。
+## 按 probability 执行一次概率判定；0 永远失败，1 永远成功。
 func chance(probability: float) -> bool:
 	return self.randf() < clamp(probability, 0.0, 1.0)
 
 
-## 执行 `weighted_pick` 对应的公开操作，并保持 `RandomService` 的领域契约一致。
+## 从带 weight 字段的条目中抽取一个结果；空列表或总权重为 0 时返回 null。
 func weighted_pick(entries: Array, weight_property: String = "weight"):
 	var total := 0.0
 	for entry in entries:

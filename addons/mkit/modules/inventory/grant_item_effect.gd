@@ -14,7 +14,7 @@ extends GameEffect
 @export var give_to_source: bool = true
 
 
-## 子类覆写的实际效果入口，并保持 `GrantItemEffect` 的领域契约一致。
+## GameEffect 子类实现此 hook 完成实际效果；apply() 会调用它并返回 EffectResult。
 func _apply_impl(context: GameplayContext) -> EffectResult:
 	if item_id == "":
 		return EffectResult.fail(effect_id, "Missing item_id")

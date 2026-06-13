@@ -16,30 +16,30 @@ var gameplay_time_scale: float = 1.0
 var elapsed_gameplay_time: float = 0.0
 
 
-## 设置 `paused` 对应的数据或对象，并保持 `TimeService` 的领域契约一致。
+## 更新当前对象中的 `paused`；输入值按该对象规则校验或夹取。
 func set_paused(value: bool) -> void:
 	paused = value
 
 
-## 设置 `gameplay_time_scale` 对应的数据或对象，并保持 `TimeService` 的领域契约一致。
+## 更新当前对象中的 `gameplay_time_scale`；输入值按该对象规则校验或夹取。
 func set_gameplay_time_scale(value: float) -> void:
 	gameplay_time_scale = max(0.0, value)
 
 
-## 返回 `scaled_delta` 对应的数据或对象，并保持 `TimeService` 的领域契约一致。
+## 读取当前对象中的 `scaled_delta`；未找到时返回 null、空集合或该 API 的默认值。
 func get_scaled_delta(delta: float) -> float:
 	if paused:
 		return 0.0
 	return delta * gameplay_time_scale
 
 
-## 推进对应目标或流程进度，并保持 `TimeService` 的领域契约一致。
+## 推进对应目标或流程进度；返回值、signal 或事件会表达实际执行结果。
 func advance(delta: float) -> float:
 	var scaled := get_scaled_delta(delta)
 	elapsed_gameplay_time += scaled
 	return scaled
 
 
-## 返回 `unix_time` 对应的数据或对象，并保持 `TimeService` 的领域契约一致。
+## 读取当前对象中的 `unix_time`；未找到时返回 null、空集合或该 API 的默认值。
 func get_unix_time() -> int:
 	return Time.get_unix_time_from_system()

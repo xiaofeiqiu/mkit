@@ -10,7 +10,7 @@ extends Condition
 @export var range: float = 64.0
 
 
-## 子类覆写的实际条件判断入口，并保持 `TargetInRangeCondition` 的领域契约一致。
+## Condition 子类实现此 hook 完成实际判断；evaluate() 会调用它并记录失败原因。
 func _evaluate_impl(context: GameplayContext) -> bool:
 	var source_2d := context.source as Node2D
 	var target_2d := context.target as Node2D
@@ -19,6 +19,6 @@ func _evaluate_impl(context: GameplayContext) -> bool:
 	return source_2d.global_position.distance_to(target_2d.global_position) <= range
 
 
-## 返回 `failure_reason` 对应的数据或对象，并保持 `TargetInRangeCondition` 的领域契约一致。
+## 读取当前对象中的 `failure_reason`；未找到时返回 null、空集合或该 API 的默认值。
 func get_failure_reason(context: GameplayContext) -> String:
 	return "target_out_of_range"

@@ -10,7 +10,8 @@ extends RefCounted
 const SERVICE_ID: String = "combat"
 
 
-## 执行 `resolve` 对应的公开操作，并保持 `CombatService` 的领域契约一致。
+## 解析一次 DamageRequest：读取 source/target StatsComponent，应用 attack_power、damage_multiplier、crit、defense 和 on-hit status rolls。
+## request、source 或 target 缺失时返回带 failure trace 的 DamageResult；本方法只计算结果，不直接扣血。
 func resolve(request: DamageRequest) -> DamageResult:
 	var result := DamageResult.new()
 	if request == null or request.source == null or request.target == null:

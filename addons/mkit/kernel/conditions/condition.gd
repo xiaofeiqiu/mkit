@@ -12,7 +12,7 @@ extends Resource
 @export var invert: bool = false
 
 
-## 执行 `evaluate` 对应的公开操作，并保持 `Condition` 的领域契约一致。
+## 执行条件判断入口；会调用子类 hook 并记录失败原因。
 func evaluate(context: GameplayContext) -> bool:
 	var result := _evaluate_impl(context)
 	if invert:
@@ -20,11 +20,11 @@ func evaluate(context: GameplayContext) -> bool:
 	return result
 
 
-## 子类覆写的实际条件判断入口，并保持 `Condition` 的领域契约一致。
+## Condition 子类实现此 hook 完成实际判断；evaluate() 会调用它并记录失败原因。
 func _evaluate_impl(context: GameplayContext) -> bool:
 	return true
 
 
-## 返回 `failure_reason` 对应的数据或对象，并保持 `Condition` 的领域契约一致。
+## 读取当前对象中的 `failure_reason`；未找到时返回 null、空集合或该 API 的默认值。
 func get_failure_reason(context: GameplayContext) -> String:
 	return "Condition failed: %s" % condition_id

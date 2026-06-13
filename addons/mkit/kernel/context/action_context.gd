@@ -12,7 +12,7 @@ var duration: float = 0.0
 var phase: String = ""
 
 
-## 执行 `from_nodes` 对应的公开操作，并保持 `ActionContext` 的领域契约一致。
+## 从 source/target Node 创建上下文对象；payload 初始化为空，由后续 pipeline 写入字段。
 static func from_nodes(source_node: Node = null, target_node: Node = null) -> ActionContext:
 	var ctx := ActionContext.new()
 	ctx.source = source_node
@@ -20,7 +20,7 @@ static func from_nodes(source_node: Node = null, target_node: Node = null) -> Ac
 	return ctx
 
 
-## 执行 `from_context` 对应的公开操作，并保持 `ActionContext` 的领域契约一致。
+## 复制已有上下文的 source、target 和 payload；传入 null 时返回空上下文。
 static func from_context(context: GameplayContext = null) -> ActionContext:
 	var ctx := ActionContext.new()
 	if context == null:
@@ -35,7 +35,7 @@ static func from_context(context: GameplayContext = null) -> ActionContext:
 	return ctx
 
 
-## 执行 `from_command` 对应的公开操作，并保持 `ActionContext` 的领域契约一致。
+## 从 GameCommand 构造执行上下文；会把 command payload 复制给 action/effect 使用。
 static func from_command(
 	command: GameCommand, source_node: Node = null, target_node: Node = null
 ) -> ActionContext:

@@ -7,7 +7,7 @@ extends RefCounted
 ## 示例：`var instance := EntityContract.new()`
 
 
-## 执行 `resolve_entity_root` 对应的公开操作，并保持 `EntityContract` 的领域契约一致。
+## 执行 `resolve_entity_root` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 static func resolve_entity_root(node: Node) -> EntityRoot:
 	if node == null:
 		return null
@@ -18,7 +18,7 @@ static func resolve_entity_root(node: Node) -> EntityRoot:
 		current = current.get_parent()
 	return null
 
-## 返回 `component` 对应的数据或对象，并保持 `EntityContract` 的领域契约一致。
+## 读取当前对象中的 `component`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_component(node: Node, id_or_type: Variant) -> Node:
 	var owner := resolve_entity_root(node)
 	if owner == null:
@@ -30,7 +30,7 @@ static func get_component(node: Node, id_or_type: Variant) -> Node:
 	return component
 
 
-## 返回 `controller` 对应的数据或对象，并保持 `EntityContract` 的领域契约一致。
+## 读取当前对象中的 `controller`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_controller(node: Node, id_or_type: Variant) -> Node:
 	var owner := resolve_entity_root(node)
 	if owner == null:
@@ -42,7 +42,7 @@ static func get_controller(node: Node, id_or_type: Variant) -> Node:
 	return controller
 
 
-## 返回 `contract_node` 对应的数据或对象，并保持 `EntityContract` 的领域契约一致。
+## 读取当前对象中的 `contract_node`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_contract_node(node: Node, container: String, id_or_type: Variant) -> Node:
 	if node == null or container.strip_edges() == "":
 		return null
@@ -64,7 +64,7 @@ static func get_contract_node(node: Node, container: String, id_or_type: Variant
 	return null
 
 
-## 返回 `identity` 对应的数据或对象，并保持 `EntityContract` 的领域契约一致。
+## 读取当前对象中的 `identity`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_identity(node: Node) -> EntityIdentity:
 	var owner := resolve_entity_root(node)
 	if owner != null:
@@ -76,13 +76,13 @@ static func get_identity(node: Node) -> EntityIdentity:
 	return null
 
 
-## 返回 `entity_id` 对应的数据或对象，并保持 `EntityContract` 的领域契约一致。
+## 读取当前对象中的 `entity_id`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_entity_id(node: Node) -> String:
 	var identity := get_identity(node)
 	return identity.entity_id if identity != null else str(node.name if node != null else "")
 
 
-## 返回 `state_machine` 对应的数据或对象，并保持 `EntityContract` 的领域契约一致。
+## 读取当前对象中的 `state_machine`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_state_machine(node: Node) -> StateMachine:
 	var root := resolve_entity_root(node)
 	if root != null:
@@ -96,7 +96,7 @@ static func get_state_machine(node: Node) -> StateMachine:
 	return null
 
 
-## 返回 `command_receiver` 对应的数据或对象，并保持 `EntityContract` 的领域契约一致。
+## 读取当前对象中的 `command_receiver`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_command_receiver(node: Node) -> CommandReceiver:
 	var root := resolve_entity_root(node)
 	if root != null:
@@ -110,7 +110,7 @@ static func get_command_receiver(node: Node) -> CommandReceiver:
 	return null
 
 
-## 判断是否存在 `contract_node`，并保持 `EntityContract` 的领域契约一致。
+## 检查当前集合或对象是否包含 `contract_node`；缺失或空值时返回 false。
 static func has_contract_node(node: Node, container: String, id_or_type: Variant) -> bool:
 	if node == null or container.strip_edges() == "":
 		return false

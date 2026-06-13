@@ -14,7 +14,7 @@ var capacity: int = 30
 var slots: Array[InventorySlot] = []
 
 
-## 初始化运行时依赖和起始状态，并保持 `InventoryModel` 的领域契约一致。
+## 绑定运行时依赖并初始化内部状态；通常由 controller 或 service 在流程开始前调用。
 func setup(slot_count: int) -> void:
 	capacity = slot_count
 	slots.clear()
@@ -24,7 +24,7 @@ func setup(slot_count: int) -> void:
 		slots.append(slot)
 
 
-## 执行 `find_first_empty_slot` 对应的公开操作，并保持 `InventoryModel` 的领域契约一致。
+## 执行 `find_first_empty_slot` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_first_empty_slot() -> InventorySlot:
 	for slot in slots:
 		if slot.is_empty():
@@ -32,7 +32,7 @@ func find_first_empty_slot() -> InventorySlot:
 	return null
 
 
-## 执行 `find_stackable_slot` 对应的公开操作，并保持 `InventoryModel` 的领域契约一致。
+## 执行 `find_stackable_slot` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_stackable_slot(definition: ItemDefinition, item: ItemInstance) -> InventorySlot:
 	if not definition.stackable:
 		return null
@@ -46,7 +46,7 @@ func find_stackable_slot(definition: ItemDefinition, item: ItemInstance) -> Inve
 	return null
 
 
-## 返回 `items` 对应的数据或对象，并保持 `InventoryModel` 的领域契约一致。
+## 读取当前对象中的 `items`；未找到时返回 null、空集合或该 API 的默认值。
 func get_items() -> Array[ItemInstance]:
 	var result: Array[ItemInstance] = []
 	for slot in slots:

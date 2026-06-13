@@ -24,7 +24,7 @@ func _ready() -> void:
 	model.owner_id = _get_owner_id()
 
 
-## 检查当前上下文是否允许 `add_item`，并保持 `InventoryController` 的领域契约一致。
+## 用 GameplayContext 和当前运行时状态判断是否允许 `add_item`；失败原因由对应查询 API 提供。
 func can_add_item(item: ItemInstance) -> bool:
 	if item == null:
 		return false
@@ -38,7 +38,7 @@ func can_add_item(item: ItemInstance) -> bool:
 	return _free_space_for(definition) >= item.quantity
 
 
-## 向当前集合或状态中增加数据，并保持 `InventoryController` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_item(item: ItemInstance) -> bool:
 	if item == null:
 		push_warning("InventoryController.add_item: item is null")
@@ -113,7 +113,7 @@ func _free_space_for(definition: ItemDefinition) -> int:
 	return total
 
 
-## 从当前集合或状态中移除数据，并保持 `InventoryController` 的领域契约一致。
+## 从当前集合或状态移除传入数据；目标不存在时安全返回。
 func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	if instance_id.strip_edges() == "":
 		return false
@@ -134,7 +134,7 @@ func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	return false
 
 
-## 执行 `find_item` 对应的公开操作，并保持 `InventoryController` 的领域契约一致。
+## 执行 `find_item` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_item(instance_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
@@ -142,7 +142,7 @@ func find_item(instance_id: String) -> ItemInstance:
 	return null
 
 
-## 执行 `find_item_by_definition` 对应的公开操作，并保持 `InventoryController` 的领域契约一致。
+## 执行 `find_item_by_definition` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_item_by_definition(definition_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.definition_id == definition_id:
@@ -150,7 +150,7 @@ func find_item_by_definition(definition_id: String) -> ItemInstance:
 	return null
 
 
-## 返回 `item_definition` 对应的数据或对象，并保持 `InventoryController` 的领域契约一致。
+## 读取当前对象中的 `item_definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_item_definition(item_id: String) -> ItemDefinition:
 	var content := Mkit.content()
 	if content == null:
@@ -158,7 +158,7 @@ func get_item_definition(item_id: String) -> ItemDefinition:
 	return content.get_resource(item_id) as ItemDefinition
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `InventoryController` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	var items: Array = []
 	for slot in model.slots:
@@ -166,7 +166,7 @@ func to_save_data() -> Dictionary:
 	return {"capacity": capacity, "items": items}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `InventoryController` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	capacity = int(data.get("capacity", capacity))
 	capacity = max(1, capacity)

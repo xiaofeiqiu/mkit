@@ -23,7 +23,7 @@ func _ready() -> void:
 		save_id = "progression"
 
 
-## 向当前集合或状态中增加数据，并保持 `ProgressionService` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_currency(currency_id: String, amount: int) -> void:
 	if currency_id.strip_edges() == "":
 		push_warning("ProgressionService.add_currency: currency_id is empty")
@@ -34,7 +34,7 @@ func add_currency(currency_id: String, amount: int) -> void:
 	currency_changed.emit(currency_id, state.get_currency(currency_id))
 
 
-## 扣除指定资源或货币，并保持 `ProgressionService` 的领域契约一致。
+## 尝试扣除指定资源或货币；成功会更新余额，失败保持原状态。
 func spend_currency(currency_id: String, amount: int) -> bool:
 	if currency_id.strip_edges() == "":
 		return false
@@ -46,14 +46,14 @@ func spend_currency(currency_id: String, amount: int) -> bool:
 	return true
 
 
-## 返回 `currency` 对应的数据或对象，并保持 `ProgressionService` 的领域契约一致。
+## 读取当前对象中的 `currency`；未找到时返回 null、空集合或该 API 的默认值。
 func get_currency(currency_id: String) -> int:
 	if currency_id.strip_edges() == "":
 		return 0
 	return state.get_currency(currency_id)
 
 
-## 检查当前上下文是否允许 `unlock`，并保持 `ProgressionService` 的领域契约一致。
+## 用 GameplayContext 和当前运行时状态判断是否允许 `unlock`；失败原因由对应查询 API 提供。
 func can_unlock(upgrade_id: String) -> bool:
 	if upgrade_id.strip_edges() == "":
 		return false
@@ -70,7 +70,7 @@ func can_unlock(upgrade_id: String) -> bool:
 	return state.get_currency(definition.currency_id) >= definition.get_cost_for_level(next_level)
 
 
-## 执行 `unlock_or_level_up` 对应的公开操作，并保持 `ProgressionService` 的领域契约一致。
+## 执行 `unlock_or_level_up` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> bool:
 	if upgrade_id.strip_edges() == "":
 		return false
@@ -93,7 +93,7 @@ func unlock_or_level_up(upgrade_id: String, context: GameplayContext = null) -> 
 	return true
 
 
-## 返回 `definition` 对应的数据或对象，并保持 `ProgressionService` 的领域契约一致。
+## 读取当前对象中的 `definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_definition(upgrade_id: String) -> UpgradeDefinition:
 	var content := Mkit.content()
 	if content == null:
@@ -112,11 +112,11 @@ func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayCont
 	executor.execute_many(definition.effects, ctx)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ProgressionService` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return state.to_save_data()
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ProgressionService` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	state.from_save_data(data)

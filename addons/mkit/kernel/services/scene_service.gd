@@ -20,7 +20,7 @@ var current_scene_path: String = ""
 var transition_locked: bool = false
 
 
-## 执行 `change_scene` 对应的公开操作，并保持 `SceneService` 的领域契约一致。
+## 请求 SceneTree 切换到指定 PackedScene 路径；成功后记录 current_scene_path。
 func change_scene(scene_path: String) -> bool:
 	if transition_locked:
 		scene_change_failed.emit(scene_path, "transition_locked")
@@ -40,7 +40,7 @@ func change_scene(scene_path: String) -> bool:
 	return true
 
 
-## 执行 `reload_current_scene` 对应的公开操作，并保持 `SceneService` 的领域契约一致。
+## 重新加载最近一次成功进入的场景；没有记录路径时返回 false。
 func reload_current_scene() -> bool:
 	if current_scene_path == "":
 		return false

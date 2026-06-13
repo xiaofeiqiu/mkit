@@ -22,7 +22,7 @@ var active_child: State = null
 var blackboard: Blackboard = null
 
 
-## 初始化运行时依赖和起始状态，并保持 `State` 的领域契约一致。
+## 绑定所属 StateMachine、owner entity、parent state 和共享 blackboard，并递归 setup 子状态。
 func setup(machine: StateMachine, entity: Node, parent: State = null) -> void:
 	state_machine = machine
 	owner_entity = entity
@@ -33,27 +33,27 @@ func setup(machine: StateMachine, entity: Node, parent: State = null) -> void:
 			child.setup(machine, entity, self)
 
 
-## 进入对应状态、房间或节点，并保持 `State` 的领域契约一致。
+## 状态进入 hook；StateMachine 完成 can_enter 检查后调用，子类在这里启动动画、action 或临时状态。
 func enter(context: Dictionary = {}) -> void:
 	pass
 
 
-## 执行 `exit` 对应的公开操作，并保持 `State` 的领域契约一致。
+## 状态退出 hook；StateMachine 离开该状态链时调用，子类在这里取消临时流程或清理状态。
 func exit(context: Dictionary = {}) -> void:
 	pass
 
 
-## 推进当前对象的运行时状态，并保持 `State` 的领域契约一致。
+## 每帧状态更新 hook；StateMachine 会从当前叶子到父链调用。
 func update(delta: float) -> void:
 	pass
 
 
-## 执行 `physics_update` 对应的公开操作，并保持 `State` 的领域契约一致。
+## 按 physics delta 推进状态；由 StateMachine 在物理帧调用。
 func physics_update(delta: float) -> void:
 	pass
 
 
-## 处理传入命令、事件或状态变化，并保持 `State` 的领域契约一致。
+## 处理命令的状态 hook；默认先交给 active_child，子类可覆写并返回 true 表示已消费。
 func handle_command(command: GameCommand) -> bool:
 	if active_child != null:
 		if active_child.handle_command(command):
@@ -61,24 +61,24 @@ func handle_command(command: GameCommand) -> bool:
 	return false
 
 
-## 检查当前上下文是否允许 `enter`，并保持 `State` 的领域契约一致。
+## 返回当前状态是否允许进入；StateMachine transition_to 会在进入链前调用。
 func can_enter(context: Dictionary = {}) -> bool:
 	return true
 
 
-## 检查当前上下文是否允许 `exit`，并保持 `State` 的领域契约一致。
+## 返回当前状态是否允许退出；StateMachine transition_to 会在离开链前调用。
 func can_exit(context: Dictionary = {}) -> bool:
 	return true
 
 
-## 执行 `request_transition` 对应的公开操作，并保持 `State` 的领域契约一致。
+## 向所属 StateMachine 请求切换状态；没有绑定 state_machine 时返回 false。
 func request_transition(target_path: String, context: Dictionary = {}) -> bool:
 	if state_machine == null:
 		return false
 	return state_machine.transition_to(target_path, context)
 
 
-## 返回 `path_ids` 对应的数据或对象，并保持 `State` 的领域契约一致。
+## 返回从根状态到当前状态的 id 列表；用于构建层级路径和最近公共祖先计算。
 func get_path_ids() -> Array[String]:
 	var result: Array[String] = []
 	var current: State = self
@@ -88,6 +88,6 @@ func get_path_ids() -> Array[String]:
 	return result
 
 
-## 返回 `full_path` 对应的数据或对象，并保持 `State` 的领域契约一致。
+## 返回以 `/` 拼接的完整状态路径，例如 `Root/Move/Attack`。
 func get_full_path() -> String:
 	return "/".join(get_path_ids())

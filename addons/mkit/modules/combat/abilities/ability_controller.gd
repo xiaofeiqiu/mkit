@@ -38,7 +38,8 @@ func _process(delta: float) -> void:
 			instance.tick(delta)
 
 
-## 注册 `ability`，让后续查询或路由可以找到它，并保持 `AbilityController` 的领域契约一致。
+## 从 ContentService 读取 AbilityDefinition，创建 AbilityInstance 并挂到 `abilities`；
+## ability id 为空或 definition 缺失时返回 false，重复注册视为成功并保留原实例。
 func register_ability(ability_id: String) -> bool:
 	if ability_id.strip_edges() == "":
 		push_warning("AbilityController.register_ability: ability_id is empty")
@@ -56,22 +57,23 @@ func register_ability(ability_id: String) -> bool:
 	return true
 
 
-## 注销 `ability`，停止后续查询或路由使用它，并保持 `AbilityController` 的领域契约一致。
+## 移除已学习 ability；之后 can_cast、cast 和 cooldown 查询会按未注册处理。
 func unregister_ability(ability_id: String) -> void:
 	abilities.erase(ability_id)
 
 
-## 判断是否存在 `ability`，并保持 `AbilityController` 的领域契约一致。
+## 检查 ability id 是否已经实例化到 `abilities`。
 func has_ability(ability_id: String) -> bool:
 	return abilities.has(ability_id)
 
 
-## 检查当前上下文是否允许 `cast`，并保持 `AbilityController` 的领域契约一致。
+## 验证 context、注册状态、enabled、definition、cooldown、cost 和 conditions；通过时返回 true。
 func can_cast(ability_id: String, context: GameplayContext) -> bool:
 	return get_cast_failure_reason(ability_id, context) == ""
 
 
-## 返回 `cast_failure_reason` 对应的数据或对象，并保持 `AbilityController` 的领域契约一致。
+## 返回 cast 失败原因；成功时写入 `context.payload["ability_id"]` 并返回空字符串。
+## 失败值包括 missing_context、not_registered、disabled、missing_definition、on_cooldown、insufficient_* 或 condition reason。
 func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> String:
 	if context == null:
 		return "missing_context"
@@ -95,7 +97,9 @@ func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> St
 	return ""
 
 
-## 执行 `cast` 对应的公开操作，并保持 `AbilityController` 的领域契约一致。
+## 尝试施放 ability：先验证 context/cooldown/cost/conditions，再扣 cost 并发 `ability_cast_started`。
+## instant ability 会立即执行 completion effects、启动 cooldown 并发 `ability_cast_finished`；cast-time ability 交给 ActionService。
+## 失败时发 `ability_failed` 并返回 false。
 func cast(ability_id: String, context: GameplayContext) -> bool:
 	if context == null:
 		ability_failed.emit(ability_id, "missing_context")
@@ -129,21 +133,21 @@ func cast(ability_id: String, context: GameplayContext) -> bool:
 	return true
 
 
-## 判断 `cooldown_ready` 当前是否成立，并保持 `AbilityController` 的领域契约一致。
+## 检查 ability 是否存在且当前可用次数或 cooldown 已恢复；未注册时返回 false。
 func is_cooldown_ready(ability_id: String) -> bool:
 	if not abilities.has(ability_id):
 		return false
 	return (abilities[ability_id] as AbilityInstance).is_cooldown_ready()
 
 
-## 返回 `cooldown_remaining` 对应的数据或对象，并保持 `AbilityController` 的领域契约一致。
+## 返回 ability 剩余 cooldown 秒数；未注册或已就绪时返回 0。
 func get_cooldown_remaining(ability_id: String) -> float:
 	if not abilities.has(ability_id):
 		return 0.0
 	return (abilities[ability_id] as AbilityInstance).cooldown_remaining
 
 
-## 返回 `definition` 对应的数据或对象，并保持 `AbilityController` 的领域契约一致。
+## 从 Mkit.content() 按 ability id 读取 AbilityDefinition；ContentService 缺失或 id 未注册时返回 null。
 func get_definition(ability_id: String) -> AbilityDefinition:
 	var content := Mkit.content()
 	if content == null:
@@ -151,7 +155,7 @@ func get_definition(ability_id: String) -> AbilityDefinition:
 	return content.get_resource(ability_id) as AbilityDefinition
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `AbilityController` 的领域契约一致。
+## 导出已学习 ability、cooldown、charges 和 recharge_durations，供 EntitySaveAgent/SaveService 写入组件状态。
 func to_save_data() -> Dictionary:
 	var learned: Array[String] = []
 	var cooldowns: Dictionary = {}
@@ -171,7 +175,7 @@ func to_save_data() -> Dictionary:
 	return {"learned": learned, "cooldowns": cooldowns, "charges": charges, "recharge_durations": recharge_durations}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `AbilityController` 的领域契约一致。
+## 从存档恢复已学习 ability、cooldown 和 charges；缺失 definition 的 ability 会在 register_ability 中跳过。
 func from_save_data(data: Dictionary) -> void:
 	abilities.clear()
 	for ability_id in data.get("learned", []):

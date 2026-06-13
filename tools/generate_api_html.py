@@ -17,6 +17,25 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_XML_DIR = ROOT / "docs" / "generated" / "xml"
 DEFAULT_OUT_DIR = ROOT / "docs" / "generated" / "html"
 
+LIFECYCLE_METHODS = {
+    "_ready",
+    "_enter_tree",
+    "_exit_tree",
+    "_process",
+    "_physics_process",
+    "_input",
+    "_unhandled_input",
+    "_notification",
+}
+PUBLIC_HOOKS = {
+    "_apply_impl",
+    "_evaluate_impl",
+    "_on_start",
+    "_on_update",
+    "_on_cancel",
+    "_on_complete",
+}
+
 
 @dataclass(frozen=True)
 class ParamDoc:
@@ -194,6 +213,16 @@ def method_signature(method: MethodDoc) -> str:
     return f"{prefix}func {method.name}({params_signature(method.params)}) -> {method.return_type}"
 
 
+def method_section(method: MethodDoc) -> str:
+    if method.name in PUBLIC_HOOKS:
+        return "Hooks"
+    if method.name in LIFECYCLE_METHODS:
+        return "Lifecycle Hooks" if method.description else ""
+    if method.name.startswith("_"):
+        return ""
+    return "Methods"
+
+
 def signal_signature(signal: SignalDoc) -> str:
     return f"signal {signal.name}({params_signature(signal.params)})"
 
@@ -277,6 +306,17 @@ def render_class_page(class_doc: ClassDoc, classes: list[ClassDoc]) -> str:
     method_rows = [
         [code(method_signature(method)), paragraph(method.description)]
         for method in class_doc.methods
+        if method_section(method) == "Methods"
+    ]
+    hook_rows = [
+        [code(method_signature(method)), paragraph(method.description)]
+        for method in class_doc.methods
+        if method_section(method) == "Hooks"
+    ]
+    lifecycle_rows = [
+        [code(method_signature(method)), paragraph(method.description)]
+        for method in class_doc.methods
+        if method_section(method) == "Lifecycle Hooks"
     ]
     member_rows = [
         [
@@ -313,6 +353,8 @@ def render_class_page(class_doc: ClassDoc, classes: list[ClassDoc]) -> str:
         {section("Signals", render_table(["Signature", "Description"], signal_rows))}
         {section("Properties", render_table(["Name", "Type", "Default", "Enum", "Description"], member_rows))}
         {section("Methods", render_table(["Signature", "Description"], method_rows))}
+        {section("Hooks", render_table(["Signature", "Description"], hook_rows))}
+        {section("Lifecycle Hooks", render_table(["Signature", "Description"], lifecycle_rows))}
         {section("Constants", render_table(["Name", "Value", "Enum", "Description"], constant_rows))}
         <div class="footer">Generated from Godot doctool XML. Update GDScript ## doc comments, then run make docs-api.</div>
       </main>

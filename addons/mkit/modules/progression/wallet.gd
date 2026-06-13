@@ -10,31 +10,31 @@ extends RefCounted
 var balances: Dictionary = {}
 
 
-## 返回 `balance` 对应的数据或对象，并保持 `Wallet` 的领域契约一致。
+## 读取当前对象中的 `balance`；未找到时返回 null、空集合或该 API 的默认值。
 func get_balance(currency_id: String) -> int:
 	return int(balances.get(currency_id, 0))
 
 
-## 设置 `balance` 对应的数据或对象，并保持 `Wallet` 的领域契约一致。
+## 更新当前对象中的 `balance`；输入值按该对象规则校验或夹取。
 func set_balance(currency_id: String, amount: int) -> void:
 	balances[currency_id] = max(0, amount)
 
 
-## 向当前集合或状态中增加数据，并保持 `Wallet` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add(currency_id: String, amount: int) -> void:
 	if currency_id.strip_edges() == "":
 		return
 	set_balance(currency_id, get_balance(currency_id) + amount)
 
 
-## 检查当前上下文是否允许 `spend`，并保持 `Wallet` 的领域契约一致。
+## 用 GameplayContext 和当前运行时状态判断是否允许 `spend`；失败原因由对应查询 API 提供。
 func can_spend(currency_id: String, amount: int) -> bool:
 	if amount <= 0:
 		return true
 	return get_balance(currency_id) >= amount
 
 
-## 扣除指定资源或货币，并保持 `Wallet` 的领域契约一致。
+## 尝试扣除指定资源或货币；成功会更新余额，失败保持原状态。
 func spend(currency_id: String, amount: int) -> bool:
 	if amount <= 0:
 		return true
@@ -44,11 +44,11 @@ func spend(currency_id: String, amount: int) -> bool:
 	return true
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `Wallet` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return balances.duplicate(true)
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `Wallet` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	balances = data.duplicate(true)

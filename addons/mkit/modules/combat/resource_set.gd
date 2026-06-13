@@ -12,37 +12,37 @@ var current: Dictionary = {}
 var max_value_provider: Callable = Callable()
 
 
-## 设置 `max_provider` 对应的数据或对象，并保持 `ResourceSet` 的领域契约一致。
+## 更新当前对象中的 `max_provider`；输入值按该对象规则校验或夹取。
 func set_max_provider(value: Callable) -> void:
 	max_value_provider = value
 
 
-## 返回 `current` 对应的数据或对象，并保持 `ResourceSet` 的领域契约一致。
+## 读取当前对象中的 `current`；未找到时返回 null、空集合或该 API 的默认值。
 func get_current(resource_id: String) -> float:
 	return float(current.get(resource_id, get_max(resource_id)))
 
 
-## 返回 `max` 对应的数据或对象，并保持 `ResourceSet` 的领域契约一致。
+## 读取当前对象中的 `max`；未找到时返回 null、空集合或该 API 的默认值。
 func get_max(resource_id: String) -> float:
 	if max_value_provider == null or not max_value_provider.is_valid():
 		return 0.0
 	return float(max_value_provider.call(resource_id))
 
 
-## 执行 `has` 对应的公开操作，并保持 `ResourceSet` 的领域契约一致。
+## 执行 `has` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func has(resource_id: String, amount: float) -> bool:
 	if amount <= 0.0:
 		return true
 	return get_current(resource_id) >= amount
 
 
-## 设置 `current` 对应的数据或对象，并保持 `ResourceSet` 的领域契约一致。
+## 更新当前对象中的 `current`；输入值按该对象规则校验或夹取。
 func set_current(resource_id: String, value: float) -> void:
 	var max_value := get_max(resource_id)
 	current[resource_id] = clamp(value, 0.0, max_value)
 
 
-## 扣除指定资源或货币，并保持 `ResourceSet` 的领域契约一致。
+## 尝试扣除指定资源或货币；成功会更新余额，失败保持原状态。
 func spend(resource_id: String, amount: float) -> bool:
 	if amount <= 0.0:
 		return true
@@ -52,24 +52,24 @@ func spend(resource_id: String, amount: float) -> bool:
 	return true
 
 
-## 执行 `restore` 对应的公开操作，并保持 `ResourceSet` 的领域契约一致。
+## 执行 `restore` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func restore(resource_id: String, amount: float) -> void:
 	if amount <= 0.0:
 		return
 	set_current(resource_id, get_current(resource_id) + amount)
 
 
-## 清理当前保存的运行时状态或缓存，并保持 `ResourceSet` 的领域契约一致。
+## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。
 func clear() -> void:
 	current.clear()
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ResourceSet` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return current.duplicate(true)
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ResourceSet` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	current = {}
 	for key in data.keys():

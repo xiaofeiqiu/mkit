@@ -26,7 +26,7 @@ func _ready() -> void:
 	current_level = starting_level
 
 
-## 向当前集合或状态中增加数据，并保持 `ExperienceComponent` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_xp(amount: int) -> void:
 	if amount <= 0:
 		return
@@ -37,14 +37,14 @@ func add_xp(amount: int) -> void:
 	xp_changed.emit(current_xp, get_xp_to_next_level())
 
 
-## 返回 `xp_to_next_level` 对应的数据或对象，并保持 `ExperienceComponent` 的领域契约一致。
+## 读取当前对象中的 `xp_to_next_level`；未找到时返回 null、空集合或该 API 的默认值。
 func get_xp_to_next_level() -> int:
 	if curve == null:
 		return 0
 	return max(0, curve.get_xp_required(current_level) - current_xp)
 
 
-## 返回 `level_progress` 对应的数据或对象，并保持 `ExperienceComponent` 的领域契约一致。
+## 读取当前对象中的 `level_progress`；未找到时返回 null、空集合或该 API 的默认值。
 func get_level_progress() -> float:
 	if curve == null:
 		return 0.0
@@ -54,7 +54,7 @@ func get_level_progress() -> float:
 	return clampf(float(current_xp) / float(required), 0.0, 1.0)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `ExperienceComponent` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"current_level": current_level,
@@ -62,7 +62,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `ExperienceComponent` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	current_level = data.get("current_level", starting_level)
 	current_xp = data.get("current_xp", 0)

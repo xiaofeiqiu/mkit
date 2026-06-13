@@ -38,7 +38,7 @@ func _ready() -> void:
 	mark_all_dirty()
 
 
-## 返回 `stat_value` 对应的数据或对象，并保持 `StatsComponent` 的领域契约一致。
+## 读取当前对象中的 `stat_value`；未找到时返回 null、空集合或该 API 的默认值。
 func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	if not base_stats.has(stat_id) and not modifiers_by_stat.has(stat_id):
 		return default_value
@@ -48,7 +48,7 @@ func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	return cached_values[stat_id]
 
 
-## 设置 `base_stat` 对应的数据或对象，并保持 `StatsComponent` 的领域契约一致。
+## 更新当前对象中的 `base_stat`；输入值按该对象规则校验或夹取。
 func set_base_stat(stat_id: String, value: float) -> void:
 	var old := get_stat_value(stat_id, value)
 	base_stats[stat_id] = value
@@ -57,7 +57,7 @@ func set_base_stat(stat_id: String, value: float) -> void:
 	stat_changed.emit(stat_id, old, new_value)
 
 
-## 向当前集合或状态中增加数据，并保持 `StatsComponent` 的领域契约一致。
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_modifier(modifier: StatModifier) -> void:
 	if modifier == null or modifier.stat_id == "":
 		return
@@ -72,7 +72,7 @@ func add_modifier(modifier: StatModifier) -> void:
 	_emit_stat_changed(modifier.stat_id, old_value)
 
 
-## 从当前集合或状态中移除数据，并保持 `StatsComponent` 的领域契约一致。
+## 从当前集合或状态移除传入数据；目标不存在时安全返回。
 func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 	_remove_modifiers_where(
 		func(m: StatModifier) -> bool:
@@ -80,12 +80,12 @@ func remove_modifier(modifier_id: String, source_id: String = "") -> void:
 	)
 
 
-## 从当前集合或状态中移除数据，并保持 `StatsComponent` 的领域契约一致。
+## 从当前集合或状态移除传入数据；目标不存在时安全返回。
 func remove_modifiers_from_source(source_id: String) -> void:
 	_remove_modifiers_where(func(m: StatModifier) -> bool: return m.source_id == source_id)
 
 
-## 执行 `tick_modifiers` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
+## 执行 `tick_modifiers` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func tick_modifiers(delta: float) -> void:
 	_remove_modifiers_where(
 		func(m: StatModifier) -> bool:
@@ -110,12 +110,12 @@ func _remove_modifiers_where(predicate: Callable) -> void:
 			_emit_stat_changed(stat_id, old_value)
 
 
-## 执行 `mark_dirty` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
+## 执行 `mark_dirty` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func mark_dirty(stat_id: String) -> void:
 	dirty_stats[stat_id] = true
 
 
-## 执行 `mark_all_dirty` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
+## 执行 `mark_all_dirty` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func mark_all_dirty() -> void:
 	for stat_id in base_stats.keys():
 		dirty_stats[stat_id] = true
@@ -123,12 +123,12 @@ func mark_all_dirty() -> void:
 		dirty_stats[stat_id] = true
 
 
-## 执行 `mark_save_baseline` 对应的公开操作，并保持 `StatsComponent` 的领域契约一致。
+## 执行 `mark_save_baseline` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func mark_save_baseline() -> void:
 	_initial_base_stats = base_stats.duplicate(true)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `StatsComponent` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"base_overrides": _get_base_overrides(),
@@ -136,7 +136,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `StatsComponent` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	if _initial_base_stats.is_empty():
 		mark_save_baseline()

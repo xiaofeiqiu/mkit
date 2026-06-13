@@ -22,7 +22,7 @@ var payload: Dictionary = {}
 var consumed: bool = false
 
 
-## 创建并返回新的运行时对象，并保持 `GameCommand` 的领域契约一致。
+## 创建并返回新的运行时对象；返回值、signal 或事件会表达实际执行结果。
 static func create(
 	type: String, source: String = "", target: String = "", data: Dictionary = {}
 ) -> GameCommand:
@@ -36,26 +36,26 @@ static func create(
 	return cmd
 
 
-## 执行 `mark_consumed` 对应的公开操作，并保持 `GameCommand` 的领域契约一致。
+## 执行 `mark_consumed` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func mark_consumed() -> void:
 	consumed = true
 
 
-## 返回 `vector2` 对应的数据或对象，并保持 `GameCommand` 的领域契约一致。
+## 读取当前对象中的 `vector2`；未找到时返回 null、空集合或该 API 的默认值。
 func get_vector2(key: String, default_value: Vector2 = Vector2.ZERO) -> Vector2:
 	if payload.has(key):
 		return payload[key]
 	return default_value
 
 
-## 返回 `string` 对应的数据或对象，并保持 `GameCommand` 的领域契约一致。
+## 读取当前对象中的 `string`；未找到时返回 null、空集合或该 API 的默认值。
 func get_string(key: String, default_value: String = "") -> String:
 	if payload.has(key):
 		return str(payload[key])
 	return default_value
 
 
-## 返回 `float` 对应的数据或对象，并保持 `GameCommand` 的领域契约一致。
+## 读取当前对象中的 `float`；未找到时返回 null、空集合或该 API 的默认值。
 func get_float(key: String, default_value: float = 0.0) -> float:
 	if payload.has(key):
 		return float(payload[key])

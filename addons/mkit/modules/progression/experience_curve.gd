@@ -16,7 +16,7 @@ extends Resource
 @export var growth_factor: float = 1.5
 
 
-## 返回 `xp_required` 对应的数据或对象，并保持 `ExperienceCurve` 的领域契约一致。
+## 读取当前对象中的 `xp_required`；未找到时返回 null、空集合或该 API 的默认值。
 func get_xp_required(level: int) -> int:
 	if level >= max_level:
 		return 0

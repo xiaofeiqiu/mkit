@@ -26,7 +26,7 @@ var remaining_duration: float = -1.0
 var tags: Array[String] = []
 
 
-## 执行 `from_definition` 对应的公开操作，并保持 `StatModifier` 的领域契约一致。
+## 执行 `from_definition` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 static func from_definition(
 	definition: StatModifierDefinition, source: String, duration: float = -1.0
 ) -> StatModifier:
@@ -43,7 +43,7 @@ static func from_definition(
 	return m
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `StatModifier` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"modifier_id": modifier_id,
@@ -58,7 +58,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `StatModifier` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 static func from_save_data(data: Dictionary) -> StatModifier:
 	var m := StatModifier.new()
 	m.modifier_id = str(data.get("modifier_id", ""))

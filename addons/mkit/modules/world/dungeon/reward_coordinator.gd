@@ -11,7 +11,7 @@ extends RefCounted
 var player_group: String = "player"
 
 
-## 把输入数据或效果应用到目标对象，并保持 `RewardCoordinator` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_reward(option: RewardOption, run_id: String, tree: SceneTree) -> bool:
 	var reward_system := Mkit.loot()
 	if reward_system == null:

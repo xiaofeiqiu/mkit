@@ -34,7 +34,7 @@ var status_applications: Array[Dictionary] = []
 var trace: Dictionary = {}
 
 
-## 执行 `to_debug_dict` 对应的公开操作，并保持 `DamageResult` 的领域契约一致。
+## 导出面向调试显示的 Dictionary；不会改变运行时状态。
 func to_debug_dict() -> Dictionary:
 	return {
 		"base_amount": base_amount,

@@ -8,7 +8,7 @@ extends RefCounted
 
 
 
-## 根据配置生成运行时结果，并保持 `DungeonGenerator` 的领域契约一致。
+## 读取配置资源生成运行时对象或结果；输入为空或无效时返回空结果。
 func generate_linear(room_pool_ids: Array[String], seed: int, length: int) -> RoomGraph:
 	var graph := RoomGraph.new()
 	if length <= 0:

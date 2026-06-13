@@ -31,7 +31,7 @@ var on_cancel_effects: Array[GameEffect] = []
 var _effect_service: EffectService = null
 
 
-## 执行 `start` 对应的公开操作，并保持 `GameAction` 的领域契约一致。
+## 绑定 ActionContext、重置 elapsed/finished/cancelled 状态，调用 `_on_start()`，并执行 on_start_effects 与动态 effects。
 func start(ctx: ActionContext) -> void:
 	context = ctx
 	elapsed = 0.0
@@ -41,7 +41,7 @@ func start(ctx: ActionContext) -> void:
 	_fire_effects(on_start_effects + _resolve_effects(context))
 
 
-## 推进当前对象的运行时状态，并保持 `GameAction` 的领域契约一致。
+## 在未完成且未取消时累加 elapsed，并把 delta 交给 `_on_update()`。
 func update(delta: float) -> void:
 	if finished or cancelled_flag:
 		return
@@ -49,7 +49,7 @@ func update(delta: float) -> void:
 	_on_update(delta)
 
 
-## 取消当前或匹配条件的运行时流程，并保持 `GameAction` 的领域契约一致。
+## 标记 action 已取消，调用 `_on_cancel(reason)`，执行 on_cancel_effects 并发 `cancelled` signal。
 func cancel(reason: String = "") -> void:
 	if finished or cancelled_flag:
 		return
@@ -59,7 +59,7 @@ func cancel(reason: String = "") -> void:
 	cancelled.emit(self, reason)
 
 
-## 执行 `complete` 对应的公开操作，并保持 `GameAction` 的领域契约一致。
+## 标记 action 已完成，调用 `_on_complete()`，执行 completion effects 与动态 effects，并发 `completed` signal。
 func complete() -> void:
 	if finished or cancelled_flag:
 		return
@@ -69,12 +69,12 @@ func complete() -> void:
 	completed.emit(self)
 
 
-## 判断 `finished` 当前是否成立，并保持 `GameAction` 的领域契约一致。
+## 返回 action 是否已经完成或取消；ActionService 用它从 active_actions 中移除实例。
 func is_finished() -> bool:
 	return finished or cancelled_flag
 
 
-## 检查当前上下文是否允许 `cancel_with`，并保持 `GameAction` 的领域契约一致。
+## 检查 cancel_tags 是否包含指定 tag；用于按来源或动作类型批量取消。
 func can_cancel_with(tag: String) -> bool:
 	return cancel_tags.has(tag)
 
@@ -98,21 +98,21 @@ func _resolve_effects(_ctx: ActionContext) -> Array[GameEffect]:
 	return []
 
 
-## 动作启动时的覆写 hook，并保持 `GameAction` 的领域契约一致。
+## GameAction 启动 hook；ActionService 调用后子类可初始化移动、计时或效果状态。
 func _on_start() -> void:
 	pass
 
 
-## 动作更新时的覆写 hook，并保持 `GameAction` 的领域契约一致。
+## GameAction 更新 hook；ActionService 每帧传入 delta，子类可推进计时或移动。
 func _on_update(delta: float) -> void:
 	pass
 
 
-## 动作取消时的覆写 hook，并保持 `GameAction` 的领域契约一致。
+## GameAction 取消 hook；流程中断时接收 reason，子类可清理临时状态。
 func _on_cancel(reason: String) -> void:
 	pass
 
 
-## 动作完成时的覆写 hook，并保持 `GameAction` 的领域契约一致。
+## GameAction 完成 hook；流程成功结束时调用，子类可提交最终效果或清理状态。
 func _on_complete() -> void:
 	pass

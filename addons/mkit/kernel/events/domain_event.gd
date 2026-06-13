@@ -20,7 +20,7 @@ var target_id: String = ""
 var payload: Dictionary = {}
 
 
-## 创建并返回新的运行时对象，并保持 `DomainEvent` 的领域契约一致。
+## 创建并返回新的运行时对象；返回值、signal 或事件会表达实际执行结果。
 static func create(
 	type: String, source: String = "", target: String = "", data: Dictionary = {}
 ) -> DomainEvent:

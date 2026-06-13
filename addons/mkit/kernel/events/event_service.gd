@@ -10,7 +10,7 @@ extends Node
 signal domain_event_emitted(event: DomainEvent)
 ## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `EventService`。
 const SERVICE_ID: String = "events"
-## 公开常量 `ANY_EVENT`，作为 `EventService` 对外暴露的类型、事件或命令标识。
+## 稳定标识 `ANY_EVENT`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
 const ANY_EVENT: String = "*"
 ## EventService 最近发布的事件历史；用于调试、测试和轻量观察。
 var recent_events: Array[DomainEvent] = []
@@ -19,7 +19,7 @@ var max_recent_events: int = 100
 var _subscribers: Dictionary = {}
 
 
-## 发布 `domain_event` 对应的领域事件或信号，并保持 `EventService` 的领域契约一致。
+## 发布 DomainEvent 到精确类型订阅者和 ANY_EVENT 订阅者，并同步发出 event_published signal。
 func emit_domain_event(event: DomainEvent) -> void:
 	if event == null:
 		push_warning("EventService.emit_domain_event: event is null")
@@ -50,7 +50,7 @@ func subscribe(event_type: String, callable: Callable) -> void:
 	_subscribers[event_type] = listeners
 
 
-## 执行 `unsubscribe` 对应的公开操作，并保持 `EventService` 的领域契约一致。
+## 执行 `unsubscribe` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func unsubscribe(event_type: String, callable: Callable) -> void:
 	var listeners: Array = _subscribers.get(event_type, [])
 	listeners.erase(callable)
@@ -58,7 +58,7 @@ func unsubscribe(event_type: String, callable: Callable) -> void:
 		_subscribers.erase(event_type)
 
 
-## 判断 `subscribed` 当前是否成立，并保持 `EventService` 的领域契约一致。
+## 检查当前对象是否满足 `subscribed` 状态；调用方可据此选择后续流程。
 func is_subscribed(event_type: String, callable: Callable) -> bool:
 	var listeners: Array = _subscribers.get(event_type, [])
 	return listeners.has(callable)

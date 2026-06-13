@@ -47,7 +47,7 @@ func _connect_events() -> void:
 	events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
 
 
-## 检查当前上下文是否允许 `accept`，并保持 `QuestService` 的领域契约一致。
+## 检查 quest definition、现有状态、前置任务和 accept_conditions；不会修改 QuestLog。
 func can_accept(quest_id: String, context: GameplayContext) -> bool:
 	var definition := get_definition(quest_id)
 	if definition == null:
@@ -68,7 +68,8 @@ func can_accept(quest_id: String, context: GameplayContext) -> bool:
 	return true
 
 
-## 执行 `accept_quest` 对应的公开操作，并保持 `QuestService` 的领域契约一致。
+## 接受可用任务：创建或重置 QuestState、初始化 objective 进度、保存 context，并发 `quest_accepted` signal/event。
+## can_accept 返回 false 时保持 QuestLog 不变并返回 false。
 func accept_quest(quest_id: String, context: GameplayContext) -> bool:
 	if not can_accept(quest_id, context):
 		return false
@@ -90,7 +91,8 @@ func accept_quest(quest_id: String, context: GameplayContext) -> bool:
 	return true
 
 
-## 执行 `notify_event` 对应的公开操作，并保持 `QuestService` 的领域契约一致。
+## 处理 EventService 派发的 DomainEvent；inventory_changed 会桥接物品目标，其他事件按 objective match 推进 active quest。
+## auto_complete 任务在目标满足后会立即调用 complete_quest。
 func notify_event(event: DomainEvent) -> void:
 	if event == null:
 		return
@@ -115,7 +117,7 @@ func notify_event(event: DomainEvent) -> void:
 			complete_quest(state.quest_id, _quest_contexts.get(state.quest_id, null))
 
 
-## 推进对应目标或流程进度，并保持 `QuestService` 的领域契约一致。
+## 手动推进指定 objective 进度；只处理 active quest，进度达到需求时发 `objective_advanced` 并可能 auto complete。
 func advance_objective(quest_id: String, objective_id: String, amount: int = 1) -> bool:
 	if amount <= 0:
 		return false
@@ -135,7 +137,7 @@ func advance_objective(quest_id: String, objective_id: String, amount: int = 1) 
 	return false
 
 
-## 判断 `quest_complete` 当前是否成立，并保持 `QuestService` 的领域契约一致。
+## 检查所有非 optional objective 是否达到 required_count；缺 state 或 definition 时返回 false。
 func is_quest_complete(quest_id: String) -> bool:
 	var state := log.get_state(quest_id)
 	var definition := get_definition(quest_id)
@@ -149,7 +151,8 @@ func is_quest_complete(quest_id: String) -> bool:
 	return true
 
 
-## 完成 `quest` 流程，并保持 `QuestService` 的领域契约一致。
+## 把 active 且目标满足的 quest 标记为 completed，并发 `quest_completed` signal/event。
+## auto_complete 的 definition 会继续调用 turn_in_quest 结算奖励。
 func complete_quest(quest_id: String, context: GameplayContext) -> bool:
 	var state := log.get_state(quest_id)
 	if state == null or state.status != QuestState.STATUS_ACTIVE:
@@ -167,7 +170,8 @@ func complete_quest(quest_id: String, context: GameplayContext) -> bool:
 	return true
 
 
-## 执行 `turn_in_quest` 对应的公开操作，并保持 `QuestService` 的领域契约一致。
+## 结算 completed quest 的 reward_effects；全部成功后标记 turned_in 并发 `quest_turned_in` signal/event。
+## repeatable quest 会回到 available 并清空 objective_progress。
 func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 	var state := log.get_state(quest_id)
 	if state == null or state.status != QuestState.STATUS_COMPLETED:
@@ -190,7 +194,7 @@ func turn_in_quest(quest_id: String, context: GameplayContext) -> bool:
 	return true
 
 
-## 返回 `definition` 对应的数据或对象，并保持 `QuestService` 的领域契约一致。
+## 从 ContentService 读取 QuestDefinition；服务未注册或 quest id 缺失时返回 null。
 func get_definition(quest_id: String) -> QuestDefinition:
 	var content := _get_content()
 	if content == null:
@@ -198,17 +202,17 @@ func get_definition(quest_id: String) -> QuestDefinition:
 	return content.get_resource(quest_id) as QuestDefinition
 
 
-## 返回 `state` 对应的数据或对象，并保持 `QuestService` 的领域契约一致。
+## 从 QuestLog 读取指定 quest 的运行时状态；尚未接触该任务时返回 null。
 func get_state(quest_id: String) -> QuestState:
 	return log.get_state(quest_id)
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `QuestService` 的领域契约一致。
+## 导出 QuestLog 状态，供 SaveService 写入 `quest` root save id。
 func to_save_data() -> Dictionary:
 	return log.to_save_data()
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `QuestService` 的领域契约一致。
+## 从存档 payload 恢复 QuestLog；未知字段由 QuestLog 自身忽略。
 func from_save_data(data: Dictionary) -> void:
 	log.from_save_data(data)
 

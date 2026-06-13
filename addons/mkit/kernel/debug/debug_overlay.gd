@@ -33,7 +33,7 @@ func _process(_delta: float) -> void:
 		_label.text = _build_text()
 
 
-## 执行 `toggle` 对应的公开操作，并保持 `DebugOverlay` 的领域契约一致。
+## 切换调试 overlay 的可见状态；启用后继续读取观察实体和服务状态。
 func toggle() -> void:
 	visible = not visible
 

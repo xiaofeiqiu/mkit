@@ -15,7 +15,7 @@ const SERVICE_ID: String = "commands"
 var _receivers: Dictionary = {}
 
 
-## 注册 `receiver`，让后续查询或路由可以找到它，并保持 `CommandService` 的领域契约一致。
+## 按 receiver_id 注册 CommandReceiver；dispatch 只会把目标 id 匹配的 GameCommand 转交给该 receiver。
 func register_receiver(receiver_id: String, receiver: CommandReceiver) -> void:
 	if receiver_id.strip_edges() == "":
 		push_warning("CommandService.register_receiver: receiver_id is empty")
@@ -26,12 +26,13 @@ func register_receiver(receiver_id: String, receiver: CommandReceiver) -> void:
 	_receivers[receiver_id] = receiver
 
 
-## 注销 `receiver`，停止后续查询或路由使用它，并保持 `CommandService` 的领域契约一致。
+## 移除 receiver_id 对应的 CommandReceiver；后续 dispatch 会发 `command_failed`。
 func unregister_receiver(receiver_id: String) -> void:
 	_receivers.erase(receiver_id)
 
 
-## 把命令或事件分发到目标接收者，并保持 `CommandService` 的领域契约一致。
+## 按 GameCommand.target_id 路由命令；先发 `command_dispatched`，再拒绝已 consumed、缺 target、缺 receiver 或无效 receiver 的命令。
+## 目标 receiver 返回 false 时发 `command_failed`；返回 true 表示命令被目标处理。
 func dispatch(command: GameCommand) -> bool:
 	if command == null:
 		push_warning("CommandService.dispatch: command is null")

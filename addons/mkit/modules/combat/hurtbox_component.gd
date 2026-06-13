@@ -16,6 +16,6 @@ extends Area2D
 @export var damage_tags: Array[String] = []
 
 
-## 返回 `owner_entity` 对应的数据或对象，并保持 `HurtboxComponent` 的领域契约一致。
+## 读取当前对象中的 `owner_entity`；未找到时返回 null、空集合或该 API 的默认值。
 func get_owner_entity() -> Node:
 	return get_node_or_null(owner_path)

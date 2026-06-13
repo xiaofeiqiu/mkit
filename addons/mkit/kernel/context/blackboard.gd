@@ -9,33 +9,33 @@ extends RefCounted
 var _data: Dictionary = {}
 
 
-## 设置 `value` 对应的数据或对象，并保持 `Blackboard` 的领域契约一致。
+## 更新当前对象中的 `value`；输入值按该对象规则校验或夹取。
 func set_value(key: String, value) -> void:
 	_data[key] = value
 
 
-## 返回 `value` 对应的数据或对象，并保持 `Blackboard` 的领域契约一致。
+## 读取当前对象中的 `value`；未找到时返回 null、空集合或该 API 的默认值。
 func get_value(key: String, default_value = null):
 	if _data.has(key):
 		return _data[key]
 	return default_value
 
 
-## 判断是否存在 `value`，并保持 `Blackboard` 的领域契约一致。
+## 检查当前集合或对象是否包含 `value`；缺失或空值时返回 false。
 func has_value(key: String) -> bool:
 	return _data.has(key)
 
 
-## 执行 `erase_value` 对应的公开操作，并保持 `Blackboard` 的领域契约一致。
+## 执行 `erase_value` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func erase_value(key: String) -> void:
 	_data.erase(key)
 
 
-## 清理当前保存的运行时状态或缓存，并保持 `Blackboard` 的领域契约一致。
+## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。
 func clear() -> void:
 	_data.clear()
 
 
-## 执行 `to_debug_dict` 对应的公开操作，并保持 `Blackboard` 的领域契约一致。
+## 导出面向调试显示的 Dictionary；不会改变运行时状态。
 func to_debug_dict() -> Dictionary:
 	return _data.duplicate(true)

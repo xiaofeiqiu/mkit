@@ -24,7 +24,7 @@ var killer_ref: Node = null
 var roll_result: LootRollResult = null
 
 
-## 判断本次掉落是否包含实际可交付内容，并保持 `LootDropResult` 的领域契约一致。
+## 判断本次掉落是否包含实际可交付内容；返回值、signal 或事件会表达实际执行结果。
 func has_content() -> bool:
 	return roll_result != null and (
 		not roll_result.item_instances.is_empty() or not roll_result.currency.is_empty()

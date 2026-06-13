@@ -26,7 +26,7 @@ var stacks: int = 1
 var applied_modifier_ids: Array[String] = []
 
 
-## 初始化运行时依赖和起始状态，并保持 `StatusEffectInstance` 的领域契约一致。
+## 绑定运行时依赖并初始化内部状态；通常由 controller 或 service 在流程开始前调用。
 func setup(
 	definition: StatusEffectDefinition,
 	source_entity: Node,

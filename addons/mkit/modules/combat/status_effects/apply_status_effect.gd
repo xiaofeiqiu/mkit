@@ -14,7 +14,7 @@ extends GameEffect
 @export var duration_override: float = -1.0
 
 
-## 子类覆写的实际效果入口，并保持 `ApplyStatusEffect` 的领域契约一致。
+## GameEffect 子类实现此 hook 完成实际效果；apply() 会调用它并返回 EffectResult。
 func _apply_impl(context: GameplayContext) -> EffectResult:
 	var target := context.target
 	if target == null:

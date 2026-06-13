@@ -14,7 +14,7 @@ extends Node
 @export var restore_order: int = 0
 
 
-## 返回 `save_scope` 对应的数据或对象，并保持 `Saveable` 的领域契约一致。
+## 读取当前对象中的 `save_scope`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_scope() -> String:
 	var normalized_scope := save_scope.strip_edges()
 	if normalized_scope == "":
@@ -22,19 +22,19 @@ func get_save_scope() -> String:
 	return normalized_scope
 
 
-## 返回 `save_scopes` 对应的数据或对象，并保持 `Saveable` 的领域契约一致。
+## 读取当前对象中的 `save_scopes`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_scopes() -> Array[String]:
 	return [get_save_scope()]
 
 
-## 返回 `save_payload_for_scope` 对应的数据或对象，并保持 `Saveable` 的领域契约一致。
+## 读取当前对象中的 `save_payload_for_scope`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_payload_for_scope(scope: String) -> Dictionary:
 	if get_save_scope() == scope.strip_edges():
 		return to_save_data()
 	return {}
 
 
-## 把输入数据或效果应用到目标对象，并保持 `Saveable` 的领域契约一致。
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
 	if get_save_scope() != scope.strip_edges():
 		return false
@@ -49,25 +49,25 @@ func register_save_scopes() -> void:
 		save_service.register_saveable_scope(self)
 
 
-## 注销 `save_scopes`，停止后续查询或路由使用它，并保持 `Saveable` 的领域契约一致。
+## 从运行时表注销 `save_scopes`；后续查询或路由会走缺失分支。
 func unregister_save_scopes() -> void:
 	var save_service := ServiceRegistry.get_port(SaveService.SERVICE_ID) as SaveService
 	if save_service != null:
 		save_service.unregister_saveable_scope(self)
 
 
-## 返回 `save_id` 对应的数据或对象，并保持 `Saveable` 的领域契约一致。
+## 读取当前对象中的 `save_id`；未找到时返回 null、空集合或该 API 的默认值。
 func get_save_id() -> String:
 	if save_id == "":
 		return owner.name if owner != null else name
 	return save_id
 
 
-## 导出当前运行时状态，供 SaveService 写入存档，并保持 `Saveable` 的领域契约一致。
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {}
 
 
-## 从 SaveService 读出的 payload 恢复运行时状态，并保持 `Saveable` 的领域契约一致。
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	pass

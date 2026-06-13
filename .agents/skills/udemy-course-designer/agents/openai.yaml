@@ -1,0 +1,8 @@
+interface:
+  display_name: "Udemy Course Designer"
+  short_description: "Turn a codebase or project into a marketable Udemy course plan."
+  brand_color: "#A435F0"
+  default_prompt: "Use this skill to inspect the project and design a commercially positioned Udemy course with curriculum, lesson structure, first lesson plan, MVP recording plan, and landing page copy."
+
+policy:
+  allow_implicit_invocation: true

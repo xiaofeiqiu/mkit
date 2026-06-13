@@ -72,7 +72,7 @@ class EmbeddedSceneRouter:
 @onready var _world_host: Node2D = $WorldHost
 @onready var _room_root: Node2D = $RoomRoot
 @onready var _run_director: RunDirector = $RunDirector
-@onready var _player: Node2D = $Player
+@onready var _player: EntityRoot = $Player
 @onready var _camera: Camera2D = $Camera2D
 @onready var _instructions_label: Label = $HUD/Instructions
 @onready var _zone_label: Label = $HUD/StatsPanel/ZoneInfo
@@ -108,7 +108,7 @@ var _auto_run_verifier: Variant = DEMO_AUTO_RUN_VERIFIER_SCRIPT.new()
 var _save_payload_verifier: Variant = DEMO_SAVE_PAYLOAD_VERIFIER_SCRIPT.new()
 var _previous_scene_router: SceneService = null
 var _log_lines: Array[String] = []
-var _field_beast_ref: Node = null
+var _field_beast_ref: EntityRoot = null
 var _field_beast_looted: bool = false
 var _field_beast_defeated: bool = false
 var _shop_purchase_completed: bool = false
@@ -704,7 +704,7 @@ func _defeat_field_beast() -> void:
 	if beast == null:
 		_log("[COMBAT] field beast not found")
 		return
-	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := beast.get_component("HealthComponent") as HealthComponent
 	if not _is_field_beast_health_alive(health):
 		_log("[COMBAT] field beast already defeated")
 		return
@@ -720,7 +720,7 @@ func _defeat_field_beast() -> void:
 		_log("[COMBAT] strike failed: %s" % result.failure_reason)
 
 
-func _damage_player_from_beast(beast: Node) -> void:
+func _damage_player_from_beast(beast: EntityRoot) -> void:
 	if _effects == null:
 		return
 	var health := _player_health()
@@ -737,7 +737,7 @@ func _engage_field_beast_via_commands() -> void:
 	if _world == null or _world.current_zone_id != ZONE_FIELD:
 		_log("[COMBAT] go to the field first")
 		return
-	var beast := _field_beast() as Node2D
+	var beast := _field_beast()
 	if beast == null:
 		if _field_beast_defeated:
 			_command_combat_succeeded = true
@@ -764,7 +764,7 @@ func _engage_field_beast_via_commands() -> void:
 
 
 func _attack_field_beast() -> void:
-	var state_machine := _player.get_node_or_null("StateMachine") as StateMachine
+	var state_machine := _player.get_state_machine_node()
 	if state_machine == null:
 		return
 	var attacks := 0
@@ -784,7 +784,7 @@ func _attack_field_beast() -> void:
 func _dispatch_player_command(command_type: String, payload: Dictionary) -> void:
 	if _player == null:
 		return
-	var receiver := EntityContract.get_command_receiver(_player)
+	var receiver := _player.get_command_receiver_node()
 	if receiver == null:
 		return
 	receiver.receive_command(GameCommand.create(command_type, PLAYER_ID, PLAYER_ID, payload))
@@ -795,7 +795,7 @@ func _cast_firebolt_command() -> void:
 
 
 func _dash_player_once() -> void:
-	var state_machine := _player.get_node_or_null("StateMachine") as StateMachine
+	var state_machine := _player.get_state_machine_node()
 	if state_machine == null:
 		return
 	var start := _player.global_position
@@ -813,11 +813,11 @@ func _cast_firebolt_at_beast() -> void:
 	if _world == null or _world.current_zone_id != ZONE_FIELD:
 		_log("[ABILITY] go to the field first")
 		return
-	var beast := _field_beast() as Node2D
+	var beast := _field_beast()
 	if beast == null:
 		_log("[ABILITY] field beast not found")
 		return
-	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := beast.get_component("HealthComponent") as HealthComponent
 	if health == null or health.dead:
 		return
 	var ability := _ability_controller()
@@ -839,8 +839,8 @@ func _cast_firebolt_at_beast() -> void:
 		_log("[ABILITY] firebolt cast did not resolve")
 
 
-func _wait_for_beast_burn_tick(beast: Node2D) -> void:
-	var status := beast.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+func _wait_for_beast_burn_tick(beast: EntityRoot) -> void:
+	var status := beast.get_controller("StatusEffectController") as StatusEffectController
 	if status == null:
 		_log("[STATUS] field beast status controller not found")
 		return
@@ -906,6 +906,39 @@ func _place_player_at_trial_cave_exit() -> void:
 	var marker := root.get_node_or_null("TrialCave") as Node2D
 	if marker != null:
 		_player.global_position = marker.global_position
+
+
+func _defeat_trial_room_enemies() -> void:
+	if _run_director == null or _run_director.current_room_controller == null:
+		_log("[TRIAL] no active room")
+		return
+	if _effects == null:
+		_log("[TRIAL] effect service missing")
+		return
+	var room := _run_director.current_room_controller
+	if room.runtime == null:
+		_log("[TRIAL] active room has no runtime")
+		return
+	var enemy_ids := room.runtime.active_enemy_ids.duplicate()
+	for enemy_id in enemy_ids:
+		var enemy := room.active_enemies.get(enemy_id, null) as EntityRoot
+		if enemy == null:
+			continue
+		var brain := enemy.get_controller("SimpleAIEnemyBrain") as SimpleAIEnemyBrain
+		if brain != null:
+			brain.enabled = false
+		var damage := DealDamageEffect.new()
+		damage.effect_id = "effect.demo.trial_strike"
+		damage.base_amount = 999.0
+		damage.can_crit = false
+		_effects.execute(damage, GameplayContext.new().with_source(_player).with_target(enemy))
+
+
+func _trial_reward_index(reward_id: String) -> int:
+	for i in range(_pending_trial_rewards.size()):
+		if _pending_trial_rewards[i].reward_id == reward_id:
+			return i
+	return 0
 
 
 func _select_trial_reward(index: int) -> void:
@@ -1233,10 +1266,10 @@ func _firebolt_visual_target() -> Node2D:
 	var best: Node2D = null
 	var best_distance: float = INF
 	for node in _player.get_tree().get_nodes_in_group("enemy"):
-		var enemy := node as Node2D
+		var enemy := node as EntityRoot
 		if enemy == null or not is_instance_valid(enemy):
 			continue
-		var health := enemy.get_node_or_null("Components/HealthComponent") as HealthComponent
+		var health := enemy.get_component("HealthComponent") as HealthComponent
 		if health != null and health.dead:
 			continue
 		var distance := _player.global_position.distance_to(enemy.global_position)
@@ -1247,7 +1280,7 @@ func _firebolt_visual_target() -> Node2D:
 
 
 func _player_facing_direction() -> Vector2:
-	var state_machine := _player.get_node_or_null("StateMachine") as StateMachine
+	var state_machine := _player.get_state_machine_node()
 	if state_machine != null:
 		var facing: Vector2 = state_machine.blackboard.get_value("facing", Vector2.RIGHT)
 		if facing != Vector2.ZERO:
@@ -1637,7 +1670,7 @@ func _update_combat_hud() -> void:
 	if beast == null:
 		_combat_label.text = "Beast: not spawned"
 		return
-	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := beast.get_component("HealthComponent") as HealthComponent
 	if health == null:
 		_combat_label.text = "Beast: missing health"
 		return
@@ -1776,14 +1809,17 @@ func _spawn_field_beast() -> void:
 	if _entity_spawner == null:
 		_log("[ENTITY] entity spawner missing")
 		return
-	var beast := _entity_spawner.spawn_entity(ENTITY_FIELD_BEAST, root, marker.global_position)
+	var spawned := _entity_spawner.spawn_entity(ENTITY_FIELD_BEAST, root, marker.global_position)
+	var beast := spawned as EntityRoot
 	if beast == null:
 		_log("[ENTITY] field beast spawn failed")
+		if spawned != null and is_instance_valid(spawned):
+			spawned.queue_free()
 		return
 	_field_beast_ref = beast
 
 
-func _field_beast() -> Node:
+func _field_beast() -> EntityRoot:
 	if is_instance_valid(_field_beast_ref):
 		return _field_beast_ref
 	return null
@@ -1794,7 +1830,7 @@ func _is_field_beast_health_alive(health_component: Object = null) -> bool:
 		var beast := _field_beast()
 		if beast == null:
 			return false
-		health_component = beast.get_node_or_null("Components/HealthComponent")
+		health_component = beast.get_component("HealthComponent")
 	if health_component == null or not is_instance_valid(health_component):
 		return false
 	var health := health_component as HealthComponent
@@ -1804,31 +1840,31 @@ func _is_field_beast_health_alive(health_component: Object = null) -> bool:
 
 
 func _inventory() -> InventoryController:
-	return _player.get_node_or_null("Controllers/InventoryController") as InventoryController
+	return _player.get_controller("InventoryController") as InventoryController
 
 
 func _equipment_controller() -> EquipmentController:
-	return _player.get_node_or_null("Controllers/EquipmentController") as EquipmentController
+	return _player.get_controller("EquipmentController") as EquipmentController
 
 
 func _player_health() -> HealthComponent:
-	return _player.get_node_or_null("Components/HealthComponent") as HealthComponent
+	return _player.get_component("HealthComponent") as HealthComponent
 
 
 func _interaction_component() -> InteractionComponent:
-	return _player.get_node_or_null("Components/InteractionComponent") as InteractionComponent
+	return _player.get_component("InteractionComponent") as InteractionComponent
 
 
 func _ability_controller() -> AbilityController:
-	return _player.get_node_or_null("Controllers/AbilityController") as AbilityController
+	return _player.get_controller("AbilityController") as AbilityController
 
 
 func _player_stats() -> StatsComponent:
-	return _player.get_node_or_null("Components/StatsComponent") as StatsComponent
+	return _player.get_component("StatsComponent") as StatsComponent
 
 
 func _player_mana() -> float:
-	var pool := _player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+	var pool := _player.get_component("ResourcePoolComponent") as ResourcePoolComponent
 	return pool.get_current("mana") if pool != null else 0.0
 
 
@@ -1848,20 +1884,26 @@ func _item_count(definition_id: String) -> int:
 
 
 func _experience() -> ExperienceComponent:
-	return _player.get_node_or_null("Components/ExperienceComponent") as ExperienceComponent
+	return _player.get_component("ExperienceComponent") as ExperienceComponent
 
 
 func _entity_id(node: Node) -> String:
 	if node == null:
 		return "?"
-	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var root := node as EntityRoot
+	var identity := (
+		root.get_entity_identity() if root != null else node.get_node_or_null("EntityIdentity")
+	) as EntityIdentity
 	return identity.entity_id if identity != null else str(node.name)
 
 
 func _entity_display_name(node: Node) -> String:
 	if node == null:
 		return "?"
-	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var root := node as EntityRoot
+	var identity := (
+		root.get_entity_identity() if root != null else node.get_node_or_null("EntityIdentity")
+	) as EntityIdentity
 	if identity != null:
 		if identity.display_name != "":
 			return identity.display_name
@@ -1952,7 +1994,10 @@ func _first_missing_service() -> String:
 func _has_entity_tag(node: Node, tag: String) -> bool:
 	if node == null:
 		return false
-	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var root := node as EntityRoot
+	var identity := (
+		root.get_entity_identity() if root != null else node.get_node_or_null("EntityIdentity")
+	) as EntityIdentity
 	return identity != null and identity.tags.has(tag)
 
 

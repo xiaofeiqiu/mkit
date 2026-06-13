@@ -87,7 +87,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	assert_eq(attack_definition.stream, attack_stream)
 	assert_eq(attack_stream.resource_path, ATTACK_SFX_PATH)
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	player.global_position = Vector2.ZERO
 	add_child_autofree(player)
 
@@ -119,7 +119,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 
 	# place the beast where the rightward swing hitbox (player + facing * 28) overlaps its hurtbox
 	player.global_position = Vector2.ZERO
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	beast.global_position = Vector2(28.0, 0.0)
 	add_child_autofree(beast)
@@ -190,7 +190,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_misses_range_and_burns(
 	var actions := ServiceRegistry.get_port("actions") as ActionService
 	assert_not_null(actions)
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	player.global_position = Vector2.ZERO
 	add_child_autofree(player)
 
@@ -202,7 +202,7 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_misses_range_and_burns(
 	assert_true(ability.has_ability(FIREBOLT))
 	assert_eq(pool.get_current("mana"), 50.0)
 
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
@@ -318,13 +318,13 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	assert_eq(burn_def.stat_modifiers.size(), 1)
 	assert_eq(burn_def.stat_modifiers[0].modifier_id, "mod.demo.burn_defense_down")
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	add_child_autofree(player)
 	var player_stats := player.get_node("Components/StatsComponent") as StatsComponent
 	player_stats.set_base_stat("attack_power", 0.0)
 	player_stats.set_base_stat("crit_chance", 0.0)
 
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_stats := beast.get_node("Components/StatsComponent") as StatsComponent
@@ -412,7 +412,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	assert_eq(blade_def.stat_modifiers[0].stat_id, "attack_power")
 	assert_eq(blade_def.stat_modifiers[0].value, 6.0)
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	add_child_autofree(player)
 	var equipment := player.get_node("Controllers/EquipmentController") as EquipmentController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
@@ -420,7 +420,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	stats.set_base_stat("crit_chance", 0.0)
 
 	# a defenseless target to read combat damage off CombatService
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_stats := beast.get_node("Components/StatsComponent") as StatsComponent
@@ -514,7 +514,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_not_null(root)
 	var marker := root.get_node_or_null("FieldBeastSpawn") as Node2D
 	assert_not_null(marker)
-	var beast := root.get_node_or_null("FieldBeast") as Node2D
+	var beast := root.get_node_or_null("FieldBeast") as EntityRoot
 	assert_not_null(beast)
 	_disable_beast_ai(beast)
 	assert_eq(beast.global_position, marker.global_position)
@@ -546,7 +546,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_true(health.destroy_on_death)
 	var status := beast.get_node("Controllers/StatusEffectController") as StatusEffectController
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var ability := player.get_node("Controllers/AbilityController") as AbilityController
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
 	watch_signals(ability)
@@ -610,14 +610,14 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var player_health := player.get_node("Components/HealthComponent") as HealthComponent
 	var player_hurtbox := player.get_node_or_null("Components/HurtboxComponent") as HurtboxComponent
 	assert_not_null(player_hurtbox)
 	player.global_position = Vector2.ZERO
 	player_health.current_hp = player_health.get_max_hp()
 
-	var beast := demo.call("_field_beast") as CharacterBody2D
+	var beast := demo.call("_field_beast") as EntityRoot
 	assert_not_null(beast)
 	beast.global_position = Vector2(110.0, 0.0)
 	var brain := beast.get_node("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
@@ -716,7 +716,7 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	assert_not_null(root.get_node_or_null("TrialCave"))
 	assert_not_null(root.get_node_or_null("TrialCaveArea/Interactable"))
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var stats := player.get_node("Components/StatsComponent") as StatsComponent
 	var attack_before := stats.get_stat_value("attack_power")
 	var run_director := demo.get_node("RunDirector") as RunDirector
@@ -820,7 +820,7 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes
 	await _settle_scene8_world()
 	assert_eq(save.save_version, 1)
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var stats := player.get_node("Components/StatsComponent") as StatsComponent
 	var health := player.get_node("Components/HealthComponent") as HealthComponent
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
@@ -975,11 +975,11 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	await _focus_demo_interactable(demo, "ToField/Interactable")
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
-	var beast := demo.call("_field_beast") as Node2D
+	var beast := demo.call("_field_beast") as EntityRoot
 	assert_not_null(beast)
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
 	beast_health.current_hp = 35.0
-	var player := demo.get_node("Player") as Node2D
+	var player := demo.get_node("Player") as EntityRoot
 	var player_stats := player.get_node("Components/StatsComponent") as StatsComponent
 	player_stats.set_base_stat("crit_chance", 0.0)
 
@@ -1081,7 +1081,7 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	assert_not_null(actions)
 	assert_eq(world.current_zone_id, ZONE_VILLAGE)
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var interaction := player.get_node("Components/InteractionComponent") as InteractionComponent
 	var state_machine := player.get_node("StateMachine") as StateMachine
 	assert_not_null(interaction)
@@ -1236,7 +1236,7 @@ func _focus_demo_interactable(demo: Node, interactable_path: String) -> Interact
 	assert_not_null(interactable)
 	var area := interactable.get_parent() as Area2D
 	assert_not_null(area)
-	var player := demo.get_node("Player") as Node2D
+	var player := demo.get_node("Player") as EntityRoot
 	player.global_position = area.global_position + Vector2(1000.0, 0.0)
 	await get_tree().physics_frame
 	player.global_position = area.global_position

@@ -115,7 +115,7 @@ func _scramble_saved_state(host) -> void:
 	var health := host._player_health() as HealthComponent
 	if health != null:
 		health.current_hp = 1.0
-	var pool := host._player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+	var pool := host._player.get_component("ResourcePoolComponent") as ResourcePoolComponent
 	if pool != null:
 		pool.set_current("mana", 0.0)
 	var ability := host._ability_controller() as AbilityController
@@ -137,7 +137,7 @@ func _roundtrip_restored(host) -> bool:
 	if ability == null or not ability.has_ability(ABILITY_FIREBOLT):
 		host._log("[SAVE] round-trip missing firebolt")
 		return false
-	var pool := host._player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+	var pool := host._player.get_component("ResourcePoolComponent") as ResourcePoolComponent
 	if pool == null or pool.get_current("mana") <= 0.0:
 		host._log("[SAVE] round-trip missing mana")
 		return false

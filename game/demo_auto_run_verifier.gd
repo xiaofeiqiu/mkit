@@ -88,48 +88,13 @@ func _run_trial(host) -> void:
 		var run_director := host._run_director as RunDirector
 		var status := run_director.run_state.status if run_director != null and run_director.run_state != null else ""
 		if status == "active":
-			_defeat_trial_room_enemies(host)
+			host._defeat_trial_room_enemies()
 		elif status == "choosing_reward":
-			host._select_trial_reward(_trial_reward_index(host, REWARD_TRIAL_ATTACK))
+			host._select_trial_reward(host._trial_reward_index(REWARD_TRIAL_ATTACK))
 		await host._settle_world()
 		guard += 1
 	if not host._is_trial_completed():
 		host._log("[TRIAL] auto run did not complete")
-
-
-func _defeat_trial_room_enemies(host) -> void:
-	var run_director := host._run_director as RunDirector
-	if run_director == null or run_director.current_room_controller == null:
-		host._log("[TRIAL] no active room")
-		return
-	var effects := host._effects as EffectService
-	if effects == null:
-		host._log("[TRIAL] effect service missing")
-		return
-	var room := run_director.current_room_controller
-	if room.runtime == null:
-		host._log("[TRIAL] active room has no runtime")
-		return
-	var enemy_ids := room.runtime.active_enemy_ids.duplicate()
-	for enemy_id in enemy_ids:
-		var enemy := room.active_enemies.get(enemy_id, null) as Node
-		if enemy == null:
-			continue
-		var brain := enemy.get_node_or_null("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
-		if brain != null:
-			brain.enabled = false
-		var damage := DealDamageEffect.new()
-		damage.effect_id = "effect.demo.trial_strike"
-		damage.base_amount = 999.0
-		damage.can_crit = false
-		effects.execute(damage, GameplayContext.new().with_source(host._player).with_target(enemy))
-
-
-func _trial_reward_index(host, reward_id: String) -> int:
-	for i in range(host._pending_trial_rewards.size()):
-		if host._pending_trial_rewards[i].reward_id == reward_id:
-			return i
-	return 0
 
 
 func _verify_debug_overlay(host) -> void:

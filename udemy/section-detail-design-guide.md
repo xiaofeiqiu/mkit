@@ -15,6 +15,7 @@ any specific section.
 - [x] Define the one-class-per-video rule.
 - [x] Define optional coverage boundaries.
 - [x] Define script writing rules.
+- [x] Define generated content organization rules.
 - [ ] Generate concrete section detailed designs only when explicitly requested.
 
 ## Guide-Only Boundary
@@ -77,37 +78,112 @@ When asked to generate a concrete section detailed design:
 3. Extract the section goal, visible result, and named classes or artifacts.
 4. Inspect current source files for those classes or artifacts.
 5. Decide which classes are required and which are optional.
-6. Create a separate section design file.
+6. Create a separate section design folder.
 7. Keep the generated section design focused on that section only.
-8. Run a markdown sanity check.
+8. Run a markdown sanity check for every generated file.
 
 Do not generate all section designs unless the user explicitly asks for all of
 them.
 
-## Output File Rule
+## Generated Content Organization Rule
 
-Create one file per generated section design.
+Create one folder per generated section detailed design.
 
-Recommended path pattern:
-
-```text
-udemy/section-<nn>-<short-title>-design.md
-```
-
-Example shape only:
+Generated section designs should live under this root:
 
 ```text
-udemy/section-02-runtime-kernel-foundation-design.md
+udemy/generated/section-detail-designs/
 ```
 
-This guide should not create that file by itself.
+Use this section folder pattern:
+
+```text
+udemy/generated/section-detail-designs/section-<nn>-<section-slug>/
+```
+
+Folder naming rules:
+
+- `<nn>` is the two-digit section number from `udemy/README.md`.
+- `<section-slug>` is a short lower-kebab-case version of the section title.
+- Use only lowercase letters, numbers, and hyphens in folder names.
+- Keep the section folder name stable after generation, even if individual
+  class files are revised later.
+- Do not put a concrete class name in the section folder name.
+
+Each generated section folder must use this shape:
+
+```text
+section-<nn>-<section-slug>/
+  README.md
+  01-source-check.md
+  02-high-level-class-design.md
+  03-video-plan.md
+  04-optional-coverage.md
+  05-demo-integration.md
+  06-tests-or-verification.md
+  video-<vv>-<class-slug>/
+    README.md
+    public-api.md
+    implementation-plan.md
+    read-aloud-script.md
+    verification.md
+```
+
+Section-level file rules:
+
+- `README.md` is the index for the section. It links to the high-level design,
+  video plan, optional coverage, verification file, and every class subfolder.
+- `01-source-check.md` records the README section, source files checked, naming
+  corrections, and runtime assumptions.
+- `02-high-level-class-design.md` contains Video 1: High-Level Class Design.
+- `03-video-plan.md` lists all required class videos and support videos.
+- `04-optional-coverage.md` keeps optional classes and optional artifacts out of
+  required class videos.
+- `05-demo-integration.md` describes the demo or visible result for the section.
+- `06-tests-or-verification.md` lists the verification steps for the generated
+  design.
+
+Class subfolder rules:
+
+- Create one direct class subfolder for each required class video.
+- Name class subfolders as `video-<vv>-<class-slug>/`.
+- `<vv>` is the two-digit video number for that class video.
+- `<class-slug>` is the current class name converted to lower-kebab-case.
+- Do not combine multiple required classes in one class subfolder.
+- Do not put optional classes in required class subfolders.
+
+Class file rules:
+
+- `README.md` explains the class responsibility and links to the other class
+  files.
+- `public-api.md` defines public fields, signals, and public functions.
+- `implementation-plan.md` explains what the class video will implement.
+- `read-aloud-script.md` contains the simple script for that class video.
+- `verification.md` explains how to verify this class design.
+
+Optional content should stay at section level by default. Use
+`04-optional-coverage.md` for optional classes, optional artifacts, and optional
+discussion topics. Create optional subfolders only if the user explicitly asks
+for optional videos to become generated artifacts.
+
+This guide should not create generated section folders by itself.
 
 ## Section Detailed Design Template
 
-Use this structure for each generated section design:
+Use this structure for the generated section folder `README.md`:
 
 ```text
 # Section NN - <Section Title> Detailed Design
+
+## Folder Index
+
+- Source check:
+- High-level class design:
+- Video plan:
+- Optional coverage:
+- Demo integration:
+- Tests or verification:
+- Required class folders:
 
 ## Source Check
 
@@ -132,7 +208,7 @@ Use this structure for each generated section design:
 
 ## Video Plan
 
-## Required Class Contracts
+## Required Class Folder Index
 
 ## Optional Coverage
 
@@ -265,7 +341,24 @@ Support videos should not hide class implementation work.
 
 ## Required Class Contract Template
 
-Use this template for each required class in a generated section design:
+Use this template for each required class subfolder in a generated section
+design.
+
+The generated class subfolder is:
+
+```text
+video-<vv>-<class-slug>/
+```
+
+Split the class details across the class files:
+
+- `README.md` gets status, source path, extends, purpose, and links.
+- `public-api.md` gets public fields, signals, and public functions.
+- `implementation-plan.md` gets the implementation order for the class video.
+- `read-aloud-script.md` gets the script.
+- `verification.md` gets checks for this class.
+
+Use this content shape across those files:
 
 ```text
 ### <ClassName>
@@ -298,7 +391,7 @@ Read-aloud script:
 <simple script that explains the implementation in order>
 ```
 
-Only fill this template in a generated section design, not in this guide.
+Only fill this template in a generated class subfolder, not in this guide.
 
 ## Optional Coverage Rule
 
@@ -382,7 +475,9 @@ Before reporting this guide as complete:
 8. Confirm optional coverage is excluded from required class videos.
 9. Confirm script rules require simple language, term definitions, and concrete
    examples.
-10. Run a markdown whitespace sanity check.
+10. Confirm generated content organization rules define section folders, class
+    subfolders, folder names, and file names.
+11. Run a markdown whitespace sanity check.
 
 ## Verification For Generated Section Designs
 
@@ -395,3 +490,6 @@ When a concrete section design is generated later:
 5. Confirm optional content is separate.
 6. Confirm the high-level Mermaid diagram uses current names.
 7. Confirm scripts are concrete and easy to read aloud.
+8. Confirm the generated section uses one section folder.
+9. Confirm each required class video has one class subfolder.
+10. Confirm class subfolders and files follow the required naming format.

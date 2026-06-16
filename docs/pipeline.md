@@ -90,7 +90,7 @@ func _build_services() -> Dictionary:
 ## P0-2：Main Gameplay Loop（每帧）
 
 **触发点：** Godot `_process(delta)`
-**涉及系统：** `StateMachine`、`State`、`ActionService`、`AbilityController`
+**涉及系统：** `Hfsm`、`HfsmState`、`ActionService`、`AbilityController`
 **输出：** 状态 update、action 推进（含完成检测）、冷却 tick
 
 ### 流程
@@ -99,14 +99,14 @@ func _build_services() -> Dictionary:
 sequenceDiagram
     participant Godot as Godot Engine
     participant SM as StateMachine
-    participant Chain as State 链（leaf→root）
+    participant Chain as HfsmState 链（leaf→root）
     participant AS as ActionService
     participant GA as GameAction
     participant AC as AbilityController
 
     Godot->>SM: _process(delta)
     SM->>Chain: update(delta) — 从 root 到 leaf 顺序
-    Note over Chain: [你实现] State.update() 里的逻辑
+    Note over Chain: [你实现] HfsmState.update() 里的逻辑
     Godot->>AS: _process(delta)  [ActionService 是 Node]
     loop active_actions
         AS->>GA: update(scaled_delta)
@@ -126,9 +126,9 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-# State.update 中根据逻辑主动完成 action（以 TimedAttackAction 为例）
+# HfsmState.update 中根据逻辑主动完成 action（以 TimedAttackAction 为例）
 class_name AttackState
-extends State
+extends HfsmState
 
 var _action: TimedAttackAction = null
 
@@ -151,15 +151,15 @@ func _on_attack_done(_action: GameAction) -> void:
 
 → [concepts.md — 可伸缩管线](concepts.md)
 → [generated/html/classes/ActionService.html](generated/html/classes/ActionService.html)
-→ [generated/html/classes/StateMachine.html](generated/html/classes/StateMachine.html)
+→ [generated/html/classes/Hfsm.html](generated/html/classes/Hfsm.html)
 
 ---
 
 ## P1-3：Command Dispatch
 
 **触发点：** 任意代码发出 `GameCommand`（玩家输入处理、AI Brain、脚本事件）
-**涉及系统：** `CommandReceiver`、`StateMachine`、`State`；跨实体按 id 路由时可选用 `CommandService`
-**输出：** 目标实体的 State 处理命令，或命令被拒绝并发 `command_failed`
+**涉及系统：** `CommandReceiver`、`Hfsm`、`HfsmState`；跨实体按 id 路由时可选用 `CommandService`
+**输出：** 目标实体的 HfsmState 处理命令，或命令被拒绝并发 `command_failed`
 
 ### 流程
 
@@ -169,7 +169,7 @@ sequenceDiagram
     participant CR as CommandReceiver
     participant CS as CommandService（可选）
     participant SM as StateMachine
-    participant S as State（leaf→root）
+    participant S as HfsmState（leaf→root）
 
     Note over You: [你实现] 输入处理 / AI / 脚本
     alt 已持有实体 / CommandReceiver
@@ -184,7 +184,7 @@ sequenceDiagram
     end
     CR->>SM: handle_command(command)
     SM->>S: handle_command(command) — leaf 开始向 root 冒泡
-    Note over S: [你实现] State.handle_command → return true 消费命令
+    Note over S: [你实现] HfsmState.handle_command → return true 消费命令
     alt 命令被处理
         S-->>SM: true
         SM-->>CR: true
@@ -209,9 +209,9 @@ func _unhandled_input(event: InputEvent) -> void:
 ```
 
 ```gdscript
-# State 处理命令
+# HfsmState 处理命令
 class_name IdleState
-extends State
+extends HfsmState
 
 func handle_command(command: GameCommand) -> bool:
     if command.command_type == "attack":
@@ -234,15 +234,15 @@ func handle_command(command: GameCommand) -> bool:
 
 ## P1-4：HFSM Transition
 
-**触发点：** `State.request_transition(path)` 或 `StateMachine.transition_to(path)`
-**涉及系统：** `StateMachine`、`State`（当前链 + 目标链）
+**触发点：** `HfsmState.request_transition(path)` 或 `Hfsm.transition_to(path)`
+**涉及系统：** `Hfsm`、`HfsmState`（当前链 + 目标链）
 **输出：** 当前状态链 exit，目标状态链 enter，`state_changed` 信号
 
 ### 流程
 
 ```mermaid
 sequenceDiagram
-    participant S as [你的 State]
+    participant S as [你的 HfsmState]
     participant SM as StateMachine
     participant From as 当前状态链
     participant To as 目标状态链
@@ -270,9 +270,9 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-# State 实现 can_enter / can_exit 守卫
+# HfsmState 实现 can_enter / can_exit 守卫
 class_name DashState
-extends State
+extends HfsmState
 
 func can_enter(context: Dictionary = {}) -> bool:
     var health := EntityContract.get_component(owner_entity, "HealthComponent") as HealthComponent
@@ -297,8 +297,8 @@ sm.transition_failed.connect(func(from: String, to: String, reason: String) -> v
 
 ### 相关文档
 
-→ [generated/html/classes/StateMachine.html](generated/html/classes/StateMachine.html)
-→ [generated/html/classes/State.html](generated/html/classes/State.html)
+→ [generated/html/classes/Hfsm.html](generated/html/classes/Hfsm.html)
+→ [generated/html/classes/HfsmState.html](generated/html/classes/HfsmState.html)
 → [debugging.md — 状态没切换](debugging.md#常见问题速查表)
 
 ---
@@ -356,9 +356,9 @@ sequenceDiagram
 ### 关键代码
 
 ```gdscript
-# State 中触发技能施法
+# HfsmState 中触发技能施法
 class_name CombatState
-extends State
+extends HfsmState
 
 func handle_command(command: GameCommand) -> bool:
     if command.command_type != "cast_ability":
@@ -662,7 +662,7 @@ if enemy != null:
 
 ```mermaid
 flowchart LR
-    A["State.enter →<br/>ActionService.start_action"]:::userOwned -->
+    A["HfsmState.enter →<br/>ActionService.start_action"]:::userOwned -->
     B["GameAction._on_start()"]:::userOwned -->
     C["source/Presentation/<br/>AnimationPlayer.play('attack')"]:::userOwned
     B --> D["_on_update(delta)"]:::userOwned -->

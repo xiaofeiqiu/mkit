@@ -92,7 +92,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	add_child_autofree(player)
 
 	var receiver := player.get_node("CommandReceiver") as CommandReceiver
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 	var player_stats := player.get_node("Components/StatsComponent") as StatsComponent
 	# crit is the only random factor in the damage formula; zero it for a deterministic hit
 	player_stats.set_base_stat("crit_chance", 0.0)
@@ -622,7 +622,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	beast.global_position = Vector2(110.0, 0.0)
 	var brain := beast.get_node("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
 	var receiver := beast.get_node("CommandReceiver") as CommandReceiver
-	var state_machine := beast.get_node("StateMachine") as StateMachine
+	var state_machine := beast.get_node("StateMachine") as Hfsm
 	var hitbox := beast.get_node("Components/HitboxComponent") as HitboxComponent
 	assert_not_null(brain)
 	assert_not_null(hitbox)
@@ -1083,7 +1083,7 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 
 	var player := demo.get_node("Player") as EntityRoot
 	var interaction := player.get_node("Components/InteractionComponent") as InteractionComponent
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 	assert_not_null(interaction)
 	assert_not_null(state_machine)
 

@@ -2,7 +2,7 @@ class_name GameCommand
 extends RefCounted
 ## 说明：`GameCommand` 是 命令路由 的命令对象，负责承载输入、AI 或脚本发出的意图。
 ## 上游：通常由输入、AI、脚本或 CommandService 创建或调用。
-## 下游：会连接CommandReceiver、StateMachine 或目标实体，不直接依赖具体游戏内容。
+## 下游：会连接CommandReceiver、状态机或目标实体，不直接依赖具体游戏内容。
 ## 使用：当项目调用方只想表达意图，并交给 pipeline 决定如何处理时使用它。
 ## 示例：`var instance := GameCommand.new()`
 

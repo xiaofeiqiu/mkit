@@ -1,27 +1,19 @@
-class_name StateMachine
-extends Node
-## 说明：`StateMachine` 是 状态机 的层级状态机，负责驱动实体状态切换、命令处理和状态更新。
-## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+class_name Hfsm
+extends StateMachineBase
+## 说明：`Hfsm` 是 kernel 的层级状态机（Hierarchical FSM），驱动可嵌套状态的切换、命令冒泡和按帧更新。
+## 上游：通常由实体场景的 `StateMachine` 节点承载，由 CommandReceiver、controller 或 AI 驱动。
 ## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
-## 使用：当项目需要在状态机中复用这段契约或状态时使用它。
-## 示例：`var instance := StateMachine.new()`
+## 使用：当实体状态需要嵌套结构、层级路径寻址或命令向父状态冒泡时使用它；互斥的扁平状态请用 `Fsm`。
+## 示例：`var instance := Hfsm.new()`
 
-## 当 `StateMachine` 发生 `state changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
-signal state_changed(previous_path: String, current_path: String)
-## 当 `StateMachine` 发生 `transition failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
-signal transition_failed(from_path: String, to_path: String, reason: String)
 ## 状态机启动时进入的状态节点路径；为空时使用第一个子状态或保持未启动。
 @export var initial_state_path: String = ""
 ## 进入场景树后是否自动启动状态机；关闭后由调用方显式 start。
 @export var auto_start: bool = true
-## 拥有该运行时对象的实体节点；通常是 EntityRoot 或其子节点。
-var owner_entity: Node = null
 ## 状态机根状态节点；启动时解析并作为转移入口。
-var root_state: State = null
+var root_state: HfsmState = null
 ## 当前处于激活链末端的叶子状态；命令优先交给它处理。
-var current_leaf_state: State = null
-## 跨状态或 AI 决策共享的临时键值数据；同一拥有者生命周期内复用。
-var blackboard: Blackboard = Blackboard.new()
+var current_leaf_state: HfsmState = null
 ## 上一次激活状态的路径字符串；用于调试转移和回退逻辑。
 var previous_path: String = ""
 ## 最近一次成功转移的原因文本；用于调试和测试断言。
@@ -49,11 +41,11 @@ func _physics_process(delta: float) -> void:
 		_update_state_chain(current_leaf_state, delta, true)
 
 
-## 从当前叶子状态开始向父状态冒泡 GameCommand；任一 State.handle_command 返回 true 即停止并表示命令已消费。
+## 从当前叶子状态开始向父状态冒泡 GameCommand；任一 HfsmState.handle_command 返回 true 即停止并表示命令已消费。
 func handle_command(command: GameCommand) -> bool:
 	if current_leaf_state == null:
 		return false
-	var current: State = current_leaf_state
+	var current: HfsmState = current_leaf_state
 	while current != null:
 		if current.handle_command(command):
 			return true
@@ -61,7 +53,7 @@ func handle_command(command: GameCommand) -> bool:
 	return false
 
 
-## 按层级 path 切换到目标 State；会验证目标存在、当前链可退出、目标链可进入。
+## 按层级 path 切换到目标 HfsmState；会验证目标存在、当前链可退出、目标链可进入。
 ## 成功时执行最近公共祖先转移、更新 current_leaf_state 并发 `state_changed`；失败时记录 reason 并发 `transition_failed`。
 func transition_to(target_path: String, context: Dictionary = {}) -> bool:
 	var target := find_state_by_path(target_path)
@@ -93,7 +85,7 @@ func get_current_path() -> String:
 
 
 ## 按层级路径查找状态节点；任一片段缺失时返回 null。
-func find_state_by_path(path: String) -> State:
+func find_state_by_path(path: String) -> HfsmState:
 	if root_state == null:
 		return null
 	var parts := path.split("/", false)
@@ -109,7 +101,7 @@ func find_state_by_path(path: String) -> State:
 	return current
 
 
-func _perform_lca_transition(from_state: State, to_state: State, context: Dictionary) -> void:
+func _perform_lca_transition(from_state: HfsmState, to_state: HfsmState, context: Dictionary) -> void:
 	if from_state == null:
 		_enter_chain(null, to_state, context)
 		return
@@ -118,9 +110,9 @@ func _perform_lca_transition(from_state: State, to_state: State, context: Dictio
 	_enter_chain(lca, to_state, context)
 
 
-func _find_lowest_common_ancestor(a: State, b: State) -> State:
-	var ancestors_a: Array[State] = []
-	var current: State = a
+func _find_lowest_common_ancestor(a: HfsmState, b: HfsmState) -> HfsmState:
+	var ancestors_a: Array[HfsmState] = []
+	var current: HfsmState = a
 	while current != null:
 		ancestors_a.append(current)
 		current = current.parent_state
@@ -132,7 +124,7 @@ func _find_lowest_common_ancestor(a: State, b: State) -> State:
 	return null
 
 
-func _exit_until(from_state: State, stop_state: State, context: Dictionary) -> void:
+func _exit_until(from_state: HfsmState, stop_state: HfsmState, context: Dictionary) -> void:
 	var current := from_state
 	while current != null and current != stop_state:
 		current.exit(context)
@@ -141,8 +133,8 @@ func _exit_until(from_state: State, stop_state: State, context: Dictionary) -> v
 		current = current.parent_state
 
 
-func _enter_chain(ancestor: State, target: State, context: Dictionary) -> void:
-	var chain: Array[State] = []
+func _enter_chain(ancestor: HfsmState, target: HfsmState, context: Dictionary) -> void:
+	var chain: Array[HfsmState] = []
 	var current := target
 	while current != null and current != ancestor:
 		chain.push_front(current)
@@ -153,7 +145,7 @@ func _enter_chain(ancestor: State, target: State, context: Dictionary) -> void:
 		state.enter(context)
 
 
-func _enter_initial_children(state: State, context: Dictionary) -> State:
+func _enter_initial_children(state: HfsmState, context: Dictionary) -> HfsmState:
 	var current := state
 	while current.initial_child_state_id != "":
 		var child := _find_child_state(current, current.initial_child_state_id)
@@ -165,7 +157,7 @@ func _enter_initial_children(state: State, context: Dictionary) -> State:
 	return current
 
 
-func _can_exit_chain(from_state: State, target_state: State, context: Dictionary) -> bool:
+func _can_exit_chain(from_state: HfsmState, target_state: HfsmState, context: Dictionary) -> bool:
 	var lca := _find_lowest_common_ancestor(from_state, target_state)
 	var current := from_state
 	while current != null and current != lca:
@@ -175,11 +167,11 @@ func _can_exit_chain(from_state: State, target_state: State, context: Dictionary
 	return true
 
 
-func _can_enter_chain(from_state: State, target_state: State, context: Dictionary) -> bool:
-	var lca: State = null
+func _can_enter_chain(from_state: HfsmState, target_state: HfsmState, context: Dictionary) -> bool:
+	var lca: HfsmState = null
 	if from_state != null:
 		lca = _find_lowest_common_ancestor(from_state, target_state)
-	var chain: Array[State] = []
+	var chain: Array[HfsmState] = []
 	var current := target_state
 	while current != null and current != lca:
 		chain.push_front(current)
@@ -190,8 +182,8 @@ func _can_enter_chain(from_state: State, target_state: State, context: Dictionar
 	return true
 
 
-func _update_state_chain(leaf: State, delta: float, physics: bool) -> void:
-	var chain: Array[State] = []
+func _update_state_chain(leaf: HfsmState, delta: float, physics: bool) -> void:
+	var chain: Array[HfsmState] = []
 	var current := leaf
 	while current != null:
 		chain.push_front(current)
@@ -203,16 +195,16 @@ func _update_state_chain(leaf: State, delta: float, physics: bool) -> void:
 			state.update(delta)
 
 
-func _find_root_state() -> State:
+func _find_root_state() -> HfsmState:
 	for child in get_children():
-		if child is State:
+		if child is HfsmState:
 			return child
 	return null
 
 
-func _find_child_state(parent: State, id: String) -> State:
+func _find_child_state(parent: HfsmState, id: String) -> HfsmState:
 	for child in parent.get_children():
-		if child is State and child.state_id == id:
+		if child is HfsmState and child.state_id == id:
 			return child
 	return null
 

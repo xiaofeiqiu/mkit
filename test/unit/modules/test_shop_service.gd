@@ -91,7 +91,7 @@ func _make_buyer(capacity: int = 30) -> EntityRoot:
 	identity.name = "EntityIdentity"
 	identity.entity_id = "buyer"
 	buyer.add_child(identity)
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	buyer.add_child(state_machine)
 	var receiver := CommandReceiver.new()

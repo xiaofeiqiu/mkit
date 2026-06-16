@@ -16,7 +16,7 @@ GAME = ROOT / "game"
 ENTITY_ROOT_SCRIPT = "res://addons/mkit/kernel/entity/entity_root.gd"
 ENTITY_IDENTITY_SCRIPT = "res://addons/mkit/kernel/entity/entity_identity.gd"
 COMMAND_RECEIVER_SCRIPT = "res://addons/mkit/kernel/commands/command_receiver.gd"
-STATE_MACHINE_SCRIPT = "res://addons/mkit/kernel/state_machine/state_machine.gd"
+STATE_MACHINE_SCRIPT = "res://addons/mkit/kernel/state_machine/hfsm.gd"
 ENTITY_SAVE_AGENT_SCRIPT = "res://addons/mkit/kernel/save/entity_save_agent.gd"
 
 REQUIRED_ENTITY_NODES = (

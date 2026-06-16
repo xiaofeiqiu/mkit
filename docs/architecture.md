@@ -10,7 +10,7 @@ Mkit 的当前分层模型、依赖规则、ServiceRegistry 服务边界、实�
 flowchart TB
     Game["**Game Content**\nres://game/\n你的场景、关卡、角色脚本\n.tres 配置资源"]
     Modules["**Mkit Modules**\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop…"]
-    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\nCommand / HFSM / Action / Effect / Event\nContentService / SaveService / ServiceRegistry"]
+    Kernel["**Kernel Runtime**\naddons/mkit/kernel/\nCommand / HFSM + FSM / Action / Effect / Event\nContentService / SaveService / ServiceRegistry"]
 
     Game -->|"依赖"| Modules
     Game -->|"依赖"| Kernel

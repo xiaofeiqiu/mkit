@@ -1,7 +1,7 @@
 class_name InventoryController
 extends SaveableComponent
 ## 说明：`InventoryController` 是 背包与装备系统 的实体控制器，负责协调实体组件、服务和运行时状态。
-## 上游：通常由 EntityRoot、CommandReceiver、StateMachine、玩家输入或 AI 创建或调用。
+## 上游：通常由 EntityRoot、CommandReceiver、状态机、玩家输入或 AI 创建或调用。
 ## 下游：会连接组件、ActionService、EffectService、ContentService 和 EventService，不直接依赖具体游戏内容。
 ## 使用：当项目实体需要把输入、状态机和组件能力组合成可调用行为时使用它。
 ## 示例：`var instance := InventoryController.new()`

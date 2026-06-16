@@ -25,7 +25,7 @@ func _make_entity_with_stats() -> EntityRoot:
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	e.add_child(identity)
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	e.add_child(state_machine)
 	var receiver := CommandReceiver.new()

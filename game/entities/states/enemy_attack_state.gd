@@ -1,4 +1,4 @@
-extends State
+extends HfsmState
 
 var current_action: GameAction = null
 

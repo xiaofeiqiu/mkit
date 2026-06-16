@@ -1,4 +1,4 @@
-extends State
+extends HfsmState
 
 var _stats: StatsComponent = null
 

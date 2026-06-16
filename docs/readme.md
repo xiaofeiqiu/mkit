@@ -108,7 +108,7 @@ addons/mkit/
     commands/         # GameCommand, CommandService, CommandReceiver, BuiltinCommands
     context/          # GameplayContext, Blackboard, ActionContext
     registry/         # ContentDefinition, ContentService, ResourceDatabase
-    state_machine/    # State, StateMachine (HFSM with LCA transitions)
+    state_machine/    # StateMachineBase, Hfsm/HfsmState (HFSM with LCA), Fsm/FsmState (flat)
     actions/          # GameAction, ActionService
     conditions/       # Condition, ConditionEvaluator, builtin conditions
     effects/          # GameEffect, EffectService, EffectResult, builtin effects

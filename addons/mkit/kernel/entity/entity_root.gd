@@ -8,8 +8,8 @@ extends CharacterBody2D
 
 ## EntityRoot 缓存的 EntityIdentity 子节点；准备阶段解析 Components/Controllers 会使用它。
 var identity: EntityIdentity
-## 绑定到同一实体的 StateMachine 引用；准备阶段解析后用于转发命令。
-var state_machine: StateMachine
+## 绑定到同一实体的状态机引用；可以是 Hfsm 或 Fsm，准备阶段解析后用于转发命令。
+var state_machine: StateMachineBase
 ## EntityRoot 缓存的 CommandReceiver 子节点；命令管线通过它进入状态机。
 var command_receiver: CommandReceiver
 
@@ -22,7 +22,7 @@ func get_entity_identity() -> EntityIdentity:
 
 
 ## 读取当前对象中的 `state_machine_node`；未找到时返回 null、空集合或该 API 的默认值。
-func get_state_machine_node() -> StateMachine:
+func get_state_machine_node() -> StateMachineBase:
 	if state_machine == null:
 		state_machine = get_node_or_null("StateMachine")
 	return state_machine

@@ -103,7 +103,7 @@ func _make_entity_root(entity_id: String, tags: Array[String] = []) -> EntityRoo
 	identity.entity_id = entity_id
 	identity.tags = tags
 	entity.add_child(identity)
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	entity.add_child(state_machine)
 	var receiver := CommandReceiver.new()

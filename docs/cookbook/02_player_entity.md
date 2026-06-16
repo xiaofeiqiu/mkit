@@ -15,7 +15,7 @@
 |--------|------------|
 | EntityRoot 场景树（默认布局） | `EntityContract` / `EntityRoot.get_component()` / `get_controller()` 语义入口 |
 | `EntityIdentity` 设 `entity_id` | 自动生成唯一 ID（若留空）|
-| 继承 `State`，实现 `handle_command` / `enter` / `exit` / `update` | HFSM 层级路由、LCA transition |
+| 继承 `HfsmState`，实现 `handle_command` / `enter` / `exit` / `update` | HFSM 层级路由、LCA transition |
 | 在 `StateMachine` 上设 `initial_state_path` | 自动在 `_ready` 时进入初始状态 |
 | 挂 `CommandReceiver`，按需设置 `receiver_id` | 接收命令并交给 `StateMachine`；按 id 路由时可自动注册到 `CommandService` |
 | 发出 `GameCommand` → `CommandReceiver.receive_command` | 将命令交给同实体状态机入口 |
@@ -119,9 +119,9 @@ if commands != null:
 PlayerEntity  (EntityRoot / CharacterBody2D)
 ├── EntityIdentity        # export entity_id = "player"
 ├── StateMachine          # export initial_state_path = "Root/Idle"
-│   └── Root  (State)     # export state_id = "Root"
-│       ├── Idle  (State) # export state_id = "Idle"
-│       └── Move  (State) # export state_id = "Move"
+│   └── Root  (HfsmState)     # export state_id = "Root"
+│       ├── Idle  (HfsmState) # export state_id = "Idle"
+│       └── Move  (HfsmState) # export state_id = "Move"
 ├── CommandReceiver       # export receiver_id = "player", auto_register = true
 ├── Components/           # Node，暂时空着（Recipe 03 添加组件）
 ├── Controllers/          # Node，暂时空着
@@ -135,7 +135,7 @@ PlayerEntity  (EntityRoot / CharacterBody2D)
 ```gdscript
 # res://game/player/states/player_idle_state.gd
 class_name PlayerIdleState
-extends State
+extends HfsmState
 
 func enter(_context: Dictionary = {}) -> void:
     if owner_entity is CharacterBody2D:
@@ -152,7 +152,7 @@ func handle_command(command: GameCommand) -> bool:
 ```gdscript
 # res://game/player/states/player_move_state.gd
 class_name PlayerMoveState
-extends State
+extends HfsmState
 
 var _direction: Vector2 = Vector2.ZERO
 
@@ -249,18 +249,18 @@ func enter(context: Dictionary = {}) -> void:
 | `faction` | String = "neutral" | 阵营标识；`HitboxComponent.target_factions` 过滤、AI 敌友判断都读它 | 玩家 `"player"`、敌人 `"enemy"`（[Recipe 04](04_attack_action.md)）|
 | `tags` | Array[String] = [] | 标签集合，供条件筛选、事件追踪、UI 分组 | 自定义 Condition / 查询要按标签过滤时 |
 
-### StateMachine
+### Hfsm
 
 | 字段 | 类型/默认 | 含义 | 什么时候改 |
 |------|----------|------|-----------|
 | `initial_state_path` | String = "" | 启动时进入的状态路径（`"Root/Idle"` 格式，按 `state_id` 用 `/` 拼接）；留空进第一个子状态 | 见步骤 1 |
-| `auto_start` | bool = true | 进入场景树后是否自动启动；关掉后状态机保持未启动，需手动调 `start()` | 进入初始状态前有前置流程时（如等出生动画播完再 `state_machine.start()`）|
+| `auto_start` | bool = true | 进入场景树后是否自动启动；关掉后状态机保持未启动 | 进入初始状态前有前置流程时（如等出生动画播完再显式转移）|
 
-### State
+### HfsmState
 
 | 字段 | 类型/默认 | 含义 | 什么时候改 |
 |------|----------|------|-----------|
-| `state_id` | String = "" | StateMachine 内引用该状态的 id，transition 路径由它拼成；同级状态必须唯一 | 必填（见步骤 1）|
+| `state_id` | String = "" | Hfsm 内引用该状态的 id，transition 路径由它拼成；同级状态必须唯一 | 必填（见步骤 1）|
 | `initial_child_state_id` | String = "" | HFSM 复合状态：transition 只到达本状态（如 `"Root/Combat"`）时，默认进入的子状态 id；留空则停在本状态不下钻 | 复合状态有多个子状态、想要默认入口时（如 Combat 默认进 `"Approach"`）|
 
 ### CommandReceiver
@@ -274,16 +274,16 @@ func enter(context: Dictionary = {}) -> void:
 
 | 现象 | 原因 | 修复 |
 |------|------|------|
-| 命令发出但状态没切换 | `CommandReceiver` 缺失，或 `State.handle_command` 未处理该类型 | 确认实体有 `CommandReceiver`，并检查当前 State 的 `handle_command` |
+| 命令发出但状态没切换 | `CommandReceiver` 缺失，或 `HfsmState.handle_command` 未处理该类型 | 确认实体有 `CommandReceiver`，并检查当前 HfsmState 的 `handle_command` |
 | `CommandService.dispatch` 返回 `false`（仅按 id 路由时） | `target_id` 为空或 `CommandReceiver` 未注册到 `CommandService` | 检查 `receiver_id` / `auto_register`，且 Bootstrap 先于玩家场景运行 |
 | 玩家不移动 | `CharacterBody2D` 未调 `move_and_slide()` | 在 `update()` 中调用 `body.move_and_slide()` |
-| `StateMachine` 找不到初始状态 | `initial_state_path` 路径拼错 | 路径格式为 `"Root/Idle"`（与节点 `state_id` 一致，用 `/` 分隔）|
-| `handle_command` 返回 true 但没跳转 | `request_transition` 的路径不存在 | 确认目标 State 节点存在且 `state_id` 正确 |
+| `Hfsm` 找不到初始状态 | `initial_state_path` 路径拼错 | 路径格式为 `"Root/Idle"`（与节点 `state_id` 一致，用 `/` 分隔）|
+| `handle_command` 返回 true 但没跳转 | `request_transition` 的路径不存在 | 确认目标 HfsmState 节点存在且 `state_id` 正确 |
 
 ## 延伸阅读
 
-- [StateMachine ref](../generated/html/classes/StateMachine.html) — transition 路由、can_enter/can_exit、blackboard
-- [State ref](../generated/html/classes/State.html) — 所有可 override 的方法
+- [Hfsm ref](../generated/html/classes/Hfsm.html) — transition 路由、can_enter/can_exit、blackboard
+- [HfsmState ref](../generated/html/classes/HfsmState.html) — 所有可 override 的方法
 - [GameCommand ref](../generated/html/classes/GameCommand.html) — 创建命令、payload 读取
 - [CommandService ref](../generated/html/classes/CommandService.html) — 按 id dispatch、注册/注销
 - [pipeline.md — Command Dispatch](../pipeline.md#3-command-dispatch) — 命令分发完整时序图

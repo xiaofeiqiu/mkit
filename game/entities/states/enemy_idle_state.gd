@@ -1,4 +1,4 @@
-extends State
+extends HfsmState
 
 
 func handle_command(command: GameCommand) -> bool:

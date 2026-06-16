@@ -338,20 +338,20 @@ func _make_entity(
 
 
 func _add_debug_nodes(entity: Node) -> void:
-	var existing_machine := entity.get_node_or_null("StateMachine") as StateMachine
+	var existing_machine := entity.get_node_or_null("StateMachine") as Hfsm
 	if existing_machine != null:
 		existing_machine.free()
 	var existing_receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
 	if existing_receiver != null:
 		existing_receiver.free()
 
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	state_machine.initial_state_path = "Root/Idle"
-	var root_state := State.new()
+	var root_state := HfsmState.new()
 	root_state.state_id = "Root"
 	root_state.name = "Root"
-	var idle_state := State.new()
+	var idle_state := HfsmState.new()
 	idle_state.state_id = "Idle"
 	idle_state.name = "Idle"
 	root_state.add_child(idle_state)

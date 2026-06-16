@@ -50,7 +50,7 @@ func _make_entity_root() -> EntityRoot:
 	identity.name = "EntityIdentity"
 	identity.entity_id = "room.controller"
 	entity_root.add_child(identity)
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	entity_root.add_child(state_machine)
 	var receiver := CommandReceiver.new()
@@ -72,7 +72,7 @@ func _make_enemy() -> EntityRoot:
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	enemy.add_child(identity)
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	enemy.add_child(state_machine)
 	var receiver := CommandReceiver.new()

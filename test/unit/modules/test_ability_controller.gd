@@ -66,7 +66,7 @@ func _make_entity_root() -> EntityRoot:
 	identity.name = "EntityIdentity"
 	identity.entity_id = "ability.entity"
 	entity_root.add_child(identity)
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	entity_root.add_child(state_machine)
 	var receiver := CommandReceiver.new()

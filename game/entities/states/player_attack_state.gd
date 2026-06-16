@@ -1,5 +1,5 @@
 class_name PlayerAttackState
-extends State
+extends HfsmState
 
 const ATTACK_SFX_ID := "sfx.demo.attack"
 

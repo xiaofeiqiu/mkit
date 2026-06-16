@@ -73,7 +73,7 @@ class TraceEventEffect:
 
 
 class PipelineIdleState:
-	extends State
+	extends HfsmState
 	var transition_trace: Array[String] = []
 
 	func enter(_context: Dictionary = {}) -> void:
@@ -101,7 +101,7 @@ class PipelineIdleState:
 
 
 class PipelineCastState:
-	extends State
+	extends HfsmState
 	var transition_trace: Array[String] = []
 
 	func enter(context: Dictionary = {}) -> void:
@@ -156,7 +156,7 @@ func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 	var actions := ServiceRegistry.get_port("actions") as ActionService
 	var events := ServiceRegistry.get_port("events") as EventService
 	var receiver := player.get_node("CommandReceiver") as CommandReceiver
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 	var resources := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
@@ -228,7 +228,7 @@ func test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure() -> 
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 	var resources := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 
 	watch_signals(router)
 	watch_signals(actions)
@@ -340,7 +340,7 @@ func test_tc_int_game_05_command_payload_context_blackboard_effect_event_trace()
 	var actions := ServiceRegistry.get_port("actions") as ActionService
 	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var events := ServiceRegistry.get_port("events") as EventService
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 
 	var command := GameCommand.create(
 		BuiltinCommands.CAST_ABILITY,
@@ -505,8 +505,8 @@ func _make_player(ability_ids: Array[String]) -> Node:
 	receiver.auto_register = false
 
 	var trace: Array[String] = []
-	var root_state := player.get_node("StateMachine/Root") as State
-	var existing_idle := root_state.get_node_or_null("Idle") as State
+	var root_state := player.get_node("StateMachine/Root") as HfsmState
+	var existing_idle := root_state.get_node_or_null("Idle") as HfsmState
 	if existing_idle != null:
 		root_state.remove_child(existing_idle)
 		existing_idle.queue_free()

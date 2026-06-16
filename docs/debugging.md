@@ -148,7 +148,7 @@ rng.set_seed(12345)    # 固定种子，每次运行结果相同
 |------|--------|----------|
 | 技能按了没反应 | `AbilityController.get_cast_failure_reason(id, ctx)` | 冷却中、cost 不足、conditions 不满足、ability_id 未注册 |
 | Effect 执行了但没效果 | `EffectService.recent_results` 查失败条目 | `conditions` 未通过、`_apply_impl` 未 override、`context.target` 为 null |
-| 状态没切换 | `StateMachine.last_failed_transition_reason` | `can_enter()` 返回 false、路径拼错、HFSM 层级匹配不到 |
+| 状态没切换 | `Hfsm.last_failed_transition_reason`（`Fsm` 同名字段） | `can_enter()` 返回 false、路径/`state_id` 拼错、HFSM 层级匹配不到 |
 | 动画不播 | `Presentation/AnimationPlayer` 是否存在；`anim.has_animation(name)` | 默认表现节点缺失；Action 中 `has_animation` 检查失败后静默跳过 |
 | 存档读取后数据丢失 | `to_save_data()` 返回值；节点 `name` 与 save key 的匹配 | 忘记 override；`get_save_id()` 返回空串；节点 name 与存档 key 不匹配 |
 | 服务取到 null | `Mkit.xxx()` / `ServiceRegistry.get_registered_service_ids()` | Bootstrap 未运行；服务常量用错；测试环境未注册；UIManager 尚未进入场景自注册 |

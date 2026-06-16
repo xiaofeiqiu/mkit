@@ -1,5 +1,5 @@
 class_name PlayerDashState
-extends State
+extends HfsmState
 
 var current_action: GameAction = null
 

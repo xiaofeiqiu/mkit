@@ -2,7 +2,7 @@ class_name CommandReceiver
 extends Node
 ## 说明：`CommandReceiver` 是 命令路由 的命令接收器，负责把 GameCommand 转交给实体状态机或本地处理逻辑。
 ## 上游：通常由 CommandService 或直接持有目标实体的脚本创建或调用。
-## 下游：会连接StateMachine、命令历史和未处理命令 hook，不直接依赖具体游戏内容。
+## 下游：会连接状态机、命令历史和未处理命令 hook，不直接依赖具体游戏内容。
 ## 使用：当项目实体需要被 CommandService 通过 target_id 路由命令时使用它。
 ## 示例：`var instance := CommandReceiver.new()`
 
@@ -12,8 +12,8 @@ extends Node
 @export var auto_register: bool = true
 ## 拥有该运行时对象的实体节点；通常是 EntityRoot 或其子节点。
 var owner_entity: Node = null
-## 绑定到同一实体的 StateMachine 引用；准备阶段解析后用于转发命令。
-var state_machine: StateMachine = null
+## 绑定到同一实体的状态机引用；可以是 Hfsm 或 Fsm，准备阶段解析后用于转发命令。
+var state_machine: StateMachineBase = null
 ## 最近接收的命令列表；用于调试、测试和有限历史回放。
 var command_history: Array[GameCommand] = []
 ## 保留的历史命令数量上限；超过后丢弃最旧记录。
@@ -57,7 +57,7 @@ func configure_receiver_id(id: String) -> void:
 	_register_with_router()
 
 
-## 接收 GameCommand、记录 history，并优先转发给 StateMachine；状态机未处理时调用 handle_unhandled_command。
+## 接收 GameCommand、记录 history，并优先转发给状态机；状态机未处理时调用 handle_unhandled_command。
 ## 任一路径处理成功都会 mark_consumed 并返回 true。
 func receive_command(command: GameCommand) -> bool:
 	if command == null:

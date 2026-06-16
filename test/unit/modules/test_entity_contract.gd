@@ -7,7 +7,7 @@ func test_tc_ec_01_entity_root_resolves_contract_nodes() -> void:
 	var component := EntityContract.get_component(query_node, "HealthComponent") as Node
 	var controller := EntityContract.get_controller(query_node, "AbilityController") as Node
 	var identity := EntityContract.get_identity(query_node) as EntityIdentity
-	var state_machine := EntityContract.get_state_machine(query_node) as StateMachine
+	var state_machine := EntityContract.get_state_machine(query_node) as Hfsm
 	var receiver := EntityContract.get_command_receiver(query_node) as CommandReceiver
 
 	assert_not_null(component)
@@ -78,7 +78,7 @@ func _build_entity_root() -> EntityRoot:
 	presentation.add_child(animation_player)
 	entity.add_child(presentation)
 
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	entity.add_child(state_machine)
 

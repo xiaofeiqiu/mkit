@@ -83,7 +83,7 @@ static func get_entity_id(node: Node) -> String:
 
 
 ## 读取当前对象中的 `state_machine`；未找到时返回 null、空集合或该 API 的默认值。
-static func get_state_machine(node: Node) -> StateMachine:
+static func get_state_machine(node: Node) -> StateMachineBase:
 	var root := resolve_entity_root(node)
 	if root != null:
 		var state_machine := root.get_state_machine_node()

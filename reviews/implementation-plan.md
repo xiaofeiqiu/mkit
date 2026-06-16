@@ -278,14 +278,23 @@ make check         # layering + docs-check + 全部测试门禁
 
 ## Progress Tracker
 
-- [ ] Phase 0：`state_machine_base.gd`（`StateMachineBase`）+ `##` 注释
-- [ ] Phase 1：HFSM 重命名（文件 / class_name / extends 基类 / 8 game 状态 /
+- [x] Phase 0：`state_machine_base.gd`（`StateMachineBase`）+ `##` 注释
+- [x] Phase 1：HFSM 重命名（文件 / class_name / extends 基类 / 8 game 状态 /
       3 .tscn / 测试引用 / 散文注释），行为不变
-- [ ] Phase 2：`fsm.gd`（`Fsm`）+ `fsm_state.gd`（`FsmState`）+ `##` 注释
-- [ ] Phase 3：`entity_root` / `command_receiver` / `entity_contract` 改 `StateMachineBase`
-- [ ] Phase 4：`test_hfsm.gd` 全绿（回归）；`test_fsm.gd` 全部用例通过；
+- [x] Phase 2：`fsm.gd`（`Fsm`）+ `fsm_state.gd`（`FsmState`）+ `##` 注释
+- [x] Phase 3：`entity_root` / `command_receiver` / `entity_contract` 改 `StateMachineBase`
+- [x] Phase 4：`test_hfsm.gd` 全绿（回归）；`test_fsm.gd` 全部用例通过；
       FSM 实体接线集成测试通过；`make ut-kernel` + `make int` 绿
-- [ ] Phase 5：glossary / concepts / architecture 更新；`make docs-api` 生成新页；
+- [x] Phase 5：glossary / concepts / architecture 更新；`make docs-api` 生成新页；
       `make docs-check` 通过（链接指向新页名）
-- [ ] Phase 6：`make layering` 通过；`make check` 全量绿
-- [ ] 确认未引入 `addons/mkit/ -> game/` 依赖、未加入具体 game 内容
+- [x] Phase 6：`make layering` 通过；`make check` 全量绿
+- [x] 确认未引入 `addons/mkit/ -> game/` 依赖、未加入具体 game 内容
+
+> 实施说明：blast radius 比计划列举的更大——除 `test_hfsm.gd` /
+> `test_gameplay_pipeline_integration.gd` 外，`test/unit/modules/` 下 9 个测试与
+> `int_test_helpers.gd` / `test_combat_status_feedback_integration.gd` /
+> `test_scene8_full_tour_integration.gd` 也引用 `State` / `StateMachine` 类型，已一并改为
+> `Hfsm` / `HfsmState`（节点名字符串 `"StateMachine"` 保持不变）。另外
+> `tools/check_runtime_contracts.py` 的 `STATE_MACHINE_SCRIPT` 路径、`docs/pipeline.md`、
+> `docs/cookbook/02_player_entity.md`、`docs/readme.md`、`docs/debugging.md` 中指向旧页名/旧类名的
+> 链接与引用也已更新，否则 `make check` 的 contract-check / docs-check 链接校验会失败。

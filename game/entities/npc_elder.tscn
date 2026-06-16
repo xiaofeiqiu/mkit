@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://addons/mkit/kernel/entity/entity_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/entity/entity_identity.gd" id="2_identity"]
 [ext_resource type="Script" path="res://addons/mkit/kernel/commands/command_receiver.gd" id="3_receiver"]
-[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/state_machine.gd" id="4_state_machine"]
+[ext_resource type="Script" path="res://addons/mkit/kernel/state_machine/hfsm.gd" id="4_state_machine"]
 [ext_resource type="Script" path="res://addons/mkit/modules/dialogue/dialogue_interactable.gd" id="5_dialogue"]
 
 [sub_resource type="CircleShape2D" id="CircleShape_interaction"]

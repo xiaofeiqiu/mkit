@@ -313,20 +313,20 @@ static func make_health_entity(
 	return entity
 
 
-static func _ensure_state_machine(entity: EntityRoot) -> StateMachine:
+static func _ensure_state_machine(entity: EntityRoot) -> Hfsm:
 	if entity == null:
 		return null
-	var existing := entity.get_node_or_null("StateMachine") as StateMachine
+	var existing := entity.get_node_or_null("StateMachine") as Hfsm
 	if existing != null:
 		return existing
-	var state_machine := StateMachine.new()
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	state_machine.auto_start = true
 	state_machine.initial_state_path = "root/idle"
-	var root_state := State.new()
+	var root_state := HfsmState.new()
 	root_state.state_id = "root"
 	root_state.name = "Root"
-	var idle_state := State.new()
+	var idle_state := HfsmState.new()
 	idle_state.state_id = "idle"
 	idle_state.name = "Idle"
 	root_state.add_child(idle_state)

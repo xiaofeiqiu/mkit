@@ -1,5 +1,5 @@
 class_name PlayerCastAbilityState
-extends State
+extends HfsmState
 
 
 func enter(context: Dictionary = {}) -> void:

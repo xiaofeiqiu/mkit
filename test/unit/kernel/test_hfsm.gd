@@ -1,30 +1,30 @@
 extends GutTest
 
 var entity: Node
-var sm: StateMachine
-var state_idle: State
-var state_combat: State
-var state_attack: State
+var sm: Hfsm
+var state_idle: HfsmState
+var state_combat: HfsmState
+var state_attack: HfsmState
 
 
 func before_each() -> void:
 	entity = Node.new()
 	add_child_autofree(entity)
-	sm = StateMachine.new()
+	sm = Hfsm.new()
 	sm.auto_start = false
 	entity.add_child(sm)
-	var root := State.new()
+	var root := HfsmState.new()
 	root.state_id = "root"
 	root.initial_child_state_id = "idle"
 	sm.add_child(root)
-	state_idle = State.new()
+	state_idle = HfsmState.new()
 	state_idle.state_id = "idle"
 	root.add_child(state_idle)
-	state_combat = State.new()
+	state_combat = HfsmState.new()
 	state_combat.state_id = "combat"
 	state_combat.initial_child_state_id = "attack"
 	root.add_child(state_combat)
-	state_attack = State.new()
+	state_attack = HfsmState.new()
 	state_attack.state_id = "attack"
 	state_combat.add_child(state_attack)
 	sm._ready()
@@ -47,15 +47,15 @@ func test_tc_sm_02_transition_to_sets_correct_leaf() -> void:
 func test_tc_sm_03_auto_start_transitions_on_ready() -> void:
 	var entity2 := Node.new()
 	add_child_autofree(entity2)
-	var sm2 := StateMachine.new()
+	var sm2 := Hfsm.new()
 	sm2.auto_start = true
 	sm2.initial_state_path = "root/idle"
 	entity2.add_child(sm2)
-	var root2 := State.new()
+	var root2 := HfsmState.new()
 	root2.state_id = "root"
 	root2.initial_child_state_id = "idle"
 	sm2.add_child(root2)
-	var idle2 := State.new()
+	var idle2 := HfsmState.new()
 	idle2.state_id = "idle"
 	root2.add_child(idle2)
 	sm2._ready()
@@ -154,7 +154,7 @@ func test_tc_sm_13_unhandled_command_bubbles_to_parent() -> void:
 	var parent_state := _ParentHandlerState.new()
 	parent_state.state_id = "parent"
 	parent_state.initial_child_state_id = "child"
-	var child_state := State.new()
+	var child_state := HfsmState.new()
 	child_state.state_id = "child"
 	sm.root_state.add_child(parent_state)
 	parent_state.add_child(child_state)
@@ -222,21 +222,21 @@ func test_tc_sm_18_on_exit_called_before_on_enter() -> void:
 
 
 class _LockedState:
-	extends State
+	extends HfsmState
 
 	func can_exit(_ctx: Dictionary = {}) -> bool:
 		return false
 
 
 class _GuardedState:
-	extends State
+	extends HfsmState
 
 	func can_enter(_ctx: Dictionary = {}) -> bool:
 		return false
 
 
 class _CommandHandlerState:
-	extends State
+	extends HfsmState
 	var received: GameCommand = null
 
 	func handle_command(cmd: GameCommand) -> bool:
@@ -245,7 +245,7 @@ class _CommandHandlerState:
 
 
 class _ParentHandlerState:
-	extends State
+	extends HfsmState
 	var handled: bool = false
 
 	func handle_command(_cmd: GameCommand) -> bool:
@@ -254,7 +254,7 @@ class _ParentHandlerState:
 
 
 class _TrackingEnterState:
-	extends State
+	extends HfsmState
 	var entered: bool = false
 	var enter_from: String = ""
 
@@ -264,7 +264,7 @@ class _TrackingEnterState:
 
 
 class _TrackingExitState:
-	extends State
+	extends HfsmState
 	var exited: bool = false
 
 	func exit(_context: Dictionary = {}) -> void:
@@ -272,7 +272,7 @@ class _TrackingExitState:
 
 
 class _OrderedExitState:
-	extends State
+	extends HfsmState
 	var order: Array = []
 
 	func exit(_context: Dictionary = {}) -> void:
@@ -280,7 +280,7 @@ class _OrderedExitState:
 
 
 class _OrderedEnterState:
-	extends State
+	extends HfsmState
 	var order: Array = []
 
 	func enter(_context: Dictionary = {}) -> void:

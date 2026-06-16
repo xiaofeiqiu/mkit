@@ -16,7 +16,7 @@
 flowchart TB
     Game["🟢 Game Content\nres://game/\n场景、.tres 内容、具体任务/商店/房间/表现"]
     Modules["🔵 Mkit Modules\naddons/mkit/modules/\ncombat、entity、inventory、quest、dialogue、world、shop、ui"]
-    Kernel["🔵 Kernel Runtime\naddons/mkit/kernel/\nCommand、StateMachine、Action、Effect、Event、Content、Save"]
+    Kernel["🔵 Kernel Runtime\naddons/mkit/kernel/\nCommand、状态机(HFSM/FSM)、Action、Effect、Event、Content、Save"]
 
     Game --> Modules
     Game --> Kernel
@@ -101,7 +101,7 @@ flowchart LR
 | 关键词 | 是什么 | 类比 |
 |--------|--------|------|
 | **GameCommand** | 类型化的「想做什么」，可序列化、可回放 | 一张点菜的**订单** |
-| **State** | HFSM 里的一个状态，决定此刻合法的操作 | **门卫**，放行或拦下订单 |
+| **HfsmState / FsmState** | 状态机里的一个状态，决定此刻合法的操作（层级用 `HfsmState`，扁平互斥用 `FsmState`） | **门卫**，放行或拦下订单 |
 | **GameAction** | 带生命周期（start→update→complete）的行为 | **后厨**，照订单按步骤做菜 |
 | **GameEffect** | 真正改变世界的最小动作（扣血、加 buff…） | 上桌的**那道菜** |
 | **DomainEvent** | 「发生了什么」的广播，解耦表现层 | 餐厅**广播**：3 号桌上菜了 |
@@ -330,7 +330,7 @@ flowchart TB
     subgraph mkit ["🔵 mkit 内部（kernel + modules）"]
         GE_base["GameEffect\n（抽象基类）"]
         GA_base["GameAction\n（抽象基类）"]
-        ST_base["State\n（抽象基类）"]
+        ST_base["HfsmState / FsmState\n（抽象基类）"]
         BR_base["Brain\n（抽象基类）"]
         IA_base["Interactable\n（抽象基类）"]
         CD_base["ContentDefinition\n（抽象基类）"]
@@ -342,7 +342,7 @@ flowchart TB
     subgraph you ["🟢 你实现"]
         GE_impl["MyEffect\nextends GameEffect\n_apply_impl(ctx)"]
         GA_impl["MyAction\nextends GameAction\n_on_start/update/complete/cancel\non_start/complete/cancel_effects\n_resolve_effects(ctx) 可选"]
-        ST_impl["MyState\nextends State\nenter/exit/update\nhandle_command\ncan_enter/can_exit"]
+        ST_impl["MyState\nextends HfsmState 或 FsmState\nenter/exit/update\nhandle_command\ncan_enter/can_exit"]
         BR_impl["MyBrain\nextends Brain\nthink(entity, delta)"]
         IA_impl["MyInteractable\nextends Interactable\n_interact_impl(interactor)"]
         CD_impl["MyDefinition\nextends ContentDefinition\nget_content_id()"]
@@ -371,7 +371,7 @@ flowchart TB
 |--------|--------|--------------|-----------|
 | 自定义效果 | `GameEffect` | `_apply_impl(ctx)` | condition 检查、`EffectResult` 包装、执行链调度 |
 | 自定义动作 | `GameAction` | `_on_start/update/cancel/complete`；声明 `on_start/complete/cancel_effects`；可 override `_resolve_effects(ctx)` 动态追加 | 生命周期管理、钩子后自动 `_fire_effects`、`completed`/`cancelled` 信号 |
-| 自定义状态 | `State` | `enter/exit/update/handle_command/can_enter/can_exit` | 层级结构、transition 路由、blackboard 注入 |
+| 自定义状态 | `HfsmState`（层级）或 `FsmState`（扁平） | `enter/exit/update/handle_command/can_enter/can_exit` | 层级结构 / 单层互斥、transition 路由、blackboard 注入 |
 | 自定义 AI | `Brain` | `think(entity, delta)` | 被 AI 系统每帧调用 |
 | 自定义交互 | `Interactable` | `_interact_impl(interactor)` | 交互检测、触发时机 |
 | 自定义内容 | `ContentDefinition` | `get_content_id()` + `@export` 字段 | 注册、校验、按 ID 查询 |

@@ -26,7 +26,7 @@
 
 ## B
 
-**Blackboard**：`StateMachine` 持有的共享键值存储，同一状态机内所有 `State` 节点共享读写，用于跨状态传递临时数据。→ [generated/html/classes/Blackboard.html](generated/html/classes/Blackboard.html)
+**Blackboard**：状态机（`Hfsm` 或 `Fsm`）持有的共享键值存储，同一状态机内所有状态节点共享读写，用于跨状态传递临时数据。→ [generated/html/classes/Blackboard.html](generated/html/classes/Blackboard.html)
 
 **Brain**：AI 决策基类，override `think(entity, delta)` 实现 AI 逻辑，每帧由 AI 系统调用。→ [generated/html/classes/Brain.html](generated/html/classes/Brain.html)
 
@@ -40,7 +40,7 @@
 
 **Command**：→ **GameCommand**
 
-**CommandReceiver**：实体上的接口，接收 `GameCommand` 并交给 `StateMachine` 处理。同实体输入/AI 可直接调用它，跨实体按 id 路由可由 `CommandService` 转交。→ [generated/html/classes/CommandReceiver.html](generated/html/classes/CommandReceiver.html)
+**CommandReceiver**：实体上的接口，接收 `GameCommand` 并交给状态机（`Hfsm` 或 `Fsm`）处理。同实体输入/AI 可直接调用它，跨实体按 id 路由可由 `CommandService` 转交。→ [generated/html/classes/CommandReceiver.html](generated/html/classes/CommandReceiver.html)
 
 **CommandService**：可选命令路由服务。调用方只知道目标实体 id、没有目标节点引用时，通过 `"commands"` ID 获取并将 `GameCommand` 路由到目标实体 `CommandReceiver`。→ [generated/html/classes/CommandService.html](generated/html/classes/CommandService.html)
 
@@ -92,6 +92,14 @@
 
 ---
 
+## F
+
+**FSM / Fsm**：扁平有限状态机（Flat FSM），管理一组互斥状态，按 `state_id` 单步转移，无嵌套、LCA 或命令冒泡，但与 HFSM 共享 hook 集合、`Blackboard` 与信号语义；kernel 中由 `Fsm` + `FsmState` 实现；需要嵌套结构或命令向父状态冒泡时改用 `Hfsm`。→ [generated/html/classes/Fsm.html](generated/html/classes/Fsm.html)
+
+**FsmState**：扁平 FSM 状态基类（`Node`），互斥状态之一、无子状态，override `enter` / `exit` / `update` / `handle_command` / `can_enter` / `can_exit` 实现状态逻辑；通过 `request_transition(state_id)` 请求切换。→ [generated/html/classes/FsmState.html](generated/html/classes/FsmState.html)
+
+---
+
 ## G
 
 **GameAction**：带时序生命周期的行为基类（`_on_start` / `_on_update` / `_on_cancel` / `_on_complete`），由 `ActionService` 管理，执行期间驱动动画和 Hitbox 开关。→ [generated/html/classes/GameAction.html](generated/html/classes/GameAction.html)
@@ -108,7 +116,9 @@
 
 ## H
 
-**HFSM / StateMachine**：层级有限状态机（Hierarchical FSM），支持嵌套状态、LCA 转换、blackboard 注入，kernel 中由 `StateMachine` + `State` 实现。→ [generated/html/classes/StateMachine.html](generated/html/classes/StateMachine.html)
+**HFSM / Hfsm**：层级有限状态机（Hierarchical FSM），支持嵌套状态、LCA 转换、命令向父状态冒泡、blackboard 注入，kernel 中由 `Hfsm` + `HfsmState` 实现；状态互斥且扁平、不需要层级时改用 `Fsm`。→ [generated/html/classes/Hfsm.html](generated/html/classes/Hfsm.html)
+
+**HfsmState**：HFSM 状态基类（`Node`），可嵌套子状态，override `enter` / `exit` / `update` / `handle_command` / `can_enter` / `can_exit` 实现状态逻辑；通过 `request_transition(path)` 按层级路径请求切换。→ [generated/html/classes/HfsmState.html](generated/html/classes/HfsmState.html)
 
 **HitboxComponent**：攻击碰撞体组件，在 `GameAction` 的 active 窗口内开启，命中 `HurtboxComponent` 后触发伤害。→ [generated/html/classes/HitboxComponent.html](generated/html/classes/HitboxComponent.html)
 
@@ -154,9 +164,7 @@
 
 **Mkit（门面）**：类型化静态门面，`Mkit.combat()` 等访问器返回具体服务类型。→ [generated/html/classes/Mkit.html](generated/html/classes/Mkit.html)
 
-**State**：HFSM 状态基类（`Node`），override `enter` / `exit` / `update` / `handle_command` / `can_enter` / `can_exit` 实现状态逻辑；通过 `request_transition(path)` 请求状态切换。→ [generated/html/classes/State.html](generated/html/classes/State.html)
-
-**StateMachine**：HFSM 根节点，管理状态树、执行 LCA 转换、按帧 tick 活跃状态链、分发 `GameCommand`。→ [generated/html/classes/StateMachine.html](generated/html/classes/StateMachine.html)
+**StateMachineBase**：状态机共享基类（`Node`），统一命令入口 `handle_command` 与 `state_changed` / `transition_failed` 信号，并持有 `owner_entity` 与 `blackboard`；`Hfsm` 与 `Fsm` 都继承它。实体接线层（`EntityRoot` / `CommandReceiver` / `EntityContract`）面向它编程，因此两种状态机都能即插即用挂到 `EntityRoot/StateMachine` 节点。→ [generated/html/classes/StateMachineBase.html](generated/html/classes/StateMachineBase.html)
 
 **System / Service**：→ **Service**
 

@@ -240,7 +240,7 @@ Mkit.events().subscribe(ReputationEvents.REPUTATION_RANK_REACHED, func(event: Do
 | 服务 `_ready` 里取别的服务为 null | 注册顺序未保证 | 改用 `_on_services_ready()` 钩子 |
 | 事件没人收到 | 订阅的字符串和目录常量拼写不一致 | 始终引用 `ReputationEvents.REPUTATION_CHANGED`，不要手写字符串 |
 | 声望没存上 | 服务 `extends Node` 而非 `Saveable`，或 `save_id` 与别人重复 | `extends Saveable`，`save_id` 全局唯一 |
-| 重启后服务重复注册告警 | bootstrap 场景被二次加载 | `initial_scene_path` 别指向 bootstrap 自己所在场景 |
+| 重启后服务重复注册错误 | bootstrap 场景被二次加载，或手动注册了同一个 service id | `initial_scene_path` 别指向 bootstrap 自己所在场景；确实要替换时用显式替换流程 |
 
 ## 延伸阅读
 

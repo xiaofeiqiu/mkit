@@ -9,18 +9,36 @@ extends Node
 var _services: Dictionary = {}
 
 
-## 以 service_id 注册服务实例；重复 id 会替换旧实例并输出 warning，空 id 或 null service 会被忽略。
-func register_service(service_id: String, service: Object) -> void:
+## 以 service_id 注册新的服务实例；空 id、null service 或重复 id 会输出 error 并返回 false。
+func register_service(service_id: String, service: Object) -> bool:
 	var id := service_id.strip_edges()
 	if id == "":
-		push_warning("ServiceRegistry.register_service: service_id is empty")
-		return
+		push_error("ServiceRegistry.register_service: service_id is empty")
+		return false
 	if service == null:
-		push_warning("ServiceRegistry.register_service: service is null for id %s" % service_id)
-		return
+		push_error("ServiceRegistry.register_service: service is null for id %s" % service_id)
+		return false
 	if _services.has(id):
-		push_warning("Service already registered: %s. It will be replaced." % id)
+		push_error("Service already registered: %s. Use replace_service() for intentional overrides." % id)
+		return false
 	_services[id] = service
+	return true
+
+
+## 显式替换已经注册的服务；目标 id 缺失、空 id 或 null service 会输出 error 并返回 false。
+func replace_service(service_id: String, service: Object) -> bool:
+	var id := service_id.strip_edges()
+	if id == "":
+		push_error("ServiceRegistry.replace_service: service_id is empty")
+		return false
+	if service == null:
+		push_error("ServiceRegistry.replace_service: service is null for id %s" % service_id)
+		return false
+	if not _services.has(id):
+		push_error("ServiceRegistry.replace_service: missing service id %s" % id)
+		return false
+	_services[id] = service
+	return true
 
 
 ## 检查去空白后的 service_id 是否已经注册；不会输出 missing-service warning。
@@ -52,10 +70,11 @@ func get_registered_service_ids() -> Array[String]:
 
 ## 移除指定 service_id；空 id 会输出 warning，缺失 id 不报错。
 func unregister_service(service_id: String) -> void:
-	if service_id.strip_edges() == "":
+	var id := service_id.strip_edges()
+	if id == "":
 		push_warning("ServiceRegistry.unregister_service: service_id is empty")
 		return
-	_services.erase(service_id)
+	_services.erase(id)
 
 
 ## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。

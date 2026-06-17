@@ -16,7 +16,7 @@
 | 新建 Bootstrap 场景，挂 `GameBootstrap` 节点 | 注册 kernel 服务（events、actions、effects…）|
 | 设 `resource_databases` 数组 | 加载并校验所有 ContentDefinition |
 | 设 `initial_scene_path` | 启动完成后切入游戏场景 |
-| （可选）继承 `GameBootstrap`，override `_register_kernel_services` 添加自定义服务 | 其余启动步骤 |
+| （可选）继承 `GameBootstrap`，override `_build_services` 添加自定义服务 | 其余启动步骤 |
 
 ## 本篇路径
 
@@ -78,10 +78,10 @@ func _ready() -> void:
 class_name MyBootstrap
 extends GameBootstrap
 
-func _register_kernel_services() -> void:
-    super._register_kernel_services()           # 先注册所有内置服务
-    var my_svc := MyCustomService.new()
-    ServiceRegistry.register_service("my_svc", my_svc)
+func _build_services() -> Dictionary:
+    var services := super()
+    services["my_svc"] = MyCustomService.new()
+    return services
 ```
 
 ### 步骤 3：添加启动验证代码

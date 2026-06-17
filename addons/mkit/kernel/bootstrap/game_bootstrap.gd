@@ -37,9 +37,11 @@ func _register_kernel_services() -> void:
 		print("[mkit] GameBootstrap: services already registered, skipping")
 		return
 	var services := _build_services()
+	var registered_services := {}
 	for service_id in services:
-		_register_service_entry(service_id, services[service_id])
-	_notify_services_ready(services)
+		if _register_service_entry(service_id, services[service_id]):
+			registered_services[service_id] = services[service_id]
+	_notify_services_ready(registered_services)
 	print("[mkit] GameBootstrap runtime services: %s" % ", ".join(ServiceRegistry.get_registered_service_ids()))
 
 
@@ -61,15 +63,18 @@ func _build_services() -> Dictionary:
 	}
 
 
-func _register_service_entry(service_id: String, service: Object) -> void:
+func _register_service_entry(service_id: String, service: Object) -> bool:
 	if service == null:
-		push_warning("GameBootstrap._register_service_entry: service is null for %s" % service_id)
-		return
+		push_error("GameBootstrap._register_service_entry: service is null for %s" % service_id)
+		return false
 	var node := service as Node
 	if node != null:
 		node.name = _service_node_name(service)
+	if not ServiceRegistry.register_service(service_id, service):
+		return false
+	if node != null:
 		ServiceRegistry.add_child(node)
-	ServiceRegistry.register_service(service_id, service)
+	return true
 
 
 func _notify_services_ready(services: Dictionary) -> void:

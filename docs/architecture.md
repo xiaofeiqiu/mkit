@@ -70,8 +70,13 @@ if ServiceRegistry.get_port(SaveService.SERVICE_ID) != null:
     var save := Mkit.save()
 
 # 注册自定义服务（在 GameBootstrap/ModuleBootstrap 子类中 override _build_services）
-ServiceRegistry.register_service("my_service", MyService.new())
+func _build_services() -> Dictionary:
+    var services := super()
+    services["my_service"] = MyService.new()
+    return services
 ```
+
+`ServiceRegistry.register_service()` 只接受新 id；空 id、null service、重复 id 都会报错并返回 `false`。需要在测试或调试工具里有意替换已注册服务时，使用 `replace_service()`，不要依赖重复注册隐式覆盖。
 
 `GameBootstrap._ready()` 在启动时自动注册内置服务，顺序：
 1. `_register_kernel_services()` — 按 `_build_services()` 服务表创建并注册服务

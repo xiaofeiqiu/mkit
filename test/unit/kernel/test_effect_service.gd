@@ -128,7 +128,7 @@ func test_tc_ee_12_heal_effect_fails_when_no_health_component() -> void:
 
 
 func test_tc_ee_13_heal_effect_heals_target_with_health_component() -> void:
-	var target := Node.new()
+	var target := EntityRoot.new()
 	add_child_autofree(target)
 	var components := Node.new()
 	components.name = "Components"
@@ -161,7 +161,7 @@ func test_tc_ee_14_deal_damage_fails_when_no_health_component() -> void:
 func test_tc_ee_15_deal_damage_reduces_target_hp() -> void:
 	var source := Node.new()
 	add_child_autofree(source)
-	var target := Node.new()
+	var target := EntityRoot.new()
 	add_child_autofree(target)
 	var components := Node.new()
 	components.name = "Components"

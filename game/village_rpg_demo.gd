@@ -14,8 +14,6 @@ const ITEM_CLAW := "item.demo.beast_claw"
 const ITEM_CHARM := "item.demo.village_charm"
 const ITEM_FIELD_BLADE := "item.demo.field_blade"
 const WEAPON_SLOT := "weapon"
-const LOOT_FIELD_BEAST := "loot.demo.field_beast"
-const LOOT_FIELD_BLADE := "loot.demo.field_blade"
 const ENTITY_FIELD_BEAST := "entity.demo.field_beast"
 const ENTITY_TRIAL_BEAST := "entity.demo.trial_beast"
 const ABILITY_FIREBOLT := "ability.demo.firebolt"
@@ -26,15 +24,26 @@ const ROOM_TRIAL_03 := "room.demo.trial_03"
 const REWARD_TRIAL_ATTACK := "reward.demo.trial_attack"
 const UPGRADE_TRIAL_ATTACK := "upgrade.demo.trial_attack"
 const PLAYER_ID := "player_001"
-const PLATFORM_REVIVE_PLACEMENT := "revive"
-const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.demo.gold_pack"
-const PLATFORM_CLOUD_SLOT := "demo_profile"
-const GOLD_PACK_AMOUNT := 25
+const ATTACK_SFX_ID := "sfx.demo.attack"
+const FIREBOLT_SFX_ID := "sfx.demo.firebolt"
+const AUTO_RUN_EXPECTED_POTION_BUYS := 2
+const HIT_VFX_AUTO_RELEASE_SECONDS := 0.55
+const EVENT_LOG_MAX_LINES := 5
 const MELEE_RANGE := 30.0
-const FIREBOLT_RANGE := 100.0
+const FIREBOLT_RANGE := 120.0
+const FIREBOLT_PROJECTILE_SPEED := 360.0
+const FIREBOLT_PROJECTILE_MIN_DURATION := 0.22
+const FIREBOLT_PROJECTILE_MAX_DURATION := 0.56
+const FIREBOLT_PROJECTILE_FALLBACK_DISTANCE := 180.0
 const TRIAL_SEED := 8606
+const DEFAULT_WINDOW_SIZE := Vector2i(1280, 720)
+const DEMO_CAMERA_CENTER := Vector2(360.0, 245.0)
+const DEMO_CAMERA_WORLD_SIZE := Vector2(1080.0, 608.0)
+const DEMO_CAMERA_MIN_ZOOM := 0.82
+const DEMO_CAMERA_MAX_ZOOM := 2.2
 const TRIAL_REWARD_UI_SCENE := preload("res://game/scenes/trial_reward_selection.tscn")
-const DEMO_SAVE_MIGRATION := preload("res://game/save_migration_v1_to_v2.gd")
+const DEMO_AUTO_RUN_VERIFIER_SCRIPT := preload("res://game/demo_auto_run_verifier.gd")
+const DEMO_SAVE_PAYLOAD_VERIFIER_SCRIPT := preload("res://game/demo_save_payload_verifier.gd")
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
 
 
@@ -63,7 +72,8 @@ class EmbeddedSceneRouter:
 @onready var _world_host: Node2D = $WorldHost
 @onready var _room_root: Node2D = $RoomRoot
 @onready var _run_director: RunDirector = $RunDirector
-@onready var _player: Node2D = $Player
+@onready var _player: EntityRoot = $Player
+@onready var _camera: Camera2D = $Camera2D
 @onready var _instructions_label: Label = $HUD/Instructions
 @onready var _zone_label: Label = $HUD/StatsPanel/ZoneInfo
 @onready var _quest_label: Label = $HUD/StatsPanel/QuestInfo
@@ -85,26 +95,26 @@ var _dialogue: DialogueService = null
 var _quest: QuestService = null
 var _shop: ShopService = null
 var _world: WorldService = null
+var _commands: CommandService = null
 var _events: EventService = null
 var _effects: EffectService = null
 var _time: TimeService = null
 var _progression: ProgressionService = null
 var _audio: AudioService = null
 var _save_manager: SaveService = null
-var _analytics: AnalyticsService = null
-var _ads: AdService = null
-var _iap: IAPService = null
-var _cloud_save: CloudSaveService = null
 var _entity_spawner: EntitySpawner = null
-var _loot_system := LootService.new()
 var _scene_router := EmbeddedSceneRouter.new()
+var _auto_run_verifier: Variant = DEMO_AUTO_RUN_VERIFIER_SCRIPT.new()
+var _save_payload_verifier: Variant = DEMO_SAVE_PAYLOAD_VERIFIER_SCRIPT.new()
 var _previous_scene_router: SceneService = null
 var _log_lines: Array[String] = []
-var _field_beast_ref: Node = null
+var _field_beast_ref: EntityRoot = null
 var _field_beast_looted: bool = false
 var _field_beast_defeated: bool = false
 var _shop_purchase_completed: bool = false
 var _shop_sale_completed: bool = false
+var _shop_purchase_verifications: int = 0
+var _shop_sale_currency_verified: bool = false
 var _auto_run_enabled: bool = false
 var _auto_run_started: bool = false
 var _firebolt_cast_succeeded: bool = false
@@ -112,14 +122,6 @@ var _burn_tick_observed: bool = false
 var _elder_blessing_received: bool = false
 var _command_combat_succeeded: bool = false
 var _field_blade_equipped: bool = false
-var _revive_ad_pending: bool = false
-var _rewarded_revive_completed: bool = false
-var _gold_pack_purchase_pending: bool = false
-var _gold_pack_purchase_completed: bool = false
-var _cloud_busy: bool = false
-var _cloud_save_completed: bool = false
-var _cloud_load_completed: bool = false
-var _cloud_last_loaded_data: Dictionary = {}
 var _pending_trial_rewards: Array[RewardOption] = []
 var _trial_room_entries: Array[String] = []
 var _trial_rooms_cleared: int = 0
@@ -127,20 +129,32 @@ var _trial_run_finished_result: String = ""
 var _trial_upgrade_reward_selected: bool = false
 var _reward_screen: RewardSelectionUI = null
 var _demo_save_roundtrip_succeeded: bool = false
+var _demo_save_payload_verified: bool = false
 var _runtime_seconds: float = 0.0
 var _feedback_toast_observed: bool = false
 var _feedback_shake_observed: bool = false
 var _spawn_scene_effect_succeeded: bool = false
+var _hit_vfx_cleanup_verified: bool = false
+var _active_hit_vfx: Array[Node] = []
+var _active_firebolt_projectiles: Array[Node2D] = []
+var _firebolt_projectile_observed: bool = false
+var _debug_overlay_verified: bool = false
 var _interaction_focus_observed: bool = false
 var _portal_interaction_succeeded: bool = false
 var _manual_quest_completed: bool = false
 var _dash_succeeded: bool = false
+var _potion_use_completed: bool = false
+var _last_failed_command: String = ""
+var _last_failed_effect: String = ""
+var _last_missing_service: String = ""
 
 
 func _ready() -> void:
 	_auto_run_enabled = OS.get_cmdline_args().has("--demo-auto-run")
+	_configure_window()
 	_resolve_services()
-	_configure_save()
+	if _save_manager != null and _auto_run_enabled:
+		_save_manager.save_path = "/tmp/mkit_demo_auto_save.json"
 	_configure_entity_spawner()
 	_configure_embedded_router()
 	_reset_demo_state()
@@ -151,6 +165,7 @@ func _ready() -> void:
 	_set_instructions()
 	_log("[DEMO] RPG loop demo ready")
 	_go_to_zone(ZONE_VILLAGE, "village_square")
+	_update_camera_for_viewport()
 	if _auto_run_enabled:
 		_run_auto_loop.call_deferred()
 
@@ -178,30 +193,29 @@ func _input(event: InputEvent) -> void:
 				_request_manual_task()
 			KEY_F:
 				_cast_firebolt_command()
+			KEY_F11:
+				_toggle_fullscreen()
+			KEY_ENTER:
+				if event.alt_pressed or event.meta_pressed:
+					_toggle_fullscreen()
+				else:
+					_perform_context_action()
 			KEY_F3:
 				_toggle_debug_overlay()
 			KEY_E:
-				_toggle_field_blade()
+				_perform_context_action()
 			KEY_C:
 				_enter_trial_cave()
-			KEY_D:
-				_trigger_rewarded_revive_demo()
-			KEY_P:
-				_purchase_gold_pack()
-			KEY_S:
+			KEY_F6:
 				_save_demo_state()
-			KEY_O:
-				_save_demo_to_cloud()
-			KEY_L:
+			KEY_F7:
 				_load_demo_state()
-			KEY_U:
-				_load_demo_from_cloud()
 			KEY_1:
-				_select_trial_reward(0)
+				_select_context_option(0)
 			KEY_2:
-				_select_trial_reward(1)
+				_select_context_option(1)
 			KEY_3:
-				_select_trial_reward(2)
+				_select_context_option(2)
 			KEY_K:
 				_defeat_field_beast()
 			KEY_B:
@@ -213,9 +227,10 @@ func _input(event: InputEvent) -> void:
 
 
 func _exit_tree() -> void:
+	_clear_hit_vfx()
 	_cleanup_audio_players()
 	if ServiceRegistry.has_service("scenes"):
-		var current := ServiceRegistry.get_service("scenes") as SceneService
+		var current := Mkit.scenes()
 		if current == _scene_router:
 			ServiceRegistry.unregister_service("scenes")
 			if _previous_scene_router != null:
@@ -225,52 +240,27 @@ func _exit_tree() -> void:
 
 
 func _resolve_services() -> void:
-	_dialogue = ServiceRegistry.get_service("dialogue") as DialogueService
-	_quest = ServiceRegistry.get_service("quest") as QuestService
-	_shop = ServiceRegistry.get_service("shop") as ShopService
-	_world = ServiceRegistry.get_service("world") as WorldService
-	_events = ServiceRegistry.get_service("events") as EventService
-	_effects = ServiceRegistry.get_service("effects") as EffectService
-	_time = ServiceRegistry.get_service("time") as TimeService
-	_progression = ServiceRegistry.get_service("progression") as ProgressionService
-	_audio = ServiceRegistry.get_service("audio") as AudioService
-	_save_manager = ServiceRegistry.get_service("save") as SaveService
-	_analytics = ServiceRegistry.get_service("analytics") as AnalyticsService
-	_ads = ServiceRegistry.get_service("ads") as AdService
-	_iap = ServiceRegistry.get_service("iap") as IAPService
-	_cloud_save = ServiceRegistry.get_service("cloud_save") as CloudSaveService
-
-
-func _configure_save() -> void:
-	if _save_manager == null:
-		return
-	if _auto_run_enabled:
-		_save_manager.save_path = "/tmp/mkit_demo_auto_save.json"
-	_save_manager.save_version = max(_save_manager.save_version, 2)
-	var migration := DEMO_SAVE_MIGRATION.new() as SaveMigration
-	if _has_save_migration(migration.from_version, migration.to_version):
-		return
-	var migrations: Array[SaveMigration] = []
-	for existing in _save_manager.migrations:
-		migrations.append(existing)
-	migrations.append(migration)
-	_save_manager.migrations = migrations
-
-
-func _has_save_migration(from_version: int, to_version: int) -> bool:
-	if _save_manager == null:
-		return false
-	for migration in _save_manager.migrations:
-		if migration.from_version == from_version and migration.to_version == to_version:
-			return true
-	return false
+	_dialogue = Mkit.dialogue()
+	_quest = Mkit.quest()
+	_shop = Mkit.shop()
+	_world = Mkit.world()
+	_commands = Mkit.commands()
+	_events = Mkit.events()
+	_effects = Mkit.effects()
+	if _effects != null:
+		_effects.trace_enabled = true
+	_time = Mkit.time()
+	_progression = Mkit.progression()
+	_audio = Mkit.audio()
+	_save_manager = Mkit.save()
+	_last_missing_service = _first_missing_service()
 
 
 func _configure_entity_spawner() -> void:
 	_entity_spawner = EntitySpawner.new()
 	_entity_spawner.name = "DemoEntitySpawner"
 	if ServiceRegistry.has_service("content"):
-		_entity_spawner.content = ServiceRegistry.get_service("content") as ContentService
+		_entity_spawner.content = Mkit.content()
 	add_child(_entity_spawner)
 
 
@@ -280,7 +270,7 @@ func _configure_embedded_router() -> void:
 	add_child(_scene_router)
 	_previous_scene_router = null
 	if ServiceRegistry.has_service("scenes"):
-		_previous_scene_router = ServiceRegistry.get_service("scenes") as SceneService
+		_previous_scene_router = Mkit.scenes()
 	ServiceRegistry.unregister_service("scenes")
 	ServiceRegistry.register_service("scenes", _scene_router)
 	if _world != null:
@@ -312,30 +302,31 @@ func _reset_demo_state() -> void:
 	_field_beast_defeated = false
 	_shop_purchase_completed = false
 	_shop_sale_completed = false
+	_shop_purchase_verifications = 0
+	_shop_sale_currency_verified = false
 	_firebolt_cast_succeeded = false
 	_burn_tick_observed = false
 	_elder_blessing_received = false
 	_command_combat_succeeded = false
-	_revive_ad_pending = false
-	_rewarded_revive_completed = false
-	_gold_pack_purchase_pending = false
-	_gold_pack_purchase_completed = false
-	_cloud_busy = false
-	_cloud_save_completed = false
-	_cloud_load_completed = false
-	_cloud_last_loaded_data.clear()
 	_runtime_seconds = 0.0
 	if _time != null:
 		_time.elapsed_gameplay_time = 0.0
 	_feedback_toast_observed = false
 	_feedback_shake_observed = false
 	_spawn_scene_effect_succeeded = false
+	_hit_vfx_cleanup_verified = false
+	_active_hit_vfx.clear()
+	_active_firebolt_projectiles.clear()
+	_firebolt_projectile_observed = false
+	_debug_overlay_verified = false
 	_interaction_focus_observed = false
 	_portal_interaction_succeeded = false
 	_manual_quest_completed = false
 	_dash_succeeded = false
+	_potion_use_completed = false
 	_reset_trial_state()
 	_demo_save_roundtrip_succeeded = false
+	_demo_save_payload_verified = false
 
 
 func _configure_audio() -> void:
@@ -343,30 +334,6 @@ func _configure_audio() -> void:
 		return
 	_audio.music_bus = "Master"
 	_audio.sfx_bus = "Master"
-	if _auto_run_enabled:
-		return
-	_audio.music_map = {
-		"bgm.demo.village": _make_audio_stream(),
-		"bgm.demo.room": _make_audio_stream(),
-		"bgm.demo.field": _make_audio_stream()
-	}
-	_audio.sfx_map = {
-		"sfx.demo.dialogue": _make_audio_stream(),
-		"sfx.demo.quest": _make_audio_stream(),
-		"sfx.demo.loot": _make_audio_stream(),
-		"sfx.demo.shop": _make_audio_stream()
-	}
-
-
-func _make_audio_stream() -> AudioStreamWAV:
-	var stream := AudioStreamWAV.new()
-	stream.format = AudioStreamWAV.FORMAT_16_BITS
-	stream.mix_rate = 22050
-	stream.stereo = false
-	var data := PackedByteArray()
-	data.resize(4410)
-	stream.data = data
-	return stream
 
 
 func _bind_ui() -> void:
@@ -391,6 +358,8 @@ func _connect_signals() -> void:
 		_quest.quest_accepted.connect(_on_quest_accepted)
 		_quest.objective_advanced.connect(_on_objective_advanced)
 		_quest.quest_turned_in.connect(_on_quest_turned_in)
+	if _commands != null:
+		_commands.command_failed.connect(_on_command_failed)
 	if _shop != null:
 		_shop.shop_opened.connect(_on_shop_opened)
 		_shop.item_purchased.connect(_on_item_purchased)
@@ -400,9 +369,10 @@ func _connect_signals() -> void:
 		_world.zone_changed.connect(_on_zone_changed)
 	if _events != null:
 		_events.domain_event_emitted.connect(_on_domain_event)
-		_events.reward_selected.connect(_on_reward_selected)
-		_events.entity_died.connect(_on_entity_died)
-		_events.damage_applied.connect(_on_damage_applied)
+		_events.subscribe(LootEvents.REWARD_SELECTED, _on_reward_selected)
+		_events.subscribe(LootEvents.LOOT_DROPPED, _on_loot_dropped)
+		_events.subscribe(CombatEvents.ENTITY_DIED, _on_entity_died)
+		_events.subscribe(CombatEvents.DAMAGE_APPLIED, _on_damage_applied)
 	if _run_director != null:
 		_run_director.run_started.connect(_on_trial_run_started)
 		_run_director.room_enter_requested.connect(_on_trial_room_enter_requested)
@@ -411,12 +381,10 @@ func _connect_signals() -> void:
 	var interaction := _interaction_component()
 	if interaction != null:
 		interaction.interactable_focused.connect(_on_interactable_focused)
+		interaction.interactable_unfocused.connect(_on_interactable_unfocused)
 	var experience := _experience()
 	if experience != null:
 		experience.level_up.connect(_on_level_up)
-	var health := _player_health()
-	if health != null:
-		health.died.connect(_on_player_died)
 	var ability := _ability_controller()
 	if ability != null:
 		ability.ability_cast_started.connect(_on_ability_cast_started)
@@ -425,17 +393,56 @@ func _connect_signals() -> void:
 	if inventory != null:
 		inventory.item_added.connect(_on_item_added)
 		inventory.item_removed.connect(_on_item_removed)
-	if _ads != null:
-		_ads.rewarded_ad_completed.connect(_on_rewarded_ad_completed)
-		_ads.rewarded_ad_failed.connect(_on_rewarded_ad_failed)
-	if _iap != null:
-		_iap.purchase_completed.connect(_on_iap_purchase_completed)
-		_iap.purchase_failed.connect(_on_iap_purchase_failed)
-	if _cloud_save != null:
-		_cloud_save.cloud_save_completed.connect(_on_cloud_save_completed)
-		_cloud_save.cloud_save_failed.connect(_on_cloud_save_failed)
-		_cloud_save.cloud_load_completed.connect(_on_cloud_load_completed)
-		_cloud_save.cloud_load_failed.connect(_on_cloud_load_failed)
+
+
+func _configure_window() -> void:
+	if _camera != null:
+		_camera.make_current()
+	var viewport := get_viewport()
+	if viewport != null:
+		viewport.size_changed.connect(_update_camera_for_viewport)
+	_update_camera_for_viewport()
+
+
+func _update_camera_for_viewport() -> void:
+	if _camera == null:
+		return
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+	var zoom: float = minf(
+		viewport_size.x / DEMO_CAMERA_WORLD_SIZE.x,
+		viewport_size.y / DEMO_CAMERA_WORLD_SIZE.y
+	)
+	zoom = clampf(zoom, DEMO_CAMERA_MIN_ZOOM, DEMO_CAMERA_MAX_ZOOM)
+	_camera.position = DEMO_CAMERA_CENTER
+	_camera.zoom = Vector2(zoom, zoom)
+
+
+func _set_fullscreen(enabled: bool) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	if enabled:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+		return
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	DisplayServer.window_set_size(DEFAULT_WINDOW_SIZE)
+	var screen := DisplayServer.window_get_current_screen()
+	var screen_position := DisplayServer.screen_get_position(screen)
+	var screen_size := DisplayServer.screen_get_size(screen)
+	var centered_offset := Vector2i(
+		maxi(0, int((screen_size.x - DEFAULT_WINDOW_SIZE.x) * 0.5)),
+		maxi(0, int((screen_size.y - DEFAULT_WINDOW_SIZE.y) * 0.5))
+	)
+	DisplayServer.window_set_position(screen_position + centered_offset)
+
+
+func _is_fullscreen() -> bool:
+	var mode := DisplayServer.window_get_mode()
+	return (
+		mode == DisplayServer.WINDOW_MODE_FULLSCREEN
+		or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+	)
 
 
 func _grant_starter_currency() -> void:
@@ -444,13 +451,7 @@ func _grant_starter_currency() -> void:
 
 
 func _set_instructions() -> void:
-	_instructions_label.text = (
-		"Demo RPG loop: stand near portals/NPC, R room/back, G field/back, "
-		+ "T talk/choice/advance, M manual task, Shift dash, F cast firebolt, "
-		+ "K defeat beast, E equip/unequip blade, Y elder blessing, "
-		+ "C trial cave, 1/2/3 reward, B buy potion, V sell claw, H use potion, "
-		+ "S save, L load, D ad revive, P gold pack, O/U cloud, F3 debug"
-	)
+	_update_instructions()
 
 
 func _toggle_debug_overlay() -> void:
@@ -458,12 +459,18 @@ func _toggle_debug_overlay() -> void:
 		_debug_overlay.toggle()
 
 
-func _go_to_zone(zone_id: String, spawn_id: String) -> void:
+func _toggle_fullscreen() -> void:
+	_set_fullscreen(not _is_fullscreen())
+
+
+func _go_to_zone(zone_id: String, spawn_id: String) -> bool:
 	if _world == null:
 		_log("[WORLD] service missing")
-		return
+		return false
 	if not _world.go_to_zone(zone_id, spawn_id):
 		_log("[WORLD] could not enter %s" % zone_id)
+		return false
+	return true
 
 
 func _toggle_room_portal() -> void:
@@ -474,18 +481,21 @@ func _toggle_room_portal() -> void:
 	elif _world.current_zone_id == ZONE_ROOM:
 		_interact_portal("ToVillage")
 	else:
-		_log("[WORLD] room portal is only available in the village or elder room")
+		_log("[WORLD] stand at the elder room door")
 
 
 func _toggle_field_portal() -> void:
 	if _world == null:
 		return
-	if _world.current_zone_id == ZONE_VILLAGE:
-		_interact_portal("ToField")
-	elif _world.current_zone_id == ZONE_FIELD:
+	if _is_trial_cave_open():
+		_leave_trial_cave("field_gate")
+		return
+	if _world.current_zone_id == ZONE_FIELD:
 		_interact_portal("ToVillage")
+	elif _world.current_zone_id == ZONE_VILLAGE:
+		_interact_portal("ToField")
 	else:
-		_log("[WORLD] field gate is only available in the village or field")
+		_log("[WORLD] stand at the field gate")
 
 
 func _interact_portal(portal_name: String) -> bool:
@@ -502,8 +512,8 @@ func _try_zone_interaction(interactable_path: String, label: String) -> bool:
 		_log("[INTERACT] missing %s" % label)
 		return false
 	if interaction.current_interactable != interactable:
-		interaction.current_interactable = interactable
-		_on_interactable_focused(interactable)
+		_log("[INTERACT] stand near %s" % label)
+		return false
 	if not interaction.try_interact():
 		_log("[INTERACT] failed %s" % label)
 		return false
@@ -512,11 +522,95 @@ func _try_zone_interaction(interactable_path: String, label: String) -> bool:
 	return true
 
 
+func _perform_context_action() -> void:
+	if _dialogue != null and _dialogue.is_active():
+		_select_dialogue_option(0)
+		return
+	if not _pending_trial_rewards.is_empty():
+		_select_trial_reward(0)
+		return
+	var focused := _focused_interactable()
+	if focused != null:
+		match focused.interaction_id:
+			"interaction.demo.elder":
+				_talk_or_advance_dialogue()
+			"interaction.demo.village_supply":
+				_ensure_shop_open()
+			"interaction.demo.trial_cave":
+				_enter_trial_cave()
+			_:
+				_try_current_interaction()
+		return
+	if _is_trial_cave_open():
+		_leave_trial_cave("field_gate")
+		return
+	if _item_count(ITEM_FIELD_BLADE) > 0:
+		_toggle_field_blade()
+		return
+	_log("[INTERACT] move near the Elder, a gate, the shop, or the cave")
+
+
+func _try_current_interaction() -> bool:
+	var interaction := _interaction_component()
+	if interaction == null:
+		_log("[INTERACT] player interaction component missing")
+		return false
+	var interactable := interaction.current_interactable
+	if interactable == null:
+		_log("[INTERACT] no nearby target")
+		return false
+	if not interaction.try_interact():
+		_log("[INTERACT] failed %s" % _interactable_label(interactable))
+		return false
+	if interactable is Portal:
+		_portal_interaction_succeeded = true
+	return true
+
+
+func _select_context_option(index: int) -> void:
+	if _dialogue != null and _dialogue.is_active():
+		_select_dialogue_option(index)
+		return
+	if not _pending_trial_rewards.is_empty():
+		_select_trial_reward(index)
+
+
+func _select_dialogue_option(index: int) -> void:
+	if _dialogue == null or not _dialogue.is_active():
+		return
+	var choices := _dialogue.get_available_choices()
+	if choices.is_empty():
+		if index == 0:
+			_dialogue.advance()
+		return
+	if index < 0 or index >= choices.size():
+		_log("[DIALOGUE] choice %d is unavailable" % (index + 1))
+		return
+	_dialogue.choose(index)
+	if _dialogue.is_active() and _dialogue.get_available_choices().is_empty():
+		_dialogue.advance()
+
+
 func _find_zone_interactable(interactable_path: String) -> Interactable:
 	var root := _current_zone_root()
 	if root == null:
 		return null
 	return root.get_node_or_null(interactable_path) as Interactable
+
+
+func _focused_interactable() -> Interactable:
+	var interaction := _interaction_component()
+	if interaction == null:
+		return null
+	return interaction.current_interactable
+
+
+func _is_focused_zone_interactable(interactable_path: String) -> bool:
+	var interaction := _interaction_component()
+	if interaction == null:
+		return false
+	var interactable := _find_zone_interactable(interactable_path)
+	return interactable != null and interaction.current_interactable == interactable
 
 
 func _focus_zone_interactable(interactable_path: String) -> void:
@@ -537,11 +631,7 @@ func _talk_or_advance_dialogue() -> void:
 	if _dialogue == null:
 		return
 	if _dialogue.is_active():
-		var choices := _dialogue.get_available_choices()
-		if choices.is_empty():
-			_dialogue.advance()
-		else:
-			_dialogue.choose(0)
+		_select_dialogue_option(0)
 		return
 	if _world == null or _world.current_zone_id != ZONE_ROOM:
 		_log("[DIALOGUE] enter the elder room first")
@@ -614,7 +704,7 @@ func _defeat_field_beast() -> void:
 	if beast == null:
 		_log("[COMBAT] field beast not found")
 		return
-	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := beast.get_component("HealthComponent") as HealthComponent
 	if not _is_field_beast_health_alive(health):
 		_log("[COMBAT] field beast already defeated")
 		return
@@ -630,7 +720,7 @@ func _defeat_field_beast() -> void:
 		_log("[COMBAT] strike failed: %s" % result.failure_reason)
 
 
-func _damage_player_from_beast(beast: Node) -> void:
+func _damage_player_from_beast(beast: EntityRoot) -> void:
 	if _effects == null:
 		return
 	var health := _player_health()
@@ -647,7 +737,7 @@ func _engage_field_beast_via_commands() -> void:
 	if _world == null or _world.current_zone_id != ZONE_FIELD:
 		_log("[COMBAT] go to the field first")
 		return
-	var beast := _field_beast() as Node2D
+	var beast := _field_beast()
 	if beast == null:
 		if _field_beast_defeated:
 			_command_combat_succeeded = true
@@ -674,7 +764,7 @@ func _engage_field_beast_via_commands() -> void:
 
 
 func _attack_field_beast() -> void:
-	var state_machine := _player.get_node_or_null("StateMachine") as StateMachine
+	var state_machine := _player.get_state_machine_node()
 	if state_machine == null:
 		return
 	var attacks := 0
@@ -692,10 +782,12 @@ func _attack_field_beast() -> void:
 
 
 func _dispatch_player_command(command_type: String, payload: Dictionary) -> void:
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	if router == null:
+	if _player == null:
 		return
-	router.dispatch(GameCommand.create(command_type, PLAYER_ID, PLAYER_ID, payload))
+	var receiver := _player.get_command_receiver_node()
+	if receiver == null:
+		return
+	receiver.receive_command(GameCommand.create(command_type, PLAYER_ID, PLAYER_ID, payload))
 
 
 func _cast_firebolt_command() -> void:
@@ -703,7 +795,7 @@ func _cast_firebolt_command() -> void:
 
 
 func _dash_player_once() -> void:
-	var state_machine := _player.get_node_or_null("StateMachine") as StateMachine
+	var state_machine := _player.get_state_machine_node()
 	if state_machine == null:
 		return
 	var start := _player.global_position
@@ -721,11 +813,11 @@ func _cast_firebolt_at_beast() -> void:
 	if _world == null or _world.current_zone_id != ZONE_FIELD:
 		_log("[ABILITY] go to the field first")
 		return
-	var beast := _field_beast() as Node2D
+	var beast := _field_beast()
 	if beast == null:
 		_log("[ABILITY] field beast not found")
 		return
-	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := beast.get_component("HealthComponent") as HealthComponent
 	if health == null or health.dead:
 		return
 	var ability := _ability_controller()
@@ -747,8 +839,8 @@ func _cast_firebolt_at_beast() -> void:
 		_log("[ABILITY] firebolt cast did not resolve")
 
 
-func _wait_for_beast_burn_tick(beast: Node2D) -> void:
-	var status := beast.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+func _wait_for_beast_burn_tick(beast: EntityRoot) -> void:
+	var status := beast.get_controller("StatusEffectController") as StatusEffectController
 	if status == null:
 		_log("[STATUS] field beast status controller not found")
 		return
@@ -764,12 +856,20 @@ func _wait_for_beast_burn_tick(beast: Node2D) -> void:
 
 
 func _enter_trial_cave() -> void:
-	if _world == null or _world.current_zone_id != ZONE_FIELD:
+	if _is_trial_cave_open():
+		_leave_trial_cave("cave_toggle")
+		return
+	if _world == null:
+		return
+	if _world.current_zone_id != ZONE_FIELD:
 		_log("[TRIAL] enter the field first")
 		return
 	var root := _current_zone_root()
 	if root == null or root.get_node_or_null("TrialCave") == null:
 		_log("[TRIAL] trial cave entrance missing")
+		return
+	if not _is_focused_zone_interactable("TrialCaveArea/Interactable"):
+		_log("[TRIAL] stand at the cave entrance")
 		return
 	if _run_director == null:
 		_log("[TRIAL] run director missing")
@@ -784,25 +884,36 @@ func _enter_trial_cave() -> void:
 	_run_director.start_run(TRIAL_SEED)
 
 
-func _run_trial_auto() -> void:
-	_enter_trial_cave()
-	await _settle_world()
-	var guard := 0
-	while not _is_trial_terminal() and guard < 12:
-		var status := _run_director.run_state.status if _run_director.run_state != null else ""
-		if status == "active":
-			_defeat_trial_room_enemies()
-		elif status == "choosing_reward":
-			_select_trial_reward(_trial_reward_index(REWARD_TRIAL_ATTACK))
-		await _settle_world()
-		guard += 1
-	if not _is_trial_completed():
-		_log("[TRIAL] auto run did not complete")
+func _is_trial_cave_open() -> bool:
+	return _room_root != null and _room_root.visible
+
+
+func _leave_trial_cave(reason: String) -> void:
+	if not _is_trial_cave_open():
+		return
+	if _run_director != null and _run_director.run_state != null and not _is_trial_terminal():
+		_run_director.fail_run(reason)
+	else:
+		_close_trial_room()
+	_place_player_at_trial_cave_exit()
+	_log("[TRIAL] left cave")
+
+
+func _place_player_at_trial_cave_exit() -> void:
+	var root := _current_zone_root()
+	if root == null:
+		return
+	var marker := root.get_node_or_null("TrialCave") as Node2D
+	if marker != null:
+		_player.global_position = marker.global_position
 
 
 func _defeat_trial_room_enemies() -> void:
 	if _run_director == null or _run_director.current_room_controller == null:
 		_log("[TRIAL] no active room")
+		return
+	if _effects == null:
+		_log("[TRIAL] effect service missing")
 		return
 	var room := _run_director.current_room_controller
 	if room.runtime == null:
@@ -810,10 +921,10 @@ func _defeat_trial_room_enemies() -> void:
 		return
 	var enemy_ids := room.runtime.active_enemy_ids.duplicate()
 	for enemy_id in enemy_ids:
-		var enemy := room.active_enemies.get(enemy_id, null) as Node
+		var enemy := room.active_enemies.get(enemy_id, null) as EntityRoot
 		if enemy == null:
 			continue
-		var brain := enemy.get_node_or_null("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
+		var brain := enemy.get_controller("SimpleAIEnemyBrain") as SimpleAIEnemyBrain
 		if brain != null:
 			brain.enabled = false
 		var damage := DealDamageEffect.new()
@@ -821,6 +932,13 @@ func _defeat_trial_room_enemies() -> void:
 		damage.base_amount = 999.0
 		damage.can_crit = false
 		_effects.execute(damage, GameplayContext.new().with_source(_player).with_target(enemy))
+
+
+func _trial_reward_index(reward_id: String) -> int:
+	for i in range(_pending_trial_rewards.size()):
+		if _pending_trial_rewards[i].reward_id == reward_id:
+			return i
+	return 0
 
 
 func _select_trial_reward(index: int) -> void:
@@ -845,14 +963,7 @@ func _select_trial_reward(index: int) -> void:
 		_run_director.select_reward(selected)
 	_pending_trial_rewards.clear()
 	_reward_screen = null
-	_log("[TRIAL] picked reward %s" % selected.reward_id)
-
-
-func _trial_reward_index(reward_id: String) -> int:
-	for i in range(_pending_trial_rewards.size()):
-		if _pending_trial_rewards[i].reward_id == reward_id:
-			return i
-	return 0
+	_log("[TRIAL] picked reward %s" % selected.display_name)
 
 
 func _is_trial_terminal() -> bool:
@@ -871,11 +982,17 @@ func _reset_trial_state() -> void:
 	_trial_rooms_cleared = 0
 	_trial_run_finished_result = ""
 	_trial_upgrade_reward_selected = false
+	_close_trial_room()
+
+
+func _close_trial_room() -> void:
 	_clear_trial_reward_screen()
 	if _room_root != null:
 		for child in _room_root.get_children():
 			child.queue_free()
 		_room_root.visible = false
+	if _run_director != null:
+		_run_director.current_room_controller = null
 
 
 func _clear_trial_reward_screen() -> void:
@@ -903,7 +1020,14 @@ func _approach(target: Node2D, stop_distance: float) -> void:
 func _buy_potion() -> void:
 	if not _ensure_shop_open():
 		return
+	var gold_before := _gold()
+	var potion_count_before := _item_count(ITEM_POTION)
+	var price := _shop.get_buy_price(ITEM_POTION)
 	if _shop.buy(ITEM_POTION, 1, _player):
+		var gold_after := _gold()
+		var potion_count_after := _item_count(ITEM_POTION)
+		if gold_after == gold_before - price and potion_count_after == potion_count_before + 1:
+			_shop_purchase_verifications += 1
 		_play_sfx("sfx.demo.shop")
 
 
@@ -917,7 +1041,15 @@ func _sell_claw() -> void:
 	if claw == null:
 		_log("[SHOP] no beast claw to sell")
 		return
+	var gold_before := _gold()
+	var claw_count_before := _item_count(ITEM_CLAW)
+	var price := _shop.get_sell_price(ITEM_CLAW)
 	if _shop.sell(claw.instance_id, 1, _player):
+		var gold_after := _gold()
+		var claw_count_after := _item_count(ITEM_CLAW)
+		_shop_sale_currency_verified = (
+			gold_after == gold_before + price and claw_count_after == claw_count_before - 1
+		)
 		_play_sfx("sfx.demo.shop")
 
 
@@ -927,6 +1059,13 @@ func _ensure_shop_open() -> bool:
 		return false
 	if _world == null or _world.current_zone_id != ZONE_VILLAGE:
 		_log("[SHOP] return to the village supply stall")
+		return false
+	if not _is_focused_zone_interactable("VillageSupply/Interactable"):
+		if _shop.current_shop != null:
+			_shop.close_shop()
+		if _shop_ui != null:
+			_shop_ui.visible = false
+		_log("[SHOP] stand at the village supply stall")
 		return false
 	if _shop.current_shop != null:
 		return true
@@ -954,10 +1093,14 @@ func _use_potion() -> void:
 		return
 	var health := _player_health()
 	var before := health.current_hp if health != null else 0.0
+	var potion_count_before := _item_count(ITEM_POTION)
 	var ctx := GameplayContext.new().with_source(_player).with_target(_player)
 	_effects.execute_many(definition.use_effects, ctx, true)
-	inventory.remove_item_by_instance_id(potion.instance_id, 1)
+	var removed := inventory.remove_item_by_instance_id(potion.instance_id, 1)
 	var after := health.current_hp if health != null else 0.0
+	_potion_use_completed = (
+		removed and after > before and _item_count(ITEM_POTION) == potion_count_before - 1
+	)
 	_log("[ITEM] used herb potion HP %.0f -> %.0f" % [before, after])
 
 
@@ -976,8 +1119,12 @@ func _load_demo_state() -> bool:
 	if _save_manager == null:
 		_log("[SAVE] service missing")
 		return false
+	_close_trial_room()
+	_clear_hit_vfx()
 	if _save_manager.load_game(get_tree().root):
 		_sync_loaded_state_flags()
+		_close_trial_room()
+		_clear_hit_vfx()
 		_log("[SAVE] loaded demo state")
 		return true
 	_log("[SAVE] load failed")
@@ -989,182 +1136,61 @@ func _sync_loaded_state_flags() -> void:
 	_field_blade_equipped = equipment != null and equipment.get_equipped(WEAPON_SLOT) != null
 
 
-func _trigger_rewarded_revive_demo() -> void:
-	var health := _player_health()
-	if health == null:
-		_log("[AD] player health missing")
-		return
-	if health.dead:
-		_request_rewarded_revive()
-		return
-	health.die(null)
-
-
-func _request_rewarded_revive() -> void:
-	var health := _player_health()
-	if health == null:
-		_log("[AD] player health missing")
-		return
-	if not health.dead:
-		_log("[AD] revive is only available after death")
-		return
-	if _ads == null:
-		_log("[AD] service missing")
-		return
-	if _revive_ad_pending:
-		_log("[AD] revive ad already pending")
-		return
-	if not _ads.is_rewarded_ad_ready(PLATFORM_REVIVE_PLACEMENT):
-		_log("[AD] revive ad not ready")
-		return
-	_revive_ad_pending = true
-	_log("[AD] showing rewarded revive")
-	_ads.show_rewarded_ad(PLATFORM_REVIVE_PLACEMENT)
-
-
-func _purchase_gold_pack() -> void:
-	if not _ensure_shop_open():
-		return
-	if _iap == null:
-		_log("[IAP] service missing")
-		return
-	if _gold_pack_purchase_pending:
-		_log("[IAP] gold pack purchase already pending")
-		return
-	_gold_pack_purchase_pending = true
-	_log("[IAP] purchasing %s" % PLATFORM_GOLD_PACK_PRODUCT)
-	_iap.purchase(PLATFORM_GOLD_PACK_PRODUCT)
-
-
-func _save_demo_to_cloud() -> void:
-	if _save_manager == null:
-		_log("[CloudSave] save service missing")
-		return
-	if _cloud_save == null:
-		_log("[CloudSave] service missing")
-		return
-	if not _cloud_save.is_available():
-		_log("[CloudSave] not available")
-		return
-	if _cloud_busy:
-		_log("[CloudSave] busy")
-		return
-	if not _save_demo_state():
-		_log("[CloudSave] local save failed")
-		return
-	var data := _read_demo_save_data()
-	if data.is_empty():
-		_log("[CloudSave] local save data missing")
-		return
-	_cloud_busy = true
-	_log("[CloudSave] saving %s" % PLATFORM_CLOUD_SLOT)
-	_cloud_save.save_to_cloud(PLATFORM_CLOUD_SLOT, data)
-
-
-func _load_demo_from_cloud() -> void:
-	if _cloud_save == null:
-		_log("[CloudSave] service missing")
-		return
-	if not _cloud_save.is_available():
-		_log("[CloudSave] not available")
-		return
-	if _cloud_busy:
-		_log("[CloudSave] busy")
-		return
-	_cloud_busy = true
-	_log("[CloudSave] loading %s" % PLATFORM_CLOUD_SLOT)
-	_cloud_save.load_from_cloud(PLATFORM_CLOUD_SLOT)
-
-
-func _read_demo_save_data() -> Dictionary:
-	if _save_manager == null:
-		return {}
-	var file := FileAccess.open(_save_manager.save_path, FileAccess.READ)
-	if file == null:
-		return {}
-	var text := file.get_as_text()
-	file.close()
-	var parsed = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return {}
-	var data: Dictionary = parsed
-	return data
-
-
-func _write_demo_save_data(data: Dictionary) -> bool:
-	if _save_manager == null:
-		return false
-	var file := FileAccess.open(_save_manager.save_path, FileAccess.WRITE)
-	if file == null:
-		return false
-	file.store_string(JSON.stringify(data, "  "))
-	file.close()
-	return true
-
-
-func _track_analytics_event(event_name: String, properties: Dictionary = {}) -> void:
-	if _analytics == null:
-		return
-	_analytics.track_event(event_name, properties)
-
-
 func _on_dialogue_started(dialogue_id: String) -> void:
 	if _dialogue_ui != null:
 		_dialogue_ui.visible = true
 	_play_sfx("sfx.demo.dialogue")
-	_log("[DIALOGUE] started %s" % dialogue_id)
+	_log("[DIALOGUE] started %s" % _display_name(dialogue_id, "Elder"))
 
 
 func _on_dialogue_ended(dialogue_id: String) -> void:
-	_log("[DIALOGUE] ended %s" % dialogue_id)
+	_log("[DIALOGUE] ended %s" % _display_name(dialogue_id, "Elder"))
 
 
 func _on_quest_accepted(quest_id: String) -> void:
 	_play_sfx("sfx.demo.quest")
-	_log("[QUEST] accepted %s" % quest_id)
+	_log("[QUEST] accepted %s" % _quest_title(quest_id))
 
 
 func _on_objective_advanced(
 	quest_id: String, objective_id: String, current: int, required: int
 ) -> void:
-	_log("[QUEST] %s %s %d/%d" % [quest_id, objective_id, current, required])
+	_log(
+		"[QUEST] %s %s %d/%d"
+		% [_quest_title(quest_id), _quest_objective_label(quest_id, objective_id), current, required]
+	)
 
 
 func _on_quest_turned_in(quest_id: String) -> void:
 	_play_sfx("sfx.demo.quest")
-	_track_analytics_event(
-		"quest_turned_in",
-		{
-			"quest_id": quest_id,
-			"zone_id": _world.current_zone_id if _world != null else ""
-		}
-	)
-	_log("[QUEST] turned in %s" % quest_id)
+	_log("[QUEST] turned in %s" % _quest_title(quest_id))
 
 
 func _on_shop_opened(shop_id: String) -> void:
 	if _shop_ui != null:
 		_shop_ui.visible = true
-	_log("[SHOP] opened %s" % shop_id)
+	_log("[SHOP] opened %s" % _display_name(shop_id, "Village Supply"))
 
 
 func _on_item_purchased(item_id: String, quantity: int, total_cost: int) -> void:
 	if item_id == ITEM_POTION and quantity > 0:
 		_shop_purchase_completed = true
-	_log("[SHOP] bought %s x%d for %d gold" % [item_id, quantity, total_cost])
+	_log("[SHOP] bought %s x%d for %d gold" % [_display_name(item_id), quantity, total_cost])
 
 
 func _on_item_sold(item_id: String, quantity: int, total_gain: int) -> void:
 	if item_id == ITEM_CLAW and quantity > 0:
 		_shop_sale_completed = true
-	_log("[SHOP] sold %s x%d for %d gold" % [item_id, quantity, total_gain])
+	_log("[SHOP] sold %s x%d for %d gold" % [_display_name(item_id), quantity, total_gain])
 
 
 func _on_transaction_failed(item_id: String, reason: String) -> void:
-	_log("[SHOP] transaction failed %s: %s" % [item_id, reason])
+	_log("[SHOP] transaction failed %s: %s" % [_display_name(item_id, "item"), reason])
 
 
 func _on_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
+	_clear_hit_vfx()
+	_clear_firebolt_projectiles()
 	var interaction := _interaction_component()
 	if interaction != null:
 		interaction.current_interactable = null
@@ -1176,15 +1202,29 @@ func _on_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
 		_field_beast_ref = null
 	if to_zone_id == ZONE_FIELD:
 		_spawn_field_beast()
-	_log("[WORLD] %s -> %s" % [from_zone_id if from_zone_id != "" else "start", to_zone_id])
+	_log(
+		"[WORLD] %s -> %s"
+		% [
+			_display_name(from_zone_id, "start") if from_zone_id != "" else "start",
+			_display_name(to_zone_id)
+		]
+	)
 
 
-func _on_damage_applied(result) -> void:
+func _on_command_failed(command: GameCommand, reason: String) -> void:
+	if command == null:
+		_last_failed_command = reason
+		return
+	_last_failed_command = "%s: %s" % [command.command_type, reason]
+
+
+func _on_damage_applied(event: DomainEvent) -> void:
+	var result: DamageResult = event.payload.get("result")
 	if result == null:
 		return
 	_log(
 		"[COMBAT] %.0f damage to %s"
-		% [result.final_amount, _entity_id(result.target)]
+		% [result.final_amount, _entity_display_name(result.target)]
 	)
 	if _has_entity_tag(result.target, "field_beast"):
 		_spawn_hit_effect(result.target)
@@ -1192,12 +1232,14 @@ func _on_damage_applied(result) -> void:
 
 func _on_ability_cast_started(ability_id: String) -> void:
 	if ability_id == ABILITY_FIREBOLT:
-		_log("[ABILITY] casting Firebolt")
+		_log("[ABILITY] casting %s" % _display_name(ability_id, "Firebolt"))
+		_play_sfx(FIREBOLT_SFX_ID)
+		_spawn_firebolt_projectile(_firebolt_visual_target())
 
 
 func _on_ability_failed(ability_id: String, reason: String) -> void:
 	if ability_id == ABILITY_FIREBOLT:
-		_log("[ABILITY] Firebolt failed: %s" % reason)
+		_log("[ABILITY] %s failed: %s" % [_display_name(ability_id, "Firebolt"), reason])
 
 
 func _spawn_hit_effect(target: Node) -> void:
@@ -1213,6 +1255,182 @@ func _spawn_hit_effect(target: Node) -> void:
 	var result := _effects.execute(effect, context)
 	if result.success:
 		_spawn_scene_effect_succeeded = true
+		var spawned := result.payload.get("instance", null) as Node
+		if spawned != null:
+			_track_hit_vfx(spawned)
+
+
+func _firebolt_visual_target() -> Node2D:
+	if _player == null or _player.get_tree() == null:
+		return null
+	var best: Node2D = null
+	var best_distance: float = INF
+	for node in _player.get_tree().get_nodes_in_group("enemy"):
+		var enemy := node as EntityRoot
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+		var health := enemy.get_component("HealthComponent") as HealthComponent
+		if health != null and health.dead:
+			continue
+		var distance := _player.global_position.distance_to(enemy.global_position)
+		if distance <= FIREBOLT_RANGE and distance < best_distance:
+			best = enemy
+			best_distance = distance
+	return best
+
+
+func _player_facing_direction() -> Vector2:
+	var state_machine := _player.get_state_machine_node()
+	if state_machine != null:
+		var facing: Vector2 = state_machine.blackboard.get_value("facing", Vector2.RIGHT)
+		if facing != Vector2.ZERO:
+			return facing.normalized()
+	return Vector2.RIGHT
+
+
+func _spawn_firebolt_projectile(target: Node2D) -> void:
+	if _player == null:
+		return
+	var start := _player.global_position
+	var has_target: bool = target != null and is_instance_valid(target)
+	var end: Vector2 = (
+		target.global_position
+		if has_target
+		else start + _player_facing_direction() * FIREBOLT_PROJECTILE_FALLBACK_DISTANCE
+	)
+	var direction: Vector2 = (end - start).normalized()
+	if direction == Vector2.ZERO:
+		direction = _player_facing_direction()
+	start += direction * 30.0
+	var projectile := Node2D.new()
+	projectile.name = "DemoFireboltProjectile"
+	projectile.z_index = 40
+	projectile.global_position = start
+	projectile.rotation = direction.angle()
+	var glow := Polygon2D.new()
+	glow.name = "Glow"
+	glow.color = Color(1.0, 0.2, 0.04, 0.2)
+	glow.polygon = PackedVector2Array([
+		Vector2(-42, -14), Vector2(-8, -22), Vector2(30, -10),
+		Vector2(44, 0), Vector2(30, 10), Vector2(-8, 22), Vector2(-42, 14)
+	])
+	projectile.add_child(glow)
+	var trail := Polygon2D.new()
+	trail.name = "Trail"
+	trail.color = Color(1.0, 0.24, 0.05, 0.28)
+	trail.polygon = PackedVector2Array([
+		Vector2(-34, -7), Vector2(-6, -13), Vector2(18, -5),
+		Vector2(26, 0), Vector2(18, 5), Vector2(-6, 13), Vector2(-34, 7)
+	])
+	projectile.add_child(trail)
+	var core := Polygon2D.new()
+	core.name = "Core"
+	core.color = Color(1.0, 0.78, 0.24, 0.95)
+	core.polygon = PackedVector2Array([
+		Vector2(-10, -6), Vector2(12, -10), Vector2(25, 0),
+		Vector2(12, 10), Vector2(-10, 6), Vector2(-18, 0)
+	])
+	projectile.add_child(core)
+	add_child(projectile)
+	_active_firebolt_projectiles.append(projectile)
+	_firebolt_projectile_observed = true
+	var duration := clampf(
+		start.distance_to(end) / FIREBOLT_PROJECTILE_SPEED,
+		FIREBOLT_PROJECTILE_MIN_DURATION,
+		FIREBOLT_PROJECTILE_MAX_DURATION
+	)
+	var tween := create_tween()
+	tween.tween_property(projectile, "global_position", end, duration).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(projectile, "scale", Vector2(1.25, 1.25), duration)
+	tween.tween_callback(_finish_firebolt_projectile.bind(projectile, target))
+
+
+func _finish_firebolt_projectile(projectile: Node2D, target: Node2D) -> void:
+	_active_firebolt_projectiles.erase(projectile)
+	if projectile != null and is_instance_valid(projectile):
+		projectile.queue_free()
+	if target != null and is_instance_valid(target):
+		_spawn_hit_effect(target)
+
+
+func _clear_firebolt_projectiles() -> void:
+	for projectile in _active_firebolt_projectiles.duplicate():
+		if projectile != null and is_instance_valid(projectile):
+			projectile.queue_free()
+	_active_firebolt_projectiles.clear()
+
+
+func _track_hit_vfx(node: Node) -> void:
+	if node == null:
+		return
+	if not _active_hit_vfx.has(node):
+		_active_hit_vfx.append(node)
+	get_tree().create_timer(HIT_VFX_AUTO_RELEASE_SECONDS).timeout.connect(_release_hit_vfx.bind(node))
+
+
+func _release_hit_vfx(node: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		_active_hit_vfx.erase(node)
+		return
+	if not _active_hit_vfx.has(node):
+		return
+	_active_hit_vfx.erase(node)
+	var pool := Mkit.pool()
+	if pool != null:
+		pool.release(HIT_VFX_SCENE, node)
+	else:
+		node.queue_free()
+
+
+func _release_active_hit_vfx() -> void:
+	for node in _active_hit_vfx.duplicate():
+		_release_hit_vfx(node)
+
+
+func _clear_hit_vfx() -> void:
+	_release_active_hit_vfx()
+	var root := get_tree().current_scene if get_tree() != null else null
+	if root == null:
+		root = self
+	_release_visible_hit_vfx(root)
+
+
+func _release_visible_hit_vfx(node: Node) -> void:
+	if node.name.begins_with("DemoHitVFX") and node is CanvasItem and (node as CanvasItem).visible:
+		_release_untracked_hit_vfx(node)
+	for child in node.get_children():
+		_release_visible_hit_vfx(child)
+
+
+func _release_untracked_hit_vfx(node: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		return
+	if _active_hit_vfx.has(node):
+		_release_hit_vfx(node)
+		return
+	var pool := Mkit.pool()
+	if pool != null:
+		pool.release(HIT_VFX_SCENE, node)
+	else:
+		node.queue_free()
+
+
+func _visible_hit_vfx_count() -> int:
+	var root := get_tree().current_scene if get_tree() != null else null
+	if root == null:
+		root = self
+	return _count_visible_hit_vfx(root)
+
+
+func _count_visible_hit_vfx(node: Node) -> int:
+	var count := 0
+	if node.name.begins_with("DemoHitVFX") and node is CanvasItem and (node as CanvasItem).visible:
+		count += 1
+	for child in node.get_children():
+		count += _count_visible_hit_vfx(child)
+	return count
 
 
 func _on_feedback_toast_requested(message: String) -> void:
@@ -1229,7 +1447,17 @@ func _on_interactable_focused(interactable: Interactable) -> void:
 	if interactable == null:
 		return
 	_interaction_focus_observed = true
-	_log("[INTERACT] focus %s" % interactable.interaction_id)
+	_log("[INTERACT] focus %s" % _interactable_label(interactable))
+
+
+func _on_interactable_unfocused(interactable: Interactable) -> void:
+	if interactable == null:
+		return
+	if interactable.interaction_id == "interaction.demo.village_supply":
+		if _shop != null:
+			_shop.close_shop()
+		if _shop_ui != null:
+			_shop_ui.visible = false
 
 
 func _on_domain_event(event: DomainEvent) -> void:
@@ -1239,15 +1467,15 @@ func _on_domain_event(event: DomainEvent) -> void:
 	_log("[STATUS] %s" % str(event.payload.get("message", "burn tick")))
 
 
-func _on_reward_selected(reward_id: String) -> void:
-	if reward_id != REWARD_TRIAL_ATTACK:
+func _on_reward_selected(event: DomainEvent) -> void:
+	if str(event.payload.get("reward_id", "")) != REWARD_TRIAL_ATTACK:
 		return
 	if _run_director == null or _run_director.run_state == null:
 		return
 	if not _run_director.run_state.temporary_upgrade_ids.has(UPGRADE_TRIAL_ATTACK):
 		_run_director.run_state.temporary_upgrade_ids.append(UPGRADE_TRIAL_ATTACK)
 	_trial_upgrade_reward_selected = true
-	_log("[TRIAL] upgrade recorded %s" % UPGRADE_TRIAL_ATTACK)
+	_log("[TRIAL] upgrade recorded %s" % _display_name(REWARD_TRIAL_ATTACK))
 
 
 func _on_trial_run_started(state: RunState) -> void:
@@ -1262,7 +1490,7 @@ func _on_trial_room_enter_requested(room_id: String) -> void:
 	_trial_room_entries.append(room_id)
 	_pending_trial_rewards.clear()
 	_clear_trial_reward_screen()
-	_log("[TRIAL] entering %s" % room_id)
+	_log("[TRIAL] entering %s" % _friendly_content_id(room_id))
 
 
 func _on_trial_choosing_reward(options: Array[RewardOption]) -> void:
@@ -1278,6 +1506,8 @@ func _on_trial_run_finished(result: String) -> void:
 	_clear_trial_reward_screen()
 	if result == "completed" and _room_root != null:
 		_room_root.visible = false
+	elif result.begins_with("failed"):
+		_close_trial_room()
 	_log("[TRIAL] finished %s" % result)
 
 
@@ -1292,38 +1522,36 @@ func _show_trial_rewards(options: Array[RewardOption]) -> void:
 	_reward_screen.setup({"options": options, "run_director": _run_director})
 
 
-func _on_entity_died(entity_id: String, entity_ref: Node) -> void:
-	_log("[COMBAT] defeated %s" % entity_id)
-	if entity_ref == null or _field_beast_looted:
+func _on_entity_died(event: DomainEvent) -> void:
+	var entity_id := str(event.payload.get("entity_id", event.source_id))
+	var entity_ref := event.payload.get("entity_ref") as Node
+	_log(
+		"[COMBAT] defeated %s"
+		% (_entity_display_name(entity_ref) if entity_ref != null else _friendly_content_id(entity_id))
+	)
+	if entity_ref == null:
 		return
-	var identity := entity_ref.get_node_or_null("EntityIdentity") as EntityIdentity
-	if identity == null or not identity.tags.has("field_beast"):
+	var tags: Array = event.payload.get("tags", [])
+	if not tags.has("field_beast"):
 		return
-	_field_beast_looted = true
 	_field_beast_defeated = true
-	_grant_field_loot(entity_ref)
 	_grant_field_xp()
 	_field_beast_ref = null
 
 
-func _grant_field_loot(entity_ref: Node) -> void:
+func _on_loot_dropped(event: DomainEvent) -> void:
+	var drop := event.payload.get("drop") as LootDropResult
+	if drop == null or drop.roll_result == null:
+		return
 	var inventory := _inventory()
 	if inventory == null:
 		return
-	_roll_loot_into_bag(LOOT_FIELD_BEAST, entity_ref, inventory)
-	_roll_loot_into_bag(LOOT_FIELD_BLADE, entity_ref, inventory)
-	_play_sfx("sfx.demo.loot")
-
-
-func _roll_loot_into_bag(
-	table_id: String, entity_ref: Node, inventory: InventoryController
-) -> void:
-	var result := _loot_system.roll_table(
-		table_id, GameplayContext.new().with_source(entity_ref).with_target(_player)
-	)
-	for item in result.item_instances:
+	for item in drop.roll_result.item_instances:
 		if inventory.add_item(item):
-			_log("[LOOT] picked up %s x%d" % [item.definition_id, item.quantity])
+			_log("[LOOT] picked up %s x%d" % [_display_name(item.definition_id), item.quantity])
+	if not _field_beast_looted and drop.entity_definition_id == ENTITY_FIELD_BEAST:
+		_field_beast_looted = true
+		_play_sfx("sfx.demo.loot")
 
 
 func _toggle_field_blade() -> void:
@@ -1338,19 +1566,19 @@ func _toggle_field_blade() -> void:
 		equipment.unequip(WEAPON_SLOT)
 		_field_blade_equipped = false
 		var restored := stats.get_stat_value("attack_power", 0.0) if stats != null else before
-		_log("[EQUIP] unequipped field blade attack_power %.0f -> %.0f" % [before, restored])
+		_log("[EQUIP] stowed Field Blade attack %.0f -> %.0f" % [before, restored])
 		return
 	var blade := inventory.find_item_by_definition(ITEM_FIELD_BLADE)
 	if blade == null:
-		_log("[EQUIP] no field blade to equip")
+		_log("[EQUIP] no Field Blade to equip")
 		return
 	if not equipment.equip(blade, WEAPON_SLOT):
-		_log("[EQUIP] field blade equip failed")
+		_log("[EQUIP] Field Blade equip failed")
 		return
 	var after := stats.get_stat_value("attack_power", 0.0) if stats != null else before
 	if after > before:
 		_field_blade_equipped = true
-	_log("[EQUIP] equipped field blade attack_power %.0f -> %.0f" % [before, after])
+	_log("[EQUIP] equipped Field Blade attack %.0f -> %.0f" % [before, after])
 
 
 func _grant_field_xp() -> void:
@@ -1362,98 +1590,15 @@ func _grant_field_xp() -> void:
 
 
 func _on_level_up(old_level: int, new_level: int) -> void:
-	_track_analytics_event(
-		"level_up",
-		{
-			"old_level": old_level,
-			"new_level": new_level,
-			"zone_id": _world.current_zone_id if _world != null else ""
-		}
-	)
 	_log("[XP] level %d -> %d" % [old_level, new_level])
 
 
-func _on_player_died(owner_entity: Node) -> void:
-	if owner_entity != _player:
-		return
-	_request_rewarded_revive()
-
-
-func _on_rewarded_ad_completed(placement_id: String) -> void:
-	if placement_id != PLATFORM_REVIVE_PLACEMENT:
-		return
-	_revive_ad_pending = false
-	var health := _player_health()
-	if health != null and health.dead:
-		health.revive(0.5)
-	_rewarded_revive_completed = health != null and not health.dead
-	_log("[AD] rewarded revive completed")
-
-
-func _on_rewarded_ad_failed(placement_id: String, reason: String) -> void:
-	if placement_id != PLATFORM_REVIVE_PLACEMENT:
-		return
-	_revive_ad_pending = false
-	_log("[AD] rewarded revive failed: %s" % reason)
-
-
-func _on_iap_purchase_completed(product_id: String) -> void:
-	if product_id != PLATFORM_GOLD_PACK_PRODUCT:
-		return
-	_gold_pack_purchase_pending = false
-	if _progression != null:
-		_progression.add_currency("gold", GOLD_PACK_AMOUNT)
-	_gold_pack_purchase_completed = true
-	_log("[IAP] gold pack completed +%d gold" % GOLD_PACK_AMOUNT)
-
-
-func _on_iap_purchase_failed(product_id: String, reason: String) -> void:
-	if product_id != PLATFORM_GOLD_PACK_PRODUCT:
-		return
-	_gold_pack_purchase_pending = false
-	_log("[IAP] gold pack failed: %s" % reason)
-
-
-func _on_cloud_save_completed(slot: String) -> void:
-	if slot != PLATFORM_CLOUD_SLOT:
-		return
-	_cloud_busy = false
-	_cloud_save_completed = true
-	_log("[CloudSave] saved %s" % slot)
-
-
-func _on_cloud_save_failed(slot: String, reason: String) -> void:
-	if slot != PLATFORM_CLOUD_SLOT:
-		return
-	_cloud_busy = false
-	_log("[CloudSave] save failed: %s" % reason)
-
-
-func _on_cloud_load_completed(slot: String, data: Dictionary) -> void:
-	if slot != PLATFORM_CLOUD_SLOT:
-		return
-	_cloud_busy = false
-	_cloud_last_loaded_data = data.duplicate(true)
-	if _write_demo_save_data(data) and _load_demo_state():
-		_cloud_load_completed = true
-		_log("[CloudSave] loaded %s" % slot)
-	else:
-		_log("[CloudSave] local load failed")
-
-
-func _on_cloud_load_failed(slot: String, reason: String) -> void:
-	if slot != PLATFORM_CLOUD_SLOT:
-		return
-	_cloud_busy = false
-	_log("[CloudSave] load failed: %s" % reason)
-
-
 func _on_item_added(item: ItemInstance) -> void:
-	_log("[INV] +%s x%d" % [item.definition_id, item.quantity])
+	_log("[INV] +%s x%d" % [_display_name(item.definition_id), item.quantity])
 
 
 func _on_item_removed(item: ItemInstance) -> void:
-	_log("[INV] -%s" % item.definition_id)
+	_log("[INV] -%s" % _display_name(item.definition_id))
 
 
 func _update_hud() -> void:
@@ -1464,6 +1609,7 @@ func _update_hud() -> void:
 	_update_inventory_hud()
 	_update_shop_hud()
 	_update_trial_hud()
+	_update_instructions()
 
 
 func _update_zone_hud() -> void:
@@ -1480,10 +1626,22 @@ func _update_quest_hud() -> void:
 		return
 	var state := _quest.get_state(QUEST_ID)
 	if state == null:
-		_quest_label.text = "Quest: talk to elder"
+		_quest_label.text = "Quest: Talk to the Elder"
 		return
 	var progress := state.get_progress(QUEST_OBJECTIVE_ID)
-	_quest_label.text = "Quest: %s  beast %d/1" % [state.status, progress]
+	match state.status:
+		"accepted":
+			_quest_label.text = "Quest: %s - %s %d/1" % [
+				_quest_title(QUEST_ID),
+				_quest_objective_label(QUEST_ID, QUEST_OBJECTIVE_ID),
+				progress
+			]
+		"completed":
+			_quest_label.text = "Quest: %s - Return to the Elder" % _quest_title(QUEST_ID)
+		"turned_in":
+			_quest_label.text = "Quest: %s complete" % _quest_title(QUEST_ID)
+		_:
+			_quest_label.text = "Quest: %s" % _quest_title(QUEST_ID)
 
 
 func _update_player_hud() -> void:
@@ -1512,7 +1670,7 @@ func _update_combat_hud() -> void:
 	if beast == null:
 		_combat_label.text = "Beast: not spawned"
 		return
-	var health := beast.get_node_or_null("Components/HealthComponent") as HealthComponent
+	var health := beast.get_component("HealthComponent") as HealthComponent
 	if health == null:
 		_combat_label.text = "Beast: missing health"
 		return
@@ -1532,7 +1690,7 @@ func _update_inventory_hud() -> void:
 		return
 	var parts: Array[String] = []
 	for item in inventory.model.get_items():
-		parts.append("%s x%d" % [item.definition_id.replace("item.demo.", ""), item.quantity])
+		parts.append("%s x%d" % [_display_name(item.definition_id), item.quantity])
 	_inventory_label.text = "Bag: %s" % (", ".join(parts) if not parts.is_empty() else "empty")
 
 
@@ -1540,10 +1698,79 @@ func _update_shop_hud() -> void:
 	if _shop == null or _shop.current_shop == null:
 		_shop_label.text = "Shop: closed"
 		return
-	_shop_label.text = "Shop: potion %d gold, claw sells for %d" % [
+	_shop_label.text = "Shop: Herb Potion %d gold, Beast Claw sells for %d" % [
 		_shop.get_buy_price(ITEM_POTION),
 		_shop.get_sell_price(ITEM_CLAW)
 	]
+
+
+func _update_instructions() -> void:
+	if _instructions_label == null:
+		return
+	var lines := _instruction_lines()
+	_instructions_label.text = "\n".join(lines)
+	_instructions_label.visible = not lines.is_empty()
+
+
+func _instruction_lines() -> Array[String]:
+	var lines: Array[String] = []
+	var context := _context_action_line()
+	if context != "":
+		lines.append(context)
+	var next := _next_goal_line()
+	if next != "" and next != context:
+		lines.append(next)
+	lines.append("Move: WASD  Attack: Space/J  Firebolt: Q")
+	return lines
+
+
+func _context_action_line() -> String:
+	if _dialogue != null and _dialogue.is_active():
+		var choices := _dialogue.get_available_choices()
+		if choices.is_empty():
+			return "E/Enter: continue dialogue"
+		return "E/Enter: %s  1-3: choose another option" % choices[0].text
+	if not _pending_trial_rewards.is_empty():
+		return "E/Enter: choose %s  1-3: choose reward" % _pending_trial_rewards[0].display_name
+	var focused := _focused_interactable()
+	if focused != null:
+		if focused.interaction_id == "interaction.demo.village_supply" and _shop != null and _shop.current_shop != null:
+			return "Village Supply: B buy Herb Potion, V sell Beast Claw"
+		return "E/Enter: %s" % _interactable_label(focused)
+	if _is_trial_cave_open():
+		return "E/Enter: leave Trial Cave"
+	if _item_count(ITEM_FIELD_BLADE) > 0:
+		return "E/Enter: equip or stow Field Blade"
+	return "E/Enter: interact with the nearest highlighted target"
+
+
+func _next_goal_line() -> String:
+	if _world == null:
+		return "Next: starting village"
+	if _is_trial_cave_open():
+		if not _pending_trial_rewards.is_empty():
+			return "Next: choose a cave reward"
+		return "Next: clear the trial room"
+	var state := _quest.get_state(QUEST_ID) if _quest != null else null
+	if state == null:
+		if _world.current_zone_id == ZONE_ROOM:
+			return "Next: talk to the Elder"
+		return "Next: enter Elder Room"
+	if state.status == "accepted":
+		if _world.current_zone_id == ZONE_FIELD:
+			if _field_beast_defeated:
+				return "Next: return to the Elder"
+			return "Next: defeat the Field Beast"
+		return "Next: go to Field Gate"
+	if state.status == "completed":
+		return "Next: return to the Elder"
+	if state.status == "turned_in":
+		if _world.current_zone_id == ZONE_FIELD:
+			return "Next: enter Trial Cave"
+		if _world.current_zone_id == ZONE_VILLAGE:
+			return "Next: try Village Supply or head to Field Gate"
+		return "Next: return to Village"
+	return ""
 
 
 func _update_trial_hud() -> void:
@@ -1582,14 +1809,17 @@ func _spawn_field_beast() -> void:
 	if _entity_spawner == null:
 		_log("[ENTITY] entity spawner missing")
 		return
-	var beast := _entity_spawner.spawn_entity(ENTITY_FIELD_BEAST, root, marker.global_position)
+	var spawned := _entity_spawner.spawn_entity(ENTITY_FIELD_BEAST, root, marker.global_position)
+	var beast := spawned as EntityRoot
 	if beast == null:
 		_log("[ENTITY] field beast spawn failed")
+		if spawned != null and is_instance_valid(spawned):
+			spawned.queue_free()
 		return
 	_field_beast_ref = beast
 
 
-func _field_beast() -> Node:
+func _field_beast() -> EntityRoot:
 	if is_instance_valid(_field_beast_ref):
 		return _field_beast_ref
 	return null
@@ -1600,7 +1830,7 @@ func _is_field_beast_health_alive(health_component: Object = null) -> bool:
 		var beast := _field_beast()
 		if beast == null:
 			return false
-		health_component = beast.get_node_or_null("Components/HealthComponent")
+		health_component = beast.get_component("HealthComponent")
 	if health_component == null or not is_instance_valid(health_component):
 		return false
 	var health := health_component as HealthComponent
@@ -1610,49 +1840,164 @@ func _is_field_beast_health_alive(health_component: Object = null) -> bool:
 
 
 func _inventory() -> InventoryController:
-	return _player.get_node_or_null("Controllers/InventoryController") as InventoryController
+	return _player.get_controller("InventoryController") as InventoryController
 
 
 func _equipment_controller() -> EquipmentController:
-	return _player.get_node_or_null("Controllers/EquipmentController") as EquipmentController
+	return _player.get_controller("EquipmentController") as EquipmentController
 
 
 func _player_health() -> HealthComponent:
-	return _player.get_node_or_null("Components/HealthComponent") as HealthComponent
+	return _player.get_component("HealthComponent") as HealthComponent
 
 
 func _interaction_component() -> InteractionComponent:
-	return _player.get_node_or_null("Components/InteractionComponent") as InteractionComponent
+	return _player.get_component("InteractionComponent") as InteractionComponent
 
 
 func _ability_controller() -> AbilityController:
-	return _player.get_node_or_null("Controllers/AbilityController") as AbilityController
+	return _player.get_controller("AbilityController") as AbilityController
 
 
 func _player_stats() -> StatsComponent:
-	return _player.get_node_or_null("Components/StatsComponent") as StatsComponent
+	return _player.get_component("StatsComponent") as StatsComponent
 
 
 func _player_mana() -> float:
-	var pool := _player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
+	var pool := _player.get_component("ResourcePoolComponent") as ResourcePoolComponent
 	return pool.get_current("mana") if pool != null else 0.0
 
 
+func _gold() -> int:
+	return _progression.get_currency("gold") if _progression != null else 0
+
+
+func _item_count(definition_id: String) -> int:
+	var inventory := _inventory()
+	if inventory == null:
+		return 0
+	var total := 0
+	for item in inventory.model.get_items():
+		if item.definition_id == definition_id:
+			total += item.quantity
+	return total
+
+
 func _experience() -> ExperienceComponent:
-	return _player.get_node_or_null("Components/ExperienceComponent") as ExperienceComponent
+	return _player.get_component("ExperienceComponent") as ExperienceComponent
 
 
 func _entity_id(node: Node) -> String:
 	if node == null:
 		return "?"
-	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var root := node as EntityRoot
+	var identity := (
+		root.get_entity_identity() if root != null else node.get_node_or_null("EntityIdentity")
+	) as EntityIdentity
 	return identity.entity_id if identity != null else str(node.name)
+
+
+func _entity_display_name(node: Node) -> String:
+	if node == null:
+		return "?"
+	var root := node as EntityRoot
+	var identity := (
+		root.get_entity_identity() if root != null else node.get_node_or_null("EntityIdentity")
+	) as EntityIdentity
+	if identity != null:
+		if identity.display_name != "":
+			return identity.display_name
+		return _friendly_content_id(identity.entity_id)
+	return str(node.name)
+
+
+func _display_name(content_id: String, fallback: String = "") -> String:
+	if content_id.strip_edges() == "":
+		return fallback
+	var content := Mkit.content()
+	if content != null and content.has(content_id):
+		var resource := content.get_resource(content_id)
+		var raw = resource.get("display_name")
+		if raw != null and str(raw) != "":
+			return str(raw)
+	return fallback if fallback != "" else _friendly_content_id(content_id)
+
+
+func _friendly_content_id(content_id: String) -> String:
+	var value := content_id
+	for prefix in [
+		"item.demo.",
+		"quest.demo.",
+		"obj.demo.",
+		"ability.demo.",
+		"entity.demo.",
+		"zone.demo.",
+		"dialogue.demo.",
+		"reward.demo.",
+		"status.demo.",
+		"room.demo.",
+		"npc.demo.",
+		"shop.demo."
+	]:
+		value = value.replace(prefix, "")
+	return value.replace("_", " ")
+
+
+func _quest_title(quest_id: String) -> String:
+	var definition := _quest.get_definition(quest_id) if _quest != null else null
+	if definition != null and definition.display_name != "":
+		return definition.display_name
+	return _display_name(quest_id)
+
+
+func _quest_objective_label(quest_id: String, objective_id: String) -> String:
+	var definition := _quest.get_definition(quest_id) if _quest != null else null
+	if definition != null:
+		var objective := definition.get_objective(objective_id)
+		if objective != null and objective.description != "":
+			return objective.description
+	return _friendly_content_id(objective_id)
+
+
+func _interactable_label(interactable: Interactable) -> String:
+	if interactable == null:
+		return "Interact"
+	match interactable.interaction_id:
+		"interaction.demo.elder":
+			return "Talk to Elder"
+		"interaction.demo.village_supply":
+			return "Open Village Supply"
+		_:
+			return interactable.display_text if interactable.display_text != "" else "Interact"
+
+
+func _first_missing_service() -> String:
+	var checks := {
+		"dialogue": _dialogue,
+		"quest": _quest,
+		"shop": _shop,
+		"world": _world,
+		"commands": _commands,
+		"events": _events,
+		"effects": _effects,
+		"time": _time,
+		"progression": _progression,
+		"audio": _audio,
+		"save": _save_manager
+	}
+	for key in checks.keys():
+		if checks[key] == null:
+			return key
+	return ""
 
 
 func _has_entity_tag(node: Node, tag: String) -> bool:
 	if node == null:
 		return false
-	var identity := node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var root := node as EntityRoot
+	var identity := (
+		root.get_entity_identity() if root != null else node.get_node_or_null("EntityIdentity")
+	) as EntityIdentity
 	return identity != null and identity.tags.has(tag)
 
 
@@ -1663,8 +2008,27 @@ func get_debug_status_lines() -> Array[String]:
 	if _run_director != null and _run_director.run_state != null:
 		run_status = _run_director.run_state.status
 	lines.append("Run: %s" % run_status)
+	var focused := _focused_interactable()
+	lines.append("Focus: %s" % (_interactable_label(focused) if focused != null else "none"))
+	if _last_failed_command != "":
+		lines.append("Last failed command: %s" % _last_failed_command)
+	_update_last_failed_effect()
+	if _last_failed_effect != "":
+		lines.append("Last failed effect: %s" % _last_failed_effect)
+	if _last_missing_service != "":
+		lines.append("Missing service: %s" % _last_missing_service)
 	lines.append("Runtime: %.2f" % _runtime_seconds)
 	return lines
+
+
+func _update_last_failed_effect() -> void:
+	if _effects == null:
+		return
+	for i in range(_effects.recent_results.size() - 1, -1, -1):
+		var result := _effects.recent_results[i] as EffectResult
+		if result != null and not result.success:
+			_last_failed_effect = "%s: %s" % [result.effect_id, result.failure_reason]
+			return
 
 
 func _play_sfx(audio_id: String) -> void:
@@ -1686,90 +2050,73 @@ func _cleanup_audio_players() -> void:
 		player.free()
 	_audio.music_player = null
 	_audio.current_music_id = ""
-	_audio.music_map.clear()
-	_audio.sfx_map.clear()
 
 
 func _log(line: String) -> void:
 	print(line)
-	_log_lines.append(line)
-	if _log_lines.size() > 10:
+	_record_debug_failure(line)
+	_log_lines.append(_compact_log_line(line))
+	if _log_lines.size() > EVENT_LOG_MAX_LINES:
 		_log_lines.pop_front()
 	if _event_log_label != null:
-		_event_log_label.text = "\n".join(_log_lines)
+		_event_log_label.text = "Log\n%s" % "\n".join(_log_lines)
+
+
+func _compact_log_line(line: String) -> String:
+	var compact := line
+	compact = _replace_known_content_ids(compact)
+	compact = compact.replace("[SHOP] bought ", "Bought ")
+	compact = compact.replace("[SHOP] sold ", "Sold ")
+	compact = compact.replace("[SHOP] opened ", "Shop: ")
+	compact = compact.replace("[QUEST] accepted ", "Quest accepted: ")
+	compact = compact.replace("[QUEST] turned in ", "Quest complete: ")
+	compact = compact.replace("[WORLD] ", "World: ")
+	compact = compact.replace("[INV] +", "Found ")
+	compact = compact.replace("[INV] -", "Removed ")
+	if compact.length() > 62:
+		compact = "%s..." % compact.substr(0, 59)
+	return compact
+
+
+func _replace_known_content_ids(value: String) -> String:
+	var compact := value
+	for id in [
+		ITEM_POTION,
+		ITEM_CLAW,
+		ITEM_CHARM,
+		ITEM_FIELD_BLADE,
+		QUEST_ID,
+		QUEST_MANUAL_ID,
+		SHOP_ID,
+		ZONE_VILLAGE,
+		ZONE_ROOM,
+		ZONE_FIELD,
+		ENTITY_FIELD_BEAST,
+		ENTITY_TRIAL_BEAST,
+		ABILITY_FIREBOLT,
+		STATUS_BURN,
+		REWARD_TRIAL_ATTACK
+	]:
+		compact = compact.replace(id, _display_name(id))
+	compact = compact.replace(QUEST_OBJECTIVE_ID, _quest_objective_label(QUEST_ID, QUEST_OBJECTIVE_ID))
+	compact = compact.replace(
+		QUEST_MANUAL_OBJECTIVE_ID,
+		_quest_objective_label(QUEST_MANUAL_ID, QUEST_MANUAL_OBJECTIVE_ID)
+	)
+	return compact
+
+
+func _record_debug_failure(line: String) -> void:
+	var lower := line.to_lower()
+	if lower.contains("service missing"):
+		_last_missing_service = line
+	if lower.contains("failed") or lower.contains("missing"):
+		if line.begins_with("[ACTION]") or line.begins_with("[ABILITY]") or line.begins_with("[COMBAT]"):
+			_last_failed_effect = line
 
 
 func _run_auto_loop() -> void:
-	if _auto_run_started:
-		return
-	_auto_run_started = true
-	await _settle_world()
-	await _focus_zone_interactable("ToRoom/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	await _focus_zone_interactable("Elder/InteractionArea/Interactable")
-	_talk_or_advance_dialogue()
-	await get_tree().process_frame
-	_talk_or_advance_dialogue()
-	await get_tree().process_frame
-	_talk_or_advance_dialogue()
-	await _settle_world()
-	await _focus_zone_interactable("ToVillage/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	await _focus_zone_interactable("ToField/Interactable")
-	_toggle_field_portal()
-	await _settle_world()
-	await _dash_player_once()
-	await _settle_world()
-	await _cast_firebolt_at_beast()
-	await _settle_world()
-	await _engage_field_beast_via_commands()
-	await _settle_world()
-	await _run_trial_auto()
-	await _settle_world()
-	await _focus_zone_interactable("ToVillage/Interactable")
-	_toggle_field_portal()
-	await _settle_world()
-	await _focus_zone_interactable("ToRoom/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	await _focus_zone_interactable("Elder/InteractionArea/Interactable")
-	_request_elder_blessing()
-	await _settle_world()
-	await _focus_zone_interactable("Elder/InteractionArea/Interactable")
-	_request_manual_task()
-	await _settle_world()
-	await _focus_zone_interactable("ToVillage/Interactable")
-	_toggle_room_portal()
-	await _settle_world()
-	_toggle_field_blade()
-	await _settle_world()
-	_toggle_field_blade()
-	await _settle_world()
-	_toggle_field_blade()
-	await _settle_world()
-	_buy_potion()
-	await get_tree().process_frame
-	_sell_claw()
-	await get_tree().process_frame
-	_trigger_rewarded_revive_demo()
-	await _wait_for_rewarded_revive()
-	_purchase_gold_pack()
-	await _wait_for_gold_pack_purchase()
-	await _roundtrip_demo_save_for_auto_run()
-	_save_demo_to_cloud()
-	await _wait_for_cloud_save()
-	_load_demo_from_cloud()
-	await _wait_for_cloud_load()
-	if _demo_loop_complete():
-		_log("[AUTO] demo RPG loop complete")
-	else:
-		_log("[AUTO] missing: %s" % ", ".join(_demo_missing_requirements()))
-		_log("[AUTO] demo RPG loop incomplete")
-	_cleanup_audio_players()
-	await get_tree().process_frame
-	get_tree().quit()
+	await _auto_run_verifier.run(self, _save_payload_verifier)
 
 
 func _settle_world() -> void:
@@ -1779,97 +2126,10 @@ func _settle_world() -> void:
 	await get_tree().physics_frame
 
 
-func _wait_for_rewarded_revive() -> void:
-	var elapsed := 0.0
-	while elapsed < 1.0 and not _rewarded_revive_completed:
+func _settle_shutdown() -> void:
+	for i in range(6):
 		await get_tree().process_frame
-		elapsed += get_process_delta_time()
-
-
-func _wait_for_gold_pack_purchase() -> void:
-	var elapsed := 0.0
-	while elapsed < 1.0 and not _gold_pack_purchase_completed:
-		await get_tree().process_frame
-		elapsed += get_process_delta_time()
-
-
-func _wait_for_cloud_save() -> void:
-	var elapsed := 0.0
-	while elapsed < 1.0 and not _cloud_save_completed:
-		await get_tree().process_frame
-		elapsed += get_process_delta_time()
-
-
-func _wait_for_cloud_load() -> void:
-	var elapsed := 0.0
-	while elapsed < 1.0 and not _cloud_load_completed:
-		await get_tree().process_frame
-		elapsed += get_process_delta_time()
-
-
-func _roundtrip_demo_save_for_auto_run() -> void:
-	_demo_save_roundtrip_succeeded = false
-	if not _save_demo_state():
-		return
-	_scramble_demo_saved_state()
-	await get_tree().process_frame
-	if _load_demo_state():
-		_demo_save_roundtrip_succeeded = _demo_save_roundtrip_restored()
-		if _demo_save_roundtrip_succeeded:
-			_log("[SAVE] round-trip restored demo state")
-		else:
-			_log("[SAVE] round-trip restore check failed")
-
-
-func _scramble_demo_saved_state() -> void:
-	var equipment := _equipment_controller()
-	if equipment != null:
-		equipment.unequip(WEAPON_SLOT)
-	var inventory := _inventory()
-	if inventory != null:
-		inventory.model.setup(inventory.capacity)
-	var stats := _player_stats()
-	if stats != null:
-		var modifier_definition := StatModifierDefinition.new()
-		modifier_definition.modifier_id = "mod.demo.save_scramble_attack"
-		modifier_definition.stat_id = "attack_power"
-		modifier_definition.value = -999.0
-		modifier_definition.stacking_rule = StatModifierDefinition.StackingRule.REPLACE_SAME_SOURCE
-		stats.add_modifier(StatModifier.from_definition(modifier_definition, "demo_save_scramble"))
-	var health := _player_health()
-	if health != null:
-		health.current_hp = 1.0
-	var pool := _player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
-	if pool != null:
-		pool.set_current("mana", 0.0)
-	var ability := _ability_controller()
-	if ability != null:
-		ability.unregister_ability(ABILITY_FIREBOLT)
-	_field_blade_equipped = false
-
-
-func _demo_save_roundtrip_restored() -> bool:
-	var equipment := _equipment_controller()
-	if equipment == null or equipment.get_equipped(WEAPON_SLOT) == null:
-		_log("[SAVE] round-trip missing equipped weapon")
-		return false
-	var inventory := _inventory()
-	if inventory == null or inventory.find_item_by_definition(ITEM_POTION) == null:
-		_log("[SAVE] round-trip missing potion")
-		return false
-	var ability := _ability_controller()
-	if ability == null or not ability.has_ability(ABILITY_FIREBOLT):
-		_log("[SAVE] round-trip missing firebolt")
-		return false
-	var pool := _player.get_node_or_null("Components/ResourcePoolComponent") as ResourcePoolComponent
-	if pool == null or pool.get_current("mana") <= 0.0:
-		_log("[SAVE] round-trip missing mana")
-		return false
-	var stats := _player_stats()
-	if stats == null or stats.get_stat_value("attack_power", 0.0) < 30.0:
-		_log("[SAVE] round-trip attack_power below gate")
-		return false
-	return true
+		await get_tree().physics_frame
 
 
 func _demo_loop_complete() -> bool:
@@ -1904,6 +2164,8 @@ func _demo_missing_requirements() -> Array[String]:
 		missing.append("level")
 	if not _firebolt_cast_succeeded:
 		missing.append("firebolt")
+	if not _firebolt_projectile_observed:
+		missing.append("firebolt_projectile")
 	if not _burn_tick_observed:
 		missing.append("burn_tick")
 	if not _elder_blessing_received:
@@ -1918,8 +2180,12 @@ func _demo_missing_requirements() -> Array[String]:
 		missing.append("dash")
 	if not _field_blade_equipped:
 		missing.append("field_blade")
+	if not _debug_overlay_verified:
+		missing.append("debug_overlay")
 	if not _demo_save_roundtrip_succeeded:
 		missing.append("save_roundtrip")
+	if not _demo_save_payload_verified:
+		missing.append("save_payload")
 	if not _is_trial_completed():
 		missing.append("trial_completed")
 	if _trial_run_finished_result != "completed":
@@ -1942,18 +2208,44 @@ func _demo_missing_requirements() -> Array[String]:
 		missing.append("attack_power")
 	if not _shop_purchase_completed or not _shop_sale_completed:
 		missing.append("shop")
-	if not _rewarded_revive_completed:
-		missing.append("revive")
-	if not _gold_pack_purchase_completed:
-		missing.append("gold_pack")
-	if not _cloud_save_completed or not _cloud_load_completed:
-		missing.append("cloud")
+	if _shop_purchase_verifications < AUTO_RUN_EXPECTED_POTION_BUYS:
+		missing.append("shop_buy_delta")
+	if not _shop_sale_currency_verified:
+		missing.append("shop_sell_delta")
+	if not _potion_use_completed:
+		missing.append("potion_use")
 	if _runtime_seconds <= 0.0:
 		missing.append("time")
 	if not _feedback_shake_observed or not _feedback_toast_observed:
 		missing.append("feedback")
 	if not _spawn_scene_effect_succeeded:
 		missing.append("spawn_scene")
-	if _progression == null or _progression.get_currency("gold") < 30:
+	if not _hit_vfx_cleanup_verified or _visible_hit_vfx_count() > 0:
+		missing.append("hit_vfx_cleanup")
+	if _progression == null or _progression.get_currency("gold") < 5:
 		missing.append("gold")
+	missing.append_array(_demo_ui_missing_requirements())
+	return missing
+
+
+func _demo_ui_missing_requirements() -> Array[String]:
+	var missing: Array[String] = []
+	_update_hud()
+	if _zone_label == null or not _zone_label.text.contains("Village"):
+		missing.append("ui_zone")
+	if _quest_label == null or not _quest_label.text.contains("complete"):
+		missing.append("ui_quest")
+	if (
+		_inventory_label == null
+		or not _inventory_label.text.contains("Village Charm")
+		or not _inventory_label.text.contains("Field Blade")
+		or not _inventory_label.text.contains("Herb Potion")
+	):
+		missing.append("ui_inventory")
+	if _shop_label == null or not _shop_label.text.contains("Herb Potion"):
+		missing.append("ui_shop")
+	if _trial_label == null or not _trial_label.text.contains("completed"):
+		missing.append("ui_trial")
+	if _player_label == null or not _player_label.text.contains("gold"):
+		missing.append("ui_player")
 	return missing

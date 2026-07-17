@@ -1,5 +1,5 @@
 class_name PlayerCastAbilityState
-extends State
+extends HfsmState
 
 
 func enter(context: Dictionary = {}) -> void:
@@ -17,7 +17,6 @@ func enter(context: Dictionary = {}) -> void:
 		return
 
 	var gameplay_ctx := GameplayContext.from_command(command, owner_entity, _find_nearest_enemy())
-	gameplay_ctx.ability_id = ability_id
 
 	var ok := controller.cast(ability_id, gameplay_ctx)
 

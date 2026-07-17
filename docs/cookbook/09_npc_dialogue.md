@@ -18,6 +18,54 @@
 | 给玩家挂 `InteractionComponent`（Area2D），按键调 `try_interact()` | 进入/离开范围自动聚焦可交互对象 |
 | 搭一个对话框 UI，`bind()` 到 `DialogueService` | 发 `node_entered` / `choices_presented` / `dialogue_ended` 信号驱动 UI |
 
+## 本篇路径
+
+### Minimal path：剧情脚本直接开对话
+
+1. 先按步骤 1 创建 `res://data/dialogue/elder_intro.tres`，并把它加入 `ResourceDatabase.resources`。
+2. 在场景里放一个 NPC 节点，例如 `Elder`，脚本或主场景能拿到 `player` 和 `elder` 两个节点。
+3. 在剧情脚本里直接启动对话：
+
+```gdscript
+func start_intro_dialogue(player: Node, elder: Node) -> void:
+    var ctx := GameplayContext.from_nodes(player, elder)
+    if not Mkit.dialogue().start("dialogue.elder_intro", ctx):
+        push_warning("dialogue.elder_intro 没有注册或无法启动")
+```
+
+4. 如果 `DialogueUI` 已经 bind 到 `DialogueService`，界面会显示 `greet` 节点文本。
+5. 这条路径适合 cutscene 或测试；没有靠近检测，也不需要 `InteractionComponent`。
+
+### Standard path：玩家按交互键
+
+1. 给玩家加 `InteractionComponent` 和碰撞形状，输入脚本里按 `interact` 时调用 `interaction_component.try_interact()`。
+2. NPC 场景按这个结构搭：
+
+```text
+Elder  (Node2D)
+└── InteractArea  (Area2D)
+    ├── CollisionShape2D
+    └── Interactable  (DialogueInteractable)
+```
+
+3. 在 `DialogueInteractable` 的 Inspector 里填 `dialogue_id = "dialogue.elder_intro"`，节点名必须是 `Interactable`。
+4. 玩家走近 NPC，`InteractionComponent` 聚焦该 interactable；按交互键后它调用 `DialogueService.start(...)`。
+5. 验证方式：走近出现提示，按键打开对话；离开范围后按键不再触发。
+
+### Advanced path：只知道 id 时先路由命令
+
+1. 确认玩家 `CommandReceiver.auto_register = true`，receiver id 是 `"player"`。
+2. 剧情系统只有玩家 id，没有玩家节点引用时，发送交互命令：
+
+```gdscript
+var command := GameCommand.create("interact", "script", "player")
+Mkit.commands().dispatch(command)
+```
+
+3. 玩家实体收到命令后，在自己的 command handler 中调用 `InteractionComponent.try_interact()`。
+4. 后续仍然走 Standard path：当前聚焦对象是 `DialogueInteractable`，它启动对话。
+5. 如果剧情脚本已经拿到 `player` 节点，直接调用 `try_interact()`，不要走 `CommandService`。
+
 ## 步骤
 
 ### 步骤 1：创建 DialogueDefinition
@@ -28,16 +76,16 @@
 |------|----|
 | `dialogue_id` | `"dialogue.elder_intro"` |
 | `start_node_id` | `"greet"` |
-| `nodes` | 见下（3 个 `DialogueNode`）|
+| `nodes` | 见下（4 个 `DialogueNode`）|
 
-`nodes` 里建 3 个 `DialogueNode`（内联 Resource）：
+`nodes` 里建 4 个 `DialogueNode`（内联 Resource）：
 
 ```
-# node[0] —— 开场，带 2 个选项
+# node[0] —— 开场，带 3 个选项
 node_id      = "greet"
 speaker_id   = "村长"
 text         = "勇者，村子最近被野兽侵扰…"
-choices      = [choice_ask, choice_leave]
+choices      = [choice_ask, choice_whisper, choice_leave]
 next_node_id = ""        # 有 choices 时忽略 next_node_id
 
 # node[1] —— 回答，无选项，按键继续
@@ -45,9 +93,16 @@ node_id      = "info"
 speaker_id   = "村长"
 text         = "它们藏在东边的房间里。"
 choices      = []
-next_node_id = ""        # 空 → 此节点后对话结束
+next_node_id = "bye"     # 无 choices 时，advance() 会进入这个节点
 
-# node[2] —— 告别
+# node[2] —— 近距离低声线索
+node_id      = "secret"
+speaker_id   = "村长"
+text         = "别告诉别人：旧井旁有一条近路。"
+choices      = []
+next_node_id = "bye"
+
+# node[3] —— 告别
 node_id      = "bye"
 speaker_id   = "村长"
 text         = "保重。"
@@ -55,14 +110,23 @@ choices      = []
 next_node_id = ""
 ```
 
-两个 `DialogueChoice`（内联 Resource）：
+`DialogueNode.next_node_id` 只在 `choices` 为空时生效：UI 调 `DialogueService.advance()` 后，如果 `next_node_id` 非空就进入对应节点；如果为空就结束对话。有选项的节点由 `DialogueChoice.next_node_id` 决定跳转，节点自己的 `next_node_id` 会被忽略。
+
+三个 `DialogueChoice`（内联 Resource）：
 
 ```
 choice_ask:   text = "野兽在哪？"  next_node_id = "info"   conditions = []   effects = []
+choice_whisper:
+  text         = "悄声问：你还知道什么？"
+  next_node_id = "secret"
+  conditions   = [TargetInRangeCondition(condition_id="elder_close_talk", range=48.0)]
+  effects      = []
 choice_leave: text = "再见。"      next_node_id = "bye"    conditions = []   effects = []
 ```
 
 > `DialogueChoice.effects` 就是挂"对话后果"的地方——[Recipe 10](10_quest.md) 会在某个选项上挂 `AcceptQuestEffect`，让"答应帮忙"直接接下任务。`DialogueNode.on_enter_effects` 则在进入节点时触发（如播放音效、给提示）。
+>
+> `DialogueChoice.conditions` 是选项的**显示门禁**：`get_available_choices()` 会静默隐藏不满足条件的选项（不会显示成灰色）。上面的 `choice_whisper` 只有玩家离 NPC owner 48 像素内才显示；context 来自 `DialogueInteractable.interact(ctx)`，所以 `source=玩家`、`target=NPC owner`。更复杂的"声望够才显示"可按 [Recipe 20](20_custom_service.md) 写 `ReputationCondition`。条件系统详见 [Recipe 21](21_conditions.md)。
 
 把 `elder_intro.tres` 加入 `ResourceDatabase.resources`。
 
@@ -108,7 +172,7 @@ PlayerEntity  (EntityRoot)
 func _process(_delta: float) -> void:
     # ...（移动/攻击输入）
     if Input.is_action_just_pressed("interact"):
-        var interaction := owner.get_node_or_null("InteractionComponent") as InteractionComponent
+        var interaction := EntityContract.get_controller(self, "InteractionComponent") as InteractionComponent
         if interaction != null:
             if not interaction.try_interact():
                 # 附近没有可交互对象，或对方拒绝（conditions 不满足）
@@ -136,7 +200,7 @@ extends DialogueUI
 
 
 func _ready() -> void:
-    var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+    var dialogue := Mkit.dialogue()
     if dialogue == null:
         push_error("DialogueService unavailable")
         return
@@ -150,7 +214,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if not visible:
         return
     if event.is_action_pressed("interact"):
-        var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+        var dialogue := Mkit.dialogue()
         if dialogue != null and dialogue.is_active():
             if dialogue.get_available_choices().is_empty():
                 dialogue.advance()
@@ -161,8 +225,8 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 运行验证
 
 1. 玩家走近 NPC → `interactable_focused` 触发（可打 log 确认聚焦）
-2. 按交互键 → 对话框出现，显示"村长：勇者，村子最近被野兽侵扰…" + 两个选项按钮
-3. 点"野兽在哪？" → 进入 `info` 节点，显示新台词，按交互键继续 → 对话结束、面板隐藏
+2. 按交互键 → 对话框出现，显示"村长：勇者，村子最近被野兽侵扰…"；48 像素内显示 3 个选项，较远时 `choice_whisper` 被条件隐藏
+3. 点"野兽在哪？" → 进入 `info` 节点，按交互键继续 → 进入 `bye`，再按一次 → 对话结束、面板隐藏
 4. `EventService.recent_events` 里能看到 `npc_talked`、`dialogue_started`、`dialogue_ended`
 
 ## 常见错误
@@ -178,8 +242,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## 延伸阅读
 
-- [DialogueService ref](../ref/modules/DialogueService.md) — start / choose / advance / end
-- [DialogueDefinition ref](../ref/modules/DialogueDefinition.md) · [DialogueNode ref](../ref/modules/DialogueNode.md) · [DialogueChoice ref](../ref/modules/DialogueChoice.md)
-- [Interactable ref](../ref/modules/Interactable.md) · [InteractionComponent ref](../ref/modules/InteractionComponent.md)
+- [DialogueService ref](../generated/html/classes/DialogueService.html) — start / choose / advance / end
+- [DialogueDefinition ref](../generated/html/classes/DialogueDefinition.html) · [DialogueNode ref](../generated/html/classes/DialogueNode.html) · [DialogueChoice ref](../generated/html/classes/DialogueChoice.html)
+- [Interactable ref](../generated/html/classes/Interactable.html) · [InteractionComponent ref](../generated/html/classes/InteractionComponent.html)
 - [pipeline.md — Dialogue](../pipeline.md#15-dialogue)
 - [cookbook/10_quest.md](10_quest.md) — 在对话选项里接受任务

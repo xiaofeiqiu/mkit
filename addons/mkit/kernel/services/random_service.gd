@@ -1,46 +1,78 @@
 class_name RandomService
 extends RefCounted
+## 说明：`RandomService` 是 基础服务 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(RandomService.SERVICE_ID, RandomService.new())`
+
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `RandomService`。
+const SERVICE_ID: String = "random"
+## RandomService 当前使用的随机种子；用于可复现的随机流程。
 var seed_value: int = 0
+## RandomNumberGenerator 实例；所有服务级随机值都应从这里取得。
 var rng := RandomNumberGenerator.new()
 
 
+## 更新当前对象中的 `seed`；输入值按该对象规则校验或夹取。
 func set_seed(value: int) -> void:
 	seed_value = value
 	rng.seed = value
 
 
+## 使用系统随机源重置 RNG；之后的随机结果不再可复现。
 func randomize_seed() -> int:
 	rng.randomize()
 	seed_value = rng.seed
 	return seed_value
 
 
+## 返回 0 到 1 之间的浮点随机数；使用服务持有的 RandomNumberGenerator。
 func randf() -> float:
 	return rng.randf()
 
 
+## 返回闭区间内的整数随机数；min/max 由调用方提供。
 func randi_range(from: int, to: int) -> int:
 	return rng.randi_range(from, to)
 
 
+## 返回闭区间内的浮点随机数；min/max 由调用方提供。
 func randf_range(from: float, to: float) -> float:
 	return rng.randf_range(from, to)
 
 
+## 按 probability 执行一次概率判定；0 永远失败，1 永远成功。
 func chance(probability: float) -> bool:
-	return randf() < clamp(probability, 0.0, 1.0)
+	return self.randf() < clamp(probability, 0.0, 1.0)
 
 
+## 从带 weight 字段的条目中抽取一个结果；空列表或总权重为 0 时返回 null。
 func weighted_pick(entries: Array, weight_property: String = "weight"):
 	var total := 0.0
 	for entry in entries:
-		total += float(entry.get(weight_property))
+		if entry == null:
+			continue
+		var raw_weight: Variant = entry.get(weight_property)
+		if raw_weight == null:
+			continue
+		total += max(0.0, float(raw_weight))
 	if total <= 0.0:
 		return null
-	var roll := randf_range(0.0, total)
+	var roll := self.randf() * total
 	var cursor := 0.0
+	var fallback = null
 	for entry in entries:
-		cursor += float(entry.get(weight_property))
+		if entry == null:
+			continue
+		var raw_weight: Variant = entry.get(weight_property)
+		if raw_weight == null:
+			continue
+		var weight := max(0.0, float(raw_weight))
+		if weight <= 0.0:
+			continue
+		fallback = entry
+		cursor += weight
 		if roll <= cursor:
 			return entry
-	return entries[-1] if not entries.is_empty() else null
+	return fallback

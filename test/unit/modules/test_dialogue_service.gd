@@ -127,7 +127,9 @@ func test_tc_dlg_01_start_enters_start_node_and_runs_enter_effects() -> void:
 	assert_eq(enter_fx.contexts[0], ctx)
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", ["dlg.intro"])
 	assert_signal_emitted(dialogue, "node_entered")
-	assert_signal_emitted_with_parameters(events, "dialogue_started", ["dlg.intro"])
+	var evt_dialogue_started_1 := DomainEventAsserts.last_event(events, "dialogue_started")
+	assert_not_null(evt_dialogue_started_1)
+	assert_eq(evt_dialogue_started_1.source_id, "dlg.intro")
 
 
 # --- choices filtered by conditions ---
@@ -201,7 +203,9 @@ func test_tc_dlg_04_linear_advance_until_end_emits_ended() -> void:
 	dialogue.advance()
 	assert_false(dialogue.is_active())
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_ended", ["dlg.linear"])
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", ["dlg.linear"])
+	var evt_dialogue_ended_2 := DomainEventAsserts.last_event(events, "dialogue_ended")
+	assert_not_null(evt_dialogue_ended_2)
+	assert_eq(evt_dialogue_ended_2.source_id, "dlg.linear")
 
 	# advancing with no active session is a safe no-op
 	dialogue.advance()
@@ -232,7 +236,7 @@ func test_tc_dlg_05_second_start_rejected_while_active() -> void:
 	assert_eq(dialogue.runtime.dialogue_id, "dlg.b")
 
 
-# --- a definition whose start_node_id is invalid reports failure (start -> immediate end) ---
+# --- a definition whose start_node_id is invalid reports failure without creating a session ---
 
 
 func test_tc_dlg_06_invalid_start_node_reports_failure() -> void:
@@ -244,6 +248,25 @@ func test_tc_dlg_06_invalid_start_node_reports_failure() -> void:
 	watch_signals(events)
 	assert_false(dialogue.start("dlg.broken", GameplayContext.new()))
 	assert_false(dialogue.is_active())
-	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", ["dlg.broken"])
-	assert_signal_emitted_with_parameters(dialogue, "dialogue_ended", ["dlg.broken"])
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", ["dlg.broken"])
+	assert_signal_not_emitted(dialogue, "dialogue_started")
+	assert_signal_not_emitted(dialogue, "dialogue_ended")
+	assert_null(DomainEventAsserts.last_event(events, "dialogue_started"))
+	assert_null(DomainEventAsserts.last_event(events, "dialogue_ended"))
+
+
+# --- empty start_node_id uses the first configured node as the default start ---
+
+
+func test_tc_dlg_07_empty_start_node_uses_first_node() -> void:
+	var first := _make_node("n.default", "Hello", "")
+	var second := _make_node("n.other", "Later", "")
+	var nodes: Array[DialogueNode] = [first, second]
+	_make_dialogue("dlg.default", "", nodes)
+
+	watch_signals(dialogue)
+	assert_true(dialogue.start("dlg.default", GameplayContext.new()))
+	assert_true(dialogue.is_active())
+	assert_true(dialogue.runtime is DialogueRuntime)
+	assert_eq(dialogue.runtime.current_node_id, "n.default")
+	assert_eq(dialogue.runtime.history, ["n.default"] as Array[String])
+	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", ["dlg.default"])

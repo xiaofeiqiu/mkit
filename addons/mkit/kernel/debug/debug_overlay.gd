@@ -1,8 +1,18 @@
 class_name DebugOverlay
 extends CanvasLayer
+## 说明：`DebugOverlay` 是 调试界面 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在调试界面中复用这段契约或状态时使用它。
+## 示例：`var instance := DebugOverlay.new()`
+
+## DebugOverlay 观察的实体 NodePath；为空时不显示实体状态。
 @export var watch_entity_path: NodePath
+## 可提供调试状态文本的节点路径；目标节点需暴露约定的状态接口。
 @export var status_provider_path: NodePath
+## 调试覆盖层是否在启动时可见；关闭后仍可由外部逻辑切换显示。
 @export var visible_on_start: bool = true
+## 是否显示 ServiceRegistry 中已注册的服务列表。
 @export var show_registered_services: bool = true
 var _label: Label = null
 var _events: EventService = null
@@ -12,8 +22,8 @@ func _ready() -> void:
 	_label = Label.new()
 	add_child(_label)
 	visible = visible_on_start
-	if ServiceRegistry.has_service("events"):
-		_events = ServiceRegistry.get_service("events") as EventService
+	if ServiceRegistry.has_service(EventService.SERVICE_ID):
+		_events = ServiceRegistry.get_port(EventService.SERVICE_ID) as EventService
 	if not ServiceRegistry.has_service("debug"):
 		ServiceRegistry.register_service("debug", self)
 
@@ -23,6 +33,7 @@ func _process(_delta: float) -> void:
 		_label.text = _build_text()
 
 
+## 切换调试 overlay 的可见状态；启用后继续读取观察实体和服务状态。
 func toggle() -> void:
 	visible = not visible
 
@@ -34,15 +45,15 @@ func _build_text() -> String:
 	_append_status_provider_lines(lines)
 	var entity := get_node_or_null(watch_entity_path)
 	if entity != null:
-		var sm := entity.get_node_or_null("StateMachine") as StateMachine
+		var sm := EntityContract.get_state_machine(entity)
 		if sm != null:
 			lines.append("State: %s" % sm.get_current_path())
 			if sm.last_failed_transition_reason != "":
 				lines.append("Last failed transition: %s" % sm.last_failed_transition_reason)
-		var receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+		var receiver := EntityContract.get_command_receiver(entity)
 		if receiver != null and not receiver.command_history.is_empty():
 			lines.append("Last command: %s" % receiver.command_history[-1].command_type)
-		var health = entity.get_node_or_null("Components/HealthComponent")
+		var health := EntityContract.get_component(entity, "HealthComponent")
 		if health != null and "current_hp" in health and health.has_method("get_max_hp"):
 			lines.append("HP: %.0f / %.0f" % [health.current_hp, health.get_max_hp()])
 	if _events != null and not _events.recent_events.is_empty():

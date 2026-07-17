@@ -84,13 +84,22 @@ func _make_shop(
 	return definition
 
 
-func _make_buyer(capacity: int = 30) -> Node:
-	var buyer := Node.new()
+func _make_buyer(capacity: int = 30) -> EntityRoot:
+	var buyer := EntityRoot.new()
 	buyer.name = "Buyer"
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	identity.entity_id = "buyer"
 	buyer.add_child(identity)
+	var state_machine := Hfsm.new()
+	state_machine.name = "StateMachine"
+	buyer.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	buyer.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	buyer.add_child(components)
 	var controllers := Node.new()
 	controllers.name = "Controllers"
 	buyer.add_child(controllers)
@@ -142,9 +151,11 @@ func test_tc_shop_01_buy_spends_currency_and_grants_item() -> void:
 	assert_not_null(item)
 	assert_eq(item.quantity, 2)
 	assert_signal_emitted_with_parameters(shop, "item_purchased", ["item.potion", 2, 20])
-	assert_signal_emitted_with_parameters(
-		events, "item_purchased", ["shop.village", "item.potion", 2]
-	)
+	var evt_purchase := DomainEventAsserts.last_event(events, "item_purchased")
+	assert_not_null(evt_purchase)
+	assert_eq(evt_purchase.source_id, "shop.village")
+	assert_eq(evt_purchase.target_id, "item.potion")
+	assert_eq(evt_purchase.payload.get("quantity"), 2)
 
 
 # --- buy: insufficient currency is rejected ---
@@ -167,7 +178,7 @@ func test_tc_shop_02_buy_fails_when_currency_insufficient() -> void:
 		shop, "transaction_failed", ["item.potion", "Insufficient currency"]
 	)
 	assert_signal_not_emitted(shop, "item_purchased")
-	assert_signal_not_emitted(events, "item_purchased")
+	assert_null(DomainEventAsserts.last_event(events, "item_purchased"))
 
 
 # --- stock decrements, blocks at zero, conditions gate ---
@@ -223,7 +234,11 @@ func test_tc_shop_04_sell_removes_item_and_adds_currency() -> void:
 	assert_eq(inventory.find_item_by_definition("item.gem").quantity, 1)
 	assert_eq(progression.get_currency("gold"), 20)
 	assert_signal_emitted_with_parameters(shop, "item_sold", ["item.gem", 2, 20])
-	assert_signal_emitted_with_parameters(events, "item_sold", ["shop.village", "item.gem", 2])
+	var evt_item_sold_1 := DomainEventAsserts.last_event(events, "item_sold")
+	assert_not_null(evt_item_sold_1)
+	assert_eq(evt_item_sold_1.source_id, "shop.village")
+	assert_eq(evt_item_sold_1.target_id, "item.gem")
+	assert_eq(evt_item_sold_1.payload.get("quantity"), 2)
 
 	assert_false(shop.sell("item.does_not_exist", 1, seller))
 

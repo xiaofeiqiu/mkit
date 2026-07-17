@@ -1,62 +1,99 @@
 class_name ResourcePoolComponent
 extends SaveableComponent
+## 说明：`ResourcePoolComponent` 是 生命与资源系统 的实体组件，负责挂在实体场景下保存状态并暴露局部能力。
+## 上游：通常由实体根节点、控制器、状态机或领域服务创建或调用。
+## 下游：会连接EventService、SaveService、controller 或实体展示层，不直接依赖具体游戏内容。
+## 使用：当项目实体需要持有可保存或可被 controller 查询的局部状态时使用它。
+## 示例：`var instance := ResourcePoolComponent.new()`
+
+## 当 `ResourcePoolComponent` 发生 `resource changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal resource_changed(resource_id: String, current: float, max_value: float)
+## 当 `ResourcePoolComponent` 发生 `resource spent` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal resource_spent(resource_id: String, amount: float)
+## 当 `ResourcePoolComponent` 发生 `resource restored` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal resource_restored(resource_id: String, amount: float)
+## 资源池初始值表；key 为资源 id，value 为当前值或最大值约定。
 @export var starting_values: Dictionary = {}
-var current_values: Dictionary = {}
+## 运行时 ResourceSet；保存各资源当前值并通过 stats 查询上限。
+var resources: ResourceSet = null
+## 同一实体上的 StatsComponent 引用；用于读取最大生命值或资源上限。
 var stats: StatsComponent = null
 
 
 func _ready() -> void:
-	stats = owner.get_node_or_null("Components/StatsComponent") as StatsComponent
-	current_values = starting_values.duplicate(true)
-	for resource_id in current_values.keys():
-		set_current(str(resource_id), float(current_values[resource_id]))
+	stats = EntityContract.get_component(owner, "StatsComponent") as StatsComponent
+	resources = ResourceSet.new()
+	resources.set_max_provider(_resolve_max_resource)
+	resources.from_save_data(starting_values)
 
 
+## 读取当前对象中的 `current`；未找到时返回 null、空集合或该 API 的默认值。
 func get_current(resource_id: String) -> float:
-	return float(current_values.get(resource_id, get_max_resource(resource_id)))
+	if resources == null:
+		return get_max_resource(resource_id)
+	return resources.get_current(resource_id)
 
 
+## 读取当前对象中的 `max_resource`；未找到时返回 null、空集合或该 API 的默认值。
 func get_max_resource(resource_id: String) -> float:
 	if stats == null:
 		return 0.0
 	return stats.get_stat_value("max_%s" % resource_id, 0.0)
 
 
+## 检查当前集合或对象是否包含 `resource`；缺失或空值时返回 false。
 func has_resource(resource_id: String, amount: float) -> bool:
-	if amount <= 0.0:
-		return true
-	return get_current(resource_id) >= amount
+	if resources == null:
+		return amount <= 0.0
+	return resources.has(resource_id, amount)
 
 
+## 尝试扣除指定资源或货币；成功会更新余额，失败保持原状态。
 func spend(resource_id: String, amount: float) -> bool:
-	if not has_resource(resource_id, amount):
+	if resources == null:
 		return false
-	set_current(resource_id, get_current(resource_id) - amount)
+	if not resources.spend(resource_id, amount):
+		return false
+	set_current(resource_id, resources.get_current(resource_id))
 	resource_spent.emit(resource_id, amount)
 	return true
 
 
+## 执行 `restore` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func restore(resource_id: String, amount: float) -> void:
-	if amount <= 0.0:
+	if resources == null:
 		return
-	set_current(resource_id, get_current(resource_id) + amount)
-	resource_restored.emit(resource_id, amount)
+	var before := resources.get_current(resource_id)
+	resources.restore(resource_id, amount)
+	var after := resources.get_current(resource_id)
+	set_current(resource_id, after)
+	resource_restored.emit(resource_id, after - before)
 
 
+## 更新当前对象中的 `current`；输入值按该对象规则校验或夹取。
 func set_current(resource_id: String, value: float) -> void:
 	var max_value := get_max_resource(resource_id)
-	current_values[resource_id] = clamp(value, 0.0, max_value)
-	resource_changed.emit(resource_id, current_values[resource_id], max_value)
+	if resources == null:
+		resources = ResourceSet.new()
+		resources.set_max_provider(_resolve_max_resource)
+	resources.set_current(resource_id, value)
+	resource_changed.emit(resource_id, resources.get_current(resource_id), max_value)
 
 
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
-	return current_values.duplicate(true)
+	if resources == null:
+		return {}
+	return resources.to_save_data()
 
 
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
-	current_values = data.duplicate(true)
-	for resource_id in current_values.keys():
-		set_current(str(resource_id), float(current_values[resource_id]))
+	if resources == null:
+		resources = ResourceSet.new()
+		resources.set_max_provider(_resolve_max_resource)
+	resources.from_save_data(data)
+
+
+func _resolve_max_resource(resource_id: String) -> float:
+	return get_max_resource(resource_id)

@@ -59,7 +59,7 @@ class GrantCurrencyEffect:
 	func _apply_impl(_context: GameplayContext) -> EffectResult:
 		if not ServiceRegistry.has_service("progression"):
 			return EffectResult.fail(effect_id, "Missing progression service")
-		var progression := ServiceRegistry.get_service("progression") as ProgressionService
+		var progression := ServiceRegistry.get_port("progression") as ProgressionService
 		if progression == null:
 			return EffectResult.fail(effect_id, "Missing progression service")
 		progression.add_currency(currency_id, amount)
@@ -250,8 +250,8 @@ static func make_entity(
 	entity_id: String,
 	tags: Array[String] = [],
 	faction: String = "neutral"
-) -> Node:
-	var entity := Node.new()
+	) -> EntityRoot:
+	var entity := EntityRoot.new()
 	entity.name = entity_name
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
@@ -264,6 +264,25 @@ static func make_entity(
 	ensure_child(entity, "Components")
 	ensure_child(entity, "Controllers")
 	ensure_child(entity, "Presentation")
+	_ensure_state_machine(entity)
+	_ensure_command_receiver(entity)
+	add_stats_component(entity, {
+		"max_hp": 100.0,
+		"attack_power": 0.0,
+		"crit_chance": 0.0,
+		"damage_multiplier": 1.0,
+		"defense": 0.0,
+		"evade_chance": 0.0,
+		"move_speed": 160.0,
+		"max_mana": 40.0,
+		"max_stamina": 100.0,
+		"attack_speed": 1.0,
+		"crit_damage": 1.5,
+		"cooldown_reduction": 0.0,
+		"luck": 0.0,
+		"healing_multiplier": 1.0
+	})
+	add_health_component(entity, 100.0)
 	assign_owner(entity, entity)
 	return entity
 
@@ -274,7 +293,7 @@ static func make_inventory_entity(
 	capacity: int,
 	tags: Array[String] = [],
 	faction: String = "neutral"
-) -> Node:
+	) -> EntityRoot:
 	var entity := make_entity(entity_name, entity_id, tags, faction)
 	add_inventory_controller(entity, capacity)
 	assign_owner(entity, entity)
@@ -287,11 +306,45 @@ static func make_health_entity(
 	current_hp: float,
 	tags: Array[String] = [],
 	faction: String = "neutral"
-) -> Node:
+	) -> EntityRoot:
 	var entity := make_entity(entity_name, entity_id, tags, faction)
 	add_health_component(entity, current_hp)
 	assign_owner(entity, entity)
 	return entity
+
+
+static func _ensure_state_machine(entity: EntityRoot) -> Hfsm:
+	if entity == null:
+		return null
+	var existing := entity.get_node_or_null("StateMachine") as Hfsm
+	if existing != null:
+		return existing
+	var state_machine := Hfsm.new()
+	state_machine.name = "StateMachine"
+	state_machine.auto_start = true
+	state_machine.initial_state_path = "root/idle"
+	var root_state := HfsmState.new()
+	root_state.state_id = "root"
+	root_state.name = "Root"
+	var idle_state := HfsmState.new()
+	idle_state.state_id = "idle"
+	idle_state.name = "Idle"
+	root_state.add_child(idle_state)
+	state_machine.add_child(root_state)
+	entity.add_child(state_machine)
+	return state_machine
+
+
+static func _ensure_command_receiver(entity: EntityRoot) -> CommandReceiver:
+	if entity == null:
+		return null
+	var existing := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+	if existing != null:
+		return existing
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity.add_child(receiver)
+	return receiver
 
 
 static func ensure_child(parent: Node, child_name: String) -> Node:

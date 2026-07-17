@@ -1,16 +1,22 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://addons/mkit/modules/world/dungeon/room_controller.gd" id="1_room_controller"]
 [ext_resource type="Script" path="res://addons/mkit/modules/entity/entity_spawner.gd" id="2_entity_spawner"]
+[ext_resource type="Script" path="res://game/scenes/demo_scene_polish.gd" id="3_polish"]
 
 [node name="TrialRoom03" type="Node2D"]
 
+[node name="ScenePolish" type="Node2D" parent="."]
+script = ExtResource("3_polish")
+scene_style = "trial_03"
+
 [node name="Ground" type="ColorRect" parent="."]
+z_index = -35
 offset_left = -80.0
 offset_top = -60.0
 offset_right = 760.0
 offset_bottom = 500.0
-color = Color(0.2, 0.16, 0.18, 1)
+color = Color(0.2, 0.16, 0.18, 0.16)
 
 [node name="RoomController" type="Node" parent="."]
 script = ExtResource("1_room_controller")

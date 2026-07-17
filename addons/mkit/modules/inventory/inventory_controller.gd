@@ -1,60 +1,57 @@
 class_name InventoryController
 extends SaveableComponent
+## 说明：`InventoryController` 是 背包与装备系统 的实体控制器，负责协调实体组件、服务和运行时状态。
+## 上游：通常由 EntityRoot、CommandReceiver、状态机、玩家输入或 AI 创建或调用。
+## 下游：会连接组件、ActionService、EffectService、ContentService 和 EventService，不直接依赖具体游戏内容。
+## 使用：当项目实体需要把输入、状态机和组件能力组合成可调用行为时使用它。
+## 示例：`var instance := InventoryController.new()`
+
+## 当 `InventoryController` 发生 `inventory changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal inventory_changed
+## 当 `InventoryController` 发生 `item added` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal item_added(item: ItemInstance)
+## 当 `InventoryController` 发生 `item removed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal item_removed(item: ItemInstance)
+## 背包容量，单位为槽位数量；0 或负数表示不能存放物品。
 @export var capacity: int = 30
+## InventoryController 持有的运行时背包模型。
 var model := InventoryModel.new()
-var content: ContentService = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
 	capacity = max(1, capacity)
 	model.setup(capacity)
 	model.owner_id = _get_owner_id()
 
 
+## 用 GameplayContext 和当前运行时状态判断是否允许 `add_item`；失败原因由对应查询 API 提供。
 func can_add_item(item: ItemInstance) -> bool:
-	if item == null:
-		return false
-	if item.quantity <= 0:
-		return false
-	var definition := get_item_definition(item.definition_id)
-	if definition == null:
-		return false
-	if definition.stackable and definition.max_stack <= 0:
-		return false
-	return _free_space_for(definition) >= item.quantity
+	return _get_add_block_reason(item) == ""
 
 
-func add_item(item: ItemInstance) -> bool:
+func _get_add_block_reason(item: ItemInstance) -> String:
 	if item == null:
-		push_warning("InventoryController.add_item: item is null")
-		return false
+		return "null_item"
 	if item.quantity <= 0:
-		push_warning("InventoryController.add_item: item quantity must be > 0")
-		return false
+		return "invalid_quantity"
 	var definition := get_item_definition(item.definition_id)
 	if definition == null:
-		return false
+		return "missing_definition"
 	if definition.stackable and definition.max_stack <= 0:
-		push_error(
-			(
-				"InventoryController.add_item: stackable item has invalid max_stack <= 0: %s"
-				% item.definition_id
-			)
-		)
-		return false
-	var stack_size := definition.max_stack if definition.stackable else 1
-	if stack_size <= 0:
-		push_error(
-			"InventoryController.add_item: invalid stack size for item %s" % item.definition_id
-		)
-		return false
+		return "invalid_stack_size"
 	if _free_space_for(definition) < item.quantity:
+		return "insufficient_space"
+	return ""
+
+
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
+func add_item(item: ItemInstance) -> bool:
+	var block_reason := _get_add_block_reason(item)
+	if block_reason != "":
+		_report_invalid_add(block_reason, item)
 		return false
+	var definition := get_item_definition(item.definition_id)
+	var stack_size := definition.max_stack if definition.stackable else 1
 	var remaining := item.quantity
 	var original_quantity := item.quantity
 	if definition.stackable:
@@ -90,6 +87,21 @@ func add_item(item: ItemInstance) -> bool:
 	return true
 
 
+func _report_invalid_add(reason: String, item: ItemInstance) -> void:
+	match reason:
+		"null_item":
+			push_warning("InventoryController.add_item: item is null")
+		"invalid_quantity":
+			push_warning("InventoryController.add_item: item quantity must be > 0")
+		"invalid_stack_size":
+			push_error(
+				(
+					"InventoryController.add_item: stackable item has invalid max_stack <= 0: %s"
+					% item.definition_id
+				)
+			)
+
+
 func _free_space_for(definition: ItemDefinition) -> int:
 	var stack_size := definition.max_stack if definition.stackable else 1
 	if stack_size <= 0:
@@ -103,6 +115,7 @@ func _free_space_for(definition: ItemDefinition) -> int:
 	return total
 
 
+## 从当前集合或状态移除传入数据；目标不存在时安全返回。
 func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	if instance_id.strip_edges() == "":
 		return false
@@ -123,6 +136,7 @@ func remove_item_by_instance_id(instance_id: String, quantity: int = 1) -> bool:
 	return false
 
 
+## 执行 `find_item` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_item(instance_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.instance_id == instance_id:
@@ -130,6 +144,7 @@ func find_item(instance_id: String) -> ItemInstance:
 	return null
 
 
+## 执行 `find_item_by_definition` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_item_by_definition(definition_id: String) -> ItemInstance:
 	for slot in model.slots:
 		if slot.item != null and slot.item.definition_id == definition_id:
@@ -137,17 +152,15 @@ func find_item_by_definition(definition_id: String) -> ItemInstance:
 	return null
 
 
+## 读取当前对象中的 `item_definition`；未找到时返回 null、空集合或该 API 的默认值。
 func get_item_definition(item_id: String) -> ItemDefinition:
-	if item_id.strip_edges() == "":
-		return null
-	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+	var content := Mkit.content()
 	if content == null:
 		return null
 	return content.get_resource(item_id) as ItemDefinition
 
 
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	var items: Array = []
 	for slot in model.slots:
@@ -155,6 +168,7 @@ func to_save_data() -> Dictionary:
 	return {"capacity": capacity, "items": items}
 
 
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	capacity = int(data.get("capacity", capacity))
 	capacity = max(1, capacity)
@@ -170,12 +184,12 @@ func _emit_inventory_changed(
 	item: ItemInstance = null, quantity: int = 0, change_type: String = ""
 ) -> void:
 	inventory_changed.emit()
-	var events: EventService = null
-	if ServiceRegistry.has_service("events"):
-		events = ServiceRegistry.get_service("events") as EventService
+	var events := Mkit.events()
 	if events != null:
-		events.emit_inventory_changed(
-			_get_owner_id(), item.definition_id if item != null else "", quantity, change_type
+		events.emit_domain_event(
+			InventoryEvents.inventory_changed(
+				_get_owner_id(), item.definition_id if item != null else "", quantity, change_type
+			)
 		)
 
 
@@ -183,5 +197,5 @@ func _get_owner_id() -> String:
 	var owner_node := owner if owner != null else get_parent()
 	if owner_node == null:
 		return name
-	var identity := owner_node.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(owner_node)
 	return identity.entity_id if identity != null else str(owner_node.name)

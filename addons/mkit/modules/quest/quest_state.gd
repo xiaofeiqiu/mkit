@@ -1,24 +1,45 @@
 class_name QuestState
 extends RefCounted
+## 说明：`QuestState` 是 任务系统 的运行时状态，负责保存可序列化或可推进的领域状态。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在任务系统中复用这段契约或状态时使用它。
+## 示例：`var instance := QuestState.new()`
+
+## 稳定标识 `STATUS_AVAILABLE`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
+const STATUS_AVAILABLE: String = "available"
+## 稳定标识 `STATUS_ACTIVE`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
+const STATUS_ACTIVE: String = "active"
+## 稳定标识 `STATUS_COMPLETED`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
+const STATUS_COMPLETED: String = "completed"
+## 稳定标识 `STATUS_TURNED_IN`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
+const STATUS_TURNED_IN: String = "turned_in"
+## 引用的 QuestDefinition id；为空字符串表示未绑定，使用前应由调用方处理缺失情况。
 var quest_id: String = ""
-var status: String = "available"
+## 任务当前状态；应使用 QuestState 提供的 STATUS_* 常量。
+var status: String = STATUS_AVAILABLE
+## 任务目标进度表；key 为 objective id，value 为累计数量。
 var objective_progress: Dictionary = {}
 
 
+## 创建并返回新的运行时对象；返回值、signal 或事件会表达实际执行结果。
 static func create(quest_id: String) -> QuestState:
 	var state := QuestState.new()
 	state.quest_id = quest_id
 	return state
 
 
+## 读取当前对象中的 `progress`；未找到时返回 null、空集合或该 API 的默认值。
 func get_progress(objective_id: String) -> int:
 	return int(objective_progress.get(objective_id, 0))
 
 
+## 更新当前对象中的 `progress`；输入值按该对象规则校验或夹取。
 func set_progress(objective_id: String, value: int) -> void:
 	objective_progress[objective_id] = max(0, value)
 
 
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"quest_id": quest_id,
@@ -27,6 +48,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	quest_id = str(data.get("quest_id", quest_id))
 	status = str(data.get("status", status))

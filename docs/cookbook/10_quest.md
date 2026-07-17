@@ -15,19 +15,55 @@
 |--------|------------|
 | 创建 `QuestDefinition` (.tres)：目标 + 奖励 | `QuestService` 注册、校验、按 id 查询 |
 | 在对话选项挂 `AcceptQuestEffect` | `accept_quest()` 校验前置/条件，创建 `QuestState`，发 `quest_accepted` |
-| 把目标的 `event_type` 对准某个领域事件 | `QuestService` 监听 `domain_event_emitted`，自动匹配并推进目标 |
+| 把目标的 `event_type` 对准某个领域事件 | `QuestService` 通过 `EventService.ANY_EVENT` 订阅领域事件，自动匹配并推进目标 |
 | （可选）监听 `quest_completed` / `quest_turned_in` 做 UI | 目标集满后自动完成；`auto_complete` 时自动上交并跑 `reward_effects` |
+
+## 本篇路径
+
+### Minimal path：剧情或测试直接接任务
+
+1. 先按步骤 1 创建 `res://data/quests/cull_beasts.tres`，并加入 `ResourceDatabase.resources`。
+2. 在测试脚本里拿到 `player` 和发任务的 `npc`，构造上下文：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, npc)
+```
+
+3. 直接接任务：
+
+```gdscript
+if not Mkit.quest().accept_quest("quest.cull_beasts", ctx):
+    push_warning("接任务失败：检查 quest id、前置条件或是否已接")
+```
+
+4. 如果 `auto_complete = false` 且你要测试交付，完成目标后再调用：
+
+```gdscript
+Mkit.quest().turn_in_quest("quest.cull_beasts", ctx)
+```
+
+5. 看到 `quest_accepted` / `quest_turned_in` 事件或奖励效果执行，说明任务资源本身可用。
+
+### Standard path：任务由对话、战斗和事件推进
+
+1. 在 Recipe 09 的 `elder_intro.tres` 里新增“我来帮忙”选项，并把 `AcceptQuestEffect(quest_id="quest.cull_beasts")` 放进该选项的 `effects`。
+2. 玩家对话时点击该选项，`DialogueService` 执行 effect，`QuestService.accept_quest(...)` 创建任务状态。
+3. 敌人死亡时不要手动推进任务；`HealthComponent.die(killer)` 发出死亡事件，`QuestService` 会合成并匹配 `"enemy_killed"`。
+4. 任务 objective 的 `match_key` / `match_value` 命中后自动 +1，达到 `required_count = 3` 后自动完成。
+5. 验证方式：接任务后杀 3 只敌人，看到 `quest_completed`，并且 `quest_reward_atk.tres` 的奖励效果执行。
+
+本篇不需要 `CommandService` 或 `GameAction`。只有当某个任务目标要求玩家执行“攻击、互动、施法”这类实体行为时，才回到对应 recipe 的 command / action path。
 
 ## 它如何"自动"推进
 
-`QuestService` 在 `_ready()` 时连上了 `EventService.domain_event_emitted` 和 `entity_died`。敌人死亡时，它会合成一个 `"enemy_killed"` 事件，payload 携带死者的 `faction` / `tags` / `definition_id`。每个活跃任务的目标若 `event_type` 与之匹配、`match_key`/`match_value` 也对得上，就自动 +1。**所以"杀 3 只敌人"这种目标完全不需要你手动调用推进接口。**
+`QuestService` 在 `_ready()` 时订阅全部领域事件，并额外订阅 `entity_died`。敌人死亡时，它会合成一个 `"enemy_killed"` 领域事件并发回 `EventService`，payload 携带死者的 `faction` / `tags` / `definition_id`。每个活跃任务的目标若 `event_type` 与之匹配、`match_key`/`match_value` 也对得上，就自动 +1。**所以"杀 3 只敌人"这种目标完全不需要你手动调用推进接口。**
 
 ```mermaid
 flowchart LR
     A["敌人 HealthComponent.die()"]:::mkitCore -->
-    B["EventService.emit_entity_died"]:::mkitCore -->
-    C["QuestService._on_entity_died\n合成 enemy_killed 事件"]:::mkitCore -->
-    D["notify_event 匹配活跃任务目标"]:::mkitCore -->
+    B["CombatEvents.entity_died 领域事件"]:::mkitCore -->
+    C["QuestService._on_entity_died\n发出 enemy_killed 领域事件"]:::mkitCore -->
+    D["ANY_EVENT 订阅匹配活跃任务目标"]:::mkitCore -->
     E["objective_advanced (+1)"]:::mkitCore -->
     F["集满 → quest_completed → 跑 reward_effects"]:::mkitCore
 
@@ -93,7 +129,7 @@ choice_help:
 ```gdscript
 # 主场景 _ready 中
 func _ready() -> void:
-    var quest := ServiceRegistry.get_service("quest") as QuestService
+    var quest := Mkit.quest()
     if quest == null:
         return
     quest.quest_accepted.connect(func(id: String):
@@ -118,6 +154,24 @@ func _ready() -> void:
 
 把 `QuestDefinition.auto_complete` 设为 `false`，则集满目标只触发 `quest_completed`（状态变 `completed`），需要玩家回 NPC 处用一个挂了 `CompleteQuestEffect`（`turn_in = true`）的对话选项才上交、发奖励。`CompleteQuestEffect` 会在 `completed` 状态下自动走 `turn_in_quest()`。
 
+## 字段参考
+
+### QuestDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `quest_type` | String = `"side"` | 任务分类字符串；mkit 不按它分支，只保存给 UI、筛选、日志或游戏代码使用 | 主线填 `"main"`，日常/循环任务可填 `"daily"`、`"repeatable"` 等项目约定值 |
+| `auto_complete` | bool = `false` | 所有非 `optional` 目标达标后，`QuestService` 是否立刻 `complete_quest()`；为 `true` 时还会自动 `turn_in_quest()` 并执行 `reward_effects` | 击杀/收集达标即领奖时设 `true`；需要回 NPC 交付时设 `false` |
+| `repeatable` | bool = `false` | 已上交任务是否允许再次接取。上交后若为 `true`，状态会重置为 `available` 并清空进度；活跃或已完成未上交时仍不能重复接 | 日常、刷怪悬赏、可重复挑战设 `true` |
+| `accept_conditions` | Array[Condition] = [] | `can_accept()` 的最后一道门禁（在前置任务、重复性检查之后求值），任一失败则接取被拒 | 等级/声望门槛任务；条件写法见 [Recipe 21](21_conditions.md) |
+
+### QuestObjectiveDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `optional` | bool = `false` | 可选目标不会阻止 `is_quest_complete()` 返回 true；它仍可被事件推进、显示在 UI、发出进度信号 | 额外奖励、支线挑战、"可救可不救"目标设 `true` |
+| `count_payload_key` | String = `""` | 匹配事件后，从 `DomainEvent.payload` 的这个 key 读取本次增加量；为空时每个事件固定 +1。读取到 ≤0 时忽略本次事件 | 一次事件代表多个数量时使用，如 `{"quantity": 5}` 对应填 `"quantity"` |
+
 ## 运行验证
 
 1. 与 NPC 对话，点"我来帮忙" → 控制台 `接受任务: quest.cull_beasts`
@@ -138,8 +192,8 @@ func _ready() -> void:
 
 ## 延伸阅读
 
-- [QuestService ref](../ref/modules/QuestService.md) — accept_quest / advance_objective / complete_quest / turn_in_quest
-- [QuestDefinition ref](../ref/modules/QuestDefinition.md) · [QuestObjectiveDefinition ref](../ref/modules/QuestObjectiveDefinition.md)
-- [AcceptQuestEffect ref](../ref/modules/AcceptQuestEffect.md) · [AdvanceObjectiveEffect ref](../ref/modules/AdvanceObjectiveEffect.md) · [CompleteQuestEffect ref](../ref/modules/CompleteQuestEffect.md)
+- [QuestService ref](../generated/html/classes/QuestService.html) — accept_quest / advance_objective / complete_quest / turn_in_quest
+- [QuestDefinition ref](../generated/html/classes/QuestDefinition.html) · [QuestObjectiveDefinition ref](../generated/html/classes/QuestObjectiveDefinition.html)
+- [AcceptQuestEffect ref](../generated/html/classes/AcceptQuestEffect.html) · [AdvanceObjectiveEffect ref](../generated/html/classes/AdvanceObjectiveEffect.html) · [CompleteQuestEffect ref](../generated/html/classes/CompleteQuestEffect.html)
 - [pipeline.md — Quest Lifecycle](../pipeline.md#12-quest-lifecycle)
 - [cookbook/11_progression_and_save.md](11_progression_and_save.md) — 任务/击杀给 XP，并把进度存档

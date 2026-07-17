@@ -1,95 +1,65 @@
 extends Node
+## 说明：`ServiceRegistry` 是 基础服务 的服务注册表，负责保存内核和模块服务实例并提供低层查找入口。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在基础服务中复用这段契约或状态时使用它。
+## 示例：`var instance := ServiceRegistry.new()`
 
-const SERVICE_EVENTS: String = "events"
-const SERVICE_CONTENT: String = "content"
-const SERVICE_RANDOM: String = "random"
-const SERVICE_TIME: String = "time"
-const SERVICE_ACTIONS: String = "actions"
-const SERVICE_EFFECTS: String = "effects"
-const SERVICE_COMMANDS: String = "commands"
-const SERVICE_COMBAT: String = "combat"
-const SERVICE_SCENES: String = "scenes"
-const SERVICE_POOL: String = "pool"
-const SERVICE_SAVE: String = "save"
-const SERVICE_PROGRESSION: String = "progression"
-const SERVICE_ANALYTICS: String = "analytics"
-const SERVICE_ADS: String = "ads"
-const SERVICE_IAP: String = "iap"
-const SERVICE_CLOUD_SAVE: String = "cloud_save"
-const SERVICE_QUEST: String = "quest"
-const SERVICE_SHOP: String = "shop"
-const SERVICE_AUDIO: String = "audio"
-const SERVICE_DIALOGUE: String = "dialogue"
-const SERVICE_WORLD: String = "world"
-const SERVICE_LOOT: String = "loot"
 
 var _services: Dictionary = {}
-var _service_types: Dictionary = {}
 
 
-func register_service(
-	service_id: String, service: Object, expected_class_name: String = ""
-) -> void:
-	var normalized_service_id := service_id.strip_edges()
-	if normalized_service_id == "":
-		push_warning("ServiceRegistry.register_service: service_id is empty")
-		return
-	if service == null:
-		push_warning("ServiceRegistry.register_service: service is null for id %s" % service_id)
-		return
-	if _services.has(normalized_service_id):
-		push_warning("Service already registered: %s. It will be replaced." % normalized_service_id)
-	_services[normalized_service_id] = service
-	if expected_class_name != "":
-		_service_types[normalized_service_id] = expected_class_name
-
-
-func has_service(service_id: String) -> bool:
-	var normalized_service_id := service_id.strip_edges()
-	if normalized_service_id == "":
+## 以 service_id 注册新的服务实例；空 id、null service 或重复 id 会输出 error 并返回 false。
+func register_service(service_id: String, service: Object) -> bool:
+	var id := service_id.strip_edges()
+	if id == "":
+		push_error("ServiceRegistry.register_service: service_id is empty")
 		return false
-	return _services.has(normalized_service_id)
-
-
-func get_service(service_id: String) -> Object:
-	var service := get_service_or_null(service_id)
-	if service == null and service_id.strip_edges() != "":
-		push_warning("Missing service: %s" % service_id)
-	return service
-
-
-func get_service_or_null(service_id: String) -> Object:
-	var normalized_service_id := service_id.strip_edges()
-	if normalized_service_id == "":
-		push_warning("ServiceRegistry.get_service: service_id is empty")
-		return null
-	if not _services.has(normalized_service_id):
-		return null
-	return _services[normalized_service_id]
-
-
-func get_required_service(service_id: String, context: String = "ServiceRegistry") -> Object:
-	var service := get_service_or_null(service_id)
 	if service == null:
-		push_error("%s: required service not found: %s" % [context, service_id.strip_edges()])
-	return service
+		push_error("ServiceRegistry.register_service: service is null for id %s" % service_id)
+		return false
+	if _services.has(id):
+		push_error("Service already registered: %s. Use replace_service() for intentional overrides." % id)
+		return false
+	_services[id] = service
+	return true
 
 
-func get_typed(service_id: String, expected_class_name: String) -> Object:
-	var service := get_service_or_null(service_id)
+## 显式替换已经注册的服务；目标 id 缺失、空 id 或 null service 会输出 error 并返回 false。
+func replace_service(service_id: String, service: Object) -> bool:
+	var id := service_id.strip_edges()
+	if id == "":
+		push_error("ServiceRegistry.replace_service: service_id is empty")
+		return false
 	if service == null:
+		push_error("ServiceRegistry.replace_service: service is null for id %s" % service_id)
+		return false
+	if not _services.has(id):
+		push_error("ServiceRegistry.replace_service: missing service id %s" % id)
+		return false
+	_services[id] = service
+	return true
+
+
+## 检查去空白后的 service_id 是否已经注册；不会输出 missing-service warning。
+func has_service(service_id: String) -> bool:
+	return _services.has(service_id.strip_edges())
+
+
+## 低层服务查找入口；缺失时会输出 warning。kernel 内部可直接使用，game/module 代码优先使用 `Mkit` 门面。
+func get_port(service_id: String) -> Object:
+	var id := service_id.strip_edges()
+	if id == "":
+		push_warning("ServiceRegistry.get_port: service_id is empty")
 		return null
-	if (
-		expected_class_name != ""
-		and service.get_class() != expected_class_name
-		and not service.is_class(expected_class_name)
-	):
-		push_warning(
-			"Service %s may not match expected type %s" % [service_id, expected_class_name]
-		)
+	var service := _services.get(id, null) as Object
+	if service == null:
+		push_warning("Missing service: %s" % id)
+		return null
 	return service
 
 
+## 返回当前已注册 service id 的排序列表，供调试、文档示例和测试断言使用。
 func get_registered_service_ids() -> Array[String]:
 	var ids: Array[String] = []
 	for service_id in _services.keys():
@@ -98,14 +68,15 @@ func get_registered_service_ids() -> Array[String]:
 	return ids
 
 
+## 移除指定 service_id；空 id 会输出 warning，缺失 id 不报错。
 func unregister_service(service_id: String) -> void:
-	if service_id.strip_edges() == "":
+	var id := service_id.strip_edges()
+	if id == "":
 		push_warning("ServiceRegistry.unregister_service: service_id is empty")
 		return
-	_services.erase(service_id)
-	_service_types.erase(service_id)
+	_services.erase(id)
 
 
+## 清空本对象持有的运行时表和缓存；通常在测试或重新 bootstrap 前调用。
 func clear() -> void:
 	_services.clear()
-	_service_types.clear()

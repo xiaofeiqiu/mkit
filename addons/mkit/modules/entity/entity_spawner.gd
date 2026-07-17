@@ -1,15 +1,24 @@
 class_name EntitySpawner
 extends Node
+## 说明：`EntitySpawner` 是 实体系统 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在实体系统中复用这段契约或状态时使用它。
+## 示例：`var instance := EntitySpawner.new()`
+
+## 当 `EntitySpawner` 发生 `entity spawned` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal entity_spawned(entity: Node, definition_id: String)
+## 当 `EntitySpawner` 发生 `entity spawn failed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal entity_spawn_failed(definition_id: String, reason: String)
+## 缓存的 ContentService 引用；生成实体前用于按 id 查找定义资源。
 var content: ContentService = null
 
 
 func _ready() -> void:
-	if ServiceRegistry.has_service("content"):
-		content = ServiceRegistry.get_service("content") as ContentService
+	content = Mkit.content()
 
 
+## 根据 EntityDefinition 实例化实体场景；会写入 identity 并返回新节点。
 func spawn_entity(
 	definition_id: String, parent: Node, position: Vector2 = Vector2.ZERO, runtime_id: String = ""
 ) -> Node:
@@ -49,8 +58,7 @@ func _get_definition(definition_id: String) -> EntityDefinition:
 	if definition_id.strip_edges() == "":
 		return null
 	if content == null:
-		if ServiceRegistry.has_service("content"):
-			content = ServiceRegistry.get_service("content") as ContentService
+		content = Mkit.content()
 	if content == null:
 		return null
 	return content.get_resource(definition_id) as EntityDefinition
@@ -59,7 +67,7 @@ func _get_definition(definition_id: String) -> EntityDefinition:
 func _initialize_identity(entity: Node, definition: EntityDefinition, runtime_id: String) -> void:
 	if entity == null or definition == null:
 		return
-	var identity := entity.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(entity)
 	if identity == null:
 		return
 	identity.definition_id = definition.entity_definition_id
@@ -77,10 +85,10 @@ func _initialize_identity(entity: Node, definition: EntityDefinition, runtime_id
 func _initialize_command_receiver(entity: Node) -> void:
 	if entity == null:
 		return
-	var identity := entity.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(entity)
 	if identity == null or identity.entity_id == "":
 		return
-	var receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+	var receiver := EntityContract.get_command_receiver(entity)
 	if receiver == null:
 		return
 	receiver.configure_receiver_id(identity.entity_id)
@@ -89,7 +97,7 @@ func _initialize_command_receiver(entity: Node) -> void:
 func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:
 	if entity == null or definition == null:
 		return
-	var stats := entity.get_node_or_null("Components/StatsComponent") as StatsComponent
+	var stats := EntityContract.get_component(entity, "StatsComponent") as StatsComponent
 	if stats == null:
 		return
 	for stat_id in definition.base_stats.keys():
@@ -100,10 +108,15 @@ func _initialize_stats(entity: Node, definition: EntityDefinition) -> void:
 func _initialize_abilities(entity: Node, definition: EntityDefinition) -> void:
 	if entity == null or definition == null:
 		return
-	var abilities := entity.get_node_or_null("Controllers/AbilityController") as AbilityController
+	var ability_ids: Array[String] = []
+	for ability_id in definition.starting_ability_ids:
+		var id := str(ability_id).strip_edges()
+		if id != "":
+			ability_ids.append(id)
+	if ability_ids.is_empty():
+		return
+	var abilities := EntityContract.get_controller(entity, "AbilityController") as AbilityController
 	if abilities == null:
 		return
-	for ability_id in definition.starting_ability_ids:
-		if str(ability_id).strip_edges() == "":
-			continue
+	for ability_id in ability_ids:
 		abilities.register_ability(ability_id)

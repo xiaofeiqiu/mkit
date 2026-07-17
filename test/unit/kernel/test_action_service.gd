@@ -15,12 +15,25 @@ class NeverEndingAction:
 		pass
 
 
+class RecordingAction:
+	extends GameAction
+	var last_delta: float = -1.0
+
+	func _on_update(delta: float) -> void:
+		last_delta = delta
+
+
 var runner: ActionService
 
 
 func before_each() -> void:
+	ServiceRegistry.clear()
 	runner = ActionService.new()
 	add_child_autofree(runner)
+
+
+func after_each() -> void:
+	ServiceRegistry.clear()
 
 
 # --- start_action ---
@@ -100,8 +113,10 @@ func test_tc_ar_08_cancel_ignores_actions_from_other_sources() -> void:
 
 
 func test_tc_ar_09_cancel_with_null_source_is_safe() -> void:
+	watch_signals(runner)
 	runner.cancel_actions_for_source(null)
-	assert_true(true)
+	assert_eq(runner.active_actions.size(), 0)
+	assert_signal_not_emitted(runner, "action_cancelled")
 
 
 # --- multiple concurrent actions ---
@@ -120,4 +135,28 @@ func test_tc_ar_11_same_action_twice_does_not_double_connect_signals() -> void:
 	runner.start_action(action, ActionContext.new())
 	runner.start_action(action, ActionContext.new())
 	assert_eq(runner.active_actions.size(), 2)
-	assert_eq(action.completed.get_connections().size(), 1)
+	assert_eq(action.cancelled.get_connections().size(), 1)
+
+
+func test_tc_ar_12_services_ready_caches_time_for_scaled_delta() -> void:
+	var time := TimeService.new()
+	time.set_gameplay_time_scale(2.5)
+	ServiceRegistry.register_service(TimeService.SERVICE_ID, time)
+	ServiceRegistry.register_service(EffectService.SERVICE_ID, EffectService.new())
+	runner._on_services_ready()
+	var action := RecordingAction.new()
+	runner.start_action(action, ActionContext.new())
+	runner._process(0.2)
+	assert_eq(action.last_delta, 0.5)
+
+
+func test_tc_ar_13_action_uses_current_effect_service() -> void:
+	ServiceRegistry.register_service(EffectService.SERVICE_ID, EffectService.new())
+	var action := NeverEndingAction.new()
+	action.on_complete_effects = [GameEffect.new()]
+	runner.start_action(action, ActionContext.new())
+	var current := EffectService.new()
+	current.trace_enabled = true
+	ServiceRegistry.replace_service(EffectService.SERVICE_ID, current)
+	action.complete()
+	assert_eq(current.recent_results.size(), 1)

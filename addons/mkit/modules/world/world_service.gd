@@ -1,25 +1,70 @@
 class_name WorldService
-extends Node
+extends Saveable
+## 说明：`WorldService` 是 世界与场景系统 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(WorldService.SERVICE_ID, WorldService.new())`
+
+## 当 `WorldService` 发生 `zone changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal zone_changed(from_zone_id: String, to_zone_id: String)
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `WorldService`。
+const SERVICE_ID: String = "world"
+## 场景切换后延迟查找 spawn point 的最大重试次数；只供 WorldService 内部 finalize 使用。
 const _MAX_FINALIZE_RETRIES: int = 1
+## 查找玩家实体时使用的 Godot 分组名称。
 @export var player_group: String = "player"
+## WorldService 当前所在 ZoneDefinition id。
 var current_zone_id: String = ""
 var _pending_zone_id: String = ""
 var _pending_spawn_id: String = ""
+## WorldService 使用的 SceneService 引用；切换区域时通过它加载场景。
 var scene_router: SceneService = null
 var _connected_scene_router: SceneService = null
-var content: ContentService = null
 
 
 func _ready() -> void:
+	if save_id == "":
+		save_id = "world"
 	_resolve_services()
+	register_save_scopes()
+
+
+func _exit_tree() -> void:
+	unregister_save_scopes()
+
+
+## 声明 WorldService 写入 `scopes` 的 zone scope；由 SaveService.save_game 调用。
+func get_save_scopes() -> Array[String]:
+	return ["world.zone"]
+
+
+## 导出当前 zone、pending zone 和 pending spawn；scope 不是 `world.zone` 时返回空 Dictionary。
+func get_save_payload_for_scope(scope: String) -> Dictionary:
+	if scope.strip_edges() != "world.zone":
+		return {}
+	return {
+		"current_zone_id": current_zone_id,
+		"pending_zone_id": _pending_zone_id,
+		"pending_spawn_id": _pending_spawn_id
+	}
+
+
+## 从 `world.zone` scope 恢复 zone 状态；必要时通过 SceneService 切回保存的 zone scene。
+func apply_save_payload_for_scope(scope: String, data: Dictionary) -> bool:
+	if scope.strip_edges() != "world.zone":
+		return false
+	var previous_zone_id := current_zone_id
+	current_zone_id = str(data.get("current_zone_id", current_zone_id))
+	_pending_zone_id = str(data.get("pending_zone_id", _pending_zone_id))
+	_pending_spawn_id = str(data.get("pending_spawn_id", _pending_spawn_id))
+	_restore_loaded_zone_scene(previous_zone_id, current_zone_id)
+	return true
 
 
 func _resolve_services() -> void:
-	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
 	if scene_router == null:
-		scene_router = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_SCENES) as SceneService
+		scene_router = Mkit.scenes()
 	_bind_scene_router()
 
 
@@ -36,6 +81,8 @@ func _bind_scene_router() -> void:
 		scene_router.scene_changed.connect(_on_scene_changed)
 
 
+## 按 ZoneDefinition id 请求切换场景；会记录 pending zone/spawn，并通过 SceneService.change_scene 进入目标 scene_path。
+## 当前已有 pending 切换、zone 缺失或 SceneService 缺失时返回 false。
 func go_to_zone(zone_id: String, spawn_id: String = "") -> bool:
 	_resolve_services()
 	if _pending_zone_id != "":
@@ -54,20 +101,21 @@ func go_to_zone(zone_id: String, spawn_id: String = "") -> bool:
 	return true
 
 
+## 返回 current_zone_id 对应的 ZoneDefinition；尚未进入 zone 或 content 缺失时返回 null。
 func get_current_zone() -> ZoneDefinition:
 	return get_zone(current_zone_id)
 
 
+## 从 ContentService 读取 ZoneDefinition；ContentService 未注册或 zone id 缺失时返回 null。
 func get_zone(zone_id: String) -> ZoneDefinition:
-	if zone_id.strip_edges() == "":
-		return null
-	if content == null:
-		content = ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_CONTENT) as ContentService
+	var content := Mkit.content()
 	if content == null:
 		return null
 	return content.get_resource(zone_id) as ZoneDefinition
 
 
+## 查找指定 SpawnPoint 和 player_group 中的玩家节点，并把玩家 global_position 移到 spawn。
+## spawn 或玩家缺失时返回 false，不改变 current_zone_id。
 func place_player_at_spawn(spawn_id: String) -> bool:
 	var spawn := _find_spawn_point(spawn_id)
 	if spawn == null:
@@ -102,11 +150,37 @@ func _finalize_zone_entry(retries_left: int) -> void:
 	var to_zone_id := _pending_zone_id
 	_pending_zone_id = ""
 	_pending_spawn_id = ""
+	_publish_zone_entry(from_zone_id, to_zone_id)
+
+
+func _restore_loaded_zone_scene(from_zone_id: String, to_zone_id: String) -> void:
+	if to_zone_id == "":
+		return
+	_resolve_services()
+	if scene_router == null or scene_router.current_scene_path == "":
+		return
+	var definition := get_zone(to_zone_id)
+	if definition == null or definition.scene_path == "":
+		return
+	if scene_router.current_scene_path == definition.scene_path:
+		return
+	var saved_pending_zone_id := _pending_zone_id
+	var saved_pending_spawn_id := _pending_spawn_id
+	_pending_zone_id = ""
+	_pending_spawn_id = ""
+	if not scene_router.change_scene(definition.scene_path):
+		_pending_zone_id = saved_pending_zone_id
+		_pending_spawn_id = saved_pending_spawn_id
+		return
+	_publish_zone_entry(from_zone_id, to_zone_id)
+
+
+func _publish_zone_entry(from_zone_id: String, to_zone_id: String) -> void:
 	current_zone_id = to_zone_id
 	zone_changed.emit(from_zone_id, to_zone_id)
-	var events := _get_events()
+	var events := Mkit.events()
 	if events != null:
-		events.emit_zone_changed(from_zone_id, to_zone_id)
+		events.emit_domain_event(WorldEvents.zone_changed(from_zone_id, to_zone_id))
 		events.emit_domain_event(
 			DomainEvent.create("zone_entered", to_zone_id, "", {"zone_id": to_zone_id})
 		)
@@ -138,9 +212,5 @@ func _find_player() -> Node2D:
 	return players[0] as Node2D
 
 
-func _get_events() -> EventService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
-
-
 func _get_audio() -> AudioService:
-	return ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_AUDIO) as AudioService
+	return Mkit.audio()

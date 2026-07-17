@@ -11,6 +11,7 @@ const REWARD_ITEM_ID := "item.int.world_reward"
 const VILLAGE_GATE_POS := Vector2(50.0, 50.0)
 const VILLAGE_RETURN_POS := Vector2(70.0, 70.0)
 const FIELD_ENTRY_POS := Vector2(300.0, 120.0)
+const SAVE_PATH := "/tmp/mkit_world_pipeline_integration_save.json"
 
 
 class TestSceneRouter:
@@ -47,6 +48,7 @@ func after_each() -> void:
 	IntTestHelpers.remove_file("%s.uid" % VILLAGE_SCENE_PATH)
 	IntTestHelpers.remove_file(FIELD_SCENE_PATH)
 	IntTestHelpers.remove_file("%s.uid" % FIELD_SCENE_PATH)
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -54,14 +56,15 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	_save_village_scene()
 	_save_field_scene()
 
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
 	assert_not_null(content)
 	assert_not_null(events)
 	assert_not_null(quest)
@@ -81,7 +84,7 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	ServiceRegistry.unregister_service("audio")
 	ServiceRegistry.register_service("audio", audio)
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_not_null(world)
 	world.scene_router = null
 
@@ -114,7 +117,10 @@ func test_tc_int_world_01_portal_navigation_places_player_and_advances_quest() -
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 	assert_eq(player.global_position, FIELD_ENTRY_POS)
 	assert_signal_emitted_with_parameters(world, "zone_changed", [ZONE_VILLAGE, ZONE_FIELD])
-	assert_signal_emitted_with_parameters(events, "zone_changed", [ZONE_VILLAGE, ZONE_FIELD])
+	var evt_zone_changed_1 := DomainEventAsserts.last_event(events, "zone_changed")
+	assert_not_null(evt_zone_changed_1)
+	assert_eq(evt_zone_changed_1.payload.get("from_zone_id"), ZONE_VILLAGE)
+	assert_eq(evt_zone_changed_1.payload.get("to_zone_id"), ZONE_FIELD)
 	assert_eq(audio.played.size(), 2)
 	assert_eq(audio.played[1], "bgm.field")
 
@@ -164,19 +170,7 @@ func _make_zone(
 
 
 func _make_player() -> Node2D:
-	var player := Node2D.new()
-	player.name = "Player"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player"
-	player.add_child(identity)
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	player.add_child(controllers)
-	var inventory := InventoryController.new()
-	inventory.name = "InventoryController"
-	inventory.capacity = 10
-	controllers.add_child(inventory)
+	var player := IntTestHelpers.make_inventory_entity("Player", "player", 10)
 	player.add_to_group("player")
 	add_child_autofree(player)
 	return player

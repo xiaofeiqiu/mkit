@@ -1,10 +1,20 @@
 class_name InventoryModel
 extends RefCounted
+## 说明：`InventoryModel` 是 背包与装备系统 的运行时模型，负责保存领域对象集合和查询入口。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在背包与装备系统中复用这段契约或状态时使用它。
+## 示例：`var instance := InventoryModel.new()`
+
+## 背包拥有者 id；用于存档、事件归因和多背包区分。
 var owner_id: String = ""
+## 背包容量，单位为槽位数量；0 或负数表示不能存放物品。
 var capacity: int = 30
+## 背包槽位列表；长度通常等于 capacity。
 var slots: Array[InventorySlot] = []
 
 
+## 绑定运行时依赖并初始化内部状态；通常由 controller 或 service 在流程开始前调用。
 func setup(slot_count: int) -> void:
 	capacity = slot_count
 	slots.clear()
@@ -14,6 +24,7 @@ func setup(slot_count: int) -> void:
 		slots.append(slot)
 
 
+## 执行 `find_first_empty_slot` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_first_empty_slot() -> InventorySlot:
 	for slot in slots:
 		if slot.is_empty():
@@ -21,6 +32,7 @@ func find_first_empty_slot() -> InventorySlot:
 	return null
 
 
+## 执行 `find_stackable_slot` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func find_stackable_slot(definition: ItemDefinition, item: ItemInstance) -> InventorySlot:
 	if not definition.stackable:
 		return null
@@ -34,6 +46,7 @@ func find_stackable_slot(definition: ItemDefinition, item: ItemInstance) -> Inve
 	return null
 
 
+## 读取当前对象中的 `items`；未找到时返回 null、空集合或该 API 的默认值。
 func get_items() -> Array[ItemInstance]:
 	var result: Array[ItemInstance] = []
 	for slot in slots:

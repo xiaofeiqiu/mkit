@@ -1,6 +1,9 @@
 extends GutTest
 
 
+const SAVE_PATH := "/tmp/mkit_combat_status_feedback_integration_save.json"
+
+
 class FixedRandom:
 	extends RandomService
 	var fixed_value: float = 0.0
@@ -22,8 +25,9 @@ class ProbeTickEffect:
 
 	func _apply_impl(context: GameplayContext) -> EffectResult:
 		tick_count += 1
-		status_ids.append(context.status_id)
-		return EffectResult.ok(effect_id, {"status_id": context.status_id})
+		var status_id := str(context.get_payload_value("status_id", ""))
+		status_ids.append(status_id)
+		return EffectResult.ok(effect_id, {"status_id": status_id})
 
 
 class ProbeDamageNumberSystem:
@@ -59,6 +63,7 @@ const STATUS_ID := "status.int.defense_down"
 
 
 func after_each() -> void:
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -68,7 +73,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 	_boot_with_database(_make_database(tick_probe))
 	ServiceRegistry.unregister_service("random")
 	ServiceRegistry.register_service("random", FixedRandom.new())
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	var feedback := _make_feedback_system()
 	var damage_numbers := feedback.get_node("DamageNumbers") as ProbeDamageNumberSystem
 	var vfx := feedback.get_node("VFX") as ProbeVFXSpawner
@@ -103,7 +108,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 
 	assert_eq(health.current_hp, 26.0)
 	assert_signal_emitted(health, "damaged")
-	assert_signal_emitted(events, "damage_applied")
+	assert_not_null(DomainEventAsserts.last_event(events, "damage_applied"))
 	assert_signal_emitted_with_parameters(status, "status_applied", [STATUS_ID, 1])
 	assert_true(status.has_status(STATUS_ID))
 	assert_eq(target_stats.get_stat_value("defense"), 0.0)
@@ -122,7 +127,7 @@ func test_tc_int_cmb_01_hitbox_damage_status_and_feedback_event() -> void:
 
 func test_tc_int_cmb_02_heal_clamps_to_max_hp_and_emits() -> void:
 	_boot_with_database(_make_database(null))
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var source := _make_entity("Source", "entity.int.source", "player", false, false, false)
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, false)
 	var target_stats := target.get_node("Components/StatsComponent") as StatsComponent
@@ -143,8 +148,8 @@ func test_tc_int_cmb_02_heal_clamps_to_max_hp_and_emits() -> void:
 
 func test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_feedback() -> void:
 	_boot_with_database(_make_database(null))
-	var events := ServiceRegistry.get_service("events") as EventService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var feedback := _make_feedback_system()
 	var vfx := feedback.get_node("VFX") as ProbeVFXSpawner
 	var audio := feedback.get_node("Audio") as ProbeAudioManager
@@ -164,17 +169,22 @@ func test_tc_int_cmb_03_lethal_damage_emits_death_and_updates_feedback() -> void
 	assert_true(health.dead)
 	assert_eq(health.current_hp, 0.0)
 	assert_signal_emitted(health, "died")
-	assert_signal_emitted_with_parameters(events, "entity_died", ["entity.int.target", target])
+	var evt_entity_died_1 := DomainEventAsserts.last_event(events, "entity_died")
+	assert_not_null(evt_entity_died_1)
+	assert_eq(evt_entity_died_1.source_id, "entity.int.target")
+	assert_eq(evt_entity_died_1.payload.get("entity_ref"), target)
 	assert_eq(vfx.calls[0].vfx_id, "hit")
 	assert_eq(vfx.calls[1].vfx_id, "death")
 	assert_eq(audio.played[0], "hit")
 	assert_eq(audio.played[1], "death")
-	assert_eq((events.recent_events[-1] as DomainEvent).event_type, "entity_died")
+	var evt_enemy_killed := DomainEventAsserts.last_event(events, QuestEvents.ENEMY_KILLED)
+	assert_not_null(evt_enemy_killed)
+	assert_eq((events.recent_events[-1] as DomainEvent).event_type, QuestEvents.ENEMY_KILLED)
 
 
 func test_tc_int_cmb_04_status_duration_expiry_removes_stat_modifier() -> void:
 	_boot_with_database(_make_database(null))
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var source := _make_entity("Source", "entity.int.source", "player", false, false, false)
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, false)
 	var target_stats := target.get_node("Components/StatsComponent") as StatsComponent
@@ -205,7 +215,7 @@ func test_tc_int_cmb_04_status_duration_expiry_removes_stat_modifier() -> void:
 
 func test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target() -> void:
 	_boot_with_database(_make_database(null))
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	var target := _make_entity("Target", "entity.int.target", "enemy", false, false, true)
 	var health := target.get_node("Components/HealthComponent") as HealthComponent
 	health.current_hp = 42.0
@@ -221,16 +231,17 @@ func test_tc_int_cmb_05_debug_overlay_registers_debug_service_and_reads_target()
 	var label := overlay.get_child(0) as Label
 	var text := label.text
 
-	assert_eq(ServiceRegistry.get_service("debug"), overlay)
+	assert_eq(ServiceRegistry.get_port("debug"), overlay)
 	assert_true(text.contains("State: Root/Idle"))
 	assert_true(text.contains("Last command: INT_DEBUG"))
 	assert_true(text.contains("HP: 42 / 100"))
 	assert_true(text.contains("Recent events: debug_probe"))
 
 
-func _boot_with_database(database: ResourceDatabase) -> GameBootstrap:
-	var bootstrap := GameBootstrap.new()
+func _boot_with_database(database: ResourceDatabase) -> ModuleBootstrap:
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [database]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 	return bootstrap
 
@@ -280,6 +291,7 @@ func _make_feedback_system() -> FeedbackSystem:
 	return feedback
 
 
+
 func _make_entity(
 	node_name: String,
 	entity_id: String,
@@ -287,34 +299,12 @@ func _make_entity(
 	with_hitbox: bool,
 	with_hurtbox: bool,
 	with_debug_nodes: bool
-) -> Node2D:
-	var entity := Node2D.new()
-	entity.name = node_name
-
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = entity_id
-	identity.faction = faction
-	entity.add_child(identity)
-
-	var components := Node.new()
-	components.name = "Components"
-	entity.add_child(components)
-
-	var stats := StatsComponent.new()
-	stats.name = "StatsComponent"
-	stats.set_base_stat("max_hp", 100.0)
-	stats.set_base_stat("attack_power", 0.0)
-	stats.set_base_stat("crit_chance", 0.0)
-	stats.set_base_stat("damage_multiplier", 1.0)
-	stats.set_base_stat("defense", 0.0)
-	stats.set_base_stat("evade_chance", 0.0)
-	components.add_child(stats)
-
-	var health := HealthComponent.new()
-	health.name = "HealthComponent"
-	health.current_hp = 40.0
-	components.add_child(health)
+) -> EntityRoot:
+	var entity := IntTestHelpers.make_entity(node_name, entity_id, [], faction)
+	var health := entity.get_node("Components/HealthComponent") as HealthComponent
+	if health != null:
+		health.current_hp = 40.0
+	var components := entity.get_node("Components") as Node
 
 	if with_hitbox:
 		var hitbox := HitboxComponent.new()
@@ -332,13 +322,12 @@ func _make_entity(
 		components.add_child(hurtbox)
 		IntTestHelpers.add_circle_collision_shape(hurtbox, 12.0)
 
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	entity.add_child(controllers)
-
-	var status := StatusEffectController.new()
-	status.name = "StatusEffectController"
-	controllers.add_child(status)
+	var controllers := IntTestHelpers.ensure_child(entity, "Controllers")
+	var status := controllers.get_node_or_null("StatusEffectController") as StatusEffectController
+	if status == null:
+		status = StatusEffectController.new()
+		status.name = "StatusEffectController"
+		controllers.add_child(status)
 
 	if with_debug_nodes:
 		_add_debug_nodes(entity)
@@ -349,13 +338,20 @@ func _make_entity(
 
 
 func _add_debug_nodes(entity: Node) -> void:
-	var state_machine := StateMachine.new()
+	var existing_machine := entity.get_node_or_null("StateMachine") as Hfsm
+	if existing_machine != null:
+		existing_machine.free()
+	var existing_receiver := entity.get_node_or_null("CommandReceiver") as CommandReceiver
+	if existing_receiver != null:
+		existing_receiver.free()
+
+	var state_machine := Hfsm.new()
 	state_machine.name = "StateMachine"
 	state_machine.initial_state_path = "Root/Idle"
-	var root_state := State.new()
+	var root_state := HfsmState.new()
 	root_state.state_id = "Root"
 	root_state.name = "Root"
-	var idle_state := State.new()
+	var idle_state := HfsmState.new()
 	idle_state.state_id = "Idle"
 	idle_state.name = "Idle"
 	root_state.add_child(idle_state)

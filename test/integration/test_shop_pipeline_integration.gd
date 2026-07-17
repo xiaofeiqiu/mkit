@@ -1,18 +1,23 @@
 extends GutTest
 
 
+const SAVE_PATH := "/tmp/mkit_shop_pipeline_integration_save.json"
+
+
 func after_each() -> void:
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
 func test_tc_int_shop_01_open_buy_sell_and_stock_pipeline() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var shop := ServiceRegistry.get_service("shop") as ShopService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var shop := ServiceRegistry.get_port("shop") as ShopService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
+	var events := ServiceRegistry.get_port("events") as EventService
 	assert_not_null(shop)
 	assert_not_null(progression)
 	assert_not_null(events)
@@ -40,16 +45,20 @@ func test_tc_int_shop_01_open_buy_sell_and_stock_pipeline() -> void:
 	var potion := inventory.find_item_by_definition("item.int.potion")
 	assert_not_null(potion)
 	assert_eq(potion.quantity, 2)
-	assert_signal_emitted_with_parameters(
-		events, "item_purchased", ["shop.int.village", "item.int.potion", 2]
-	)
+	var evt_item_purchased_4 := DomainEventAsserts.last_event(events, "item_purchased")
+	assert_not_null(evt_item_purchased_4)
+	assert_eq(evt_item_purchased_4.source_id, "shop.int.village")
+	assert_eq(evt_item_purchased_4.target_id, "item.int.potion")
+	assert_eq(evt_item_purchased_4.payload.get("quantity"), 2)
 
 	assert_true(shop.sell(potion.instance_id, 1, buyer))
 	assert_eq(inventory.find_item_by_definition("item.int.potion").quantity, 1)
 	assert_eq(progression.get_currency("gold"), 85)
-	assert_signal_emitted_with_parameters(
-		events, "item_sold", ["shop.int.village", "item.int.potion", 1]
-	)
+	var evt_item_sold_5 := DomainEventAsserts.last_event(events, "item_sold")
+	assert_not_null(evt_item_sold_5)
+	assert_eq(evt_item_sold_5.source_id, "shop.int.village")
+	assert_eq(evt_item_sold_5.target_id, "item.int.potion")
+	assert_eq(evt_item_sold_5.payload.get("quantity"), 1)
 
 	assert_true(shop.buy("item.int.limited", 1, buyer))
 	assert_false(shop.buy("item.int.limited", 1, buyer))

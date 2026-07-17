@@ -1,6 +1,9 @@
 extends GutTest
 
 
+const SAVE_PATH := "/tmp/mkit_gameplay_pipeline_integration_save.json"
+
+
 class PassingCondition:
 	extends Condition
 
@@ -49,13 +52,13 @@ class TraceEventEffect:
 		var payload := {
 			"trace_id": str(context.get_payload_value("trace_id", "")),
 			"marker": str(context.get_payload_value("marker", "")),
-			"ability_id": context.ability_id,
+			"ability_id": str(context.get_payload_value("ability_id", "")),
 			"position": context.position,
 			"direction": context.direction
 		}
 		var events: EventService = null
 		if ServiceRegistry.has_service("events"):
-			events = ServiceRegistry.get_service("events") as EventService
+			events = ServiceRegistry.get_port("events") as EventService
 		if events != null:
 			events.emit_domain_event(
 				DomainEvent.create(event_type, _get_entity_id(context.source), "", payload)
@@ -70,7 +73,7 @@ class TraceEventEffect:
 
 
 class PipelineIdleState:
-	extends State
+	extends HfsmState
 	var transition_trace: Array[String] = []
 
 	func enter(_context: Dictionary = {}) -> void:
@@ -98,7 +101,7 @@ class PipelineIdleState:
 
 
 class PipelineCastState:
-	extends State
+	extends HfsmState
 	var transition_trace: Array[String] = []
 
 	func enter(context: Dictionary = {}) -> void:
@@ -110,7 +113,8 @@ class PipelineCastState:
 			return
 		var gameplay_context := GameplayContext.from_command(command, owner_entity)
 		var action_context := ActionContext.from_command(command, owner_entity)
-		blackboard.set_value("cast_context_ability_id", gameplay_context.ability_id)
+		var ability_id := str(gameplay_context.get_payload_value("ability_id", ""))
+		blackboard.set_value("cast_context_ability_id", ability_id)
 		blackboard.set_value(
 			"cast_action_context_trace_id", str(action_context.get_payload_value("trace_id", ""))
 		)
@@ -125,7 +129,7 @@ class PipelineCastState:
 			abilities.ability_cast_finished.connect(_on_ability_cast_finished)
 		if not abilities.ability_failed.is_connected(_on_ability_failed):
 			abilities.ability_failed.connect(_on_ability_failed)
-		var result := abilities.cast(gameplay_context.ability_id, gameplay_context)
+		var result := abilities.cast(ability_id, gameplay_context)
 		blackboard.set_value("last_cast_result", result)
 
 	func exit(_context: Dictionary = {}) -> void:
@@ -141,17 +145,18 @@ class PipelineCastState:
 
 
 func after_each() -> void:
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
 func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.grant"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var events := ServiceRegistry.get_port("events") as EventService
 	var receiver := player.get_node("CommandReceiver") as CommandReceiver
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 	var resources := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
@@ -203,7 +208,9 @@ func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 	)
 	assert_signal_emitted(inventory, "item_added")
 	assert_signal_emitted(inventory, "inventory_changed")
-	assert_signal_emitted_with_parameters(events, "inventory_changed", ["player.int"])
+	var evt_inventory_changed_1 := DomainEventAsserts.last_event(events, "inventory_changed")
+	assert_not_null(evt_inventory_changed_1)
+	assert_eq(evt_inventory_changed_1.source_id, "player.int")
 	assert_eq(_latest_event(events).event_type, "inventory_changed")
 	assert_eq(_latest_event(events).payload.get("item_id", ""), "item.int.reward")
 
@@ -215,13 +222,13 @@ func test_tc_int_game_01_command_to_ability_to_inventory_event() -> void:
 func test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.blocked"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 	var resources := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 
 	watch_signals(router)
 	watch_signals(actions)
@@ -255,9 +262,9 @@ func test_tc_int_game_02_failed_condition_blocks_effects_and_emits_failure() -> 
 func test_tc_int_game_03_time_pause_blocks_action_progress() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.grant"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var time := ServiceRegistry.get_service("time") as TimeService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var time := ServiceRegistry.get_port("time") as TimeService
 	var abilities := player.get_node("Controllers/AbilityController") as AbilityController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
 
@@ -299,7 +306,7 @@ func test_tc_int_game_03_time_pause_blocks_action_progress() -> void:
 
 func test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results() -> void:
 	_boot_gameplay()
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var first := ProbeEffect.new()
 	first.effect_id = "fx.int.first"
 	var failing := FailingEffect.new()
@@ -329,11 +336,11 @@ func test_tc_int_game_04_effect_chain_stop_on_failure_preserves_previous_results
 func test_tc_int_game_05_command_payload_context_blackboard_effect_event_trace() -> void:
 	_boot_gameplay()
 	var player := _make_player(["ability.int.trace"])
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var state_machine := player.get_node("StateMachine") as Hfsm
 
 	var command := GameCommand.create(
 		BuiltinCommands.CAST_ABILITY,
@@ -400,9 +407,11 @@ func test_tc_int_game_06_equip_applies_and_unequip_reverts_stat_modifier() -> vo
 
 
 func _boot_gameplay() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
+	(ServiceRegistry.get_port("effects") as EffectService).trace_enabled = true
 
 
 func _make_database() -> ResourceDatabase:
@@ -470,44 +479,10 @@ func _make_database() -> ResourceDatabase:
 
 
 func _make_player(ability_ids: Array[String]) -> Node:
-	var player := Node.new()
+	var player := IntTestHelpers.make_entity("Player", "player.int", [], "neutral")
 	player.name = "Player"
-
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player.int"
-	player.add_child(identity)
-
-	var state_machine := StateMachine.new()
-	state_machine.name = "StateMachine"
-	state_machine.initial_state_path = "root/idle"
-	state_machine.auto_start = true
-	var root := State.new()
-	root.state_id = "root"
-	var trace: Array[String] = []
-	var idle := PipelineIdleState.new()
-	idle.state_id = "idle"
-	idle.transition_trace = trace
-	var cast := PipelineCastState.new()
-	cast.state_id = "cast"
-	cast.transition_trace = trace
-	root.add_child(idle)
-	root.add_child(cast)
-	state_machine.add_child(root)
-	player.add_child(state_machine)
-
-	var receiver := CommandReceiver.new()
-	receiver.name = "CommandReceiver"
-	receiver.receiver_id = "player.int"
-	receiver.auto_register = false
-	player.add_child(receiver)
-
-	var components := Node.new()
-	components.name = "Components"
-	player.add_child(components)
-
-	var stats := StatsComponent.new()
-	stats.name = "StatsComponent"
+	IntTestHelpers.assign_owner(player, player)
+	var stats := player.get_node("Components/StatsComponent") as StatsComponent
 	stats.base_stats = {
 		"max_hp": 100.0,
 		"attack_power": 10.0,
@@ -523,39 +498,45 @@ func _make_player(ability_ids: Array[String]) -> Node:
 		"damage_multiplier": 1.0,
 		"healing_multiplier": 1.0
 	}
-	components.add_child(stats)
+	stats.mark_save_baseline()
 
-	var resource_pool := ResourcePoolComponent.new()
-	resource_pool.name = "ResourcePoolComponent"
-	resource_pool.starting_values = {"mana": 30.0}
-	components.add_child(resource_pool)
+	var receiver := player.get_node("CommandReceiver") as CommandReceiver
+	receiver.receiver_id = "player.int"
+	receiver.auto_register = false
 
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	player.add_child(controllers)
+	var trace: Array[String] = []
+	var root_state := player.get_node("StateMachine/Root") as HfsmState
+	var existing_idle := root_state.get_node_or_null("Idle") as HfsmState
+	if existing_idle != null:
+		root_state.remove_child(existing_idle)
+		existing_idle.queue_free()
+	var idle := PipelineIdleState.new()
+	idle.name = "Idle"
+	idle.state_id = "idle"
+	idle.transition_trace = trace
+	root_state.add_child(idle)
+	if root_state.get_node_or_null("Cast") == null:
+		var cast := PipelineCastState.new()
+		cast.state_id = "cast"
+		cast.transition_trace = trace
+		root_state.add_child(cast)
+	var resources := player.get_node("Components") as Node
+	if resources != null:
+		var resource_pool := resources.get_node_or_null("ResourcePoolComponent") as ResourcePoolComponent
+		if resource_pool == null:
+			resource_pool = ResourcePoolComponent.new()
+			resource_pool.name = "ResourcePoolComponent"
+			resources.add_child(resource_pool)
+		resource_pool.starting_values = {"mana": 30.0}
 
-	var abilities := AbilityController.new()
-	abilities.name = "AbilityController"
+	var abilities := IntTestHelpers.add_ability_controller(player, ability_ids)
 	abilities.starting_ability_ids = ability_ids
-	controllers.add_child(abilities)
-
-	var inventory := InventoryController.new()
-	inventory.name = "InventoryController"
-	inventory.capacity = 8
-	controllers.add_child(inventory)
-
-	var equipment := EquipmentController.new()
-	equipment.name = "EquipmentController"
-	controllers.add_child(equipment)
-
-	var presentation := Node.new()
-	presentation.name = "Presentation"
-	player.add_child(presentation)
+	IntTestHelpers.add_inventory_controller(player, 8).capacity = 8
+	IntTestHelpers.add_equipment_controller(player)
 	IntTestHelpers.add_animation_player(player)
-
 	IntTestHelpers.assign_owner(player, player)
+	(ServiceRegistry.get_port("commands") as CommandService).register_receiver("player.int", receiver)
 	add_child_autofree(player)
-	(ServiceRegistry.get_service("commands") as CommandService).register_receiver("player.int", receiver)
 	return player
 
 

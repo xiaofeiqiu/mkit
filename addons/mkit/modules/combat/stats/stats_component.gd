@@ -1,6 +1,14 @@
 class_name StatsComponent
 extends SaveableComponent
+## 说明：`StatsComponent` 是 属性系统 的实体组件，负责挂在实体场景下保存状态并暴露局部能力。
+## 上游：通常由实体根节点、控制器、状态机或领域服务创建或调用。
+## 下游：会连接EventService、SaveService、controller 或实体展示层，不直接依赖具体游戏内容。
+## 使用：当项目实体需要持有可保存或可被 controller 查询的局部状态时使用它。
+## 示例：`var instance := StatsComponent.new()`
+
+## 当 `StatsComponent` 发生 `stat changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal stat_changed(stat_id: String, old_value: float, new_value: float)
+## 实体基础属性表；key 为 stat id，value 为初始数值。
 @export var base_stats: Dictionary = {
 	"max_hp": 100.0,
 	"attack_power": 10.0,
@@ -16,8 +24,11 @@ signal stat_changed(stat_id: String, old_value: float, new_value: float)
 	"damage_multiplier": 1.0,
 	"healing_multiplier": 1.0
 }
+## 按 stat id 分组的运行时修饰器表。
 var modifiers_by_stat: Dictionary = {}
+## 属性计算缓存；dirty_stats 标记后会在下次读取时刷新。
 var cached_values: Dictionary[String, float] = {}
+## 需要重新计算的属性标记表；key 为 stat id。
 var dirty_stats: Dictionary[String, bool] = {}
 var _initial_base_stats: Dictionary = {}
 
@@ -27,6 +38,7 @@ func _ready() -> void:
 	mark_all_dirty()
 
 
+## 读取当前对象中的 `stat_value`；未找到时返回 null、空集合或该 API 的默认值。
 func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	if not base_stats.has(stat_id) and not modifiers_by_stat.has(stat_id):
 		return default_value
@@ -36,6 +48,7 @@ func get_stat_value(stat_id: String, default_value: float = 0.0) -> float:
 	return cached_values[stat_id]
 
 
+## 更新当前对象中的 `base_stat`；输入值按该对象规则校验或夹取。
 func set_base_stat(stat_id: String, value: float) -> void:
 	var old := get_stat_value(stat_id, value)
 	base_stats[stat_id] = value
@@ -44,6 +57,7 @@ func set_base_stat(stat_id: String, value: float) -> void:
 	stat_changed.emit(stat_id, old, new_value)
 
 
+## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_modifier(modifier: StatModifier) -> void:
 	if modifier == null or modifier.stat_id == "":
 		return
@@ -58,30 +72,37 @@ func add_modifier(modifier: StatModifier) -> void:
 	_emit_stat_changed(modifier.stat_id, old_value)
 
 
+## 从当前集合或状态移除传入数据；目标不存在时安全返回。
 func remove_modifier(modifier_id: String, source_id: String = "") -> void:
-	for stat_id in modifiers_by_stat.keys():
-		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
-		var old_value := get_stat_value(stat_id)
-		var removed := false
-		for modifier in list.duplicate():
-			if (
-				modifier.modifier_id == modifier_id
-				and (source_id == "" or modifier.source_id == source_id)
-			):
-				list.erase(modifier)
-				removed = true
-		if removed:
-			mark_dirty(stat_id)
-			_emit_stat_changed(stat_id, old_value)
+	_remove_modifiers_where(
+		func(m: StatModifier) -> bool:
+			return m.modifier_id == modifier_id and (source_id == "" or m.source_id == source_id)
+	)
 
 
+## 从当前集合或状态移除传入数据；目标不存在时安全返回。
 func remove_modifiers_from_source(source_id: String) -> void:
+	_remove_modifiers_where(func(m: StatModifier) -> bool: return m.source_id == source_id)
+
+
+## 执行 `tick_modifiers` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
+func tick_modifiers(delta: float) -> void:
+	_remove_modifiers_where(
+		func(m: StatModifier) -> bool:
+			if m.remaining_duration <= 0:
+				return false
+			m.remaining_duration -= delta
+			return m.remaining_duration <= 0
+	)
+
+
+func _remove_modifiers_where(predicate: Callable) -> void:
 	for stat_id in modifiers_by_stat.keys():
 		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
 		var old_value := get_stat_value(stat_id)
 		var removed := false
 		for modifier in list.duplicate():
-			if modifier.source_id == source_id:
+			if predicate.call(modifier):
 				list.erase(modifier)
 				removed = true
 		if removed:
@@ -89,26 +110,12 @@ func remove_modifiers_from_source(source_id: String) -> void:
 			_emit_stat_changed(stat_id, old_value)
 
 
-func tick_modifiers(delta: float) -> void:
-	for stat_id in modifiers_by_stat.keys():
-		var list: Array[StatModifier] = modifiers_by_stat[stat_id]
-		var old_value := get_stat_value(stat_id)
-		var removed := false
-		for modifier in list.duplicate():
-			if modifier.remaining_duration > 0:
-				modifier.remaining_duration -= delta
-				if modifier.remaining_duration <= 0:
-					list.erase(modifier)
-					removed = true
-		if removed:
-			mark_dirty(stat_id)
-			_emit_stat_changed(stat_id, old_value)
-
-
+## 执行 `mark_dirty` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func mark_dirty(stat_id: String) -> void:
 	dirty_stats[stat_id] = true
 
 
+## 执行 `mark_all_dirty` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func mark_all_dirty() -> void:
 	for stat_id in base_stats.keys():
 		dirty_stats[stat_id] = true
@@ -116,10 +123,12 @@ func mark_all_dirty() -> void:
 		dirty_stats[stat_id] = true
 
 
+## 执行 `mark_save_baseline` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func mark_save_baseline() -> void:
 	_initial_base_stats = base_stats.duplicate(true)
 
 
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {
 		"base_overrides": _get_base_overrides(),
@@ -127,6 +136,7 @@ func to_save_data() -> Dictionary:
 	}
 
 
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	if _initial_base_stats.is_empty():
 		mark_save_baseline()

@@ -1,7 +1,16 @@
 class_name InteractionComponent
 extends Area2D
+## 说明：`InteractionComponent` 是 交互系统 的实体组件，负责挂在实体场景下保存状态并暴露局部能力。
+## 上游：通常由实体根节点、控制器、状态机或领域服务创建或调用。
+## 下游：会连接EventService、SaveService、controller 或实体展示层，不直接依赖具体游戏内容。
+## 使用：当项目实体需要持有可保存或可被 controller 查询的局部状态时使用它。
+## 示例：`var instance := InteractionComponent.new()`
+
+## 当 `InteractionComponent` 发生 `interactable focused` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal interactable_focused(interactable: Interactable)
+## 当 `InteractionComponent` 发生 `interactable unfocused` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal interactable_unfocused(interactable: Interactable)
+## 当前处于可交互范围内的对象；没有目标时为 null。
 var current_interactable: Interactable = null
 
 
@@ -10,6 +19,7 @@ func _ready() -> void:
 	area_exited.connect(_on_area_exited)
 
 
+## 执行 `try_interact` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func try_interact() -> bool:
 	if current_interactable == null:
 		return false

@@ -19,6 +19,44 @@
 | 实现敌人 Attack 状态（类似玩家，使用 `TimedAttackAction`）| — |
 | 可选：继承 `Brain` 实现自定义决策逻辑 | `think()` 每帧由 `Brain._process` 按间隔调用 |
 
+## 本篇路径
+
+### Minimal path：AI 只读取世界和组件
+
+1. 先按步骤 1 搭好敌人实体，并把玩家加入 `"player"` group。
+2. 在 `SimpleAIEnemyBrain.target_group` 填 `"player"`，运行后 brain 会找到玩家节点。
+3. 如果你只是写感知或调试脚本，直接读距离和组件：
+
+```gdscript
+var target := get_tree().get_first_node_in_group("player") as Node2D
+var distance := (owner as Node2D).global_position.distance_to(target.global_position)
+var health := EntityContract.get_component(owner, "HealthComponent") as HealthComponent
+```
+
+4. 只显示警戒、巡逻或 UI 提示时，到这里就够了，不发 `GameCommand`。
+
+### Standard path：Brain 给自己发命令
+
+1. 给敌人 `CommandReceiver` 和 `StateMachine` 配好 Idle / Move / Attack state。
+2. `SimpleAIEnemyBrain` 每 `think_interval` 根据距离选择命令：远离时 `STOP_MOVE`，追击时 `MOVE`，进入攻击距离时 `ATTACK`。
+3. 命令的 source 和 target 都是敌人自己的 id；brain 直接调用敌人自己的 receiver。
+4. 运行验证：玩家走进 `detection_range` 后敌人移动，进入 `attack_range` 后敌人停止追击并切到 Attack。
+
+### Advanced path：敌人 Attack 状态启动 `TimedAttackAction`
+
+1. 在敌人 `Components/` 下加 `HitboxComponent`，并把 `target_factions` 设为 `["player"]`。
+2. 在 `EnemyAttackState.enter()` 里创建 `TimedAttackAction`，设置 startup / active / recovery 和 hitbox path。
+3. 找到玩家节点后构造上下文：
+
+```gdscript
+var target := get_tree().get_first_node_in_group("player")
+var ctx := ActionContext.from_nodes(owner_entity, target)
+Mkit.actions().start_action(attack, ctx)
+```
+
+4. 连接 action 完成信号，完成后回到 Idle 或 Move。
+5. 验证方式：敌人进入攻击距离后，active 窗口内玩家 `HealthComponent` 扣血。
+
 ## 步骤
 
 ### 步骤 1：构建敌人场景树
@@ -52,6 +90,7 @@ EnemyEntity  (EntityRoot)
 - `detection_range` = `240.0`（像素）
 - `attack_range` = `48.0`
 - `target_group` = `"player"`（通过 `get_first_node_in_group("player")` 找玩家）
+- `enabled` = `true`（运行时关掉后 Brain 保留在场景树里，但不再思考或发命令）
 - `think_interval` = `0.2`（每 0.2 秒决策一次）
 
 `SimpleAIEnemyBrain` 内部逻辑：
@@ -59,7 +98,9 @@ EnemyEntity  (EntityRoot)
 - 距离 ≤ detection_range 且 > attack_range → `MOVE`（方向朝向玩家）
 - 距离 ≤ attack_range → `ATTACK`
 
-命令发给**自身**（`target_id = self.entity_id`），由敌人自己的 `CommandReceiver` 接收。
+命令发给**自身**（`target_id = self.entity_id`），由敌人自己的 `CommandReceiver` 直接接收。
+
+`Brain.enabled` 是剧情、暂停、过场冻结敌人的开关：设为 `false` 后 `_process()` 会直接返回，不会累计 `think_interval`，也不会调用 `think()`。重新设回 `true` 后会从当前计时继续思考；如果希望立即重算，可在你的游戏代码里直接调用 `think()`。
 
 ### 步骤 3：实现敌人状态
 
@@ -126,7 +167,7 @@ var _current_action: GameAction = null
 
 
 func _ready() -> void:
-    _action_svc = ServiceRegistry.get_service("actions") as ActionService
+    _action_svc = Mkit.actions()
 
 
 func enter(_context: Dictionary = {}) -> void:
@@ -218,14 +259,14 @@ print("Brain: intent=%s dist=%.1f" % [blackboard.get_value("intent", "?"), dista
 | 现象 | 原因 | 修复 |
 |------|------|------|
 | 敌人不动 | Brain 无法找到玩家 | 确认玩家节点已加入 `"player"` group（Scene → Groups）|
-| 命令发出但敌人状态不切换 | `CommandReceiver.receiver_id` 未正确初始化 | 检查 `EntityIdentity.entity_id` 非空；`auto_register = true` |
+| 命令发出但敌人状态不切换 | `CommandReceiver` 缺失，或当前 State 未处理该命令 | 检查实体默认布局，并确认对应 State 的 `handle_command` |
 | 敌人攻击但玩家不掉血 | `ctx.target` 不是带 HealthComponent 的节点 | 确认 `get_first_node_in_group("player")` 返回的是 EntityRoot 节点 |
 | `think_interval` 为 0 → 卡死 | `Brain._process` 每帧都调 `think()` | 保持 `think_interval > 0`（默认 0.2 即可）|
 | 敌人追到玩家但超出 attack_range 时没切回 Move | 状态机处于 Attack 中，Brain 发的 MOVE 命令未被 Attack 状态处理 | 在 `EnemyAttackState.handle_command` 中处理 MOVE 命令，或 action complete 后自动回 Idle |
 
 ## 延伸阅读
 
-- [Brain ref](../ref/modules/Brain.md) — think_interval / issue_command / blackboard
-- [SimpleAIEnemyBrain ref](../ref/modules/SimpleAIEnemyBrain.md) — 内置简单 AI 策略
-- [EntitySpawner ref](../ref/modules/EntitySpawner.md) — 在运行时动态 spawn 敌人
+- [Brain ref](../generated/html/classes/Brain.html) — think_interval / issue_command / blackboard
+- [SimpleAIEnemyBrain ref](../generated/html/classes/SimpleAIEnemyBrain.html) — 内置简单 AI 策略
+- [EntitySpawner ref](../generated/html/classes/EntitySpawner.html) — 在运行时动态 spawn 敌人
 - [cookbook/07_room.md](07_room.md) — 将敌人放进房间系统，由 RoomController 管理 spawn

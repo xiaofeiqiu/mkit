@@ -17,12 +17,70 @@
 | 给玩家 `Controllers/InventoryController` + 一些 `gold` | 买入：扣货币 → `add_item`；失败自动退款 |
 | 开店：`ShopService.open_shop()` + 绑 `ShopUI` | `buy()` / `sell()` 校验、改库存、发 `item_purchased` / `item_sold` |
 
+## 本篇路径
+
+### Minimal path：UI 已经拿到 shop id 时直接调 ShopService
+
+1. 先按步骤 1 / 2 创建 `item.potion` 和 `shop.village`，并加入 `ResourceDatabase`。
+2. 确认玩家有 `InventoryController`，并先给货币：
+
+```gdscript
+Mkit.progression().add_currency("gold", 200)
+```
+
+3. 打开商店时执行：
+
+```gdscript
+var shop := Mkit.shop()
+if shop.open_shop("shop.village"):
+    var ui := preload("res://game/ui/shop.tscn").instantiate() as ShopUI
+    add_child(ui)
+    ui.bind(shop, player)
+```
+
+4. UI 按钮里直接调用 `shop.buy("item.potion", 1, player)`。
+5. 验证方式：金币减少、背包新增药水、库存减少或交易失败原因可见。
+
+这条路径是普通 UI 服务调用，不需要实体 command 或 action。
+
+### Standard path：玩家按交互键打开商店
+
+1. 商店 NPC 或柜台做成 `Area2D`，下面放名为 `Interactable` 的商店交互节点。
+2. 玩家实体挂 `InteractionComponent`，输入脚本在按下交互键时调用 `interaction_component.try_interact()`。
+3. 商店 interactable 的 `_interact_impl(context)` 里写：
+
+```gdscript
+var shop := Mkit.shop()
+if shop == null or not shop.open_shop("shop.village"):
+    return false
+_open_shop_ui(shop, context.source)
+return true
+```
+
+4. `_open_shop_ui()` 实例化 `ShopUI` 并 `bind(shop, context.source)`。
+5. 验证方式：只有玩家靠近商店并按交互键时 UI 才打开。
+
+这条路径和 NPC / Portal 一样，入口是玩家自己的交互组件。
+
+### Advanced path：只知道 NPC id 时才用 CommandService
+
+1. 给商店 NPC 配 `EntityIdentity.entity_id = "shopkeeper"` 和自动注册的 `CommandReceiver`。
+2. 剧情脚本只有 NPC id 时，发送命令：
+
+```gdscript
+var command := GameCommand.create("open_shop", "script", "shopkeeper")
+Mkit.commands().dispatch(command)
+```
+
+3. NPC 的 command handler 处理 `"open_shop"`，调用 Standard path 的商店打开逻辑。
+4. 如果调用方已经拿到 NPC 节点、商店 UI 或玩家 `InteractionComponent`，直接调用对应对象，不要经过 `CommandService`。
+
 ## 关键认知：商店货币来自 ProgressionService
 
 `ShopService.buy()` 用 `SpendCurrencyEffect` / `AddCurrencyEffect` 结算，它们操作的是 **`ProgressionService` 的货币**（不是实体身上的 `ResourcePoolComponent`）。所以买东西前玩家得先有 `gold`：
 
 ```gdscript
-var progression := ServiceRegistry.get_service("progression") as ProgressionService
+var progression := Mkit.progression()
 progression.add_currency("gold", 200)
 ```
 
@@ -41,6 +99,18 @@ progression.add_currency("gold", 200)
 | `stackable` | `true`, `max_stack` = `99` |
 
 加入 `ResourceDatabase.resources`。
+
+再建一个高级商品 `res://data/items/elixir.tres`，用于演示条件门禁：
+
+| 字段 | 值 |
+|------|----|
+| `item_id` | `"item.elixir"` |
+| `display_name` | `"秘制灵药"` |
+| `item_type` | `"consumable"` |
+| `value` | `120` |
+| `stackable` | `true`, `max_stack` = `9` |
+
+同样加入 `ResourceDatabase.resources`。
 
 ### 步骤 2：创建 ShopDefinition
 
@@ -64,9 +134,17 @@ entry_potion:
   price_override = -1     # -1 → 用 value*buy_price_multiplier 算价；>=0 则固定此价
   stock          = 5      # -1 = 无限库存
   conditions     = []
+
+entry_elixir:
+  item_id        = "item.elixir"
+  price_override = 120
+  stock          = 1
+  conditions     = [ReputationCondition(faction_id="faction.village", required=50)]
 ```
 
 加入 `ResourceDatabase.resources`。
+
+> `entry_elixir.conditions` 演示的是游戏自定义 `Condition`：按 [Recipe 20](20_custom_service.md) 的声望服务写一个 `ReputationCondition`，再按 [Recipe 21](21_conditions.md) 步骤 4 覆写 `_evaluate_impl()`。`ShopService` 求值时 `context.source` 是买家实体、`context.target` 为 null；条件不满足时购买被拒，失败原因是 `"Entry locked"`。
 
 ### 步骤 3：确认玩家有背包和货币
 
@@ -85,7 +163,7 @@ Shop  (ShopUI)
 
 ```gdscript
 func open_village_shop(player: Node) -> void:
-    var shop := ServiceRegistry.get_service("shop") as ShopService
+    var shop := Mkit.shop()
     if shop == null:
         return
     if not shop.open_shop("shop.village"):
@@ -104,14 +182,14 @@ func open_village_shop(player: Node) -> void:
 买入（也可不经 UI 直接调）：
 
 ```gdscript
-var shop := ServiceRegistry.get_service("shop") as ShopService
+var shop := Mkit.shop()
 if shop.can_buy("item.potion", 1, player):
     shop.buy("item.potion", 1, player)
 else:
     print("买不了：钱不够 / 缺货 / 背包满")
 ```
 
-`buy()` 流程：算总价 → `SpendCurrencyEffect` 扣 `gold`（失败即终止）→ `InventoryController.add_item()`（失败则**自动退款**）→ 扣库存 → 发 `item_purchased` + `EventService.emit_item_purchased`。
+`buy()` 流程：算总价 → `SpendCurrencyEffect` 扣 `gold`（失败即终止）→ `InventoryController.add_item()`（失败则**自动退款**）→ 扣库存 → 发 `item_purchased` 信号 + `ShopEvents.item_purchased` 领域事件。
 
 卖出（按物品**实例 id**）：
 
@@ -154,7 +232,7 @@ shop.transaction_failed.connect(func(item_id: String, reason: String):
 
 ## 延伸阅读
 
-- [ShopService ref](../ref/modules/ShopService.md) — open_shop / buy / sell / 价格计算
-- [ShopDefinition ref](../ref/modules/ShopDefinition.md) · [ShopEntry ref](../ref/modules/ShopEntry.md)
-- [InventoryController ref](../ref/modules/InventoryController.md) · [ItemDefinition ref](../ref/modules/ItemDefinition.md)
+- [ShopService ref](../generated/html/classes/ShopService.html) — open_shop / buy / sell / 价格计算
+- [ShopDefinition ref](../generated/html/classes/ShopDefinition.html) · [ShopEntry ref](../generated/html/classes/ShopEntry.html)
+- [InventoryController ref](../generated/html/classes/InventoryController.html) · [ItemDefinition ref](../generated/html/classes/ItemDefinition.html)
 - [pipeline.md — Shop Purchase](../pipeline.md#16-shop-purchase)

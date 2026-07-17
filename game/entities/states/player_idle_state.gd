@@ -1,5 +1,5 @@
 class_name PlayerIdleState
-extends State
+extends HfsmState
 
 
 func enter(context: Dictionary = {}) -> void:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Section Detail Guide Generator"
+  short_description: "Generate section design guides"
+  default_prompt: "Use $section-detail-guide-generator to generate a reusable section detailed design guide from this README or curriculum outline."

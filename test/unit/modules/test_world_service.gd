@@ -37,6 +37,7 @@ class AudioProbe:
 var content: StubContent
 var scenes: StubSceneRouter
 var events: EventService
+var save_manager: SaveService
 
 
 func before_each() -> void:
@@ -46,12 +47,19 @@ func before_each() -> void:
 	add_child_autofree(scenes)
 	events = EventService.new()
 	add_child_autofree(events)
+	save_manager = SaveService.new()
+	add_child_autofree(save_manager)
+	save_manager.save_path = "/tmp/mkit_unit_world_scope.json"
 	ServiceRegistry.register_service("content", content)
 	ServiceRegistry.register_service("scenes", scenes)
 	ServiceRegistry.register_service("events", events)
+	ServiceRegistry.register_service("save", save_manager)
 
 
 func after_each() -> void:
+	var path := save_manager.save_path if save_manager != null else ""
+	if path != "" and FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
 	ServiceRegistry.clear()
 
 
@@ -161,7 +169,10 @@ func test_tc_world_03_zone_changed_event_and_bgm_triggered() -> void:
 	assert_eq(world.current_zone_id, "zone.field")
 	assert_eq(player.global_position, Vector2(300, 90))
 	assert_signal_emitted_with_parameters(world, "zone_changed", ["", "zone.field"])
-	assert_signal_emitted_with_parameters(events, "zone_changed", ["", "zone.field"])
+	var evt_zone_changed_1 := DomainEventAsserts.last_event(events, "zone_changed")
+	assert_not_null(evt_zone_changed_1)
+	assert_eq(evt_zone_changed_1.payload.get("from_zone_id"), "")
+	assert_eq(evt_zone_changed_1.payload.get("to_zone_id"), "zone.field")
 	assert_eq(audio.played.size(), 1)
 	assert_eq(audio.played[0], "bgm.field")
 	var last := events.recent_events[-1]
@@ -244,3 +255,53 @@ func test_tc_world_07_rebinding_scene_router_disconnects_old_one() -> void:
 
 	assert_false(scenes.scene_changed.is_connected(world._on_scene_changed))
 	assert_true(new_scenes.scene_changed.is_connected(world._on_scene_changed))
+
+
+func test_tc_world_08_scoped_zone_state_restores_without_scene_root() -> void:
+	var world := _make_world()
+	world.current_zone_id = "zone.saved"
+	world._pending_zone_id = "zone.pending"
+	world._pending_spawn_id = "spawn.pending"
+
+	assert_true(save_manager.save_game(null))
+	world.free()
+
+	var restored := _make_world()
+	assert_true(save_manager.load_game(null))
+	assert_eq(restored.current_zone_id, "zone.saved")
+	assert_eq(restored._pending_zone_id, "zone.pending")
+	assert_eq(restored._pending_spawn_id, "spawn.pending")
+	assert_eq(scenes.changed_paths.size(), 0)
+
+
+func test_tc_world_09_scoped_zone_restore_changes_active_scene_to_saved_zone() -> void:
+	_make_zone("zone.village", "res://village.tscn", "village_center", "bgm.village")
+	_make_zone("zone.field", "res://field.tscn", "field_entry", "bgm.field")
+	var audio := AudioProbe.new()
+	add_child_autofree(audio)
+	ServiceRegistry.register_service("audio", audio)
+	var world := _make_world()
+	world.current_zone_id = "zone.village"
+	scenes.current_scene_path = "res://village.tscn"
+
+	assert_true(save_manager.save_game(null))
+	world.current_zone_id = "zone.field"
+	scenes.current_scene_path = "res://field.tscn"
+	scenes.changed_paths.clear()
+
+	watch_signals(world)
+	watch_signals(events)
+	assert_true(save_manager.load_game(null))
+
+	assert_eq(world.current_zone_id, "zone.village")
+	assert_eq(world._pending_zone_id, "")
+	assert_eq(world._pending_spawn_id, "")
+	assert_eq(scenes.changed_paths, ["res://village.tscn"])
+	assert_eq(scenes.current_scene_path, "res://village.tscn")
+	assert_signal_emitted_with_parameters(world, "zone_changed", ["zone.field", "zone.village"])
+	var evt_zone_changed_2 := DomainEventAsserts.last_event(events, "zone_changed")
+	assert_not_null(evt_zone_changed_2)
+	assert_eq(evt_zone_changed_2.payload.get("from_zone_id"), "zone.field")
+	assert_eq(evt_zone_changed_2.payload.get("to_zone_id"), "zone.village")
+	assert_eq(audio.played.size(), 1)
+	assert_eq(audio.played[0], "bgm.village")

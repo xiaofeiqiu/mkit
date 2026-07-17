@@ -1,7 +1,16 @@
 class_name SimpleAIEnemyBrain
 extends Brain
+## 说明：`SimpleAIEnemyBrain` 是 AI 系统 的公开 API 类型，负责承载该领域的可复用运行时数据或行为。
+## 上游：通常由同领域服务、controller、组件或内容资源创建或调用。
+## 下游：会连接 mkit 的服务、组件、资源或事件管线，不直接依赖具体游戏内容。
+## 使用：当项目需要在AI 系统中复用这段契约或状态时使用它。
+## 示例：`var instance := SimpleAIEnemyBrain.new()`
+
+## AI 搜索目标的距离，单位为像素；超出范围的目标会被忽略。
 @export var detection_range: float = 240.0
+## AI 触发攻击的距离，单位为像素；目标更远时通常改为追击。
 @export var attack_range: float = 48.0
+## AI 搜索目标时使用的 Godot 分组名称。
 @export var target_group: String = "player"
 
 
@@ -12,6 +21,7 @@ func _ready() -> void:
 		blackboard.set_value("target", target)
 
 
+## 执行 `think` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func think() -> void:
 	target = _get_target()
 	if target == null:

@@ -24,68 +24,19 @@ const ROOM_TRIAL_02 := "room.demo.trial_02"
 const ROOM_TRIAL_03 := "room.demo.trial_03"
 const REWARD_TRIAL_ATTACK := "reward.demo.trial_attack"
 const UPGRADE_TRIAL_ATTACK := "upgrade.demo.trial_attack"
-const PLATFORM_REVIVE_PLACEMENT := "revive"
-const PLATFORM_GOLD_PACK_PRODUCT := "com.mkit.demo.gold_pack"
-const PLATFORM_CLOUD_SLOT := "demo_profile"
-const GOLD_PACK_AMOUNT := 25
+const SCENE8_BOOT_SAVE_PATH := "/tmp/mkit_scene8_bootstrap_save.json"
 const SCENE8_S7_SAVE_PATH := "/tmp/mkit_scene8_s7_save.json"
-const SCENE8_PLATFORM_SAVE_PATH := "/tmp/mkit_scene8_platform_save.json"
 const DAMAGE_NUMBER_SCENE := "res://game/ui/damage_number.tscn"
 const HIT_VFX_SCENE := "res://game/ui/hit_vfx.tscn"
+const ATTACK_SFX_ID := "sfx.demo.attack"
+const ATTACK_SFX_PATH := "res://game/audio/demo_attack_slash.wav"
+const DEMO_VILLAGE_BGM_PATH := "res://game/audio/demo_village_loop.wav"
+const DEMO_ROOM_BGM_PATH := "res://game/audio/demo_room_loop.wav"
+const DEMO_FIELD_BGM_PATH := "res://game/audio/demo_field_loop.wav"
 const TOAST_SCREEN_ID := "demo.toast"
 
 var _previous_current_scene: Node = null
 var _current_scene_override: Node = null
-
-
-class SpyAnalyticsService:
-	extends AnalyticsServiceMock
-	var tracked_events: Array[Dictionary] = []
-	var user_properties: Dictionary = {}
-
-	func track_event(event_name: String, properties: Dictionary = {}) -> void:
-		tracked_events.append(
-			{"event_name": event_name, "properties": properties.duplicate(true)}
-		)
-		super.track_event(event_name, properties)
-
-	func set_user_property(key: String, value: Variant) -> void:
-		user_properties[key] = value
-		super.set_user_property(key, value)
-
-
-class SpyAdService:
-	extends AdServiceMock
-	var shown_placements: Array[String] = []
-
-	func show_rewarded_ad(placement_id: String) -> void:
-		shown_placements.append(placement_id)
-		super.show_rewarded_ad(placement_id)
-
-
-class SpyIAPService:
-	extends IAPServiceMock
-	var purchased_products: Array[String] = []
-
-	func purchase(product_id: String) -> void:
-		purchased_products.append(product_id)
-		super.purchase(product_id)
-
-
-class SpyCloudSaveService:
-	extends CloudSaveServiceMock
-	var saved_slots: Array[String] = []
-	var loaded_slots: Array[String] = []
-	var last_saved_data: Dictionary = {}
-
-	func save_to_cloud(slot: String, data: Dictionary) -> void:
-		saved_slots.append(slot)
-		last_saved_data = data.duplicate(true)
-		super.save_to_cloud(slot, data)
-
-	func load_from_cloud(slot: String) -> void:
-		loaded_slots.append(slot)
-		super.load_from_cloud(slot)
 
 
 func after_each() -> void:
@@ -102,8 +53,8 @@ func after_each() -> void:
 		_current_scene_override.free()
 	_current_scene_override = null
 	_previous_current_scene = null
+	IntTestHelpers.remove_file(SCENE8_BOOT_SAVE_PATH)
 	IntTestHelpers.remove_file(SCENE8_S7_SAVE_PATH)
-	IntTestHelpers.remove_file(SCENE8_PLATFORM_SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
@@ -113,23 +64,35 @@ func after_each() -> void:
 # and ATTACK commands run a TimedAttackAction whose HitboxComponent overlaps the field
 # beast HurtboxComponent, feeding CombatService until the beast dies.
 func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var audio := ServiceRegistry.get_port("audio") as AudioService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_not_null(router)
 	assert_not_null(actions)
 	assert_not_null(events)
+	assert_not_null(audio)
+	assert_not_null(content)
+	audio.sfx_bus = "Master"
+	var attack_definition := content.get_resource(ATTACK_SFX_ID) as AudioDefinition
+	assert_not_null(attack_definition)
+	var attack_stream := audio.sfx_map[ATTACK_SFX_ID] as AudioStream
+	assert_not_null(attack_stream)
+	assert_eq(attack_definition.stream, attack_stream)
+	assert_eq(attack_stream.resource_path, ATTACK_SFX_PATH)
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	player.global_position = Vector2.ZERO
 	add_child_autofree(player)
 
 	var receiver := player.get_node("CommandReceiver") as CommandReceiver
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 	var player_stats := player.get_node("Components/StatsComponent") as StatsComponent
 	# crit is the only random factor in the damage formula; zero it for a deterministic hit
 	player_stats.set_base_stat("crit_chance", 0.0)
@@ -156,7 +119,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 
 	# place the beast where the rightward swing hitbox (player + facing * 28) overlaps its hurtbox
 	player.global_position = Vector2.ZERO
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	beast.global_position = Vector2(28.0, 0.0)
 	add_child_autofree(beast)
@@ -171,9 +134,14 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	await get_tree().physics_frame
 
 	# --- ATTACK 1: command -> Attack state -> TimedAttackAction -> hitbox -> CombatService ---
+	var audio_child_count := audio.get_child_count()
 	assert_true(router.dispatch(GameCommand.create(BuiltinCommands.ATTACK, PLAYER_ID, PLAYER_ID, {})))
 	assert_eq(state_machine.get_current_path(), "Player/Attack")
 	assert_eq(actions.active_actions.size(), 1)
+	assert_eq(audio.get_child_count(), audio_child_count + 1)
+	var attack_player := audio.get_child(audio.get_child_count() - 1) as AudioStreamPlayer
+	assert_not_null(attack_player)
+	assert_eq(attack_player.stream, attack_stream)
 	var action := actions.active_actions[0]
 	assert_true(action is TimedAttackAction)
 	# ActionContext carries the swinging entity and its facing
@@ -185,7 +153,7 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	# 35 - (hitbox base 12 + StatsComponent attack_power 10), no crit/defense
 	assert_eq(beast_health.current_hp, 13.0)
 	assert_signal_emitted(beast_health, "damaged")
-	assert_signal_emitted(events, "damage_applied")
+	assert_not_null(DomainEventAsserts.last_event(events, "damage_applied"))
 
 	# finish the swing; the state machine returns to Idle and the action drains
 	actions._process(0.25)
@@ -199,7 +167,10 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 	assert_true(beast_health.dead)
 	assert_eq(beast_health.current_hp, 0.0)
 	assert_signal_emitted(beast_health, "died")
-	assert_signal_emitted_with_parameters(events, "entity_died", [BEAST_ID, beast])
+	var evt_entity_died_1 := DomainEventAsserts.last_event(events, "entity_died")
+	assert_not_null(evt_entity_died_1)
+	assert_eq(evt_entity_died_1.source_id, BEAST_ID)
+	assert_eq(evt_entity_died_1.payload.get("entity_ref"), beast)
 
 	actions._process(0.25)
 	assert_eq(state_machine.get_current_path(), "Player/Idle")
@@ -208,67 +179,94 @@ func test_tc_int_scene8_00_command_hfsm_action_drives_combat_to_death() -> void:
 # S1: the firebolt skill pipeline. The player scene registers ability.demo.firebolt from
 # the live content database; casting it spends mana, channels through a CastAction (cast_time
 # > 0) before its effects fire, then DealDamage + ApplyStatus burn the field beast and a
-# cooldown starts. TargetInRangeCondition gates an out-of-range cast and CooldownReadyCondition
-# blocks the immediate re-cast.
-func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns() -> void:
-	var bootstrap := GameBootstrap.new()
+# cooldown starts. TargetInRangeCondition now lives on the damage/burn effects, so an
+# out-of-range cast launches and pays cost but misses; CooldownReadyCondition blocks recasts.
+func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_misses_range_and_burns() -> void:
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
 	assert_not_null(actions)
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	player.global_position = Vector2.ZERO
 	add_child_autofree(player)
 
 	var ability := player.get_node("Controllers/AbilityController") as AbilityController
 	var input_reader := player.get_node("InputReader")
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
-	# the shared player scene stays generic; Scene8 registers firebolt from live content.
-	assert_eq(str(input_reader.get("cast_ability_id")), "")
-	assert_false(ability.has_ability(FIREBOLT))
-	assert_true(ability.register_ability(FIREBOLT))
+	# the shared player scene starts with firebolt from live content for the demo loop.
+	assert_eq(str(input_reader.get("cast_ability_id")), FIREBOLT)
 	assert_true(ability.has_ability(FIREBOLT))
 	assert_eq(pool.get_current("mana"), 50.0)
 
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
 	var beast_status := beast.get_node("Controllers/StatusEffectController") as StatusEffectController
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	effects.trace_enabled = true
+	effects.clear_recent_results()
+	watch_signals(ability)
+	watch_signals(beast_health)
 
-	# --- TargetInRangeCondition gates a cast beyond the 120px firebolt range ---
+	# --- out of range: cast still starts, spends mana, finishes, but the effects miss ---
 	beast.global_position = Vector2(400.0, 0.0)
 	var ctx_far := GameplayContext.new().with_source(player).with_target(beast)
-	assert_false(ability.can_cast(FIREBOLT, ctx_far))
-	assert_eq(ability.get_cast_failure_reason(FIREBOLT, ctx_far), "target_out_of_range")
+	assert_true(ability.can_cast(FIREBOLT, ctx_far))
+	assert_eq(ability.get_cast_failure_reason(FIREBOLT, ctx_far), "")
+	assert_true(ability.cast(FIREBOLT, ctx_far))
+	assert_eq(pool.get_current("mana"), 40.0)
+	assert_signal_emit_count(ability, "ability_cast_started", 1)
+	assert_eq(actions.active_actions.size(), 1)
+	assert_true(actions.active_actions[0] is CastAction)
+	assert_eq(beast_health.current_hp, 35.0)
+	assert_false(beast_status.has_status(BURN))
+	actions._process(0.5)
+	assert_eq(actions.active_actions.size(), 0)
+	assert_signal_emit_count(ability, "ability_cast_finished", 1)
+	assert_signal_emit_count(ability, "cooldown_started", 1)
+	assert_signal_emit_count(beast_health, "damaged", 0)
+	assert_eq(beast_health.current_hp, 35.0)
+	assert_false(beast_status.has_status(BURN))
+	var missed_effect_ids: Array[String] = []
+	for result in effects.recent_results:
+		if not result.success and result.failure_reason == "target_out_of_range":
+			missed_effect_ids.append(result.effect_id)
+	assert_true(missed_effect_ids.has("effect.demo.firebolt_damage"))
+	assert_true(missed_effect_ids.has("effect.demo.firebolt_burn"))
+
+	var ability_instance := ability.abilities[FIREBOLT] as AbilityInstance
+	ability_instance.current_charges = 1
+	ability_instance.cooldown_remaining = 0.0
+	pool.set_current("mana", 50.0)
 
 	# --- in range: cast pays mana up front and channels through a CastAction (cast_time > 0) ---
 	beast.global_position = Vector2(80.0, 0.0)
-	watch_signals(ability)
-	watch_signals(beast_health)
 	var ctx := GameplayContext.new().with_source(player).with_target(beast)
 	assert_true(ability.can_cast(FIREBOLT, ctx))
 	assert_true(ability.cast(FIREBOLT, ctx))
 	# ResourcePoolComponent.spend is charged immediately
 	assert_eq(pool.get_current("mana"), 40.0)
-	assert_signal_emitted(ability, "ability_cast_started")
+	assert_signal_emit_count(ability, "ability_cast_started", 2)
 	assert_eq(actions.active_actions.size(), 1)
 	assert_true(actions.active_actions[0] is CastAction)
 	# the channel is still in flight: no damage, no burn, no finish yet
 	assert_eq(beast_health.current_hp, 35.0)
 	assert_false(beast_status.has_status(BURN))
-	assert_signal_not_emitted(ability, "ability_cast_finished")
+	assert_signal_emit_count(ability, "ability_cast_finished", 1)
 
 	# --- advance the channel past cast_time: DealDamage + ApplyStatus fire, cooldown starts ---
 	actions._process(0.5)
 	assert_eq(actions.active_actions.size(), 0)
-	assert_signal_emitted(ability, "ability_cast_finished")
-	assert_signal_emitted(ability, "cooldown_started")
+	assert_signal_emit_count(ability, "ability_cast_finished", 2)
+	assert_signal_emit_count(ability, "cooldown_started", 2)
 	# 35 - (firebolt base 8 + player attack_power 10), no crit/defense
 	assert_eq(beast_health.current_hp, 17.0)
-	assert_signal_emitted(beast_health, "damaged")
+	assert_signal_emit_count(beast_health, "damaged", 1)
 	assert_true(beast_status.has_status(BURN))
 
 	# --- CooldownReadyCondition now blocks the immediate re-cast ---
@@ -278,7 +276,6 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 	assert_eq(ability.get_cast_failure_reason(FIREBOLT, ctx_cd), "on_cooldown: %s" % FIREBOLT)
 	var cd_cond := CooldownReadyCondition.new()
 	cd_cond.ability_id = FIREBOLT
-	ctx_cd.ability_id = FIREBOLT
 	assert_false(cd_cond.evaluate(ctx_cd))
 
 
@@ -288,14 +285,16 @@ func test_tc_int_scene8_01_firebolt_pipeline_spends_mana_gates_range_and_burns()
 # when duration expires, and the elder dialogue exposes an ApplyStatModifierEffect
 # blessing that CombatService reads through StatsComponent.
 func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_attack() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	effects.trace_enabled = true
+	var events := ServiceRegistry.get_port("events") as EventService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
 	assert_not_null(content)
 	assert_not_null(effects)
 	assert_not_null(events)
@@ -319,13 +318,13 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	assert_eq(burn_def.stat_modifiers.size(), 1)
 	assert_eq(burn_def.stat_modifiers[0].modifier_id, "mod.demo.burn_defense_down")
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	add_child_autofree(player)
 	var player_stats := player.get_node("Components/StatsComponent") as StatsComponent
 	player_stats.set_base_stat("attack_power", 0.0)
 	player_stats.set_base_stat("crit_chance", 0.0)
 
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_stats := beast.get_node("Components/StatsComponent") as StatsComponent
@@ -387,7 +386,7 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 	request.target = beast
 	request.base_amount = 10.0
 	request.can_crit = false
-	var damage := (ServiceRegistry.get_service("combat") as CombatService).resolve(request)
+	var damage := (ServiceRegistry.get_port("combat") as CombatService).resolve(request)
 	assert_eq(damage.final_amount, 15.0)
 
 
@@ -396,11 +395,12 @@ func test_tc_int_scene8_02_burn_ticks_logs_restores_stats_and_elder_blesses_atta
 # CombatService damage; unequipping restores both; and a Saveable round-trip on the controller
 # re-applies the equipped item and its modifier.
 func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_round_trips() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_not_null(content)
 
 	# the blade content: a weapon-slot item carrying a +attack_power StatModifierDefinition
@@ -412,7 +412,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	assert_eq(blade_def.stat_modifiers[0].stat_id, "attack_power")
 	assert_eq(blade_def.stat_modifiers[0].value, 6.0)
 
-	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var player := (load(PLAYER_SCENE) as PackedScene).instantiate() as EntityRoot
 	add_child_autofree(player)
 	var equipment := player.get_node("Controllers/EquipmentController") as EquipmentController
 	var inventory := player.get_node("Controllers/InventoryController") as InventoryController
@@ -420,7 +420,7 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 	stats.set_base_stat("crit_chance", 0.0)
 
 	# a defenseless target to read combat damage off CombatService
-	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as CharacterBody2D
+	var beast := (load(BEAST_SCENE) as PackedScene).instantiate() as EntityRoot
 	_disable_beast_ai(beast)
 	add_child_autofree(beast)
 	var beast_stats := beast.get_node("Components/StatsComponent") as StatsComponent
@@ -477,11 +477,12 @@ func test_tc_int_scene8_03_field_blade_equip_boosts_attack_changes_damage_and_ro
 # EntityDefinition in live content, enters the field, and creates the beast through
 # EntitySpawner so identity, tags and base stats all come from data.
 func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
+	var content := ServiceRegistry.get_port("content") as ContentService
 	assert_not_null(content)
 	var definition := content.get_resource(ENTITY_FIELD_BEAST) as EntityDefinition
 	assert_not_null(definition)
@@ -507,13 +508,13 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 	var root := demo.call("_current_zone_root") as Node
 	assert_not_null(root)
 	var marker := root.get_node_or_null("FieldBeastSpawn") as Node2D
 	assert_not_null(marker)
-	var beast := root.get_node_or_null("FieldBeast") as Node2D
+	var beast := root.get_node_or_null("FieldBeast") as EntityRoot
 	assert_not_null(beast)
 	_disable_beast_ai(beast)
 	assert_eq(beast.global_position, marker.global_position)
@@ -530,7 +531,7 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_true(identity.tags.has("field_beast"))
 	var receiver := beast.get_node("CommandReceiver") as CommandReceiver
 	assert_eq(receiver.receiver_id, identity.entity_id)
-	var commands := ServiceRegistry.get_service("commands") as CommandService
+	var commands := ServiceRegistry.get_port("commands") as CommandService
 	assert_true(commands._receivers.has(identity.entity_id))
 	assert_false(commands._receivers.has(BEAST_ID))
 
@@ -543,21 +544,43 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 	assert_true((save_data["base_overrides"] as Dictionary).is_empty())
 	var health := beast.get_node("Components/HealthComponent") as HealthComponent
 	assert_true(health.destroy_on_death)
+	var status := beast.get_node("Controllers/StatusEffectController") as StatusEffectController
 
-	var player := demo.get_node("Player") as CharacterBody2D
-	player.global_position = beast.global_position + Vector2(-80.0, 0.0)
+	var player := demo.get_node("Player") as EntityRoot
 	var ability := player.get_node("Controllers/AbilityController") as AbilityController
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
 	watch_signals(ability)
+
+	player.global_position = beast.global_position + Vector2(-400.0, 0.0)
+	demo.set("_firebolt_projectile_observed", false)
 	demo.call("_cast_firebolt_command")
+	assert_true(bool(demo.get("_firebolt_projectile_observed")))
+	assert_true(await wait_for_signal(ability.ability_cast_finished, 1.0, "firebolt_miss"))
+	assert_signal_emit_count(ability, "ability_cast_finished", 1)
+	demo.call("_update_hud")
+	assert_eq(pool.get_current("mana"), 40.0)
+	assert_eq(health.current_hp, 35.0)
+	assert_false(status.has_status(BURN))
+	assert_eq(combat_label.text, "Beast: HP 35/35")
+
+	var ability_instance := ability.abilities[FIREBOLT] as AbilityInstance
+	ability_instance.current_charges = 1
+	ability_instance.cooldown_remaining = 0.0
+	pool.set_current("mana", 50.0)
+
+	player.global_position = beast.global_position + Vector2(-80.0, 0.0)
+	demo.set("_firebolt_projectile_observed", false)
+	demo.call("_cast_firebolt_command")
+	assert_true(bool(demo.get("_firebolt_projectile_observed")))
 	assert_true(await wait_for_signal(ability.ability_cast_finished, 1.0, "firebolt"))
+	assert_signal_emit_count(ability, "ability_cast_finished", 2)
 	demo.call("_update_hud")
 	assert_eq(pool.get_current("mana"), 40.0)
 	assert_eq(health.current_hp, 17.0)
 	assert_true(combat_label.text.contains("Beast: HP 17/35"))
 	assert_true(combat_label.text.contains("burn"))
 
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	var lethal := DealDamageEffect.new()
 	lethal.effect_id = "effect.test.scene8.destroy_field_beast"
 	lethal.base_amount = 999.0
@@ -572,8 +595,9 @@ func test_tc_int_scene8_04_field_beast_spawns_from_entity_definition() -> void:
 
 
 func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
@@ -583,22 +607,22 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_eq(world.current_zone_id, ZONE_FIELD)
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var player_health := player.get_node("Components/HealthComponent") as HealthComponent
 	var player_hurtbox := player.get_node_or_null("Components/HurtboxComponent") as HurtboxComponent
 	assert_not_null(player_hurtbox)
 	player.global_position = Vector2.ZERO
 	player_health.current_hp = player_health.get_max_hp()
 
-	var beast := demo.call("_field_beast") as CharacterBody2D
+	var beast := demo.call("_field_beast") as EntityRoot
 	assert_not_null(beast)
 	beast.global_position = Vector2(110.0, 0.0)
 	var brain := beast.get_node("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
 	var receiver := beast.get_node("CommandReceiver") as CommandReceiver
-	var state_machine := beast.get_node("StateMachine") as StateMachine
+	var state_machine := beast.get_node("StateMachine") as Hfsm
 	var hitbox := beast.get_node("Components/HitboxComponent") as HitboxComponent
 	assert_not_null(brain)
 	assert_not_null(hitbox)
@@ -622,7 +646,7 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 
 	beast.global_position = Vector2(28.0, 0.0)
 	watch_signals(player_health)
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	watch_signals(events)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -632,25 +656,26 @@ func test_tc_int_scene8_05_enemy_ai_approaches_attacks_and_damages_player() -> v
 	assert_eq(receiver.command_history[-1].command_type, BuiltinCommands.ATTACK)
 	assert_eq(state_machine.get_current_path(), "Enemy/Attack")
 
-	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
 	assert_eq(actions.active_actions.size(), 1)
 	assert_true(actions.active_actions[0] is TimedAttackAction)
 	actions._process(0.08)
 	assert_lt(player_health.current_hp, hp_before)
 	assert_eq(player_health.current_hp, hp_before - 8.0)
 	assert_signal_emitted(player_health, "damaged")
-	assert_signal_emitted(events, "damage_applied")
+	assert_not_null(DomainEventAsserts.last_event(events, "damage_applied"))
 	actions._process(0.25)
 	assert_eq(state_machine.get_current_path(), "Enemy/Idle")
 
 
 func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var events := ServiceRegistry.get_service("events") as EventService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var events := ServiceRegistry.get_port("events") as EventService
 	assert_not_null(content)
 	assert_not_null(events)
 
@@ -689,8 +714,9 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	var root := demo.call("_current_zone_root") as Node
 	assert_not_null(root)
 	assert_not_null(root.get_node_or_null("TrialCave"))
+	assert_not_null(root.get_node_or_null("TrialCaveArea/Interactable"))
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var stats := player.get_node("Components/StatsComponent") as StatsComponent
 	var attack_before := stats.get_stat_value("attack_power")
 	var run_director := demo.get_node("RunDirector") as RunDirector
@@ -700,6 +726,11 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	watch_signals(run_director)
 	watch_signals(events)
 
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_null(run_director.run_state)
+
+	await _focus_demo_interactable(demo, "TrialCaveArea/Interactable")
 	demo.call("_enter_trial_cave")
 	await _settle_scene8_world()
 
@@ -712,7 +743,10 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	assert_true(run_director.room_graph.boss_node is RoomNode)
 	assert_eq(run_director.run_state.room_history.size(), 1)
 	assert_signal_emitted(run_director, "run_started")
-	assert_signal_emitted_with_parameters(events, "run_started", [run_director.run_state.run_id, 8606])
+	var evt_run_started_2 := DomainEventAsserts.last_event(events, "run_started")
+	assert_not_null(evt_run_started_2)
+	assert_eq(evt_run_started_2.source_id, run_director.run_state.run_id)
+	assert_eq(evt_run_started_2.payload.get("seed"), 8606)
 
 	for _room_index in range(3):
 		var room := run_director.current_room_controller
@@ -763,29 +797,30 @@ func test_tc_int_scene8_06_trial_cave_run_rooms_rewards_and_upgrade() -> void:
 	assert_eq(int(demo.get("_trial_rooms_cleared")), 3)
 	assert_signal_emit_count(run_director, "room_enter_requested", 3)
 	assert_signal_emit_count(run_director, "choosing_reward", 3)
-	assert_signal_emit_count(events, "reward_selected", 3)
+	assert_eq(DomainEventAsserts.find_events(events, "reward_selected").size(), 3)
 	assert_signal_emitted_with_parameters(run_director, "run_finished", ["completed"])
-	assert_signal_emitted_with_parameters(
-		events, "run_finished", [run_director.run_state.run_id, "completed"]
-	)
+	var evt_run_finished_6 := DomainEventAsserts.last_event(events, "run_finished")
+	assert_not_null(evt_run_finished_6)
+	assert_eq(evt_run_finished_6.source_id, run_director.run_state.run_id)
+	assert_eq(evt_run_finished_6.payload.get("result"), "completed")
 
 
-func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrates() -> void:
-	var bootstrap := GameBootstrap.new()
+func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_scopes() -> void:
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var save := ServiceRegistry.get_port("save") as SaveService
 	assert_not_null(save)
 	save.save_path = SCENE8_S7_SAVE_PATH
 
 	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
-	assert_eq(save.save_version, 2)
-	assert_eq(save.migrations.size(), 1)
+	assert_eq(save.save_version, 1)
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var stats := player.get_node("Components/StatsComponent") as StatsComponent
 	var health := player.get_node("Components/HealthComponent") as HealthComponent
 	var pool := player.get_node("Components/ResourcePoolComponent") as ResourcePoolComponent
@@ -815,11 +850,22 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	assert_true(save.save_game(get_tree().root))
 	assert_signal_emitted_with_parameters(save, "save_completed", [SCENE8_S7_SAVE_PATH])
 	var saved := _read_json(SCENE8_S7_SAVE_PATH)
-	assert_eq(int(saved.get("save_version", 0)), 2)
-	var saved_payload: Dictionary = saved.get("payload", {})
-	assert_true(saved_payload.has("demo_player"))
-	var saved_player: Dictionary = saved_payload["demo_player"]
+	assert_eq(int(saved.get("save_version", 0)), 1)
+	var saved_roots: Dictionary = saved.get("roots", {})
+	var saved_entities: Dictionary = saved.get("entities", {})
+	var saved_scopes: Dictionary = saved.get("scopes", {})
+	assert_false(saved_roots.has("demo_player"))
+	assert_true(saved_entities.has(PLAYER_ID))
+	assert_true(saved_roots.has("player_experience"))
+	assert_true(saved_scopes.has("world.zone"))
+	assert_true(saved_scopes.has("world.run"))
+	assert_false(saved.has("payload"))
+	assert_false(saved.has("scope_manifest"))
+	assert_false(saved.has("save_scopes"))
+	var saved_player: Dictionary = saved_entities[PLAYER_ID]
+	assert_eq(saved_player.get("scene_path", ""), PLAYER_SCENE)
 	var saved_components: Dictionary = saved_player.get("components", {})
+	assert_true(saved_components.has("Position"))
 	assert_true(saved_components.has("HealthComponent"))
 	assert_true(saved_components.has("StatsComponent"))
 	assert_true(saved_components.has("ResourcePoolComponent"))
@@ -854,125 +900,11 @@ func test_tc_int_scene8_07_save_manager_round_trips_player_components_and_migrat
 	assert_eq(equipment.get_equipped("weapon").definition_id, FIELD_BLADE)
 	assert_eq(stats.get_stat_value("attack_power"), 20.0)
 
-	_write_json(
-		SCENE8_S7_SAVE_PATH,
-		{
-			"save_version": 1,
-			"game_version": "0.1.0",
-			"timestamp": "",
-			"profile_id": "legacy_demo",
-			"payload": {
-				"demo_player": {
-					"position_x": 444.0,
-					"position_y": 222.0,
-					"current_hp": 34.0,
-					"dead": false,
-					"mana": 12.0,
-					"components": {
-						"StatsComponent": {
-							"base_overrides": {"attack_power": 18.0},
-							"persistent_modifiers": []
-						},
-						"StatusEffectController": {"active": []},
-						"AbilityController": {
-							"learned": [FIREBOLT],
-							"cooldowns": {},
-							"charges": {FIREBOLT: 1},
-							"recharge_durations": {}
-						},
-						"InventoryController": {"capacity": 20, "items": []},
-						"EquipmentController": {"slots": {}}
-					}
-				}
-			}
-		}
-	)
-
-	assert_true(save.load_game(get_tree().root))
-	assert_eq(player.global_position, Vector2(444.0, 222.0))
-	assert_eq(health.current_hp, 34.0)
-	assert_eq(pool.get_current("mana"), 12.0)
-	assert_eq(stats.get_stat_value("attack_power"), 18.0)
-
-
-func test_tc_int_scene8_08_platform_services_track_revive_purchase_and_cloud_save() -> void:
-	var bootstrap := GameBootstrap.new()
-	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
-	add_child_autofree(bootstrap)
-
-	var save := ServiceRegistry.get_service("save") as SaveService
-	assert_not_null(save)
-	save.save_path = SCENE8_PLATFORM_SAVE_PATH
-
-	var analytics := SpyAnalyticsService.new()
-	var ads := SpyAdService.new()
-	var iap := SpyIAPService.new()
-	var cloud := SpyCloudSaveService.new()
-	_replace_service("analytics", analytics)
-	_replace_service("ads", ads)
-	_replace_service("iap", iap)
-	_replace_service("cloud_save", cloud)
-
-	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
-	add_child_autofree(demo)
-	await _settle_scene8_world()
-
-	assert_true(analytics is AnalyticsServiceMock)
-	assert_true(ads is AdServiceMock)
-	assert_true(iap is IAPServiceMock)
-	assert_true(cloud is CloudSaveServiceMock)
-
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	assert_not_null(quest)
-	assert_not_null(progression)
-
-	var player := demo.get_node("Player") as CharacterBody2D
-	var health := player.get_node("Components/HealthComponent") as HealthComponent
-	var experience := player.get_node("Components/ExperienceComponent") as ExperienceComponent
-	assert_not_null(health)
-	assert_not_null(experience)
-
-	quest.quest_turned_in.emit(QUEST_ID)
-	experience.level_up.emit(1, 2)
-	assert_eq(analytics.tracked_events.size(), 2)
-	assert_eq(analytics.tracked_events[0].get("event_name", ""), "quest_turned_in")
-	assert_eq(analytics.tracked_events[0]["properties"]["quest_id"], QUEST_ID)
-	assert_eq(analytics.tracked_events[1].get("event_name", ""), "level_up")
-	assert_eq(int(analytics.tracked_events[1]["properties"]["new_level"]), 2)
-
-	health.die(null)
-	assert_true(await wait_for_signal(ads.rewarded_ad_completed, 1.0, "rewarded ad"))
-	assert_eq(ads.shown_placements, [PLATFORM_REVIVE_PLACEMENT])
-	assert_false(health.dead)
-	assert_eq(health.current_hp, health.get_max_hp() * 0.5)
-
-	var gold_before := progression.get_currency("gold")
-	demo.call("_purchase_gold_pack")
-	assert_true(await wait_for_signal(iap.purchase_completed, 1.0, "purchase"))
-	assert_eq(iap.purchased_products[-1], PLATFORM_GOLD_PACK_PRODUCT)
-	assert_true(iap.is_purchased(PLATFORM_GOLD_PACK_PRODUCT))
-	assert_eq(progression.get_currency("gold"), gold_before + GOLD_PACK_AMOUNT)
-
-	var saved_gold := progression.get_currency("gold")
-	demo.call("_save_demo_to_cloud")
-	assert_true(await wait_for_signal(cloud.cloud_save_completed, 1.0, "cloud save"))
-	assert_eq(cloud.saved_slots[-1], PLATFORM_CLOUD_SLOT)
-	assert_true(cloud.last_saved_data.has("payload"))
-	assert_eq(int(cloud.last_saved_data["payload"]["progression"]["currencies"]["gold"]), saved_gold)
-
-	progression.state = ProgressionState.new()
-	assert_eq(progression.get_currency("gold"), 0)
-	demo.call("_load_demo_from_cloud")
-	assert_true(await wait_for_signal(cloud.cloud_load_completed, 1.0, "cloud load"))
-	assert_eq(cloud.loaded_slots[-1], PLATFORM_CLOUD_SLOT)
-	await get_tree().process_frame
-	assert_eq(progression.get_currency("gold"), saved_gold)
-
 
 func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debug_runtime() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var scene_root := _make_current_scene_root("Scene8S9World")
@@ -980,10 +912,10 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	scene_root.add_child(demo)
 	await _settle_scene8_world()
 
-	var time := ServiceRegistry.get_service("time") as TimeService
-	var pool := ServiceRegistry.get_service("pool") as PoolService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var ui := ServiceRegistry.get_service("ui") as UIManager
+	var time := ServiceRegistry.get_port("time") as TimeService
+	var pool := ServiceRegistry.get_port("pool") as PoolService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var ui := ServiceRegistry.get_port("ui") as UIManager
 	assert_not_null(time)
 	assert_not_null(pool)
 	assert_not_null(effects)
@@ -993,6 +925,35 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	var damage_numbers := feedback.get_node("DamageNumbers") as DamageNumberSystem
 	var vfx := feedback.get_node("VFX") as VFXSpawner
 	var overlay := demo.get_node("DebugOverlay") as DebugOverlay
+	var audio := ServiceRegistry.get_port("audio") as AudioService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	assert_not_null(audio)
+	assert_not_null(content)
+	assert_eq(feedback.audio, audio)
+	assert_true(content.get_resource(ATTACK_SFX_ID) is AudioDefinition)
+	assert_true(content.get_resource("bgm.demo.village") is AudioDefinition)
+	assert_true(content.get_resource("sfx.demo.firebolt") is AudioDefinition)
+	assert_true(audio.sfx_map.has(ATTACK_SFX_ID))
+	assert_eq((audio.sfx_map[ATTACK_SFX_ID] as AudioStream).resource_path, ATTACK_SFX_PATH)
+	assert_eq(
+		(audio.music_map["bgm.demo.village"] as AudioStream).resource_path,
+		DEMO_VILLAGE_BGM_PATH
+	)
+	assert_eq(
+		(audio.music_map["bgm.demo.room"] as AudioStream).resource_path,
+		DEMO_ROOM_BGM_PATH
+	)
+	assert_eq(
+		(audio.music_map["bgm.demo.field"] as AudioStream).resource_path,
+		DEMO_FIELD_BGM_PATH
+	)
+	assert_eq((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_mode, AudioStreamWAV.LOOP_FORWARD)
+	assert_eq((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_begin, 0)
+	assert_gt((audio.music_map["bgm.demo.village"] as AudioStreamWAV).loop_end, 0)
+	assert_eq(audio.current_music_id, "bgm.demo.village")
+	assert_not_null(audio.music_player)
+	assert_true(audio.music_player.playing)
+	assert_eq(audio.music_player.stream, audio.music_map["bgm.demo.village"])
 	assert_eq(int(ProjectSettings.get_setting("display/window/size/viewport_width")), 1280)
 	assert_eq(int(ProjectSettings.get_setting("display/window/size/viewport_height")), 720)
 	assert_eq(str(ProjectSettings.get_setting("display/window/stretch/mode")), "canvas_items")
@@ -1014,11 +975,11 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	await _focus_demo_interactable(demo, "ToField/Interactable")
 	demo.call("_toggle_field_portal")
 	await _settle_scene8_world()
-	var beast := demo.call("_field_beast") as Node2D
+	var beast := demo.call("_field_beast") as EntityRoot
 	assert_not_null(beast)
 	var beast_health := beast.get_node("Components/HealthComponent") as HealthComponent
 	beast_health.current_hp = 35.0
-	var player := demo.get_node("Player") as Node2D
+	var player := demo.get_node("Player") as EntityRoot
 	var player_stats := player.get_node("Components/StatsComponent") as StatsComponent
 	player_stats.set_base_stat("crit_chance", 0.0)
 
@@ -1044,20 +1005,28 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 	assert_true(bool(demo.get("_spawn_scene_effect_succeeded")))
 	var spawned_hit := scene_root.get_node_or_null("DemoHitVFX") as Node2D
 	assert_not_null(spawned_hit)
+	assert_true(spawned_hit.visible)
 	assert_eq(spawned_hit.global_position, beast.global_position)
 
 	await _wait_scene8_seconds(0.25)
 	assert_true(first_number.visible)
 	assert_true(first_vfx.visible)
+	assert_true(spawned_hit.visible)
 	await _wait_scene8_seconds(0.35)
 	assert_false(first_number.visible)
 	assert_false(first_vfx.visible)
+	assert_false(spawned_hit.visible)
 	var number_pool: Array = pool._pools.get(DAMAGE_NUMBER_SCENE, [])
 	var vfx_pool: Array = pool._pools.get(HIT_VFX_SCENE, [])
 	assert_true(number_pool.has(first_number))
 	assert_true(vfx_pool.has(first_vfx))
+	assert_true(vfx_pool.has(spawned_hit))
 	assert_eq(damage_numbers.show_number(Vector2(40.0, 50.0), 7.0, false), first_number)
-	assert_eq(vfx.spawn("hit", Vector2(60.0, 70.0)), first_vfx)
+	var reused_vfx := vfx.spawn("hit", Vector2(60.0, 70.0))
+	assert_not_null(reused_vfx)
+	if reused_vfx != null:
+		assert_true(reused_vfx == first_vfx or reused_vfx == spawned_hit)
+		assert_eq((reused_vfx as Node2D).global_position, Vector2(60.0, 70.0))
 
 	var lethal := DealDamageEffect.new()
 	lethal.effect_id = "effect.test.scene8.s9_lethal"
@@ -1088,20 +1057,22 @@ func test_tc_int_scene8_09_presentation_tools_spawn_feedback_reuse_pool_and_debu
 
 
 func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
 	add_child_autofree(bootstrap)
 
 	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
 	add_child_autofree(demo)
 	await _settle_scene8_world()
 
-	var world := ServiceRegistry.get_service("world") as WorldService
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var router := ServiceRegistry.get_service("commands") as CommandService
-	var actions := ServiceRegistry.get_service("actions") as ActionService
+	var world := ServiceRegistry.get_port("world") as WorldService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	effects.trace_enabled = true
+	var router := ServiceRegistry.get_port("commands") as CommandService
+	var actions := ServiceRegistry.get_port("actions") as ActionService
 	assert_not_null(world)
 	assert_not_null(dialogue)
 	assert_not_null(quest)
@@ -1110,9 +1081,9 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	assert_not_null(actions)
 	assert_eq(world.current_zone_id, ZONE_VILLAGE)
 
-	var player := demo.get_node("Player") as CharacterBody2D
+	var player := demo.get_node("Player") as EntityRoot
 	var interaction := player.get_node("Components/InteractionComponent") as InteractionComponent
-	var state_machine := player.get_node("StateMachine") as StateMachine
+	var state_machine := player.get_node("StateMachine") as Hfsm
 	assert_not_null(interaction)
 	assert_not_null(state_machine)
 
@@ -1172,27 +1143,77 @@ func test_tc_int_scene8_10_interaction_manual_quest_and_dash() -> void:
 	assert_eq(state_machine.get_current_path(), "Player/Idle")
 
 
+func test_tc_int_scene8_11_trial_cave_shortcuts_close_room_without_zone_mismatch() -> void:
+	var bootstrap := ModuleBootstrap.new()
+	bootstrap.resource_databases = [load(CONTENT_DB) as ResourceDatabase]
+	bootstrap.save_path = SCENE8_BOOT_SAVE_PATH
+	add_child_autofree(bootstrap)
+
+	var demo := (load(DEMO_SCENE) as PackedScene).instantiate()
+	add_child_autofree(demo)
+	await _settle_scene8_world()
+
+	var world := ServiceRegistry.get_port("world") as WorldService
+	assert_not_null(world)
+	await _focus_demo_interactable(demo, "ToField/Interactable")
+	demo.call("_toggle_field_portal")
+	await _settle_scene8_world()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+
+	var room_root := demo.get_node("RoomRoot") as Node2D
+	var run_director := demo.get_node("RunDirector") as RunDirector
+	assert_not_null(room_root)
+	assert_not_null(run_director)
+
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_false(room_root.visible)
+	assert_null(run_director.run_state)
+
+	await _focus_demo_interactable(demo, "TrialCaveArea/Interactable")
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_true(room_root.visible)
+	assert_gt(room_root.get_child_count(), 0)
+	assert_eq(run_director.run_state.status, "active")
+
+	demo.call("_toggle_field_portal")
+	await _settle_scene8_world()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+	assert_eq((demo.call("_current_zone_root") as Node).name, "Field")
+	assert_false(room_root.visible)
+	assert_eq(room_root.get_child_count(), 0)
+	assert_eq(run_director.run_state.status, "failed")
+	assert_eq(str(demo.get("_trial_run_finished_result")), "failed:field_gate")
+	assert_true((demo.get_node("HUD/StatsPanel/ZoneInfo") as Label).text.contains("Field"))
+
+	await _focus_demo_interactable(demo, "TrialCaveArea/Interactable")
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_true(room_root.visible)
+	assert_eq(run_director.run_state.status, "active")
+
+	demo.call("_enter_trial_cave")
+	await _settle_scene8_world()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+	assert_false(room_root.visible)
+	assert_eq(run_director.run_state.status, "failed")
+	assert_eq(str(demo.get("_trial_run_finished_result")), "failed:cave_toggle")
+
+
 func _resolve_damage(source: Node, target: Node) -> float:
 	var request := DamageRequest.new()
 	request.source = source
 	request.target = target
 	request.base_amount = 10.0
 	request.can_crit = false
-	return (ServiceRegistry.get_service("combat") as CombatService).resolve(request).final_amount
+	return (ServiceRegistry.get_port("combat") as CombatService).resolve(request).final_amount
 
 
 func _disable_beast_ai(beast: Node) -> void:
 	var brain := beast.get_node_or_null("Controllers/SimpleAIEnemyBrain") as SimpleAIEnemyBrain
 	if brain != null:
 		brain.enabled = false
-
-
-func _replace_service(service_id: String, service: Object) -> void:
-	var node := service as Node
-	if node != null:
-		add_child_autofree(node)
-	ServiceRegistry.unregister_service(service_id)
-	ServiceRegistry.register_service(service_id, service)
 
 
 func _modifier_count(stats: StatsComponent, stat_id: String) -> int:
@@ -1215,7 +1236,7 @@ func _focus_demo_interactable(demo: Node, interactable_path: String) -> Interact
 	assert_not_null(interactable)
 	var area := interactable.get_parent() as Area2D
 	assert_not_null(area)
-	var player := demo.get_node("Player") as Node2D
+	var player := demo.get_node("Player") as EntityRoot
 	player.global_position = area.global_position + Vector2(1000.0, 0.0)
 	await get_tree().physics_frame
 	player.global_position = area.global_position

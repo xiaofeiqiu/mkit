@@ -1,4 +1,4 @@
-extends State
+extends HfsmState
 
 var current_action: GameAction = null
 
@@ -21,7 +21,7 @@ func enter(context: Dictionary = {}) -> void:
 	action.recovery_duration = 0.10
 	action.hitbox_path = NodePath("Components/HitboxComponent")
 	action.completed.connect(_on_action_completed)
-	var runner := ServiceRegistry.get_service("actions") as ActionService
+	var runner := Mkit.actions()
 	if runner == null:
 		request_transition("Enemy/Idle", {"reason": "no_action_runner"})
 		return

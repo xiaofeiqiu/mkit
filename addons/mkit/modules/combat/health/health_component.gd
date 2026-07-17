@@ -1,29 +1,45 @@
 class_name HealthComponent
 extends SaveableComponent
+## 说明：`HealthComponent` 是 生命与资源系统 的实体组件，负责挂在实体场景下保存状态并暴露局部能力。
+## 上游：通常由实体根节点、控制器、状态机或领域服务创建或调用。
+## 下游：会连接EventService、SaveService、controller 或实体展示层，不直接依赖具体游戏内容。
+## 使用：当项目实体需要持有可保存或可被 controller 查询的局部状态时使用它。
+## 示例：`var instance := HealthComponent.new()`
+
+## 当 `HealthComponent` 发生 `health changed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal health_changed(current: float, max_value: float)
+## 当 `HealthComponent` 发生 `damaged` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal damaged(result: DamageResult)
+## 当 `HealthComponent` 发生 `healed` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal healed(amount: float, source: Node)
+## 当 `HealthComponent` 发生 `died` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal died(owner_entity: Node)
+## 当前生命值；通常会被限制在 0 到最大生命值之间。
 @export var current_hp: float = 100.0
+## 死亡时是否直接 queue_free 拥有者；关闭后仅发出死亡事件并保留节点。
 @export var destroy_on_death: bool = false
+## 生命值是否已经进入死亡状态；避免重复触发死亡逻辑。
 var dead: bool = false
+## 同一实体上的 StatsComponent 引用；用于读取最大生命值或资源上限。
 var stats: StatsComponent = null
 
 
 func _ready() -> void:
 	if owner != null:
-		stats = owner.get_node_or_null("Components/StatsComponent") as StatsComponent
+		stats = EntityContract.get_component(owner, "StatsComponent") as StatsComponent
 		if stats != null:
 			stats.stat_changed.connect(_on_stat_changed)
 	current_hp = min(current_hp, get_max_hp())
 
 
+## 读取当前对象中的 `max_hp`；未找到时返回 null、空集合或该 API 的默认值。
 func get_max_hp() -> float:
 	if stats != null:
 		return stats.get_stat_value("max_hp", 100.0)
 	return 100.0
 
 
+## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_damage(result: DamageResult) -> void:
 	if dead:
 		return
@@ -34,9 +50,9 @@ func apply_damage(result: DamageResult) -> void:
 	_apply_on_hit_statuses(result)
 	damaged.emit(result)
 	health_changed.emit(current_hp, get_max_hp())
-	var events := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := Mkit.events()
 	if events != null:
-		events.emit_damage_applied(result)
+		events.emit_domain_event(CombatEvents.damage_applied(result))
 	if current_hp <= 0.0:
 		die(result.source)
 
@@ -44,18 +60,19 @@ func apply_damage(result: DamageResult) -> void:
 func _apply_on_hit_statuses(result: DamageResult) -> void:
 	if result.status_applications.is_empty():
 		return
-	var controller := owner.get_node_or_null("Controllers/StatusEffectController") as StatusEffectController
+	var controller := EntityContract.get_controller(owner, "StatusEffectController") as StatusEffectController
 	if controller == null:
 		return
-	for entry in result.status_applications:
+	for entry: Dictionary in result.status_applications:
+		var status_id := str(entry.get("status_id", ""))
+		if status_id == "":
+			continue
 		controller.apply_status(
-			str(entry.get("status_id", "")),
-			result.source,
-			int(entry.get("stacks", 1)),
-			float(entry.get("duration", -1.0))
+			status_id, result.source, int(entry.get("stacks", 1)), float(entry.get("duration", -1.0))
 		)
 
 
+## 执行 `heal` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func heal(amount: float, source: Node = null) -> void:
 	if dead:
 		return
@@ -66,31 +83,35 @@ func heal(amount: float, source: Node = null) -> void:
 	health_changed.emit(current_hp, get_max_hp())
 
 
+## 执行 `die` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func die(killer: Node = null) -> void:
 	if dead:
 		return
 	dead = true
 	current_hp = 0.0
 	died.emit(owner)
-	var identity := owner.get_node_or_null("EntityIdentity") as EntityIdentity
+	var identity := EntityContract.get_identity(owner)
 	var entity_id: String = identity.entity_id if identity != null else str(owner.name)
-	var events := ServiceRegistry.get_service_or_null(ServiceRegistry.SERVICE_EVENTS) as EventService
+	var events := Mkit.events()
 	if events != null:
-		events.emit_entity_died(entity_id, owner)
+		events.emit_domain_event(CombatEvents.entity_died(entity_id, owner, killer))
 	if destroy_on_death:
 		owner.queue_free()
 
 
+## 执行 `revive` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
 func revive(percent: float = 1.0) -> void:
 	dead = false
 	current_hp = get_max_hp() * clamp(percent, 0.0, 1.0)
 	health_changed.emit(current_hp, get_max_hp())
 
 
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {"current_hp": current_hp, "dead": dead}
 
 
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	dead = bool(data.get("dead", dead))
 	current_hp = clamp(float(data.get("current_hp", current_hp)), 0.0, get_max_hp())

@@ -1,155 +1,88 @@
 class_name EventService
 extends Node
+## 说明：`EventService` 是 事件总线 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(EventService.SERVICE_ID, EventService.new())`
+
+## 当 `EventService` 发生 `domain event emitted` 事件时发出，供 UI、音频、VFX、任务或测试订阅。
 signal domain_event_emitted(event: DomainEvent)
-signal damage_applied(result: DamageResult)
-signal entity_died(entity_id: String, entity_ref: Node)
-signal inventory_changed(owner_id: String)
-signal room_cleared(room_id: String)
-signal reward_selected(reward_id: String)
-signal run_started(run_id: String, seed: int)
-signal run_finished(run_id: String, result: String)
-signal quest_accepted(quest_id: String)
-signal quest_objective_advanced(quest_id: String, objective_id: String, current: int, required: int)
-signal quest_completed(quest_id: String)
-signal quest_turned_in(quest_id: String)
-signal dialogue_started(dialogue_id: String)
-signal dialogue_ended(dialogue_id: String)
-signal npc_talked(npc_id: String)
-signal zone_changed(from_zone_id: String, to_zone_id: String)
-signal item_purchased(shop_id: String, item_id: String, quantity: int)
-signal item_sold(shop_id: String, item_id: String, quantity: int)
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `EventService`。
+const SERVICE_ID: String = "events"
+## 稳定标识 `ANY_EVENT`；用于事件、命令、类型或存档字段，调用方应引用常量避免手写字符串。
+const ANY_EVENT: String = "*"
+## EventService 最近发布的事件历史；用于调试、测试和轻量观察。
 var recent_events: Array[DomainEvent] = []
+## EventService 保留的事件数量上限；超过后丢弃最旧事件。
 var max_recent_events: int = 100
+var _subscribers: Dictionary = {}
 
 
+## 发布 DomainEvent 到精确类型订阅者和 ANY_EVENT 订阅者，并同步发出 event_published signal。
 func emit_domain_event(event: DomainEvent) -> void:
+	if event == null:
+		push_warning("EventService.emit_domain_event: event is null")
+		return
 	recent_events.append(event)
 	if recent_events.size() > max_recent_events:
 		recent_events.pop_front()
 	domain_event_emitted.emit(event)
+	_dispatch_to_subscribers(event)
 
 
-func emit_damage_applied(result: DamageResult) -> void:
-	damage_applied.emit(result)
-	var data: Dictionary = {}
-	if result != null:
-		data = result.to_debug_dict()
-	var source_id := ""
-	var target_id := ""
-	if result != null:
-		source_id = _get_entity_id(result.source)
-		target_id = _get_entity_id(result.target)
-	_emit_domain_event("damage_applied", source_id, target_id, data)
-
-
-func emit_entity_died(entity_id: String, entity_ref: Node) -> void:
-	entity_died.emit(entity_id, entity_ref)
-	_emit_domain_event("entity_died", entity_id, "", {"entity_id": entity_id})
-
-
-func emit_inventory_changed(
-	owner_id: String, item_id: String = "", quantity: int = 0, change_type: String = ""
-) -> void:
-	inventory_changed.emit(owner_id)
-	var payload := {"owner_id": owner_id}
-	if item_id != "":
-		payload["item_id"] = item_id
-	if quantity > 0:
-		payload["quantity"] = quantity
-	if change_type != "":
-		payload["change_type"] = change_type
-	_emit_domain_event("inventory_changed", owner_id, item_id, payload)
-
-
-func emit_room_cleared(room_id: String) -> void:
-	room_cleared.emit(room_id)
-	_emit_domain_event("room_cleared", room_id, "", {})
-
-
-func emit_reward_selected(reward_id: String, source_id: String = "") -> void:
-	reward_selected.emit(reward_id)
-	_emit_domain_event("reward_selected", source_id, "", {"reward_id": reward_id})
-
-
-func emit_run_started(run_id: String, seed: int) -> void:
-	run_started.emit(run_id, seed)
-	_emit_domain_event("run_started", run_id, "", {"seed": seed})
-
-
-func emit_run_finished(run_id: String, result: String) -> void:
-	run_finished.emit(run_id, result)
-	_emit_domain_event("run_finished", run_id, "", {"result": result})
-
-
-func emit_quest_accepted(quest_id: String) -> void:
-	quest_accepted.emit(quest_id)
-	_emit_domain_event("quest_accepted", quest_id, "", {"quest_id": quest_id})
-
-
-func emit_quest_objective_advanced(
-	quest_id: String, objective_id: String, current: int, required: int
-) -> void:
-	quest_objective_advanced.emit(quest_id, objective_id, current, required)
-	_emit_domain_event(
-		"quest_objective_advanced",
-		quest_id,
-		objective_id,
-		{"quest_id": quest_id, "objective_id": objective_id, "current": current, "required": required}
-	)
-
-
-func emit_quest_completed(quest_id: String) -> void:
-	quest_completed.emit(quest_id)
-	_emit_domain_event("quest_completed", quest_id, "", {"quest_id": quest_id})
-
-
-func emit_quest_turned_in(quest_id: String) -> void:
-	quest_turned_in.emit(quest_id)
-	_emit_domain_event("quest_turned_in", quest_id, "", {"quest_id": quest_id})
-
-
-func emit_dialogue_started(dialogue_id: String) -> void:
-	dialogue_started.emit(dialogue_id)
-	_emit_domain_event("dialogue_started", dialogue_id, "", {"dialogue_id": dialogue_id})
-
-
-func emit_dialogue_ended(dialogue_id: String) -> void:
-	dialogue_ended.emit(dialogue_id)
-	_emit_domain_event("dialogue_ended", dialogue_id, "", {"dialogue_id": dialogue_id})
-
-
-func emit_npc_talked(npc_id: String) -> void:
-	npc_talked.emit(npc_id)
-	_emit_domain_event("npc_talked", npc_id, "", {"npc_id": npc_id})
-
-
-func emit_zone_changed(from_zone_id: String, to_zone_id: String) -> void:
-	zone_changed.emit(from_zone_id, to_zone_id)
-	_emit_domain_event(
-		"zone_changed", from_zone_id, to_zone_id, {"from_zone_id": from_zone_id, "to_zone_id": to_zone_id}
-	)
-
-
-func emit_item_purchased(shop_id: String, item_id: String, quantity: int) -> void:
-	item_purchased.emit(shop_id, item_id, quantity)
-	_emit_domain_event("item_purchased", shop_id, item_id, {"shop_id": shop_id, "item_id": item_id, "quantity": quantity})
-
-
-func emit_item_sold(shop_id: String, item_id: String, quantity: int) -> void:
-	item_sold.emit(shop_id, item_id, quantity)
-	_emit_domain_event("item_sold", shop_id, item_id, {"shop_id": shop_id, "item_id": item_id, "quantity": quantity})
-
-
-func _emit_domain_event(
-	event_type: String, source_id: String, target_id: String, payload: Dictionary
+## 便捷事件发布入口，会在方法内部构造 DomainEvent。
+func emit_event(
+	event_type: String, source_id: String = "", target_id: String = "", payload: Dictionary = {}
 ) -> void:
 	emit_domain_event(DomainEvent.create(event_type, source_id, target_id, payload))
 
 
-func _get_entity_id(entity: Node) -> String:
-	if entity == null:
-		return ""
-	var identity = entity.get_node_or_null("EntityIdentity")
-	if identity != null and "entity_id" in identity:
-		return str(identity.entity_id)
-	return str(entity.name)
+## 订阅指定事件类型；事件发出时调用 `callable(event: DomainEvent)`，重复订阅同一个 callable 不会产生重复注册。
+func subscribe(event_type: String, callable: Callable) -> void:
+	if event_type == "" or not callable.is_valid():
+		push_warning("EventService.subscribe: invalid event_type or callable")
+		return
+	var listeners: Array = _subscribers.get(event_type, [])
+	if listeners.has(callable):
+		return
+	listeners.append(callable)
+	_subscribers[event_type] = listeners
+
+
+## 执行 `unsubscribe` API；读取当前运行时状态，并通过返回值、signal 或事件报告结果。
+func unsubscribe(event_type: String, callable: Callable) -> void:
+	var listeners: Array = _subscribers.get(event_type, [])
+	listeners.erase(callable)
+	if listeners.is_empty():
+		_subscribers.erase(event_type)
+
+
+## 检查当前对象是否满足 `subscribed` 状态；调用方可据此选择后续流程。
+func is_subscribed(event_type: String, callable: Callable) -> bool:
+	var listeners: Array = _subscribers.get(event_type, [])
+	return listeners.has(callable)
+
+
+func _dispatch_to_subscribers(event: DomainEvent) -> void:
+	var delivered: Array = []
+	_dispatch_listener_group(event, event.event_type, delivered)
+	if event.event_type != ANY_EVENT:
+		_dispatch_listener_group(event, ANY_EVENT, delivered)
+
+
+func _dispatch_listener_group(event: DomainEvent, event_type: String, delivered: Array) -> void:
+	var listeners: Array = _subscribers.get(event_type, [])
+	if listeners.is_empty():
+		return
+	var stale: Array = []
+	for callable: Callable in listeners.duplicate():
+		if delivered.has(callable):
+			continue
+		if callable.is_valid():
+			callable.call(event)
+			delivered.append(callable)
+		else:
+			stale.append(callable)
+	for callable: Callable in stale:
+		unsubscribe(event_type, callable)

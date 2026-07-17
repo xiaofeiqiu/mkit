@@ -1,12 +1,28 @@
 class_name AudioService
 extends Saveable
+## 说明：`AudioService` 是 基础服务 的运行时服务，负责集中处理该领域的跨节点规则和查询。
+## 上游：通常由 GameBootstrap、ModuleBootstrap、Mkit 门面或其他领域服务创建或调用。
+## 下游：会连接 ContentService、EventService、组件、定义资源或场景节点，不直接依赖具体游戏内容。
+## 使用：当项目需要从多个节点共享同一套领域规则或查询入口时使用它。
+## 示例：`ServiceRegistry.register_service(AudioService.SERVICE_ID, AudioService.new())`
+
+## 服务注册 id，供 GameBootstrap、ModuleBootstrap、ServiceRegistry 和 Mkit 查找 `AudioService`。
+const SERVICE_ID: String = "audio"
+## 音效 id 到 AudioDefinition 的快速表；启动或注册音频资源时填充。
 @export var sfx_map: Dictionary = {}
+## 音乐 id 到 AudioDefinition 的快速表；play_music 按此表查找资源。
 @export var music_map: Dictionary = {}
+## 音效播放使用的音频总线名称；需与项目 Audio Bus 配置一致。
 @export var sfx_bus: String = "SFX"
+## 音乐播放使用的音频总线名称；需与项目 Audio Bus 配置一致。
 @export var music_bus: String = "Music"
+## 音乐淡出结束时的最低分贝；通常保持足够低以近似静音。
 @export var music_fade_floor_db: float = -80.0
+## AudioService 持有的音乐播放器节点；首次播放音乐时创建。
 var music_player: AudioStreamPlayer = null
+## 当前音乐的 AudioDefinition id；空字符串表示没有正在播放的音乐。
 var current_music_id: String = ""
+## 记录各音频总线的目标音量；key 为 bus 名称，value 为分贝值。
 var bus_volumes: Dictionary = {}
 var _music_tween: Tween = null
 
@@ -18,6 +34,30 @@ func _ready() -> void:
 	_apply_bus_volumes()
 
 
+## 注册 `audio_definition` 到运行时表；后续查询、路由或 facade 会使用该实例。
+func register_audio_definition(definition: AudioDefinition) -> bool:
+	if definition == null or definition.audio_id == "" or definition.stream == null:
+		return false
+	var stream := _prepare_stream(definition.stream, definition.loop)
+	if definition.kind == AudioDefinition.AudioKind.MUSIC:
+		music_map[definition.audio_id] = stream
+		sfx_map.erase(definition.audio_id)
+	else:
+		sfx_map[definition.audio_id] = stream
+		music_map.erase(definition.audio_id)
+	return true
+
+
+## 注册 `audio_definitions` 到运行时表；后续查询、路由或 facade 会使用该实例。
+func register_audio_definitions(definitions: Array) -> int:
+	var count := 0
+	for raw in definitions:
+		if register_audio_definition(raw as AudioDefinition):
+			count += 1
+	return count
+
+
+## 按 AudioDefinition id 播放一次性音效；缺失定义或 stream 时返回 null。
 func play_sfx(audio_id: String, volume_db: float = 0.0) -> void:
 	if not sfx_map.has(audio_id):
 		return
@@ -33,6 +73,7 @@ func play_sfx(audio_id: String, volume_db: float = 0.0) -> void:
 	player.play()
 
 
+## 按 AudioDefinition id 切换音乐；会复用或创建播放器并停止旧音乐。
 func play_music(music_id: String, fade_seconds: float = 0.0) -> void:
 	if not music_map.has(music_id):
 		return
@@ -64,6 +105,7 @@ func play_music(music_id: String, fade_seconds: float = 0.0) -> void:
 	_music_tween.tween_callback(_clear_music_tween)
 
 
+## 停止当前音乐播放器；没有正在播放的音乐时安全返回。
 func stop_music() -> void:
 	if music_player != null:
 		_stop_music_tween()
@@ -72,6 +114,7 @@ func stop_music() -> void:
 	current_music_id = ""
 
 
+## 更新当前对象中的 `bus_volume`；输入值按该对象规则校验或夹取。
 func set_bus_volume(bus: String, db: float) -> bool:
 	var bus_name := bus.strip_edges()
 	if bus_name == "":
@@ -82,6 +125,7 @@ func set_bus_volume(bus: String, db: float) -> bool:
 	return true
 
 
+## 读取当前对象中的 `bus_volume`；未找到时返回 null、空集合或该 API 的默认值。
 func get_bus_volume(bus: String) -> float:
 	var bus_name := bus.strip_edges()
 	if bus_name == "":
@@ -94,10 +138,12 @@ func get_bus_volume(bus: String) -> float:
 	return AudioServer.get_bus_volume_db(index)
 
 
+## 导出当前运行时状态给 SaveService；只包含恢复该对象所需字段。
 func to_save_data() -> Dictionary:
 	return {"bus_volumes": bus_volumes.duplicate(true)}
 
 
+## 从 SaveService 读出的 payload 恢复运行时字段；缺失字段保留当前默认值。
 func from_save_data(data: Dictionary) -> void:
 	var raw: Dictionary = data.get("bus_volumes", {})
 	bus_volumes.clear()
@@ -123,6 +169,15 @@ func _start_music_stream(stream: AudioStream, music_id: String, volume_db: float
 	music_player.volume_db = volume_db
 	music_player.play()
 	current_music_id = music_id
+
+
+func _prepare_stream(stream: AudioStream, loop: bool) -> AudioStream:
+	var wav := stream as AudioStreamWAV
+	if wav != null and loop:
+		wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		wav.loop_begin = 0
+		wav.loop_end = maxi(1, int(wav.get_length() * float(wav.mix_rate)))
+	return stream
 
 
 func _stop_music_tween() -> void:

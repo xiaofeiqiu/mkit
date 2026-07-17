@@ -15,9 +15,46 @@
 |--------|------------|
 | 在 `Components/` 下添加 `StatsComponent` 节点，配置 `base_stats` | 属性修改器合并计算（flat / percent / override）|
 | 在 `Components/` 下添加 `HealthComponent` 节点，设 `current_hp` | 从 `StatsComponent.get_stat_value("max_hp")` 读上限；死亡后 `die()` |
-| 创建 `DealDamageEffect` 资源，配置 `base_amount` | 查找 `HealthComponent`，调用 `CombatService.resolve()` 计算最终伤害 |
-| 用 `EffectService.execute(effect, ctx)` 触发伤害 | 伤害结算、暴击、防御减免、广播 `damage_applied` 事件 |
+| 创建 `DealDamageEffect` 资源，配置 `base_amount` | 通过 `EntityContract` 查找 `HealthComponent`，调用 `CombatService.resolve()` 计算最终伤害 |
+| 用 `EffectService.execute(effect, ctx)` 触发伤害 | `DamageRequest -> DamageResult`、暴击、防御、闪避、广播 `damage_applied` 事件 |
 | 订阅 `EventService.entity_died` 信号，处理死亡逻辑 | 广播 `entity_died` 事件 |
+
+## 本篇路径
+
+### Minimal path：已有目标节点，直接改血或执行 effect
+
+1. 先按步骤 1 在 `PlayerEntity/Components/` 下加 `StatsComponent` 和 `HealthComponent`，并把 `max_hp` / `current_hp` 设成 `100`。
+2. 做治疗、脚本扣血或调试时，写一个临时函数直接取组件：
+
+```gdscript
+func heal_player(player: Node) -> void:
+    var health := EntityContract.get_component(player, "HealthComponent") as HealthComponent
+    if health != null:
+        health.heal(25.0, player)
+```
+
+3. 要走伤害结算时，把 `res://data/effects/test_damage_10.tres` 拖到脚本的 `damage_effect` 导出字段。
+4. 按键触发时执行：
+
+```gdscript
+var ctx := GameplayContext.from_nodes(player, player)
+Mkit.effects().execute(damage_effect, ctx)
+```
+
+5. 看到玩家 HP 减少、`damage_applied` 事件出现，就完成了本篇 minimal path。
+
+### Standard path：伤害来自输入或 AI 命令
+
+1. 不要在输入脚本里直接扣目标 HP；输入脚本只发送 `attack` 或 `cast_ability` 命令给玩家自己的 `CommandReceiver`。
+2. 在 `Idle` / `Move` state 的 `handle_command()` 里判断是否允许攻击。
+3. 允许时，临时项目可以直接执行上面的 `DealDamageEffect`；正式攻击时继续到 Recipe 04，把伤害放到攻击 action / hitbox 命中后触发。
+4. 验证方式：按攻击键时 state 日志出现，HP 变化发生在 state 或后续 action 中，而不是输入脚本中。
+
+### Advanced path：本篇不启动 action
+
+1. 如果你只是在测试数值、治疗、陷阱伤害或脚本事件，停在 Minimal path。
+2. 如果攻击需要前摇、命中窗口、取消或恢复时间，不要在本篇临时拼 `_process()` 计时器。
+3. 继续到 [Recipe 04](04_attack_action.md)，在那里新建 `Attack` state 和 `TimedAttackAction`，由 `ActionService` 每帧推进。
 
 ## 步骤
 
@@ -81,8 +118,8 @@ var _player: Node = null
 
 
 func _ready() -> void:
-    _effect_svc = ServiceRegistry.get_service("effects") as EffectService
-    _event_svc = ServiceRegistry.get_service("events") as EventService
+    _effect_svc = Mkit.effects()
+    _event_svc = Mkit.events()
 
     # 订阅死亡事件
     if _event_svc != null:
@@ -133,14 +170,14 @@ func _on_entity_died(entity_id: String, _entity_ref: Node) -> void:
 ```gdscript
 # 在玩家实体场景的 _ready 中
 func _ready() -> void:
-    var health := get_node("Components/HealthComponent") as HealthComponent
+    var health := EntityContract.get_component(self, "HealthComponent") as HealthComponent
     if health != null:
         health.died.connect(_on_player_died)
 
 
 func _on_player_died(_entity: Node) -> void:
     # 切到死亡状态、播放动画、显示 Game Over 等
-    var sm := get_node("StateMachine") as StateMachine
+    var sm := EntityContract.get_state_machine(self)
     if sm != null:
         sm.transition_to("Root/Dead")  # Recipe 04+ 再加 Dead 状态
 ```
@@ -159,21 +196,70 @@ Entity died: player_12345               ← 10次后 HP 归零
 
 在 Remote 调试器可查看 `HealthComponent.current_hp` 的实时变化。
 
+## 字段参考
+
+### StatsComponent
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `base_stats` | Dictionary（默认含 max_hp / attack_power / defense / move_speed / max_mana / max_stamina / attack_speed / crit_chance / crit_damage / cooldown_reduction / luck / damage_multiplier / healing_multiplier）| 实体基础属性表，key 为 stat id。`max_<资源id>` 还兼任 `ResourcePoolComponent` 对应池的上限（如 `max_mana`，[Recipe 05](05_ability.md) 步骤 3 依赖它）| 见步骤 1；可自由加自定义 stat id |
+
+### HealthComponent
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `current_hp` | float = 100.0 | 当前生命值；`_ready` 时被夹到 `max_hp`（来自 StatsComponent，无则 100）以内 | 见步骤 1 |
+| `destroy_on_death` | bool = false | 死亡时是否自动 `queue_free()` 拥有者实体。敌人通常 `true`（掉落/事件已在释放前广播）；玩家保持 `false`，由游戏逻辑接管死亡演出（步骤 5）| 敌人实体设 `true`（[Recipe 06](06_ai_enemy.md)）|
+
+### StatDefinition（可选——用 .tres 描述属性的元信息）
+
+`base_stats` 直接用字符串 key 即可工作；当你需要给属性面板、编辑器校验或游戏侧规则提供元信息时，才建一个 `StatDefinition` 入库。当前 `StatsComponent` 的数值计算**不自动读取** `StatDefinition.default_value/min_value/max_value`：运行时基础值来自 `base_stats`，夹取要靠 `StatModifierDefinition.CLAMP_MIN/CLAMP_MAX` 或你的游戏代码执行。
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `stat_id` | String = "" | 稳定 id，对应 `base_stats` 的 key | 必填 |
+| `display_name` | String = "" | UI 显示名 | 做属性面板时填 |
+| `default_value` | float = 0.0 | 属性的设计默认值/显示默认值。**当前 `StatsComponent.get_stat_value()` 不会自动回退到这里**；需要时由 UI、内容校验或你的游戏代码读取 | 给属性面板、模板生成器或自定义校验用 |
+| `min_value` / `max_value` | float = -INF / INF | 属性允许范围的元信息；±INF = 不限制。**当前运行时不会自动按它 clamp** | UI 输入限制、内容校验；运行时夹取请用 `CLAMP_MIN/CLAMP_MAX` modifier |
+| `is_percent` | bool = false | 是否按百分比**显示**（0.05 → "5%"）；只影响 UI 约定，不改变数值计算 | `crit_chance`、`cooldown_reduction` 等设 `true` |
+
+### StatModifierDefinition（buff / 装备改属性的最小单元）
+
+挂在 `StatusEffectDefinition.stat_modifiers`（[Recipe 12](12_status_effects.md)）或装备上，由 `StatsComponent.add_modifier` 参与计算：
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `modifier_id` | String = "" | 修饰器 id；`remove_modifier` 按它移除，`UNIQUE` 等叠加规则按它判重 | 必填 |
+| `stat_id` | String = "" | 修改哪个属性（`base_stats` 的 key）| 必填 |
+| `operation` | enum = FLAT_ADD | 运算类型，6 个取值（计算顺序固定，见下）：<br>`FLAT_ADD` — 加法：所有 FLAT_ADD 先求和加到基础值<br>`PERCENT_ADD` — 加法百分比：所有 PERCENT_ADD 求和后 `×(1 + 总和)`（0.1 = +10%，两个 0.1 = +20%）<br>`PERCENT_MULTIPLY` — 乘法百分比：逐个连乘（两个 1.1 = ×1.21）<br>`OVERRIDE` — 无视前面全部计算直接覆盖为 value（多个 OVERRIDE 时 priority 最大的生效）<br>`CLAMP_MIN` / `CLAMP_MAX` — 最后把结果夹到下限/上限（多个时取最严格的）<br>完整公式：`(base + ΣFLAT) × (1 + ΣPERCENT_ADD) × ΠPERCENT_MULTIPLY → OVERRIDE → CLAMP` | buff 加攻用 FLAT_ADD；"伤害提高 20%" 用 PERCENT_ADD；"虚弱：攻击减半" 用 PERCENT_MULTIPLY(0.5) |
+| `value` | float = 0.0 | 数值；含义随 operation 变化（FLAT_ADD 是加量，PERCENT_MULTIPLY 是倍率）| 必填 |
+| `priority` | int = 0 | 排序优先级，数值小的先参与。对 FLAT_ADD / PERCENT_ADD（求和）和 CLAMP（取最严）**没有影响**；只影响多个 `OVERRIDE` 之间谁最终生效（排序靠后者赢）| 多 OVERRIDE 冲突时才需要 |
+| `stacking_rule` | enum = STACK | 重复 `add_modifier` 时的去重规则，5 个取值：<br>`STACK` — 无脑共存，全部参与计算<br>`REPLACE_SAME_SOURCE` — 同 `source_id` + 同 `modifier_id` 的旧条目被替换（同一来源刷新自己的 buff）<br>`HIGHEST_ONLY` — 同 `modifier_id` 只留 value 最大的（新值更小则拒绝加入）<br>`LOWEST_ONLY` — 同上但留最小<br>`UNIQUE` — 同 `modifier_id` 只留最新一条，无视来源 | 可叠的毒用 STACK；不同来源的同名光环不叠加用 UNIQUE |
+| `tags` | Array[String] = [] | 标签；供查询/事件过滤，mkit 不做规则判定 | 一般留空 |
+
+> `StatModifierDefinition` 是静态定义；运行时实际挂到组件上的是 `StatModifier`（带 `source_id`、`remaining_duration`）。状态效果到期时按 `source_id`（= 状态实例 id）整组移除。
+
+### ResourcePoolComponent
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `starting_values` | Dictionary = {} | 资源池**当前值**初值表，如 `{"mana": 50.0}`。上限不在这里配——来自 StatsComponent 的 `max_<资源id>` stat；不写的资源默认满值开局。它是技能 `cost_type` 的扣费来源（[Recipe 05](05_ability.md) 步骤 3 完整演示）| 半蓝/空怒气开局时填 |
+
 ## 常见错误
 
 | 现象 | 原因 | 修复 |
 |------|------|------|
-| `DealDamageEffect` 执行失败，原因 `no_health_component` | `HealthComponent` 节点路径不对 | 确认节点路径为 `Components/HealthComponent` |
-| 伤害为 0 | `DamageResult.was_evaded = true` 或 base_amount = 0 | 检查 `DealDamageEffect.base_amount`；CombatService 默认不处理闪避 |
+| `DealDamageEffect` 执行失败，原因 `no_health_component` | `EntityContract` 找不到目标的 `HealthComponent` | 确认目标在 `EntityRoot` 下，且默认布局中存在 `Components/HealthComponent` |
+| 伤害为 0 | `DamageResult.was_evaded = true`、base_amount = 0 或防御抵消 | 检查 `DealDamageEffect.base_amount`、目标 `evade_chance` / `defense` 和 `DamageResult.trace` |
 | `entity_died` 未触发 | `HealthComponent.die()` 未被调用 | 确认 HP 确实降到 0；`die()` 内部有 `dead` 标记防止重复触发 |
 | `EventService` 为 null | Bootstrap 未运行 | 确认 Bootstrap 场景是第一个场景 |
 | 伤害一直相同，无暴击 | `StatsComponent` 中 `crit_chance` = 0 | 在 `base_stats` 里设 `"crit_chance": 0.3` |
 
 ## 延伸阅读
 
-- [HealthComponent ref](../ref/modules/HealthComponent.md)
-- [StatsComponent ref](../ref/modules/StatsComponent.md)
-- [DealDamageEffect ref](../ref/modules/DealDamageEffect.md)
-- [GameplayContext ref](../ref/kernel/GameplayContext.md) — source / target / amount / tags
-- [EffectService ref](../ref/kernel/EffectService.md) — execute / execute_many / trace
+- [HealthComponent ref](../generated/html/classes/HealthComponent.html)
+- [StatsComponent ref](../generated/html/classes/StatsComponent.html)
+- [DealDamageEffect ref](../generated/html/classes/DealDamageEffect.html)
+- [GameplayContext ref](../generated/html/classes/GameplayContext.html) — source / target / tags / payload
+- [EffectService ref](../generated/html/classes/EffectService.html) — execute / execute_many / trace
 - [pipeline.md — Damage Resolution](../pipeline.md#7-damage-resolution) — 伤害结算完整时序

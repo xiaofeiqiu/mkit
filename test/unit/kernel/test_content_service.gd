@@ -69,6 +69,22 @@ func test_tc_cr_08_get_typed_resource_returns_null_on_type_mismatch() -> void:
 	assert_push_error("item.shield")
 
 
+func test_tc_cr_09_validation_result_tracks_warnings_and_errors() -> void:
+	var result := ContentValidationResult.new()
+	assert_true(result.success)
+	assert_true(result.errors.is_empty())
+	assert_true(result.warnings.is_empty())
+
+	result.add_warning("duplicate optional tag")
+	assert_true(result.success)
+	assert_eq(result.warnings, ["duplicate optional tag"])
+	assert_true(result.errors.is_empty())
+
+	result.add_error("missing content id")
+	assert_false(result.success)
+	assert_eq(result.errors, ["missing content id"])
+
+
 class _QuestRes:
 	extends ContentDefinition
 	@export var quest_id: String = ""

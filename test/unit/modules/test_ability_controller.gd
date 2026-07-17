@@ -11,8 +11,10 @@ class StubContent:
 
 class _NeverCondition:
 	extends Condition
+	var calls: int = 0
 
 	func evaluate(_ctx: GameplayContext) -> bool:
+		calls += 1
 		return false
 
 
@@ -39,13 +41,12 @@ var ctrl: AbilityController
 var content: StubContent
 var actions: ActionService
 var time: TimeService
-var entity: Node
+var entity: EntityRoot
 var ctx: GameplayContext
 
 
 func before_each() -> void:
-	entity = Node.new()
-	add_child_autofree(entity)
+	entity = _make_entity_root()
 	content = StubContent.new()
 	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
@@ -58,6 +59,29 @@ func before_each() -> void:
 	entity.add_child(ctrl)
 	ctx = GameplayContext.new()
 	ctx.source = entity
+
+
+func _make_entity_root() -> EntityRoot:
+	var entity_root := EntityRoot.new()
+	entity_root.name = "AbilityEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = "ability.entity"
+	entity_root.add_child(identity)
+	var state_machine := Hfsm.new()
+	state_machine.name = "StateMachine"
+	entity_root.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity_root.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	entity_root.add_child(components)
+	var controllers := Node.new()
+	controllers.name = "Controllers"
+	entity_root.add_child(controllers)
+	add_child_autofree(entity_root)
+	return entity_root
 
 
 func after_each() -> void:
@@ -217,14 +241,16 @@ func test_tc_ab_16_cast_fails_when_no_resource_for_cost() -> void:
 
 
 func test_tc_ab_17_cast_fails_when_condition_false() -> void:
+	var condition := _NeverCondition.new()
 	var def := _make_ability("slam")
-	def.conditions = [_NeverCondition.new()]
+	def.conditions = [condition]
 	content._defs["slam"] = def
 	ctrl.register_ability("slam")
 	watch_signals(ctrl)
 	var result := ctrl.cast("slam", ctx)
 	assert_false(result)
 	assert_signal_emitted(ctrl, "ability_failed")
+	assert_eq(condition.calls, 1)
 
 
 func test_tc_ab_18_cast_succeeds_when_all_conditions_pass() -> void:
@@ -307,5 +333,8 @@ func test_tc_ab_23_unregister_removes_ability() -> void:
 
 
 func test_tc_ab_24_unregister_nonexistent_is_safe() -> void:
+	content._defs["slash"] = _make_ability("slash")
+	ctrl.register_ability("slash")
 	ctrl.unregister_ability("ghost_ability")
-	assert_true(true)
+	assert_true(ctrl.has_ability("slash"))
+	assert_eq(ctrl.abilities.size(), 1)

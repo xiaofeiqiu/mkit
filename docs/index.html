@@ -42,6 +42,27 @@
       letter-spacing: -0.2px;
     }
     .sidebar-header span { opacity: 0.55; font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+    .nav-search {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-search input {
+      width: 100%;
+      background: var(--code-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 7px 9px;
+      font-size: 12.5px;
+      outline: none;
+    }
+    .nav-search input:focus { border-color: var(--active-border); }
+    #nav-empty {
+      display: none;
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
     .nav-group { margin-top: 4px; }
     .nav-group-label {
       padding: 8px 16px 4px;
@@ -157,6 +178,10 @@
     Mkit Docs
     <span>Godot 4.x RPG Framework</span>
   </div>
+  <div class="nav-search">
+    <input id="nav-search" type="search" placeholder="搜索：技能、任务、存档、Shop、Debug…" autocomplete="off">
+  </div>
+  <div id="nav-empty">没有匹配的文档入口</div>
   <div id="nav-root"></div>
 </nav>
 
@@ -172,13 +197,42 @@ const NAV = [
   { group: '入门', items: [
     { label: 'Overview',        href: 'readme.md' },
     { label: 'Getting Started', href: 'getting_started.md' },
+    { label: 'Compatibility',    href: 'compatibility.md' },
     { label: 'Architecture',    href: 'architecture.md' },
     { label: 'Concepts',        href: 'concepts.md' },
     { label: 'Glossary',        href: 'glossary.md' },
+    { label: 'Current Limits',   href: 'roadmap.md' },
+  ]},
+  { group: '常用任务', items: [
+    { label: '做一个玩家实体',   href: 'cookbook/02_player_entity.md#步骤' },
+    { label: '做一个攻击动作',   href: 'cookbook/04_attack_action.md#步骤' },
+    { label: '做一个技能',       href: 'cookbook/05_ability.md#步骤' },
+    { label: '做一个敌人（AI）', href: 'cookbook/06_ai_enemy.md#步骤' },
+    { label: '做 buff/DOT',      href: 'cookbook/12_status_effects.md#步骤' },
+    { label: '做 NPC 对话',      href: 'cookbook/09_npc_dialogue.md#步骤' },
+    { label: '做一个任务',       href: 'cookbook/10_quest.md#步骤' },
+    { label: '做一个物品/背包',  href: 'cookbook/16_items_and_inventory.md#步骤' },
+    { label: '做杀敌掉落',       href: 'cookbook/22_enemy_death_loot.md#步骤' },
+    { label: '做三选一升级',     href: 'cookbook/23_upgrade_choice_rewards.md#步骤' },
+    { label: '做一个商店',       href: 'cookbook/14_shop.md#步骤' },
+    { label: '做存档/读档',      href: 'cookbook/11_progression_and_save.md#步骤' },
+  ]},
+  { group: '排查问题', collapsed: true, items: [
+    { label: '技能没效果',         href: 'debugging.md#按症状选择工具' },
+    { label: '按键/命令没反应',    href: 'debugging.md#按症状选择工具' },
+    { label: '存档没有恢复',       href: 'debugging.md#按症状选择工具' },
+    { label: '事件没到 UI',        href: 'debugging.md#按症状选择工具' },
+    { label: '场景/区域不切换',    href: 'debugging.md#按症状选择工具' },
+    { label: '服务取到 null',      href: 'debugging.md#常见问题速查表' },
   ]},
   { group: '指南', items: [
     { label: 'Pipeline',   href: 'pipeline.md' },
+    { label: 'Event Payloads', href: 'event_payloads.md' },
     { label: 'Debugging',  href: 'debugging.md' },
+    { label: 'Error Reporting', href: 'error_reporting.md' },
+  ]},
+  { group: 'API Reference', items: [
+    { label: 'Generated API HTML', href: 'generated/html/index.html' },
   ]},
   { group: 'Cookbook', collapsed: true, items: [
     { label: 'Index',                   href: 'cookbook/index.md' },
@@ -196,52 +250,16 @@ const NAV = [
     { label: '12 · Status Effects',     href: 'cookbook/12_status_effects.md' },
     { label: '13 · Animation',          href: 'cookbook/13_animation.md' },
     { label: '14 · Shop',               href: 'cookbook/14_shop.md' },
+    { label: '15 · World / Zone',       href: 'cookbook/15_world_zone_transition.md' },
+    { label: '16 · Items & Inventory',  href: 'cookbook/16_items_and_inventory.md' },
+    { label: '17 · Interaction Area',   href: 'cookbook/17_interaction_area.md' },
+    { label: '18 · UI & HUD',           href: 'cookbook/18_ui_hud.md' },
+    { label: '19 · XP & Upgrades',      href: 'cookbook/19_xp_and_upgrades.md' },
+    { label: '20 · Custom Service',     href: 'cookbook/20_custom_service.md' },
+    { label: '21 · Conditions',         href: 'cookbook/21_conditions.md' },
+    { label: '22 · Enemy Death Loot',   href: 'cookbook/22_enemy_death_loot.md' },
+    { label: '23 · Upgrade Choices',    href: 'cookbook/23_upgrade_choice_rewards.md' },
   ]},
-  { group: 'Kernel Ref', collapsed: true, items: [
-    'GameBootstrap','ServiceRegistry','GameCommand','CommandService',
-    'CommandReceiver','BuiltinCommands','GameAction','ActionService',
-    'ActionContext',
-    'GameEffect','EffectService','EffectResult',
-    'SpawnSceneEffect','LogEffect',
-    'GameplayContext','Blackboard','DomainEvent','EventService',
-    'ContentDefinition','ContentService','ContentValidationResult','ResourceDatabase',
-    'Saveable','SaveableComponent','SaveService','SaveMigration',
-    'State','StateMachine','Condition','ConditionEvaluator',
-    'TargetInRangeCondition',
-    'TimeService','RandomService','SceneService','PoolService',
-    'AudioService','AnalyticsService','AnalyticsServiceMock',
-    'AdService','AdServiceMock','IAPService','IAPServiceMock',
-    'CloudSaveService','CloudSaveServiceMock','DebugOverlay',
-  ].map(c => ({ label: c, href: `ref/kernel/${c}.md` })),
-  },
-  { group: 'Module Ref', collapsed: true, items: [
-    'AbilityDefinition','AbilityInstance','AbilityController','CastAction','CooldownReadyCondition',
-    'Brain','SimpleAIEnemyBrain',
-    'CombatService','DamageRequest','DamageResult','HitboxComponent','HurtboxComponent',
-    'DealDamageEffect','DashAction','TimedAttackAction',
-    'DialogueDefinition','DialogueNode','DialogueChoice','DialogueRuntime',
-    'DialogueInteractable','DialogueService',
-    'EntityDefinition','EntityIdentity','EntityRoot','EntitySpawner',
-    'HealthComponent','ResourcePoolComponent','HealEffect',
-    'Interactable','InteractionComponent',
-    'ItemDefinition','ItemInstance','InventorySlot','InventoryModel',
-    'InventoryController','EquipmentController','GrantItemEffect',
-    'LootTableDefinition','LootEntry','LootService','LootRollResult',
-    'RewardDefinition','RewardOption','RewardSystem',
-    'ExperienceComponent','ExperienceCurve','ProgressionState',
-    'ProgressionService','UpgradeDefinition','AddCurrencyEffect','SpendCurrencyEffect',
-    'QuestDefinition','QuestObjectiveDefinition','QuestState','QuestLog',
-    'QuestService','AcceptQuestEffect','AdvanceObjectiveEffect','CompleteQuestEffect',
-    'RoomDefinition','RoomGraph','RoomLoader','RoomNode','RoomRuntime',
-    'RoomController','DungeonGenerator','RunState','RunDirector','RewardCoordinator',
-    'ShopDefinition','ShopEntry','ShopService',
-    'StatDefinition','StatModifier','StatModifierDefinition','StatsComponent','ApplyStatModifierEffect',
-    'StatusEffectDefinition','StatusEffectInstance','StatusEffectController','ApplyStatusEffect',
-    'UIManager','DialogueUI','QuestLogUI','ShopUI','RewardSelectionUI',
-    'FeedbackSystem','DamageNumberSystem','VFXSpawner',
-    'ZoneDefinition','WorldService','Portal','SpawnPoint',
-  ].map(c => ({ label: c, href: `ref/modules/${c}.md` })),
-  },
 ]
 
 // ── Mermaid config ────────────────────────────────────────────────────────────
@@ -301,8 +319,10 @@ function buildNav() {
       const li = document.createElement('li')
       const a = document.createElement('a')
       a.textContent = item.label
-      a.href = '#' + item.href
+      const isHtmlPage = item.href.endsWith('.html')
+      a.href = isHtmlPage ? item.href : '#' + item.href
       a.dataset.href = item.href
+      a.dataset.search = `${item.label} ${item.href} ${group.group}`.toLowerCase()
       li.appendChild(a)
       ul.appendChild(li)
     })
@@ -311,6 +331,28 @@ function buildNav() {
     div.appendChild(ul)
     root.appendChild(div)
   })
+}
+
+function applyNavFilter() {
+  const input = document.getElementById('nav-search')
+  const query = (input ? input.value : '').trim().toLowerCase()
+  let visibleTotal = 0
+
+  document.querySelectorAll('.nav-group').forEach(group => {
+    let visibleInGroup = 0
+    group.querySelectorAll('.nav-items li').forEach(li => {
+      const link = li.querySelector('a')
+      const matches = !query || (link && link.dataset.search.includes(query))
+      li.style.display = matches ? '' : 'none'
+      if (matches) visibleInGroup += 1
+    })
+    group.style.display = visibleInGroup > 0 ? '' : 'none'
+    if (query && visibleInGroup > 0) group.classList.remove('collapsed')
+    visibleTotal += visibleInGroup
+  })
+
+  const empty = document.getElementById('nav-empty')
+  if (empty) empty.style.display = visibleTotal === 0 ? 'block' : 'none'
 }
 
 function setActiveLink(href) {
@@ -326,7 +368,84 @@ function setActiveLink(href) {
 }
 
 // ── Content rendering ─────────────────────────────────────────────────────────
-async function loadPage(href) {
+function splitRoute(route) {
+  const value = (route || '').trim()
+  const hashIndex = value.indexOf('#')
+  if (hashIndex === -1) return { path: value, anchor: '' }
+  return {
+    path: value.slice(0, hashIndex),
+    anchor: decodeURIComponent(value.slice(hashIndex + 1)),
+  }
+}
+
+function normalizePath(path, basePath = '') {
+  if (!path) return basePath || 'readme.md'
+
+  const baseParts = basePath ? basePath.split('/').slice(0, -1) : []
+  const parts = path.startsWith('/') ? [] : baseParts
+
+  path.split('/').forEach(part => {
+    if (!part || part === '.') return
+    if (part === '..') {
+      parts.pop()
+      return
+    }
+    parts.push(part)
+  })
+
+  return parts.join('/')
+}
+
+function normalizeRoute(raw, basePath = '') {
+  const { path, anchor } = splitRoute(raw)
+  const normalizedPath = normalizePath(path, basePath)
+  return anchor ? `${normalizedPath}#${anchor}` : normalizedPath
+}
+
+function slugifyHeading(text) {
+  const pipelineMatch = text.trim().match(/^P\d+-(\d+)[：:](.*)$/i)
+  if (pipelineMatch) {
+    return `${pipelineMatch[1]}-${slugifyHeading(pipelineMatch[2])}`
+  }
+
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[：:，,。.!！?？、"'`（）()[\]{}]/g, '')
+    .replace(/[\/+—–]/g, '')
+}
+
+function addHeadingAnchors(content) {
+  const seen = new Map()
+  content.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(heading => {
+    const base = slugifyHeading(heading.textContent || '')
+    if (!base) return
+
+    const count = seen.get(base) || 0
+    seen.set(base, count + 1)
+    heading.id = count === 0 ? base : `${base}-${count + 1}`
+  })
+}
+
+function scrollToAnchor(anchor) {
+  if (!anchor) {
+    document.getElementById('content-wrap').scrollTop = 0
+    return
+  }
+
+  const target = document.getElementById(anchor)
+  if (!target) {
+    document.getElementById('content-wrap').scrollTop = 0
+    return
+  }
+
+  target.scrollIntoView({ block: 'start' })
+}
+
+async function loadPage(route) {
+  const { path, anchor } = splitRoute(normalizeRoute(route))
+  const href = path || 'readme.md'
   const content = document.getElementById('content')
   const status = document.createElement('div')
   status.id = 'status'
@@ -354,6 +473,7 @@ async function loadPage(href) {
   // Render markdown
   const html = marked.parse(md)
   content.innerHTML = html
+  addHeadingAnchors(content)
 
   // Convert mermaid code blocks
   content.querySelectorAll('pre code.language-mermaid').forEach(el => {
@@ -370,16 +490,19 @@ async function loadPage(href) {
   // Intercept internal .md links
   content.querySelectorAll('a[href]').forEach(a => {
     const h = a.getAttribute('href')
-    if (h && h.endsWith('.md') && !h.startsWith('http')) {
+    if (h && !h.startsWith('http')) {
+      const { path } = splitRoute(h)
+      const isMarkdownRoute = h.startsWith('#') || path.endsWith('.md')
+      if (!isMarkdownRoute) return
+
       a.addEventListener('click', e => {
         e.preventDefault()
-        window.location.hash = h
+        window.location.hash = normalizeRoute(h, href)
       })
     }
   })
 
-  // Scroll to top
-  document.getElementById('content-wrap').scrollTop = 0
+  scrollToAnchor(anchor)
 }
 
 // ── Mermaid lightbox ─────────────────────────────────────────────────────────
@@ -461,6 +584,7 @@ window.addEventListener('hashchange', () => loadPage(currentHref()))
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildNav()
+document.getElementById('nav-search').addEventListener('input', applyNavFilter)
 loadPage(currentHref())
 </script>
 </body>

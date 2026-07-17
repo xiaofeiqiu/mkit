@@ -19,15 +19,14 @@ func _make_item_def(id: String, stackable: bool = false, max_stack: int = 1) -> 
 
 var inv: InventoryController
 var content: StubContent
-var entity: Node
+var entity: EntityRoot
 
 
 func before_each() -> void:
 	content = StubContent.new()
 	add_child_autofree(content)
 	ServiceRegistry.register_service("content", content)
-	entity = Node.new()
-	add_child_autofree(entity)
+	entity = _make_entity_root()
 	inv = InventoryController.new()
 	inv.capacity = 5
 	entity.add_child(inv)
@@ -36,6 +35,60 @@ func before_each() -> void:
 
 func after_each() -> void:
 	ServiceRegistry.clear()
+
+
+func _make_entity_root() -> EntityRoot:
+	var entity_root := EntityRoot.new()
+	entity_root.name = "InventoryEntity"
+	var identity := EntityIdentity.new()
+	identity.name = "EntityIdentity"
+	identity.entity_id = "inv.entity"
+	entity_root.add_child(identity)
+	var state_machine := Hfsm.new()
+	state_machine.name = "StateMachine"
+	entity_root.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity_root.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	entity_root.add_child(components)
+	var controllers := Node.new()
+	controllers.name = "Controllers"
+	entity_root.add_child(controllers)
+	add_child_autofree(entity_root)
+	return entity_root
+
+
+func test_tc_inv_25_inventory_model_setup_creates_indexed_empty_slots() -> void:
+	var model := InventoryModel.new()
+	model.owner_id = "bag.unit"
+	model.setup(3)
+
+	assert_eq(model.capacity, 3)
+	assert_eq(model.slots.size(), 3)
+	assert_true(model.slots[0] is InventorySlot)
+	assert_eq(model.slots[0].index, 0)
+	assert_eq(model.slots[2].index, 2)
+	assert_eq(model.find_first_empty_slot(), model.slots[0])
+	assert_true(model.get_items().is_empty())
+
+
+func test_tc_inv_26_inventory_model_finds_stackable_slot_and_items() -> void:
+	var model := InventoryModel.new()
+	model.setup(2)
+	var potion_def := _make_item_def("potion", true, 5)
+	var potion := ItemInstance.create("potion", 3)
+	model.slots[0].item = potion
+
+	var stackable := model.find_stackable_slot(potion_def, ItemInstance.create("potion", 1))
+	assert_eq(stackable, model.slots[0])
+	assert_eq(model.get_items(), [potion] as Array[ItemInstance])
+
+	model.slots[0].clear()
+	assert_true(model.slots[0].is_empty())
+	assert_null(model.find_stackable_slot(potion_def, ItemInstance.create("potion", 1)))
+	assert_null(model.find_stackable_slot(_make_item_def("sword", false, 1), ItemInstance.create("sword", 1)))
 
 
 # --- add_item (non-stackable) ---
@@ -262,7 +315,7 @@ func test_tc_inv_21_add_item_triggers_inventory_changed_event() -> void:
 	content._defs["key"] = _make_item_def("key")
 	watch_signals(events)
 	inv.add_item(ItemInstance.create("key", 1))
-	assert_signal_emitted(events, "inventory_changed")
+	assert_not_null(DomainEventAsserts.last_event(events, "inventory_changed"))
 	var de: DomainEvent = events.recent_events.back()
 	assert_eq(de.event_type, "inventory_changed")
 	assert_eq(de.payload.get("item_id"), "key")

@@ -76,18 +76,20 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	_save_field_scene()
 
 	# boot the real kernel + modules against the loop content database
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_database()]
+	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
 
-	var content := ServiceRegistry.get_service("content") as ContentService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var dialogue := ServiceRegistry.get_service("dialogue") as DialogueService
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var shop := ServiceRegistry.get_service("shop") as ShopService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var content := ServiceRegistry.get_port("content") as ContentService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var dialogue := ServiceRegistry.get_port("dialogue") as DialogueService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var shop := ServiceRegistry.get_port("shop") as ShopService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
+	var save := ServiceRegistry.get_port("save") as SaveService
+	var death_loot := ServiceRegistry.get_port("death_loot") as DeathLootService
 	assert_not_null(content)
 	assert_not_null(events)
 	assert_not_null(effects)
@@ -96,6 +98,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_not_null(shop)
 	assert_not_null(progression)
 	assert_not_null(save)
+	assert_not_null(death_loot)
 	assert_true(content.validate_all().success)
 	save.save_path = _save_path
 
@@ -115,7 +118,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	ServiceRegistry.unregister_service("audio")
 	ServiceRegistry.register_service("audio", audio)
 
-	var world := ServiceRegistry.get_service("world") as WorldService
+	var world := ServiceRegistry.get_port("world") as WorldService
 	assert_not_null(world)
 	world.scene_router = null
 
@@ -124,7 +127,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	var experience := player.get_node("Components/ExperienceComponent") as ExperienceComponent
 	var elder := _make_elder()
 	var beast := _make_beast()
-	var loot_system := LootService.new()
+	events.subscribe(LootEvents.LOOT_DROPPED, _add_drop_to_inventory.bind(inventory))
 
 	watch_signals(dialogue)
 	watch_signals(quest)
@@ -156,11 +159,15 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_true(elder_interactable.interact(talk_ctx))
 	assert_true(dialogue.is_active())
 	assert_signal_emitted_with_parameters(dialogue, "dialogue_started", [DIALOGUE_ELDER])
-	assert_signal_emitted_with_parameters(events, "npc_talked", [NPC_ELDER])
+	var evt_npc_talked_1 := DomainEventAsserts.last_event(events, "npc_talked")
+	assert_not_null(evt_npc_talked_1)
+	assert_eq(evt_npc_talked_1.source_id, NPC_ELDER)
 
 	dialogue.choose(0)
 	assert_false(dialogue.is_active())
-	assert_signal_emitted_with_parameters(events, "dialogue_ended", [DIALOGUE_ELDER])
+	var evt_dialogue_ended_2 := DomainEventAsserts.last_event(events, "dialogue_ended")
+	assert_not_null(evt_dialogue_ended_2)
+	assert_eq(evt_dialogue_ended_2.source_id, DIALOGUE_ELDER)
 	assert_eq(quest.get_state(QUEST_ID).status, "active")
 	assert_signal_emitted_with_parameters(quest, "quest_accepted", [QUEST_ID])
 	assert_eq(quest.get_state(QUEST_ID).get_progress(OBJECTIVE_ID), 0)
@@ -186,7 +193,10 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	var strike_ctx := GameplayContext.new().with_source(player).with_target(beast)
 	assert_true(effects.execute(strike, strike_ctx).success)
 	assert_true(beast_health.dead)
-	assert_signal_emitted_with_parameters(events, "entity_died", [BEAST_ID, beast])
+	var evt_entity_died_3 := DomainEventAsserts.last_event(events, "entity_died")
+	assert_not_null(evt_entity_died_3)
+	assert_eq(evt_entity_died_3.source_id, BEAST_ID)
+	assert_eq(evt_entity_died_3.payload.get("entity_ref"), beast)
 	assert_signal_emitted_with_parameters(
 		quest, "objective_advanced", [QUEST_ID, OBJECTIVE_ID, 1, 1]
 	)
@@ -196,12 +206,7 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_not_null(inventory.find_item_by_definition(ITEM_CHARM))
 	assert_eq(progression.get_currency(CURRENCY), STARTER_GOLD + REWARD_GOLD)
 
-	# the game responds to the kill by rolling the beast loot table and granting field XP
-	var loot := loot_system.roll_table(
-		LOOT_FIELD_BEAST, GameplayContext.new().with_source(beast).with_target(player)
-	)
-	for item in loot.item_instances:
-		assert_true(inventory.add_item(item))
+	# the game responds to LootEvents.LOOT_DROPPED by deciding how to deliver the rolled items.
 	var claw := inventory.find_item_by_definition(ITEM_CLAW)
 	assert_not_null(claw)
 	assert_eq(claw.quantity, 1)
@@ -228,14 +233,36 @@ func test_tc_int_loop_01_full_village_rpg_loop() -> void:
 	assert_true(shop.buy(ITEM_POTION, 1, player))
 	assert_eq(progression.get_currency(CURRENCY), STARTER_GOLD + REWARD_GOLD - POTION_VALUE)
 	assert_not_null(inventory.find_item_by_definition(ITEM_POTION))
-	assert_signal_emitted_with_parameters(events, "item_purchased", [SHOP_ID, ITEM_POTION, 1])
+	var evt_item_purchased_4 := DomainEventAsserts.last_event(events, "item_purchased")
+	assert_not_null(evt_item_purchased_4)
+	assert_eq(evt_item_purchased_4.source_id, SHOP_ID)
+	assert_eq(evt_item_purchased_4.target_id, ITEM_POTION)
+	assert_eq(evt_item_purchased_4.payload.get("quantity"), 1)
 
 	assert_eq(shop.get_sell_price(ITEM_CLAW), CLAW_SELL_PRICE)
 	assert_true(shop.sell(claw.instance_id, 1, player))
 	assert_null(inventory.find_item_by_definition(ITEM_CLAW))
-	assert_signal_emitted_with_parameters(events, "item_sold", [SHOP_ID, ITEM_CLAW, 1])
+	var evt_item_sold_5 := DomainEventAsserts.last_event(events, "item_sold")
+	assert_not_null(evt_item_sold_5)
+	assert_eq(evt_item_sold_5.source_id, SHOP_ID)
+	assert_eq(evt_item_sold_5.target_id, ITEM_CLAW)
+	assert_eq(evt_item_sold_5.payload.get("quantity"), 1)
 	var expected_gold := STARTER_GOLD + REWARD_GOLD - POTION_VALUE + CLAW_SELL_PRICE
 	assert_eq(progression.get_currency(CURRENCY), expected_gold)
+
+	assert_true(save.save_game(get_tree().root))
+	var reload_to_field := host.get_child(0).get_node_or_null("ToField") as Portal
+	assert_not_null(reload_to_field)
+	assert_true(reload_to_field.interact(GameplayContext.new().with_source(player)))
+	await _settle()
+	assert_eq(world.current_zone_id, ZONE_FIELD)
+	assert_eq(router.current_scene_path, FIELD_SCENE_PATH)
+
+	assert_true(save.load_game(get_tree().root))
+	await _settle()
+	assert_eq(world.current_zone_id, ZONE_VILLAGE)
+	assert_eq(router.current_scene_path, VILLAGE_SCENE_PATH)
+	assert_eq(host.get_child(0).name, "Village")
 
 	# --- HOP 6: persist the run and round-trip it through save/load ---
 	assert_true(save.save_game(ServiceRegistry))
@@ -323,9 +350,13 @@ func _make_database() -> ResourceDatabase:
 	loot.rolls = 1
 	loot.entries = loot_entries
 	loot.allow_empty = false
+	var death_loot_rule := DeathLootRuleDefinition.new()
+	death_loot_rule.rule_id = "death_loot.int.loop.field_beast"
+	death_loot_rule.required_tags = [BEAST_TAG]
+	death_loot_rule.loot_table_ids = [LOOT_FIELD_BEAST]
 
 	var resources: Array[Resource] = [
-		village, field, potion, claw, charm, quest, elder_dialogue, shop, loot
+		village, field, potion, claw, charm, quest, elder_dialogue, shop, loot, death_loot_rule
 	]
 	return IntTestHelpers.make_resource_database("village_rpg_loop_int", resources)
 
@@ -350,39 +381,27 @@ func _make_curve() -> ExperienceCurve:
 
 
 func _make_player() -> Node2D:
-	var player := Node2D.new()
+	var player := IntTestHelpers.make_inventory_entity("Player", "player", 10)
 	player.name = "Player"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player"
-	player.add_child(identity)
-	var components := Node.new()
-	components.name = "Components"
-	player.add_child(components)
-	var experience := ExperienceComponent.new()
-	experience.name = "ExperienceComponent"
-	experience.curve = _make_curve()
-	experience.starting_level = 1
-	components.add_child(experience)
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	player.add_child(controllers)
-	var inventory := InventoryController.new()
-	inventory.name = "InventoryController"
-	inventory.capacity = 10
-	controllers.add_child(inventory)
+	var components := player.get_node("Components") as Node
+	var existing := components.get_node_or_null("ExperienceComponent") as ExperienceComponent
+	if existing == null:
+		var experience := ExperienceComponent.new()
+		experience.name = "ExperienceComponent"
+		experience.curve = _make_curve()
+		experience.starting_level = 1
+		components.add_child(experience)
+	else:
+		existing.curve = _make_curve()
+		existing.starting_level = 1
 	player.add_to_group("player")
 	add_child_autofree(player)
 	return player
 
 
 func _make_elder() -> Node:
-	var elder := Node2D.new()
+	var elder := IntTestHelpers.make_entity("Elder", NPC_ELDER)
 	elder.name = "Elder"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = NPC_ELDER
-	elder.add_child(identity)
 	var interactable := DialogueInteractable.new()
 	interactable.name = "Interactable"
 	interactable.npc_id = NPC_ELDER
@@ -397,6 +416,14 @@ func _make_beast() -> Node:
 	var beast := IntTestHelpers.make_health_entity("FieldBeast", BEAST_ID, 10.0, tags)
 	add_child_autofree(beast)
 	return beast
+
+
+func _add_drop_to_inventory(event: DomainEvent, inventory: InventoryController) -> void:
+	var drop := event.payload.get("drop") as LootDropResult
+	if drop == null or drop.roll_result == null or inventory == null:
+		return
+	for item in drop.roll_result.item_instances:
+		inventory.add_item(item)
 
 
 func _save_village_scene() -> void:

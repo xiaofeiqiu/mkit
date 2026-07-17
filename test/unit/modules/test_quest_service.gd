@@ -95,32 +95,43 @@ func _make_quest(
 	return definition
 
 
-func _make_enemy(entity_id: String, tags: Array[String] = []) -> Node:
-	var enemy := Node.new()
-	enemy.name = "Enemy"
+func _make_entity_root(entity_id: String, tags: Array[String] = []) -> EntityRoot:
+	var entity := EntityRoot.new()
+	entity.name = "Entity"
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	identity.entity_id = entity_id
 	identity.tags = tags
-	enemy.add_child(identity)
-	add_child_autofree(enemy)
-	return enemy
-
-
-func _make_player_with_inventory() -> Node:
-	var player := Node.new()
-	player.name = "Player"
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player"
-	player.add_child(identity)
+	entity.add_child(identity)
+	var state_machine := Hfsm.new()
+	state_machine.name = "StateMachine"
+	entity.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity.add_child(receiver)
+	var components := Node.new()
+	components.name = "Components"
+	entity.add_child(components)
 	var controllers := Node.new()
 	controllers.name = "Controllers"
-	player.add_child(controllers)
+	entity.add_child(controllers)
+	add_child_autofree(entity)
+	return entity
+
+
+func _make_enemy(entity_id: String, tags: Array[String] = []) -> EntityRoot:
+	return _make_entity_root(entity_id, tags)
+
+
+func _make_player_with_inventory() -> EntityRoot:
+	var player := _make_entity_root("player")
+	player.name = "Player"
+	var identity := player.get_node("EntityIdentity") as EntityIdentity
+	identity.entity_id = "player"
+	var controllers := player.get_node("Controllers") as Node
 	var inventory := InventoryController.new()
 	inventory.name = "InventoryController"
 	controllers.add_child(inventory)
-	add_child_autofree(player)
 	return player
 
 
@@ -159,7 +170,9 @@ func test_tc_quest_01_accept_requires_prerequisites_and_conditions() -> void:
 	assert_true(quest.accept_quest("quest.main", null))
 	assert_eq(quest.get_state("quest.main").status, "active")
 	assert_signal_emitted_with_parameters(quest, "quest_accepted", ["quest.main"])
-	assert_signal_emitted_with_parameters(events, "quest_accepted", ["quest.main"])
+	var evt_quest_accepted_1 := DomainEventAsserts.last_event(events, "quest_accepted")
+	assert_not_null(evt_quest_accepted_1)
+	assert_eq(evt_quest_accepted_1.source_id, "quest.main")
 	assert_false(quest.accept_quest("quest.main", null))
 
 
@@ -175,18 +188,30 @@ func test_tc_quest_02_kill_event_advances_objective_to_complete() -> void:
 	watch_signals(quest)
 
 	var wolf: Array[String] = ["wolf"]
-	events.emit_entity_died("wolf_1", _make_enemy("wolf_1", wolf))
+	events.emit_domain_event(CombatEvents.entity_died("wolf_1", _make_enemy("wolf_1", wolf)))
 	assert_eq(quest.get_state("quest.cull").get_progress("obj.goblins"), 0)
 	assert_false(quest.is_quest_complete("quest.cull"))
 
 	var goblin: Array[String] = ["goblin"]
-	events.emit_entity_died("goblin_1", _make_enemy("goblin_1", goblin))
-	events.emit_entity_died("goblin_2", _make_enemy("goblin_2", goblin))
+	events.emit_domain_event(CombatEvents.entity_died("goblin_1", _make_enemy("goblin_1", goblin)))
+	events.emit_domain_event(CombatEvents.entity_died("goblin_2", _make_enemy("goblin_2", goblin)))
 	assert_eq(quest.get_state("quest.cull").get_progress("obj.goblins"), 2)
 	assert_true(quest.is_quest_complete("quest.cull"))
 	assert_signal_emitted_with_parameters(
 		quest, "objective_advanced", ["quest.cull", "obj.goblins", 2, 2]
 	)
+
+
+func test_tc_quest_12_synthesized_kill_event_is_published_to_event_service() -> void:
+	var objectives: Array[QuestObjectiveDefinition] = [_make_objective("obj.kill", "enemy_killed")]
+	_make_quest("quest.kill", objectives)
+	quest.accept_quest("quest.kill", null)
+
+	events.emit_domain_event(CombatEvents.entity_died("rat_1", _make_enemy("rat_1")))
+
+	var enemy_killed := DomainEventAsserts.last_event(events, QuestEvents.ENEMY_KILLED)
+	assert_not_null(enemy_killed)
+	assert_eq(enemy_killed.source_id, "rat_1")
 
 
 # --- item acquired with payload count key ---
@@ -238,7 +263,7 @@ func test_tc_quest_04_auto_complete_grants_reward_effects() -> void:
 	quest.accept_quest("quest.bounty", ctx)
 	watch_signals(quest)
 
-	events.emit_entity_died("rat_1", _make_enemy("rat_1"))
+	events.emit_domain_event(CombatEvents.entity_died("rat_1", _make_enemy("rat_1")))
 
 	assert_eq(quest.get_state("quest.bounty").status, "turned_in")
 	assert_signal_emitted(quest, "quest_completed")
@@ -261,7 +286,7 @@ func test_tc_quest_05_manual_turn_in_grants_reward_and_repeatable_resets() -> vo
 	definition.reward_effects = rewards
 
 	quest.accept_quest("quest.daily", null)
-	events.emit_entity_died("rat_1", _make_enemy("rat_1"))
+	events.emit_domain_event(CombatEvents.entity_died("rat_1", _make_enemy("rat_1")))
 	assert_true(quest.is_quest_complete("quest.daily"))
 	assert_eq(quest.get_state("quest.daily").status, "active")
 	assert_eq(counting.runs, 0)
@@ -290,7 +315,7 @@ func test_tc_quest_06_save_load_roundtrips_quest_log() -> void:
 
 	quest.accept_quest("quest.a", null)
 	quest.accept_quest("quest.b", null)
-	events.emit_entity_died("goblin_1", _make_enemy("goblin_1"))
+	events.emit_domain_event(CombatEvents.entity_died("goblin_1", _make_enemy("goblin_1")))
 	assert_eq(quest.get_state("quest.a").get_progress("obj.kill"), 1)
 
 	var json: String = JSON.stringify(quest.to_save_data())
@@ -349,7 +374,7 @@ func test_tc_quest_09_complete_quest_effect_turns_in() -> void:
 	var definition := _make_quest("quest.fx", objectives, false)
 	definition.reward_effects = rewards
 	quest.accept_quest("quest.fx", null)
-	events.emit_entity_died("rat_1", _make_enemy("rat_1"))
+	events.emit_domain_event(CombatEvents.entity_died("rat_1", _make_enemy("rat_1")))
 
 	var effect := CompleteQuestEffect.new()
 	effect.quest_id = "quest.fx"
@@ -387,7 +412,7 @@ func test_tc_quest_11_turn_in_keeps_completed_when_reward_fails() -> void:
 	var definition := _make_quest("quest.failed_reward", objectives, false)
 	definition.reward_effects = rewards
 	quest.accept_quest("quest.failed_reward", null)
-	events.emit_entity_died("rat_1", _make_enemy("rat_1"))
+	events.emit_domain_event(CombatEvents.entity_died("rat_1", _make_enemy("rat_1")))
 	assert_true(quest.complete_quest("quest.failed_reward", null))
 	assert_eq(quest.get_state("quest.failed_reward").status, "completed")
 

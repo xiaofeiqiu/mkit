@@ -258,6 +258,36 @@ func test_tc_svc_08_equipment_roundtrip_restores_slots_and_affix_modifiers() -> 
 	assert_eq(stats.get_stat_value("attack_power"), 13.0)
 
 
+func test_tc_svc_18_equipment_restore_does_not_duplicate_modifiers_after_stats_restore() -> void:
+	var static_mod := _make_modifier_definition("mod.weapon.attack", "attack_power", 3.0)
+	var item_def := _make_item("item.blade", "weapon", false, 1)
+	item_def.stat_modifiers = [static_mod]
+	content._defs["item.blade"] = item_def
+	var entity := _make_entity("Player", "player_001")
+	var stats := _add_stats(entity)
+	var equipment := _add_equipment(entity)
+	add_child_autofree(entity)
+	var item := ItemInstance.create("item.blade", 1)
+	item.instance_id = "blade_001"
+	item.rolled_affixes.append(_make_modifier("mod.rolled.crit", "crit_chance", 0.1, -1.0))
+	assert_true(equipment.equip(item, "weapon"))
+	var stats_data := stats.to_save_data()
+	var equipment_data := equipment.to_save_data()
+
+	var restored_entity := _make_entity("Restored", "player_002")
+	var restored_stats := _add_stats(restored_entity)
+	var restored_equipment := _add_equipment(restored_entity)
+	add_child_autofree(restored_entity)
+	restored_stats.from_save_data(stats_data)
+	assert_eq(restored_stats.get_stat_value("attack_power"), 13.0)
+	assert_almost_eq(restored_stats.get_stat_value("crit_chance"), 0.15, 0.001)
+
+	restored_equipment.from_save_data(equipment_data)
+	assert_eq(restored_stats.get_stat_value("attack_power"), 13.0)
+	assert_almost_eq(restored_stats.get_stat_value("crit_chance"), 0.15, 0.001)
+	assert_eq(_modifier_source_count(restored_stats, "blade_001"), 2)
+
+
 func test_tc_svc_10_status_restore_rebinds_source_for_tick_effects() -> void:
 	var probe := SourceProbeEffect.new()
 	content._defs["status.mark"] = _make_status("status.mark", "defense", -1.0)
@@ -265,9 +295,13 @@ func test_tc_svc_10_status_restore_rebinds_source_for_tick_effects() -> void:
 	(content._defs["status.mark"] as StatusEffectDefinition).effects_on_tick = [probe]
 	var source := _make_entity("Caster", "caster_001")
 	var entity := _make_entity("Target", "target_001")
+	_add_stats(entity)
 	var status := _add_status(entity)
+	var plain_node := Node.new()
+	plain_node.name = "PlainNode"
 	add_child_autofree(source)
 	add_child_autofree(entity)
+	add_child_autofree(plain_node)
 	assert_true(status.apply_status("status.mark", source, 1, 5.0))
 	var data := status.to_save_data()
 	var restored_entity := _make_entity("Restored", "target_002")
@@ -340,13 +374,19 @@ func test_tc_svc_16_stats_lowest_only_replaces_higher_with_lower_value() -> void
 	assert_eq((list[0] as StatModifier).value, -10.0)
 
 
-func _make_entity(entity_name: String, entity_id: String) -> Node:
-	var entity := Node.new()
+func _make_entity(entity_name: String, entity_id: String) -> EntityRoot:
+	var entity := EntityRoot.new()
 	entity.name = entity_name
 	var identity := EntityIdentity.new()
 	identity.name = "EntityIdentity"
 	identity.entity_id = entity_id
 	entity.add_child(identity)
+	var state_machine := Hfsm.new()
+	state_machine.name = "StateMachine"
+	entity.add_child(state_machine)
+	var receiver := CommandReceiver.new()
+	receiver.name = "CommandReceiver"
+	entity.add_child(receiver)
 	var components := Node.new()
 	components.name = "Components"
 	entity.add_child(components)
@@ -448,6 +488,16 @@ func _make_modifier_definition(
 	modifier.value = value
 	modifier.stacking_rule = StatModifierDefinition.StackingRule.STACK
 	return modifier
+
+
+func _modifier_source_count(stats: StatsComponent, source_id: String) -> int:
+	var count := 0
+	for raw_list in stats.modifiers_by_stat.values():
+		var list: Array = raw_list
+		for modifier in list:
+			if modifier is StatModifier and modifier.source_id == source_id:
+				count += 1
+	return count
 
 
 func _make_status(status_id: String, stat_id: String, value: float) -> StatusEffectDefinition:

@@ -21,6 +21,45 @@
 | 在主场景挂 `RunDirector`，配 `first_floor_room_pool` / `RoomRoot` 容器 | `DungeonGenerator` 生成线性图，`RunDirector` 串联房间、处理推进/失败 |
 | 调 `run_director.start_run()` | 加载首个房间，监听清空，自动进下一间 |
 
+## 本篇路径
+
+### Minimal path：只手动生成一个敌人
+
+1. 先创建 `EntityDefinition("enemy.field_beast")`，`scene_path` 指向 Recipe 06 的敌人场景，并加入 `ResourceDatabase`。
+2. 在测试房间放两个节点：`Enemies`（`Node2D`）和 `EntitySpawner`。
+3. 在房间脚本 `_ready()` 里写：
+
+```gdscript
+@onready var enemies_root: Node2D = $Enemies
+@onready var spawner: EntitySpawner = $EntitySpawner
+
+func _ready() -> void:
+    spawner.spawn_entity("enemy.field_beast", enemies_root, Vector2(160, 96))
+```
+
+4. 运行房间，看到一只敌人出现在 `Enemies` 下并带有 `EntityIdentity.definition_id = "enemy.field_beast"`，说明手动刷怪路径完成。
+
+### Standard path：房间里的敌人仍按自己的 AI 命令行动
+
+1. 确认敌人场景自带 `SimpleAIEnemyBrain`、`CommandReceiver` 和 Idle / Move / Attack state。
+2. `RoomController` 或手动 spawner 只负责实例化敌人，不要在房间脚本里直接控制敌人移动和攻击。
+3. 敌人生成后，brain 自动找 `"player"` group 并给自己的 receiver 发 move / attack 命令。
+4. 房间脚本只订阅死亡事件或等 `RoomController.room_cleared`，验证重点是“敌人自己会动，房间只管清空”。
+
+### Advanced path：多房间 run 用 `RunDirector`
+
+1. 按步骤 2 创建至少一个 `RoomDefinition`，并把它加入 `ResourceDatabase`。
+2. 主场景放 `RunDirector` 和 `RoomRoot` 容器，Inspector 里配置 `first_floor_room_pool = ["room.combat_a"]`、`room_root_path = "../RoomRoot"`、玩家路径或玩家 group。
+3. 在主场景 `_ready()` 里调用：
+
+```gdscript
+run_director.run_finished.connect(func(reason: String): print("run finished: ", reason))
+run_director.start_run()
+```
+
+4. 运行后 `RunDirector` 加载房间，`RoomController` 按 `enemy_spawn_ids` 刷怪。
+5. 杀光房间敌人后进入下一房间；玩家死亡则触发失败。
+
 ## 步骤
 
 ### 步骤 1：为敌人创建 EntityDefinition
@@ -125,9 +164,9 @@ func _ready() -> void:
 
 ### 步骤 6：房间清空如何推进（无需写代码，理解时序）
 
-1. 玩家击杀房间里的敌人 → `HealthComponent.die()` → `EventService.emit_entity_died()`
+1. 玩家击杀房间里的敌人 → `HealthComponent.die()` → 广播 `CombatEvents.entity_died` 领域事件
 2. `RoomController._on_entity_died()` 从 `active_enemies` 移除该敌人 → `check_clear_condition()`
-3. `active_enemies` 空了 → `runtime.cleared = true` → `generate_reward()`（reward 池空 → 空数组）→ `room_cleared.emit()` + `EventService.emit_room_cleared()`
+3. `active_enemies` 空了 → `runtime.cleared = true` → `generate_reward()`（reward 池空 → 空数组）→ `room_cleared.emit()` + `WorldEvents.room_cleared` 领域事件
 4. `RunDirector.on_room_cleared()` 发现 reward 选项为空 → `current_room_index += 1` → `enter_next_room()`
 5. 走完最后一个房间 → `enter_next_room()` 取不到房间 → `complete_run()` → `run_finished("completed")`
 
@@ -138,6 +177,35 @@ func _ready() -> void:
 3. 清空敌人 → 自动加载下一个房间（`Entering room: ...` 再次打印，旧房间被 `queue_free`）
 4. 清空全部 3 个房间 → `Run finished: completed`
 5. 中途让玩家死亡 → `Run finished: failed:player_died`
+
+## 字段参考
+
+### EntityDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `entity_definition_id` | String | ContentService 注册用的稳定 id；`enemy_spawn_ids` 引用它，spawn 后写入 `EntityIdentity.definition_id` | 必填，全局唯一（见步骤 1）|
+| `display_name` | String = "" | UI 显示名，不参与注册 | 见步骤 1 |
+| `scene_path` | String = "" | 实体场景路径（`res://...tscn`），`EntitySpawner` 按它实例化 | 必填（见步骤 1）|
+| `default_faction` | String = "neutral" | spawn 时写入 `EntityIdentity.faction`，决定敌友判定与 hitbox 过滤 | 敌人 `"enemy"`（见步骤 1）|
+| `tags` | Array[String] = [] | 标签集合，供条件筛选、事件追踪、UI 分组 | 见步骤 1 |
+| `base_stats` | Dictionary = {} | `{stat_id: 初始值}`；spawn 时覆盖 `StatsComponent` 基础值 | 见步骤 1 |
+| `starting_ability_ids` | Array[String] = [] | spawn 时注册进该实体 `AbilityController` 的技能 id；每项需已入库 | 敌人要放技能时（配合 [Recipe 05](05_ability.md)）|
+
+死亡掉落不配置在 `EntityDefinition` 上；见 [Recipe 22](22_enemy_death_loot.md) 用 `DeathLootRuleDefinition` 把实体死亡事件映射到掉落表。
+
+### RoomDefinition
+
+| 字段 | 类型/默认 | 含义 | 什么时候改 |
+|------|----------|------|-----------|
+| `room_id` | String | ContentService 注册用的稳定 id；`first_floor_room_pool` 引用它 | 必填，全局唯一（见步骤 2）|
+| `scene_path` | String = "" | 房间场景路径，`RoomLoader` 按它实例化 | 必填（见步骤 2）|
+| `room_type` | String = "combat" | 房间类型字符串（`combat` / `shop` / `event`…），由游戏内容约定语义 | 做非战斗房间时 |
+| `difficulty_rating` | int = 1 | 难度等级。**mkit 内置生成器不读取**——`DungeonGenerator.generate_linear()` 只做有放回随机；供你的选房/缩放逻辑使用（如按楼层过滤房间池、按难度加成敌人属性）| 自写选房算法时 |
+| `size` | Vector2i = (1, 1) | 房间逻辑尺寸。**mkit 不读取**，供布局/地图/生成约束使用 | 自写布局算法时 |
+| `tags` | Array[String] = [] | 标签集合。**mkit 不读取**，供条件筛选与自定义房间池过滤 | 自写选房算法时 |
+| `enemy_spawn_ids` | Array[String] = [] | 进房时 spawn 的 `EntityDefinition` id 列表，重复 id = 多只；按 `spawn_positions` 顺序落点 | 见步骤 2 |
+| `reward_pool_ids` | Array[String] = [] | 清房后供三选一抽取的 `RewardDefinition` 或奖励池 id；空 = 直接进下一间 | 本篇留空，[Recipe 08](08_loot_and_rewards.md) 填上 |
 
 ## 常见错误
 
@@ -152,8 +220,9 @@ func _ready() -> void:
 
 ## 延伸阅读
 
-- [RunDirector ref](../ref/modules/RunDirector.md) — start_run / enter_next_room / select_reward / fail_run
-- [RoomController ref](../ref/modules/RoomController.md) — spawn_enemies / check_clear_condition / generate_reward
-- [EntitySpawner ref](../ref/modules/EntitySpawner.md) — spawn_entity 注入身份与属性
+- [RunDirector ref](../generated/html/classes/RunDirector.html) — start_run / enter_next_room / select_reward / fail_run
+- [RoomController ref](../generated/html/classes/RoomController.html) — spawn_enemies / check_clear_condition / generate_reward
+- [EntitySpawner ref](../generated/html/classes/EntitySpawner.html) — spawn_entity 注入身份与属性
 - [pipeline.md — Room / Run](../pipeline.md#18-room--run)
 - [cookbook/08_loot_and_rewards.md](08_loot_and_rewards.md) — 房间清空后弹出奖励选择
+- [cookbook/22_enemy_death_loot.md](22_enemy_death_loot.md) — 杀死敌人按规则掉落

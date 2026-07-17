@@ -3,6 +3,7 @@ extends GutTest
 
 const SCENE_TARGET_PATH := "res://test/integration/tmp_mkit_int_scene_router_target.tscn"
 const MODAL_SCREEN_PATH := "res://test/integration/tmp_mkit_int_modal_screen.tscn"
+const SAVE_PATH := "/tmp/mkit_ui_interaction_ai_scene_integration_save.json"
 
 
 class RecordingReceiver:
@@ -25,7 +26,7 @@ class EffectInteractable:
 	func _interact_impl(context: GameplayContext) -> bool:
 		call_count += 1
 		last_context = context
-		var executor := ServiceRegistry.get_service("effects") as EffectService
+		var executor := ServiceRegistry.get_port("effects") as EffectService
 		if executor == null:
 			return false
 		var results := executor.execute_many(effects, context, true)
@@ -39,12 +40,13 @@ func after_each() -> void:
 	_cleanup_current_scene()
 	IntTestHelpers.remove_file(SCENE_TARGET_PATH)
 	IntTestHelpers.remove_file(MODAL_SCREEN_PATH)
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 
 
-func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
+func test_tc_int_ui_01_enemy_brain_issues_command_to_receiver() -> void:
 	_boot_runtime()
-	var router := ServiceRegistry.get_service("commands") as CommandService
+	var router := ServiceRegistry.get_port("commands") as CommandService
 	assert_not_null(router)
 
 	var world := Node2D.new()
@@ -70,7 +72,7 @@ func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
 	assert_eq(receiver.last_command.source_id, "enemy.int.ai")
 	assert_eq(receiver.last_command.target_id, "enemy.int.ai")
 	assert_eq(receiver.last_command.payload["target"], player)
-	assert_signal_emitted(router, "command_dispatched")
+	assert_signal_not_emitted(router, "command_dispatched")
 	assert_signal_not_emitted(router, "command_failed")
 
 	player.global_position = Vector2(96.0, 0.0)
@@ -84,8 +86,9 @@ func test_tc_int_ui_01_enemy_brain_dispatches_command_to_receiver() -> void:
 
 func test_tc_int_ui_02_interaction_executes_interactable_effects() -> void:
 	_boot_runtime()
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	assert_not_null(effects)
+	effects.trace_enabled = true
 
 	var world := Node2D.new()
 	world.name = "World"
@@ -125,7 +128,7 @@ func test_tc_int_ui_02_interaction_executes_interactable_effects() -> void:
 func test_tc_int_ui_03_scene_router_emits_success_and_failure_paths() -> void:
 	_boot_runtime()
 	_save_plain_scene(SCENE_TARGET_PATH, "SceneRouterTarget")
-	var router := ServiceRegistry.get_service("scenes") as SceneService
+	var router := ServiceRegistry.get_port("scenes") as SceneService
 	assert_not_null(router)
 
 	watch_signals(router)
@@ -153,7 +156,7 @@ func test_tc_int_ui_03_scene_router_emits_success_and_failure_paths() -> void:
 func test_tc_int_ui_04_modal_ui_pauses_and_closes_to_resume_time() -> void:
 	_boot_runtime()
 	_save_control_scene(MODAL_SCREEN_PATH, "ModalScreen")
-	var time := ServiceRegistry.get_service("time") as TimeService
+	var time := ServiceRegistry.get_port("time") as TimeService
 	var ui := _make_ui_manager({"modal.int.pause": MODAL_SCREEN_PATH})
 	assert_not_null(time)
 	assert_not_null(ui)
@@ -180,75 +183,62 @@ func test_tc_int_ui_05_ui_manager_registers_ui_service() -> void:
 	await get_tree().process_frame
 
 	assert_true(ServiceRegistry.has_service("ui"))
-	assert_eq(ServiceRegistry.get_service("ui"), ui)
+	assert_eq(ServiceRegistry.get_port("ui"), ui)
 
 
-func _boot_runtime() -> GameBootstrap:
-	var bootstrap := GameBootstrap.new()
+func _boot_runtime() -> ModuleBootstrap:
+	var bootstrap := ModuleBootstrap.new()
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
 	return bootstrap
 
 
 func _make_ai_target() -> Node2D:
-	var player := Node2D.new()
+	var player := IntTestHelpers.make_health_entity("Player", "player.int.ai", 100.0)
 	player.name = "Player"
 	player.global_position = Vector2(24.0, 0.0)
 	player.add_to_group("player")
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "player.int.ai"
-	player.add_child(identity)
-	IntTestHelpers.assign_owner(player, player)
 	return player
 
 
 func _make_ai_enemy() -> Node2D:
-	var enemy := Node2D.new()
-	enemy.name = "Enemy"
+	var enemy := IntTestHelpers.make_entity("Enemy", "enemy.int.ai")
 	enemy.global_position = Vector2.ZERO
-
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	identity.entity_id = "enemy.int.ai"
-	enemy.add_child(identity)
-
+	var old_receiver := enemy.get_node("CommandReceiver") as CommandReceiver
+	if old_receiver != null:
+		enemy.remove_child(old_receiver)
+		old_receiver.free()
 	var receiver := RecordingReceiver.new()
 	receiver.name = "CommandReceiver"
+	receiver.receiver_id = "enemy.int.ai"
+	receiver.auto_register = true
 	enemy.add_child(receiver)
-
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	enemy.add_child(controllers)
-
 	var brain := SimpleAIEnemyBrain.new()
 	brain.name = "SimpleAIEnemyBrain"
 	brain.enabled = false
 	brain.attack_range = 48.0
 	brain.detection_range = 160.0
+	var controllers := enemy.get_node("Controllers") as Node
 	controllers.add_child(brain)
-
 	IntTestHelpers.assign_owner(enemy, enemy)
 	return enemy
 
 
 func _make_interactor_entity() -> Node2D:
-	var player := Node2D.new()
+	var player := IntTestHelpers.make_entity("Interactor", "interactor.int", [])
 	player.name = "Interactor"
 	player.global_position = Vector2.ZERO
-
-	var components := Node.new()
-	components.name = "Components"
-	player.add_child(components)
-
-	var interaction := InteractionComponent.new()
-	interaction.name = "InteractionComponent"
+	var components := player.get_node("Components") as Node
+	var interaction := components.get_node_or_null("InteractionComponent") as InteractionComponent
+	if interaction == null:
+		interaction = InteractionComponent.new()
+		interaction.name = "InteractionComponent"
+		components.add_child(interaction)
+		IntTestHelpers.add_circle_collision_shape(interaction, 16.0)
 	interaction.collision_layer = 1
 	interaction.collision_mask = 2
 	interaction.monitoring = true
 	interaction.monitorable = true
-	components.add_child(interaction)
-	IntTestHelpers.add_circle_collision_shape(interaction, 16.0)
-
 	IntTestHelpers.assign_owner(player, player)
 	return player
 
@@ -257,7 +247,6 @@ func _make_interactable_entity() -> Node2D:
 	var target := Node2D.new()
 	target.name = "InteractableTarget"
 	target.global_position = Vector2.ZERO
-
 	var area := Area2D.new()
 	area.name = "InteractionArea"
 	area.collision_layer = 2
@@ -266,12 +255,10 @@ func _make_interactable_entity() -> Node2D:
 	area.monitorable = true
 	target.add_child(area)
 	IntTestHelpers.add_circle_collision_shape(area, 16.0)
-
 	var interactable := EffectInteractable.new()
 	interactable.name = "Interactable"
 	interactable.interaction_id = "interactable.int.effect"
 	area.add_child(interactable)
-
 	IntTestHelpers.assign_owner(target, target)
 	return target
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check docs drift against source files and docs/index.html navigation."""
+"""Check docs links, navigation, cookbook ownership, and stale demo paths."""
 
 from __future__ import annotations
 
@@ -10,17 +10,79 @@ from urllib.parse import unquote, urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
+ADDON = ROOT / "addons" / "mkit"
 DOCS = ROOT / "docs"
 INDEX = DOCS / "index.html"
-ADDON = ROOT / "addons" / "mkit"
-
-CLASS_NAME_RE = re.compile(r"^class_name\s+([A-Za-z_][A-Za-z0-9_]*)\b", re.MULTILINE)
+EVENT_PAYLOADS = DOCS / "event_payloads.md"
 DIRECT_HREF_RE = re.compile(r"href:\s*['\"]([^'\"]+\.md)['\"]")
-QUOTED_STRING_RE = re.compile(r"['\"]([^'\"]+)['\"]")
 MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]\n]*\]\(([^)\n]+)\)")
 HTML_HREF_RE = re.compile(r"<a\b[^>]*\bhref=['\"]([^'\"]+)['\"]", re.IGNORECASE)
 RECIPE_OWNERSHIP_RE = re.compile(r"^##\s+你负责 / mkit 负责\s*$", re.MULTILINE)
 DEMO_PATH_RE = re.compile(r"(?:res://)?game/demo/")
+EVENT_CONST_RE = re.compile(r'^const\s+[A-Z][A-Z0-9_]*\s*(?::\s*String)?\s*:?=\s*"([^"]+)"', re.MULTILINE)
+
+SYNTHETIC_PUBLIC_EVENTS = {
+    "item_acquired",
+    "zone_entered",
+}
+EVENT_PAYLOAD_KEYS = {
+    "damage_applied": (
+        "base_amount",
+        "final_amount",
+        "damage_type",
+        "element_type",
+        "critical",
+        "evaded",
+        "blocked",
+        "lethal",
+        "applied_status_effects",
+        "trace",
+        "result",
+    ),
+    "entity_died": (
+        "entity_id",
+        "entity_ref",
+        "killer_id",
+        "killer_ref",
+        "tags",
+        "faction",
+        "definition_id",
+        "killer_tags",
+        "killer_faction",
+        "killer_definition_id",
+    ),
+    "dialogue_started": ("dialogue_id",),
+    "dialogue_ended": ("dialogue_id",),
+    "npc_talked": ("npc_id",),
+    "inventory_changed": ("owner_id", "item_id", "quantity", "change_type"),
+    "reward_selected": ("reward_id",),
+    "loot_dropped": ("drop",),
+    "quest_accepted": ("quest_id",),
+    "quest_objective_advanced": ("quest_id", "objective_id", "current", "required"),
+    "quest_completed": ("quest_id",),
+    "quest_turned_in": ("quest_id",),
+    "enemy_killed": ("entity_id", "tags", "faction", "definition_id"),
+    "item_acquired": ("owner_id", "item_id", "quantity", "change_type", "amount"),
+    "item_purchased": ("shop_id", "item_id", "quantity"),
+    "item_sold": ("shop_id", "item_id", "quantity"),
+    "room_cleared": (),
+    "zone_changed": ("from_zone_id", "to_zone_id"),
+    "zone_entered": ("zone_id",),
+    "run_started": ("seed",),
+    "run_finished": ("result",),
+}
+SHORT_PATH_NAV_HREFS = {
+    "readme.md",
+    "concepts.md",
+    "pipeline.md",
+    "cookbook/index.md",
+}
+SHORT_PATH_MARKERS = {
+    DOCS / "concepts.md": ("Minimal path", "Standard path", "Advanced path"),
+    DOCS / "cookbook" / "index.md": ("Minimal path", "Standard path", "Advanced path"),
+    DOCS / "pipeline.md": ("Minimal path", "Standard path", "Advanced path"),
+    DOCS / "readme.md": ("标准管线与短路径", "CommandService.dispatch()", "GameAction"),
+}
 
 
 def rel(path: Path) -> str:
@@ -141,30 +203,7 @@ def extract_nav_hrefs(issues: list[str]) -> set[str]:
     if not text:
         return set()
 
-    direct_hrefs = DIRECT_HREF_RE.findall(text)
-    hrefs: list[str] = list(direct_hrefs)
-
-    for layer in ("kernel", "modules"):
-        prefix = f"ref/{layer}"
-        marker = f"href: `{prefix}/${{c}}.md`"
-        marker_index = text.find(marker)
-        if marker_index == -1:
-            add_issue(issues, "nav", INDEX, f"missing computed NAV map for {prefix}")
-            continue
-
-        items_index = text.rfind("items: [", 0, marker_index)
-        if items_index == -1:
-            add_issue(issues, "nav", INDEX, f"cannot locate item array for {prefix}")
-            continue
-
-        body_start = text.find("[", items_index, marker_index)
-        body_end = text.find("]", body_start, marker_index)
-        if body_start == -1 or body_end == -1:
-            add_issue(issues, "nav", INDEX, f"cannot parse item array for {prefix}")
-            continue
-
-        class_names = QUOTED_STRING_RE.findall(text[body_start + 1 : body_end])
-        hrefs.extend(f"{prefix}/{class_name}.md" for class_name in class_names)
+    hrefs: list[str] = DIRECT_HREF_RE.findall(text)
 
     seen: set[str] = set()
     duplicates: set[str] = set()
@@ -179,8 +218,7 @@ def extract_nav_hrefs(issues: list[str]) -> set[str]:
     return set(hrefs)
 
 
-def check_nav_sync(issues: list[str]) -> None:
-    nav_hrefs = extract_nav_hrefs(issues)
+def check_nav_sync(issues: list[str], nav_hrefs: set[str]) -> None:
     if not nav_hrefs:
         return
 
@@ -194,66 +232,87 @@ def check_nav_sync(issues: list[str]) -> None:
         add_issue(issues, "nav", DOCS / path, "markdown file is not listed in NAV")
 
 
-def class_names_for_layer(layer: str, issues: list[str]) -> dict[str, Path]:
-    layer_root = ADDON / layer
-    classes: dict[str, Path] = {}
-
-    for gd_file in sorted(layer_root.rglob("*.gd")):
-        text = read_text(gd_file, issues, "ref")
+def collect_public_event_types(issues: list[str]) -> set[str]:
+    event_types: set[str] = set(SYNTHETIC_PUBLIC_EVENTS)
+    event_root = ADDON / "modules"
+    for path in sorted(event_root.rglob("*_events.gd")):
+        text = read_text(path, issues, "event")
         if not text:
             continue
-        match = CLASS_NAME_RE.search(text)
-        if match is None:
-            continue
-        class_name = match.group(1)
-        if class_name in classes:
+        event_types.update(match.group(1) for match in EVENT_CONST_RE.finditer(text))
+    return event_types
+
+
+def find_event_payload_row(text: str, event_type: str) -> str:
+    needle = f"`{event_type}`"
+    for line in text.splitlines():
+        if line.startswith("|") and needle in line:
+            return line
+    return ""
+
+
+def check_event_payload_reference(issues: list[str]) -> None:
+    text = read_text(EVENT_PAYLOADS, issues, "event")
+    if not text:
+        return
+
+    public_events = collect_public_event_types(issues)
+    for event_type in sorted(public_events):
+        if event_type not in EVENT_PAYLOAD_KEYS:
             add_issue(
                 issues,
-                "ref",
-                gd_file,
-                f"duplicate class_name {class_name}; already declared in {rel(classes[class_name])}",
+                "event",
+                EVENT_PAYLOADS,
+                f"missing checker payload key spec for public event {event_type}",
             )
-        classes[class_name] = gd_file
+            continue
 
-    return classes
+        row = find_event_payload_row(text, event_type)
+        if not row:
+            add_issue(
+                issues,
+                "event",
+                EVENT_PAYLOADS,
+                f"missing public event payload row for {event_type}",
+            )
+            continue
 
-
-def expected_ref_classes(issues: list[str]) -> dict[str, dict[str, Path]]:
-    expected = {
-        "kernel": class_names_for_layer("kernel", issues),
-        "modules": class_names_for_layer("modules", issues),
-    }
-
-    service_registry = ADDON / "kernel" / "services" / "service_registry.gd"
-    if service_registry.exists():
-        expected["kernel"].setdefault("ServiceRegistry", service_registry)
-
-    return expected
-
-
-def check_ref_coverage(issues: list[str]) -> None:
-    expected = expected_ref_classes(issues)
-
-    for layer, classes in expected.items():
-        ref_dir = DOCS / "ref" / layer
-        for class_name, source in sorted(classes.items()):
-            ref_path = ref_dir / f"{class_name}.md"
-            if not ref_path.exists():
+        keys = EVENT_PAYLOAD_KEYS[event_type]
+        if not keys:
+            if "none" not in row:
                 add_issue(
                     issues,
-                    "ref",
-                    source,
-                    f"missing ref page {rel(ref_path)} for class_name {class_name}",
+                    "event",
+                    EVENT_PAYLOADS,
+                    f"{event_type} row must mark payload keys as none",
+                )
+            continue
+
+        for key in keys:
+            if f"`{key}`" not in row:
+                add_issue(
+                    issues,
+                    "event",
+                    EVENT_PAYLOADS,
+                    f"{event_type} row is missing payload key {key}",
                 )
 
-        for ref_path in sorted(ref_dir.glob("*.md")):
-            class_name = ref_path.stem
-            if class_name not in classes:
+
+def check_short_path_navigation(issues: list[str], nav_hrefs: set[str]) -> None:
+    for href in sorted(SHORT_PATH_NAV_HREFS - nav_hrefs):
+        add_issue(issues, "path-nav", INDEX, f"NAV must expose short/advanced path doc: {href}")
+
+    for path, markers in SHORT_PATH_MARKERS.items():
+        text = read_text(path, issues, "path-nav")
+        if not text:
+            continue
+        for marker in markers:
+            if marker not in text:
                 add_issue(
                     issues,
-                    "ref",
-                    ref_path,
-                    f"no matching source class under addons/mkit/{layer}",
+                    "path-nav",
+                    path,
+                    f"missing short/advanced path marker: {marker}",
                 )
 
 
@@ -279,10 +338,12 @@ def check_no_demo_paths(issues: list[str]) -> None:
 
 def main() -> int:
     issues: list[str] = []
+    nav_hrefs = extract_nav_hrefs(issues)
 
     check_links(issues)
-    check_ref_coverage(issues)
-    check_nav_sync(issues)
+    check_nav_sync(issues, nav_hrefs)
+    check_short_path_navigation(issues, nav_hrefs)
+    check_event_payload_reference(issues)
     check_recipe_ownership_sections(issues)
     check_no_demo_paths(issues)
 
@@ -293,8 +354,9 @@ def main() -> int:
         return 1
 
     print(
-        "docs-check passed: links, ref coverage, NAV sync, and recipe ownership "
-        "sections are in sync; no game/demo paths are exposed."
+        "docs-check passed: links, NAV sync, and recipe ownership sections are "
+        "in sync; event payload docs and path navigation are covered; no game/demo "
+        "paths are exposed."
     )
     return 0
 

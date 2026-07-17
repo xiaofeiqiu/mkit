@@ -15,6 +15,7 @@ const REWARD_ITEM_ID := "item.int.reward"
 const REWARD_GOOD_ID := "reward.int.good"
 const REWARD_FILTERED_ID := "reward.int.filtered"
 const SPAWN_PROBE_SCRIPT := preload("res://test/integration/int_spawn_probe.gd")
+const SAVE_PATH := "/tmp/mkit_content_spawn_room_run_integration_save.json"
 
 var _current_scene_root: Node = null
 var _previous_current_scene: Node = null
@@ -38,6 +39,7 @@ func after_each() -> void:
 	IntTestHelpers.remove_file("%s.uid" % ENTITY_SCENE_PATH)
 	IntTestHelpers.remove_file(ROOM_SCENE_PATH)
 	IntTestHelpers.remove_file("%s.uid" % ROOM_SCENE_PATH)
+	IntTestHelpers.remove_file(SAVE_PATH)
 	IntTestHelpers.cleanup_service_registry()
 	_current_scene_root = null
 	_previous_current_scene = null
@@ -46,7 +48,8 @@ func after_each() -> void:
 func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_sets_transform() -> void:
 	_save_spawn_probe_scene()
 	var world := _make_current_scene_root("SpawnWorld")
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
+	bootstrap.save_path = SAVE_PATH
 	world.add_child(bootstrap)
 
 	var source := Node2D.new()
@@ -59,7 +62,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 	target.global_position = Vector2(96.0, 128.0)
 	world.add_child(target)
 
-	var effects := ServiceRegistry.get_service("effects") as EffectService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
 	assert_not_null(effects)
 
 	var source_effect := _make_spawn_effect(false)
@@ -73,6 +76,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 
 	assert_true(source_result.success)
 	assert_not_null(source_spawn)
+	assert_eq(source_result.payload.get("instance", null), source_spawn)
 	assert_eq(source_spawn.global_position, source.global_position)
 	assert_eq(source_spawn.get("direction"), Vector2.RIGHT)
 
@@ -86,6 +90,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 
 	assert_true(target_result.success)
 	assert_not_null(target_spawn)
+	assert_eq(target_result.payload.get("instance", null), target_spawn)
 	assert_eq(target_spawn.global_position, target.global_position)
 	assert_eq(target_spawn.get("direction"), Vector2.DOWN)
 
@@ -97,6 +102,7 @@ func test_tc_int_spawn_room_run_01_spawn_scene_effect_direct_loads_scene_and_set
 
 	assert_true(position_result.success)
 	assert_not_null(position_spawn)
+	assert_eq(position_result.payload.get("instance", null), position_spawn)
 	assert_eq(position_spawn.global_position, position_context.position)
 
 
@@ -104,8 +110,9 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	_save_entity_scene()
 	_save_room_scene()
 	var world := _make_current_scene_root("RunWorld")
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [_make_content_database()]
+	bootstrap.save_path = SAVE_PATH
 	world.add_child(bootstrap)
 	_replace_random_service()
 
@@ -124,7 +131,7 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	director.player_entity_id = PLAYER_ID
 	world.add_child(director)
 
-	var events := ServiceRegistry.get_service("events") as EventService
+	var events := ServiceRegistry.get_port("events") as EventService
 	assert_not_null(events)
 	watch_signals(director)
 	watch_signals(events)
@@ -140,7 +147,10 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	assert_eq(director.run_state.current_room_id, ROOM_ID)
 	assert_eq(director.run_state.room_history, [ROOM_ID])
 	assert_signal_emitted(director, "run_started")
-	assert_signal_emitted_with_parameters(events, "run_started", [director.run_state.run_id, 12345])
+	var evt_run_started_1 := DomainEventAsserts.last_event(events, "run_started")
+	assert_not_null(evt_run_started_1)
+	assert_eq(evt_run_started_1.source_id, director.run_state.run_id)
+	assert_eq(evt_run_started_1.payload.get("seed"), 12345)
 
 	var room := director.current_room_controller
 	assert_not_null(room)
@@ -167,17 +177,23 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	assert_eq(room.active_enemies.size(), 1)
 	assert_eq(room.runtime.active_enemy_ids.size(), 1)
 
-	var loot := LootService.new()
-	var loot_context := GameplayContext.new().with_source(enemy)
-	var loot_result := loot.roll_table(LOOT_TABLE_ID, loot_context)
-	assert_eq(loot_result.item_instances.size(), 1)
-	assert_eq(loot_result.item_instances[0].definition_id, LOOT_ITEM_ID)
-	assert_eq(loot_result.item_instances[0].quantity, 3)
-	assert_false(loot_result.item_instances[0].definition_id == FILTERED_LOOT_ITEM_ID)
+	var death_loot := ServiceRegistry.get_port("death_loot") as DeathLootService
+	assert_not_null(death_loot)
 
 	watch_signals(room)
 	var enemy_id := room.runtime.active_enemy_ids[0]
-	events.emit_entity_died(enemy_id, enemy)
+	events.emit_domain_event(CombatEvents.entity_died(enemy_id, enemy))
+
+	var evt_loot_dropped_2 := DomainEventAsserts.last_event(events, LootEvents.LOOT_DROPPED)
+	assert_not_null(evt_loot_dropped_2)
+	var drop := evt_loot_dropped_2.payload.get("drop") as LootDropResult
+	assert_not_null(drop)
+	assert_eq(drop.rule_id, "death_loot.int.enemy")
+	assert_eq(drop.loot_table_id, LOOT_TABLE_ID)
+	assert_eq(drop.roll_result.item_instances.size(), 1)
+	assert_eq(drop.roll_result.item_instances[0].definition_id, LOOT_ITEM_ID)
+	assert_eq(drop.roll_result.item_instances[0].quantity, 3)
+	assert_false(drop.roll_result.item_instances[0].definition_id == FILTERED_LOOT_ITEM_ID)
 
 	assert_true(room.runtime.cleared)
 	assert_eq(room.active_enemies.size(), 0)
@@ -186,7 +202,9 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	assert_eq(room.runtime.reward_options[0].reward_id, REWARD_GOOD_ID)
 	assert_signal_emitted(room, "reward_ready")
 	assert_signal_emitted(room, "room_cleared")
-	assert_signal_emitted_with_parameters(events, "room_cleared", [room.runtime.room_runtime_id])
+	var evt_room_cleared_2 := DomainEventAsserts.last_event(events, "room_cleared")
+	assert_not_null(evt_room_cleared_2)
+	assert_eq(evt_room_cleared_2.source_id, room.runtime.room_runtime_id)
 	assert_eq(director.run_state.status, "choosing_reward")
 	assert_signal_emitted(director, "choosing_reward")
 
@@ -194,23 +212,27 @@ func test_tc_int_spawn_room_run_02_run_room_entity_reward_and_loot_pipeline() ->
 	watch_signals(inventory)
 	director.select_reward(room.runtime.reward_options[0])
 
-	assert_signal_emitted_with_parameters(events, "reward_selected", [REWARD_GOOD_ID])
+	var evt_reward_selected_3 := DomainEventAsserts.last_event(events, "reward_selected")
+	assert_not_null(evt_reward_selected_3)
+	assert_eq(evt_reward_selected_3.payload.get("reward_id"), REWARD_GOOD_ID)
 	assert_signal_emitted(inventory, "item_added")
 	assert_not_null(inventory.find_item_by_definition(REWARD_ITEM_ID))
 	assert_true(director.run_state.reward_history.has(REWARD_GOOD_ID))
 	assert_eq(director.run_state.current_room_index, 1)
 	assert_eq(director.run_state.status, "completed")
 	assert_signal_emitted_with_parameters(director, "run_finished", ["completed"])
-	assert_signal_emitted_with_parameters(
-		events, "run_finished", [director.run_state.run_id, "completed"]
-	)
+	var evt_run_finished_1 := DomainEventAsserts.last_event(events, "run_finished")
+	assert_not_null(evt_run_finished_1)
+	assert_eq(evt_run_finished_1.source_id, director.run_state.run_id)
+	assert_eq(evt_run_finished_1.payload.get("result"), "completed")
 
 
 func test_tc_int_spawn_room_run_03_object_pool_acquire_release_roundtrip() -> void:
 	_save_spawn_probe_scene()
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
+	bootstrap.save_path = SAVE_PATH
 	add_child_autofree(bootstrap)
-	var pool := ServiceRegistry.get_service("pool") as PoolService
+	var pool := ServiceRegistry.get_port("pool") as PoolService
 	assert_not_null(pool)
 
 	var parent := Node2D.new()
@@ -267,6 +289,7 @@ func _make_content_database() -> ResourceDatabase:
 		_make_entity_definition(),
 		_make_room_definition(),
 		_make_loot_table(),
+		_make_death_loot_rule(),
 		_make_reward(REWARD_GOOD_ID, true),
 		_make_reward(REWARD_FILTERED_ID, false)
 	]
@@ -299,7 +322,6 @@ func _make_entity_definition() -> EntityDefinition:
 	definition.tags = ["int_enemy"]
 	definition.base_stats = {"max_hp": 44.0, "attack_power": 12.0}
 	definition.starting_ability_ids = [ENEMY_ABILITY_ID]
-	definition.loot_table_id = LOOT_TABLE_ID
 	return definition
 
 
@@ -321,6 +343,14 @@ func _make_loot_table() -> LootTableDefinition:
 	table.allow_empty = false
 	table.entries = [filtered, valid]
 	return table
+
+
+func _make_death_loot_rule() -> DeathLootRuleDefinition:
+	var rule := DeathLootRuleDefinition.new()
+	rule.rule_id = "death_loot.int.enemy"
+	rule.entity_definition_ids = [ENEMY_DEF_ID]
+	rule.loot_table_ids = [LOOT_TABLE_ID]
+	return rule
 
 
 func _make_loot_entry(
@@ -367,35 +397,11 @@ func _save_spawn_probe_scene() -> void:
 
 
 func _save_entity_scene() -> void:
-	var entity := Node2D.new()
+	var entity := IntTestHelpers.make_health_entity("Enemy", "enemy.int.room", 10.0)
 	entity.name = "Enemy"
+	var abilities := IntTestHelpers.add_ability_controller(entity, [ENEMY_ABILITY_ID])
+	abilities.starting_ability_ids = [ENEMY_ABILITY_ID]
 
-	var identity := EntityIdentity.new()
-	identity.name = "EntityIdentity"
-	entity.add_child(identity)
-
-	var components := Node.new()
-	components.name = "Components"
-	entity.add_child(components)
-
-	var stats := StatsComponent.new()
-	stats.name = "StatsComponent"
-	components.add_child(stats)
-
-	var health := HealthComponent.new()
-	health.name = "HealthComponent"
-	health.current_hp = 10.0
-	components.add_child(health)
-
-	var controllers := Node.new()
-	controllers.name = "Controllers"
-	entity.add_child(controllers)
-
-	var abilities := AbilityController.new()
-	abilities.name = "AbilityController"
-	controllers.add_child(abilities)
-
-	IntTestHelpers.ensure_child(entity, "Presentation")
 	_save_packed_scene(entity, ENTITY_SCENE_PATH)
 
 

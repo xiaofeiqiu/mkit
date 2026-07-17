@@ -1,5 +1,5 @@
 class_name PlayerMoveState
-extends State
+extends HfsmState
 
 
 func physics_update(delta: float) -> void:

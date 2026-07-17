@@ -10,15 +10,16 @@ func after_each() -> void:
 
 
 func test_tc_int_quest_01_bootstrap_combat_reward_and_save_roundtrip() -> void:
-	var bootstrap := GameBootstrap.new()
+	var bootstrap := ModuleBootstrap.new()
 	bootstrap.resource_databases = [IntTestHelpers.make_quest_pipeline_database()]
+	bootstrap.save_path = _save_path
 	add_child_autofree(bootstrap)
 
-	var quest := ServiceRegistry.get_service("quest") as QuestService
-	var events := ServiceRegistry.get_service("events") as EventService
-	var effects := ServiceRegistry.get_service("effects") as EffectService
-	var progression := ServiceRegistry.get_service("progression") as ProgressionService
-	var save := ServiceRegistry.get_service("save") as SaveService
+	var quest := ServiceRegistry.get_port("quest") as QuestService
+	var events := ServiceRegistry.get_port("events") as EventService
+	var effects := ServiceRegistry.get_port("effects") as EffectService
+	var progression := ServiceRegistry.get_port("progression") as ProgressionService
+	var save := ServiceRegistry.get_port("save") as SaveService
 	assert_not_null(quest)
 	assert_not_null(events)
 	assert_not_null(effects)
@@ -65,12 +66,13 @@ func test_tc_int_quest_01_bootstrap_combat_reward_and_save_roundtrip() -> void:
 	assert_signal_emitted_with_parameters(
 		quest, "quest_turned_in", [IntTestHelpers.QUEST_BOUNTY_ID]
 	)
-	assert_signal_emitted_with_parameters(
-		events, "entity_died", [IntTestHelpers.QUEST_MARKED_ENEMY_ID, enemy]
-	)
-	assert_signal_emitted_with_parameters(
-		events, "quest_turned_in", [IntTestHelpers.QUEST_BOUNTY_ID]
-	)
+	var evt_entity_died_2 := DomainEventAsserts.last_event(events, "entity_died")
+	assert_not_null(evt_entity_died_2)
+	assert_eq(evt_entity_died_2.source_id, IntTestHelpers.QUEST_MARKED_ENEMY_ID)
+	assert_eq(evt_entity_died_2.payload.get("entity_ref"), enemy)
+	var evt_quest_turned_in_3 := DomainEventAsserts.last_event(events, "quest_turned_in")
+	assert_not_null(evt_quest_turned_in_3)
+	assert_eq(evt_quest_turned_in_3.source_id, IntTestHelpers.QUEST_BOUNTY_ID)
 	assert_signal_emitted(inventory, "item_added")
 	assert_signal_emitted_with_parameters(
 		progression, "currency_changed", [IntTestHelpers.QUEST_REWARD_CURRENCY_ID, 7]

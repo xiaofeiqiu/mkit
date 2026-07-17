@@ -85,8 +85,7 @@ func _try_hit(hurtbox: HurtboxComponent) -> void:
 
 
 func _resolve_combat(request: DamageRequest) -> DamageResult:
-	var resolver: CombatService = null
-	resolver = Mkit.combat()
+	var resolver := Mkit.combat()
 	if resolver == null:
 		resolver = CombatService.new()
 	return resolver.resolve(request)

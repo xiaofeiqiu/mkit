@@ -92,8 +92,9 @@ func get_cast_failure_reason(ability_id: String, context: GameplayContext) -> St
 	if not _has_enough_cost(definition):
 		return "insufficient_%s" % definition.cost_type
 	context.payload["ability_id"] = ability_id
-	if not ConditionEvaluator.evaluate_all(definition.conditions, context):
-		return ", ".join(ConditionEvaluator.collect_failures(definition.conditions, context))
+	var condition_failures := ConditionEvaluator.collect_failures(definition.conditions, context)
+	if not condition_failures.is_empty():
+		return ", ".join(condition_failures)
 	return ""
 
 

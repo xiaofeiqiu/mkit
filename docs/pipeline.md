@@ -845,7 +845,7 @@ if not save.save_game(get_tree().root):
 ## P3-14：Loot Roll
 
 **触发点：** `LootService.roll_table(table_id, ctx)`、`DeathLootService` 监听 `entity_died`，或 `generate_options(pool_ids, count, ctx)`
-**涉及系统：** `DeathLootService`、`DeathLootRuleDefinition`、`LootService`、`LootTableDefinition`、`LootEntry`、`LootRollResult`、`LootDropResult`、`RewardSystem`、`RandomService`
+**涉及系统：** `DeathLootService`、`DeathLootRuleDefinition`、`LootService`、`LootTableDefinition`、`LootEntry`、`LootRollResult`、`LootDropResult`、`RandomService`
 **输出：** 掉落物 `LootRollResult.item_instances`、死亡掉落事件 `LootEvents.LOOT_DROPPED`，或可选奖励 `Array[RewardOption]`
 
 ### 流程
@@ -868,7 +868,7 @@ flowchart TB
     classDef userOwned fill:#7ED321,color:#fff,stroke:#5A9A18
 ```
 
-**三个入口：** `roll_table` 直接走掉落表（权重 + 数量 + 可空）；`DeathLootService` 把死亡事件按 `DeathLootRuleDefinition` 映射到一个或多个掉落表，并只发 `LOOT_DROPPED` 事件，不负责交付；`generate_options` 走 `RewardSystem`，从 `RewardDefinition` 池**无放回**加权抽 `count` 个 `RewardOption`（房间清空奖励用这条）。`apply_selected(option, ctx)` 再执行选中项的 effect 链。
+**三个入口：** `roll_table` 直接走掉落表（权重 + 数量 + 可空）；`DeathLootService` 把死亡事件按 `DeathLootRuleDefinition` 映射到一个或多个掉落表，并只发 `LOOT_DROPPED` 事件，不负责交付；`LootService.generate_options` 从 `RewardDefinition` 池**无放回**加权抽 `count` 个 `RewardOption`（房间清空奖励用这条）。`apply_selected(option, ctx)` 再执行选中项的 effect 链。
 
 ### 关键代码
 
@@ -894,7 +894,7 @@ func _on_loot_dropped(event: DomainEvent) -> void:
 
 ### 相关文档
 
-→ [generated/html/classes/DeathLootService.html](generated/html/classes/DeathLootService.html) · [generated/html/classes/DeathLootRuleDefinition.html](generated/html/classes/DeathLootRuleDefinition.html) · [generated/html/classes/LootService.html](generated/html/classes/LootService.html) · [generated/html/classes/LootTableDefinition.html](generated/html/classes/LootTableDefinition.html) · [generated/html/classes/RewardSystem.html](generated/html/classes/RewardSystem.html)
+→ [generated/html/classes/DeathLootService.html](generated/html/classes/DeathLootService.html) · [generated/html/classes/DeathLootRuleDefinition.html](generated/html/classes/DeathLootRuleDefinition.html) · [generated/html/classes/LootService.html](generated/html/classes/LootService.html) · [generated/html/classes/LootTableDefinition.html](generated/html/classes/LootTableDefinition.html)
 → [cookbook/08_loot_and_rewards.md](cookbook/08_loot_and_rewards.md) · [cookbook/22_enemy_death_loot.md](cookbook/22_enemy_death_loot.md) · [cookbook/23_upgrade_choice_rewards.md](cookbook/23_upgrade_choice_rewards.md)
 
 ---

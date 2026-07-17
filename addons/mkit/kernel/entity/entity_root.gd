@@ -37,43 +37,38 @@ func get_command_receiver_node() -> CommandReceiver:
 
 ## 读取当前对象中的 `entity_id`；未找到时返回 null、空集合或该 API 的默认值。
 func get_entity_id() -> String:
-	if identity == null:
+	var resolved_identity := get_entity_identity()
+	if resolved_identity == null:
 		return name
-	return identity.entity_id
+	return resolved_identity.entity_id
 
 
 ## 读取当前对象中的 `component`；未找到时返回 null、空集合或该 API 的默认值。
 func get_component(component_name: Variant) -> Node:
-	if component_name is String or component_name is StringName:
-		return get_node_or_null("Components/%s" % str(component_name))
-	if component_name is Script:
-		var components := get_node_or_null("Components") as Node
-		if components == null:
-			return null
-		for child in components.get_children():
-			if child != null and child.get_script() == component_name:
-				return child
-	return null
+	return get_contract_node("Components", component_name)
 
 
 ## 读取当前对象中的 `controller`；未找到时返回 null、空集合或该 API 的默认值。
 func get_controller(controller_name: Variant) -> Node:
-	if controller_name is String or controller_name is StringName:
-		return get_node_or_null("Controllers/%s" % str(controller_name))
-	if controller_name is Script:
-		var controllers := get_node_or_null("Controllers") as Node
-		if controllers == null:
+	return get_contract_node("Controllers", controller_name)
+
+
+## 从约定容器中按节点名或脚本类型读取成员；Components、Controllers 和 Presentation 共用同一查找规则。
+func get_contract_node(container: String, member: Variant) -> Node:
+	if container.strip_edges() == "":
+		return null
+	if member is String or member is StringName:
+		return get_node_or_null("%s/%s" % [container, str(member)])
+	if member is Script:
+		var container_node := get_node_or_null(container) as Node
+		if container_node == null:
 			return null
-		for child in controllers.get_children():
-			if child != null and child.get_script() == controller_name:
+		for child in container_node.get_children():
+			if child != null and child.get_script() == member:
 				return child
 	return null
 
 
 ## 检查当前集合或对象是否包含 `contract_node`；缺失或空值时返回 false。
 func has_contract_node(container: String, member: Variant) -> bool:
-	if container == "Components":
-		return get_component(member) != null
-	if container == "Controllers":
-		return get_controller(member) != null
-	return false
+	return get_contract_node(container, member) != null

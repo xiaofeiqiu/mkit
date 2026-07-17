@@ -26,45 +26,32 @@ func _ready() -> void:
 
 ## 用 GameplayContext 和当前运行时状态判断是否允许 `add_item`；失败原因由对应查询 API 提供。
 func can_add_item(item: ItemInstance) -> bool:
+	return _get_add_block_reason(item) == ""
+
+
+func _get_add_block_reason(item: ItemInstance) -> String:
 	if item == null:
-		return false
+		return "null_item"
 	if item.quantity <= 0:
-		return false
+		return "invalid_quantity"
 	var definition := get_item_definition(item.definition_id)
 	if definition == null:
-		return false
+		return "missing_definition"
 	if definition.stackable and definition.max_stack <= 0:
-		return false
-	return _free_space_for(definition) >= item.quantity
+		return "invalid_stack_size"
+	if _free_space_for(definition) < item.quantity:
+		return "insufficient_space"
+	return ""
 
 
 ## 向当前集合或状态加入传入数据；重复项按该对象规则合并或覆盖。
 func add_item(item: ItemInstance) -> bool:
-	if item == null:
-		push_warning("InventoryController.add_item: item is null")
-		return false
-	if item.quantity <= 0:
-		push_warning("InventoryController.add_item: item quantity must be > 0")
+	var block_reason := _get_add_block_reason(item)
+	if block_reason != "":
+		_report_invalid_add(block_reason, item)
 		return false
 	var definition := get_item_definition(item.definition_id)
-	if definition == null:
-		return false
-	if definition.stackable and definition.max_stack <= 0:
-		push_error(
-			(
-				"InventoryController.add_item: stackable item has invalid max_stack <= 0: %s"
-				% item.definition_id
-			)
-		)
-		return false
 	var stack_size := definition.max_stack if definition.stackable else 1
-	if stack_size <= 0:
-		push_error(
-			"InventoryController.add_item: invalid stack size for item %s" % item.definition_id
-		)
-		return false
-	if _free_space_for(definition) < item.quantity:
-		return false
 	var remaining := item.quantity
 	var original_quantity := item.quantity
 	if definition.stackable:
@@ -98,6 +85,21 @@ func add_item(item: ItemInstance) -> bool:
 	item_added.emit(item)
 	_emit_inventory_changed(item, original_quantity, "added")
 	return true
+
+
+func _report_invalid_add(reason: String, item: ItemInstance) -> void:
+	match reason:
+		"null_item":
+			push_warning("InventoryController.add_item: item is null")
+		"invalid_quantity":
+			push_warning("InventoryController.add_item: item quantity must be > 0")
+		"invalid_stack_size":
+			push_error(
+				(
+					"InventoryController.add_item: stackable item has invalid max_stack <= 0: %s"
+					% item.definition_id
+				)
+			)
 
 
 func _free_space_for(definition: ItemDefinition) -> int:
@@ -182,8 +184,7 @@ func _emit_inventory_changed(
 	item: ItemInstance = null, quantity: int = 0, change_type: String = ""
 ) -> void:
 	inventory_changed.emit()
-	var events: EventService = null
-	events = Mkit.events()
+	var events := Mkit.events()
 	if events != null:
 		events.emit_domain_event(
 			InventoryEvents.inventory_changed(

@@ -17,15 +17,13 @@ const SERVICE_ID: String = "actions"
 ## ActionService 当前推进中的动作实例；动作完成或取消后会从列表移除。
 var active_actions: Array[GameAction] = []
 var _time: TimeService = null
-var _effects: EffectService = null
 
 
 func _on_services_ready() -> void:
 	_resolve_time_service()
-	_resolve_effect_service()
 
 
-## 启动 GameAction 并加入 active_actions；会注入 EffectService、连接取消信号、调用 action.start() 并发 `action_started`。
+## 启动 GameAction 并加入 active_actions；会连接取消信号、调用 action.start() 并发 `action_started`。
 ## action 或 context 为空时返回 null 且不改变队列。
 func start_action(action: GameAction, context: ActionContext) -> GameAction:
 	if action == null:
@@ -34,8 +32,6 @@ func start_action(action: GameAction, context: ActionContext) -> GameAction:
 	if context == null:
 		push_warning("ActionService.start_action: context is null")
 		return null
-	_resolve_effect_service()
-	action._effect_service = _effects
 	active_actions.append(action)
 	if not action.cancelled.is_connected(_on_action_cancelled):
 		action.cancelled.connect(_on_action_cancelled)
@@ -75,8 +71,3 @@ func _on_action_cancelled(action: GameAction, reason: String) -> void:
 func _resolve_time_service() -> void:
 	if _time == null and ServiceRegistry.has_service(TimeService.SERVICE_ID):
 		_time = ServiceRegistry.get_port(TimeService.SERVICE_ID) as TimeService
-
-
-func _resolve_effect_service() -> void:
-	if _effects == null and ServiceRegistry.has_service(EffectService.SERVICE_ID):
-		_effects = ServiceRegistry.get_port(EffectService.SERVICE_ID) as EffectService

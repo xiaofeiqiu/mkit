@@ -45,8 +45,7 @@ func _apply_impl(context: GameplayContext) -> EffectResult:
 
 
 func _resolve_combat(request: DamageRequest) -> DamageResult:
-	var resolver: CombatService = null
-	resolver = Mkit.combat()
+	var resolver := Mkit.combat()
 	if resolver == null:
 		resolver = CombatService.new()
 	return resolver.resolve(request)

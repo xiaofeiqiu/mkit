@@ -2,22 +2,11 @@
 
 This file is the index for generating section detailed designs from
 `udemy/README.md`. It gives the high-level flow and points to the detailed
-instruction files under `udemy/guide/`.
+instruction files under `references/guide/` in this skill folder.
 
 It is not a concrete section detailed design. Do not use this file to generate
 full section folders, full class contracts, lesson scripts, or implementation
 plans unless the user explicitly asks for a specific section design.
-
-## Progress Tracker
-
-- [x] Keep the main guide as a high-level index.
-- [x] Move source-of-truth and boundary rules into child instructions.
-- [x] Move generation workflow and output organization rules into child
-  instructions.
-- [x] Move MVP, dependency readiness, class design, implementation, and script
-  rules into child instructions.
-- [x] Keep source-derived coverage seeds in a dedicated child instruction file.
-- [ ] Generate concrete section detailed designs only when explicitly requested.
 
 ## Standard Generation Path
 
@@ -97,8 +86,15 @@ or support videos as generated artifacts.
 - Class `implementation.md` files must cover only the current video's MVP.
 - Treat MVP as section-local; defer later APIs as `future-section MVP` or
   `non-MVP`.
+- Write scripts for students who know Godot and programming basics, but are not
+  comfortable with professional architecture language yet.
+- Explain one core design idea first, define the key domain noun, and use
+  concrete source examples before adding analogies or formal architecture terms.
+- Public API scripts must explain what each public interface is used for before
+  explaining parameters, returns, or implementation details.
 - Put spoken explanations next to the design point or code snippet they
   explain. Do not create standalone read-aloud script files.
+- Put an explicit transition script between implementation steps.
 - Use flat FSM as the default teaching path unless the requested section
   explicitly teaches hierarchical state behavior.
 
@@ -107,9 +103,9 @@ or support videos as generated artifacts.
 For this index and the child guide files:
 
 ```bash
-grep -RIn '[[:blank:]]$' udemy/section-detail-design-guide.md udemy/guide
-rg -n "TO""DO|TB""D|game[/]demo" udemy/section-detail-design-guide.md udemy/guide
-git diff --check -- udemy/section-detail-design-guide.md udemy/guide
+grep -RIn '[[:blank:]]$' udemy/.agents/skills/section-detail-designer/SKILL.md udemy/.agents/skills/section-detail-designer/references
+rg -n "TO""DO|TB""D|game[/]demo" udemy/.agents/skills/section-detail-designer/SKILL.md udemy/.agents/skills/section-detail-designer/references
+git diff --check -- udemy/.agents/skills/section-detail-designer
 ```
 
 For generated section designs, use

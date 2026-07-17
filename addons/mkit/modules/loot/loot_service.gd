@@ -95,9 +95,70 @@ func _roll_quantity(entry: LootEntry, random: RandomService) -> int:
 func generate_options(
 	pool_ids: Array[String], count: int, context: GameplayContext
 ) -> Array[RewardOption]:
-	return RewardSystem.new().generate_options(pool_ids, count, context)
+	if count <= 0 or pool_ids.is_empty():
+		return []
+	var content := Mkit.content()
+	if content == null:
+		push_warning("LootService.generate_options: missing ContentService service")
+		return []
+	var ctx := GameplayContext.from_context(context)
+	var candidates: Array[RewardDefinition] = []
+	for id in pool_ids:
+		if id.strip_edges() == "":
+			continue
+		var definition := content.get_resource(id) as RewardDefinition
+		if definition != null and ConditionEvaluator.evaluate_all(definition.conditions, ctx):
+			candidates.append(definition)
+	var result: Array[RewardOption] = []
+	while result.size() < count and not candidates.is_empty():
+		var selected := _weighted_pick_reward(candidates)
+		if selected == null:
+			break
+		candidates.erase(selected)
+		result.append(_build_reward_option(selected))
+	return result
 
 
 ## 将传入 payload 或 effect 应用到目标对象；返回值、signal 或 event 表示实际结果。
 func apply_selected(option: RewardOption, context: GameplayContext) -> bool:
-	return RewardSystem.new().apply_selected(option, context)
+	if option == null:
+		return false
+	var ctx := GameplayContext.from_context(context)
+	var executor := Mkit.effects()
+	if executor == null:
+		executor = EffectService.new()
+	var results := executor.execute_many(option.effects, ctx, true)
+	for result in results:
+		if not result.success:
+			return false
+	var events := Mkit.events()
+	if events != null:
+		events.emit_domain_event(
+			LootEvents.reward_selected(
+				option.reward_id, ctx.source.name if ctx.source != null else ""
+			)
+		)
+	return true
+
+
+func _weighted_pick_reward(candidates: Array[RewardDefinition]) -> RewardDefinition:
+	if candidates.is_empty():
+		return null
+	var random: RandomService = Mkit.random()
+	if random == null:
+		return candidates[0]
+	var picked := random.weighted_pick(candidates) as RewardDefinition
+	return picked if picked != null else candidates[0]
+
+
+func _build_reward_option(definition: RewardDefinition) -> RewardOption:
+	var option := RewardOption.new()
+	if definition == null:
+		return option
+	option.reward_id = definition.reward_id
+	option.display_name = definition.display_name
+	option.description = definition.description
+	option.icon = definition.icon
+	option.rarity = definition.rarity
+	option.effects = definition.effects.duplicate()
+	return option

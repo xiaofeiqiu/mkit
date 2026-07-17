@@ -154,14 +154,16 @@ func test_tc_sm_13_unhandled_command_bubbles_to_parent() -> void:
 	var parent_state := _ParentHandlerState.new()
 	parent_state.state_id = "parent"
 	parent_state.initial_child_state_id = "child"
-	var child_state := HfsmState.new()
+	var child_state := _CommandHandlerState.new()
 	child_state.state_id = "child"
+	child_state.consumes = false
 	sm.root_state.add_child(parent_state)
 	parent_state.add_child(child_state)
 	parent_state.setup(sm, entity, sm.root_state)
 	sm.transition_to("root/parent")
 	sm.handle_command(GameCommand.create("cmd", "s", "t"))
 	assert_true(parent_state.handled)
+	assert_eq(child_state.received_count, 1)
 
 
 # --- find_state_by_path ---
@@ -238,17 +240,21 @@ class _GuardedState:
 class _CommandHandlerState:
 	extends HfsmState
 	var received: GameCommand = null
+	var received_count: int = 0
+	var consumes: bool = true
 
 	func handle_command(cmd: GameCommand) -> bool:
 		received = cmd
-		return true
+		received_count += 1
+		return consumes
 
 
 class _ParentHandlerState:
 	extends HfsmState
 	var handled: bool = false
 
-	func handle_command(_cmd: GameCommand) -> bool:
+	func handle_command(cmd: GameCommand) -> bool:
+		super.handle_command(cmd)
 		handled = true
 		return true
 

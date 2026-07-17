@@ -10,7 +10,6 @@ extends Node
 const SERVICE_ID: String = "content"
 var _by_id: Dictionary = {}
 var _by_type: Dictionary = {}
-var _resource_path_by_id: Dictionary = {}
 
 
 ## 读取传入配置、资源或存档 payload 并写入运行时表；无效输入会返回失败或被跳过。
@@ -33,8 +32,6 @@ func register_resource(res: Resource) -> void:
 		if not _by_type.has(type_name):
 			_by_type[type_name] = []
 		_by_type[type_name].append(res)
-	if res.resource_path != "":
-		_resource_path_by_id[content_id] = res.resource_path
 
 
 ## 读取当前对象中的 `resource`；未找到时返回 null、空集合或该 API 的默认值。

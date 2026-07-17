@@ -17,7 +17,7 @@
 | 你写的 | mkit 处理的 |
 |--------|------------|
 | 创建 3 个以上 `RewardDefinition`，每个代表一个升级选项 | `LootService.generate_options()` 按权重无放回抽出 `RewardOption` |
-| 在 `RewardDefinition.effects` 里放升级效果 | `RewardSystem.apply_selected()` 逐个执行 effect，全部成功后发 `reward_selected` |
+| 在 `RewardDefinition.effects` 里放升级效果 | `LootService.apply_selected()` 逐个执行 effect，全部成功后发 `reward_selected` |
 | 给房间的 `reward_pool_ids` 填 reward id | `RoomController` 清房后生成 reward options |
 | 监听 `RunDirector.choosing_reward` 并显示 UI | `RunDirector` 等玩家选择，选完后推进到下一房间 |
 | 可选：监听 `LootEvents.REWARD_SELECTED` 记录本局升级 | mkit 只发选择事件，不规定你的升级记录格式 |

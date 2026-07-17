@@ -17,8 +17,7 @@ func load_room(room_definition_id: String, container: Node) -> RoomController:
 	if room_definition_id.strip_edges() == "":
 		last_error = "empty_room_definition_id"
 		return null
-	var content: ContentService = null
-	content = Mkit.content()
+	var content := Mkit.content()
 	if content == null:
 		last_error = "missing_content_registry"
 		return null

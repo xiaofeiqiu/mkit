@@ -20,48 +20,19 @@ static func resolve_entity_root(node: Node) -> EntityRoot:
 
 ## 读取当前对象中的 `component`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_component(node: Node, id_or_type: Variant) -> Node:
-	var owner := resolve_entity_root(node)
-	if owner == null:
-		_warn_missing(node, "component", id_or_type)
-		return null
-	var component := owner.get_component(id_or_type)
-	if component == null:
-		_warn_missing(node, "component", id_or_type)
-	return component
+	return _get_member(node, "Components", "component", id_or_type, true)
 
 
 ## 读取当前对象中的 `controller`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_controller(node: Node, id_or_type: Variant) -> Node:
-	var owner := resolve_entity_root(node)
-	if owner == null:
-		_warn_missing(node, "controller", id_or_type)
-		return null
-	var controller := owner.get_controller(id_or_type)
-	if controller == null:
-		_warn_missing(node, "controller", id_or_type)
-	return controller
+	return _get_member(node, "Controllers", "controller", id_or_type, true)
 
 
 ## 读取当前对象中的 `contract_node`；未找到时返回 null、空集合或该 API 的默认值。
 static func get_contract_node(node: Node, container: String, id_or_type: Variant) -> Node:
 	if node == null or container.strip_edges() == "":
 		return null
-	var owner := resolve_entity_root(node)
-	if owner == null:
-		_warn_missing(node, "contract:%s" % container, id_or_type)
-		return null
-	if id_or_type is String or id_or_type is StringName:
-		return owner.get_node_or_null("%s/%s" % [container, str(id_or_type)])
-	if id_or_type is Script:
-		var container_node := owner.get_node_or_null(container) as Node
-		if container_node == null:
-			_warn_missing(node, "contract:%s" % container, id_or_type)
-			return null
-		for child in container_node.get_children():
-			if child != null and child.get_script() == id_or_type:
-				return child
-	_warn_missing(node, "contract:%s" % container, id_or_type)
-	return null
+	return _get_member(node, container, "contract:%s" % container, id_or_type, false)
 
 
 ## 读取当前对象中的 `identity`；未找到时返回 null、空集合或该 API 的默认值。
@@ -118,6 +89,24 @@ static func has_contract_node(node: Node, container: String, id_or_type: Variant
 	if owner == null:
 		return false
 	return get_contract_node(owner, container, id_or_type) != null
+
+
+static func _get_member(
+	node: Node,
+	container: String,
+	contract_kind: String,
+	id_or_type: Variant,
+	warn_if_missing: bool
+) -> Node:
+	var owner := resolve_entity_root(node)
+	if owner == null:
+		if warn_if_missing:
+			_warn_missing(node, contract_kind, id_or_type)
+		return null
+	var member := owner.get_contract_node(container, id_or_type)
+	if member == null and warn_if_missing:
+		_warn_missing(node, contract_kind, id_or_type)
+	return member
 
 
 static func _warn_missing(node: Node, contract_kind: String, id_or_type: Variant) -> void:

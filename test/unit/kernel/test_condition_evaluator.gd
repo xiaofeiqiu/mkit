@@ -39,6 +39,10 @@ func test_tc_cond_02_evaluate_all_stops_on_first_failure() -> void:
 	assert_false(ConditionEvaluator.evaluate_all(conditions, GameplayContext.new()))
 	assert_eq(failing.calls, 1)
 	assert_eq(skipped.calls, 0)
+	var effect := GameEffect.new()
+	effect.conditions = [failing]
+	effect.apply(GameplayContext.new())
+	assert_eq(failing.calls, 2)
 
 
 func test_tc_cond_03_collect_failures_returns_reasons_for_failed_conditions_only() -> void:

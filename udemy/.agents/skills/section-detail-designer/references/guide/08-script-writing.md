@@ -18,13 +18,45 @@ Scripts must be embedded where the teacher needs them:
 Scripts must be simple enough to read while recording. They should sound like a
 teacher explaining code live, not like API documentation.
 
+## Target Student Level
+
+Write scripts for students who are more than absolute beginners, but less than
+intermediate.
+
+Assume students can:
+
+- read basic GDScript;
+- understand nodes, resources, scenes, exported fields, and signals;
+- follow one small class at a time.
+
+Do not assume students already understand:
+
+- service registry;
+- facade;
+- composition root;
+- event bus;
+- payload;
+- dependency injection;
+- lifecycle hook;
+- decoupling.
+
+When one of these terms is useful, explain it with a simple analogy or concrete
+project action before using it as a formal term.
+
 Rules:
 
 - Write generated scripts in English.
 - Use simple, direct language first.
 - Use conversational tone.
+- In `Design Script`, identify one core design idea before explaining fields,
+  functions, or implementation details.
+- Define the key domain noun for the class before using it heavily. For example,
+  define what a service is before explaining `ServiceRegistry`.
+- Use one or two concrete examples from current source or the section goal
+  before using abstract architecture language.
 - If a technical term is necessary, define it immediately.
 - Explain the term with a concrete example from the section.
+- Use an analogy only after the core mechanism and concrete example are clear.
 - Prefer concrete runtime actions over abstract architecture language.
 - Start with the class responsibility.
 - Name the source path.
@@ -42,9 +74,11 @@ Rules:
 Generated scripts should sound like a clear teacher walking through code:
 
 - short spoken paragraphs;
+- simple words before professional terms;
 - plain English;
 - natural transitions between ideas;
 - concrete examples before abstract explanation;
+- analogies that support the real mechanism instead of replacing it;
 - direct references to what students can see in the snippet;
 - "we" language when walking through code together.
 
@@ -53,6 +87,9 @@ Avoid:
 - API-reference prose;
 - phrases like "this method is responsible for facilitating";
 - dense architecture words without examples;
+- professional summary phrases such as "centralizes dependency access",
+  "improves decoupling", or "encapsulates lifecycle orchestration" unless they
+  are immediately translated into plain language;
 - repeating code line by line without explaining why the line exists;
 - summaries so short they skip the key idea or important guard.
 
@@ -71,6 +108,31 @@ This method performs service registration and input validation for runtime
 dependency management.
 ```
 
+## Design Script Focus
+
+`Design Script` should explain the main design concept, not merely introduce
+the class name. For each class, choose one focus:
+
+- centralized read/write access;
+- intent message;
+- runtime state owner;
+- content definition;
+- executor service;
+- typed facade;
+- scene/component controller;
+- event publisher or listener.
+
+After choosing the focus, define the important noun and give concrete examples.
+For `ServiceRegistry`, the focus is centralized read/write access to services.
+A service is a shared runtime object with one job, such as `RandomService` for
+randomness, `SceneService` for changing scenes, `ContentService` for loaded
+definitions, or `EventService` for gameplay events. Only after that should the
+script talk about the class path, `extends`, collaborators, and API names.
+
+Avoid scripts that only say a class is "a front desk", "a manager", or "a
+coordinator". Those analogies can help, but they must be attached to the real
+mechanism students need to understand.
+
 ## Transition Rules
 
 Required transition points:
@@ -79,17 +141,24 @@ Required transition points:
   Video`.
 - Each class `design.md` must include `Transition To Implementation`.
 - Each `implementation.md` must start with `Opening transition`.
-- Each implementation step script should end with a short transition to the
-  next step unless it is the final check step.
+- Each implementation step must be followed by an explicit transition block
+  named `Transition to Step N:` unless the next block is `Next video
+  transition`.
 - Each class `implementation.md` must end with `Next video transition`.
+
+Transition blocks are part of the read-aloud script. They should not be hidden
+inside the previous paragraph. Use them to connect the student's mental model:
+"we now have X, so next we add Y."
 
 Good step-to-step transitions:
 
 ```text
+Transition to Step 2:
 Now that we have the storage, let's add the function that writes into it.
 ```
 
 ```text
+Transition to Step 3:
 Next, let's add the lookup side, so other code can read from this table.
 ```
 

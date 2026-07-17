@@ -47,9 +47,11 @@ For each important concept:
 
 ## High-Level Design Script
 
-<one or two short spoken paragraphs that introduce the section goal, the main
-concept, and the visible result in easy language. Do not explain each class in
-detail here. Move per-class explanation into that class folder's design.md.>
+<two or three short spoken paragraphs that introduce the section goal, the main
+concept, and the visible result in easy language. Start with an analogy or a
+concrete project situation, then connect it to the formal class names. Do not
+explain each class in detail here. Move per-class explanation into that class
+folder's design.md.>
 
 ## Transition To First Class Video
 
@@ -77,13 +79,18 @@ class-by-class teaching path.
 ## Script Boundary
 
 The high-level script is the teacher's opening concept explanation. It should be
-one or two short spoken paragraphs.
+two or three short spoken paragraphs.
 
 It should help students understand:
 
 - the section goal;
 - the main concept introduced by the section;
 - the visible runtime result students should expect.
+
+Write for students who know basic Godot and programming, but are not yet
+comfortable with professional architecture language. Use the simple idea first,
+then the formal word. For example, say "this is the startup checklist for the
+game" before saying "composition root".
 
 It may name required classes as a quick preview, but it must not explain each
 class in detail. Per-class explanations belong in the relevant

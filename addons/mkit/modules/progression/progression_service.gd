@@ -104,8 +104,7 @@ func get_definition(upgrade_id: String) -> UpgradeDefinition:
 func _apply_upgrade_effects(definition: UpgradeDefinition, context: GameplayContext) -> void:
 	if definition.effects.is_empty():
 		return
-	var executor: EffectService = null
-	executor = Mkit.effects()
+	var executor := Mkit.effects()
 	if executor == null:
 		return
 	var ctx := GameplayContext.from_context(context)

@@ -130,6 +130,22 @@ When creating a review, proposal, or planning document that contains follow-up
 items, include a `## Progress Tracker` section and keep it updated as items are
 resolved.
 
+## Local Skills
+
+Use `$section-detail-designer` for concrete section detailed designs,
+class-per-video course docs, high-level class design files, class `design.md`
+files, class `implementation.md` files, and embedded course scripts.
+
+That skill lives under:
+
+```text
+udemy/.agents/skills/section-detail-designer/
+```
+
+Its own guide files live inside the skill folder under `references/`. Do not
+maintain a second section-detail guide at `udemy/section-detail-design-guide.md`
+or `udemy/guide/`.
+
 ## Lesson Quality Bar
 
 Each lesson should state:

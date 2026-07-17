@@ -11,8 +11,10 @@ class StubContent:
 
 class _NeverCondition:
 	extends Condition
+	var calls: int = 0
 
 	func evaluate(_ctx: GameplayContext) -> bool:
+		calls += 1
 		return false
 
 
@@ -239,14 +241,16 @@ func test_tc_ab_16_cast_fails_when_no_resource_for_cost() -> void:
 
 
 func test_tc_ab_17_cast_fails_when_condition_false() -> void:
+	var condition := _NeverCondition.new()
 	var def := _make_ability("slam")
-	def.conditions = [_NeverCondition.new()]
+	def.conditions = [condition]
 	content._defs["slam"] = def
 	ctrl.register_ability("slam")
 	watch_signals(ctrl)
 	var result := ctrl.cast("slam", ctx)
 	assert_false(result)
 	assert_signal_emitted(ctrl, "ability_failed")
+	assert_eq(condition.calls, 1)
 
 
 func test_tc_ab_18_cast_succeeds_when_all_conditions_pass() -> void:

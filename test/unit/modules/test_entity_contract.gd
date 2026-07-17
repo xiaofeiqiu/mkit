@@ -3,6 +3,7 @@ extends GutTest
 
 func test_tc_ec_01_entity_root_resolves_contract_nodes() -> void:
 	var entity := _build_entity_root()
+	assert_eq(entity.get_entity_id(), "test.entity.001")
 	var query_node := entity.get_node("Components/HealthComponent")
 	var component := EntityContract.get_component(query_node, "HealthComponent") as Node
 	var controller := EntityContract.get_controller(query_node, "AbilityController") as Node
@@ -20,6 +21,10 @@ func test_tc_ec_01_entity_root_resolves_contract_nodes() -> void:
 	assert_eq(state_machine.name, "StateMachine")
 	assert_not_null(receiver)
 	assert_eq(receiver.name, "CommandReceiver")
+	assert_not_null(EntityContract.get_contract_node(query_node, "Presentation", "AnimationPlayer"))
+	assert_null(EntityContract.get_contract_node(query_node, "Presentation", "MissingNode"))
+	assert_false(EntityContract.has_contract_node(query_node, "Presentation", "MissingNode"))
+	assert_push_warning_count(0)
 
 
 func test_tc_ec_02_entity_root_resolves_script_components_and_controllers() -> void:

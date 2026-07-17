@@ -94,8 +94,7 @@ func _stat(stats: StatsComponent, stat_id: String, default_value: float) -> floa
 
 
 func _roll_chance(chance: float) -> bool:
-	var random: RandomService = null
-	random = Mkit.random()
+	var random := Mkit.random()
 	if random != null:
 		return random.randf() < chance
 	return randf() < chance

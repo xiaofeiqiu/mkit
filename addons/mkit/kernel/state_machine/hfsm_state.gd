@@ -53,11 +53,8 @@ func physics_update(delta: float) -> void:
 	pass
 
 
-## 处理命令的状态 hook；默认先交给 active_child，子类可覆写并返回 true 表示已消费。
+## 处理命令的状态 hook；默认不消费，子类可覆写并返回 true。叶子到根的冒泡由 Hfsm 统一负责。
 func handle_command(command: GameCommand) -> bool:
-	if active_child != null:
-		if active_child.handle_command(command):
-			return true
 	return false
 
 

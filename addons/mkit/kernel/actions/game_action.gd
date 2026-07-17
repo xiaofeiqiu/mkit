@@ -28,7 +28,6 @@ var on_start_effects: Array[GameEffect] = []
 var on_complete_effects: Array[GameEffect] = []
 ## 动作被取消时按顺序执行的效果列表。
 var on_cancel_effects: Array[GameEffect] = []
-var _effect_service: EffectService = null
 
 
 ## 绑定 ActionContext、重置 elapsed/finished/cancelled 状态，调用 `_on_start()`，并执行 on_start_effects 与动态 effects。
@@ -89,9 +88,9 @@ func _fire_effects(effects: Array[GameEffect]) -> void:
 
 
 func _get_effect_service() -> EffectService:
-	if _effect_service == null and ServiceRegistry.has_service(EffectService.SERVICE_ID):
-		_effect_service = ServiceRegistry.get_port(EffectService.SERVICE_ID) as EffectService
-	return _effect_service
+	if not ServiceRegistry.has_service(EffectService.SERVICE_ID):
+		return null
+	return ServiceRegistry.get_port(EffectService.SERVICE_ID) as EffectService
 
 
 func _resolve_effects(_ctx: ActionContext) -> Array[GameEffect]:

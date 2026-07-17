@@ -148,3 +148,15 @@ func test_tc_ar_12_services_ready_caches_time_for_scaled_delta() -> void:
 	runner.start_action(action, ActionContext.new())
 	runner._process(0.2)
 	assert_eq(action.last_delta, 0.5)
+
+
+func test_tc_ar_13_action_uses_current_effect_service() -> void:
+	ServiceRegistry.register_service(EffectService.SERVICE_ID, EffectService.new())
+	var action := NeverEndingAction.new()
+	action.on_complete_effects = [GameEffect.new()]
+	runner.start_action(action, ActionContext.new())
+	var current := EffectService.new()
+	current.trace_enabled = true
+	ServiceRegistry.replace_service(EffectService.SERVICE_ID, current)
+	action.complete()
+	assert_eq(current.recent_results.size(), 1)

@@ -1,7 +1,0 @@
-interface:
-  display_name: "Section Detail Designer"
-  short_description: "Generate mkit Udemy section detailed designs from the local guide."
-  default_prompt: "Use $section-detail-designer to generate a requested udemy section detailed design."
-
-policy:
-  allow_implicit_invocation: true

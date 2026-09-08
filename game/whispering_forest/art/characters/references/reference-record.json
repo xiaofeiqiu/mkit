@@ -1,0 +1,9 @@
+{
+  "reference_image": "/var/folders/y4/rwzljltx10v6qf6dww0ry69r0000gn/T/codex-clipboard-248f9e31-d99b-411f-b624-c7f97ca13c7d.png",
+  "reference_image_sha256": "57ad048a68898f6fb30f3cf74a7b1754480be57f6556857b9c5eff75d0b28f85",
+  "use": "Body proportions, clear costume masses, volumetric silhouette; no pixels used as game assets.",
+  "video": "/Users/dev/Movies/2026-09-06 10-44-13.mp4",
+  "video_observation": "720 decoded frames, luma YMIN 16 and YMAX 16–18: near-black; gait could not be observed.",
+  "staff_requirement": "Full-length upright staff, explicitly corrected by the user.",
+  "npc_requirement": "Static town NPCs."
+}

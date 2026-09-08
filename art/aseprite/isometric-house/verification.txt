@@ -1,0 +1,13 @@
+PASS: 256x240, 12 layers, RGBA alpha 0/255, 26451 painted / 34989 transparent pixels, bounds [16,26]-[240,221], PNG exact match
+hidden  00 · Backdrop (optional)
+visible 01 · Grass island / earth
+visible 02 · Cast shadow / garden path
+visible 03 · Stone foundation
+visible 04 · Plaster walls / gable
+visible 05 · Oak framing
+visible 06 · Windows / teal shutters
+visible 07 · Arched door / entry steps
+visible 08 · Roof / individual terracotta tiles
+visible 09 · Brick chimney
+visible 10 · Lantern / flower boxes
+visible 11 · Garden plants / finishing pixels

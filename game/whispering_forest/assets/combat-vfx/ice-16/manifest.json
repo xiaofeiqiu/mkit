@@ -1,0 +1,262 @@
+{
+	"clips": {
+		"ice": {
+			"anchor": "shared projected ground origin; constant canvas; no per-frame trim, scale or centre",
+			"aseprite_data": "res://game/whispering_forest/assets/combat-vfx/ice-16/aseprite.json",
+			"authoring": "res://game/whispering_forest/art/combat/ice-16/ice-spear-16.aseprite",
+			"bounds": [
+				[
+					[
+						107,
+						254,
+						163,
+						84
+					],
+					[
+						115,
+						258,
+						147,
+						75
+					],
+					[
+						122,
+						261,
+						130,
+						67
+					],
+					[
+						130,
+						266,
+						116,
+						59
+					],
+					[
+						139,
+						270,
+						102,
+						53
+					],
+					[
+						151,
+						277,
+						86,
+						43
+					],
+					[
+						155,
+						279,
+						78,
+						39
+					],
+					[
+						150,
+						237,
+						87,
+						83
+					],
+					[
+						147,
+						143,
+						93,
+						179
+					],
+					[
+						143,
+						57,
+						99,
+						267
+					],
+					[
+						139,
+						57,
+						106,
+						269
+					],
+					[
+						133,
+						53,
+						117,
+						275
+					],
+					[
+						129,
+						54,
+						126,
+						277
+					],
+					[
+						126,
+						59,
+						134,
+						274
+					],
+					[
+						140,
+						67,
+						104,
+						256
+					],
+					[
+						140,
+						79,
+						104,
+						245
+					]
+				]
+			],
+			"cell": 384.0,
+			"duration_seconds": 1.45,
+			"durations_ms": [
+				40.0,
+				40.0,
+				40.0,
+				40.0,
+				40.0,
+				40.0,
+				60.0,
+				60.0,
+				60.0,
+				110.0,
+				120.0,
+				140.0,
+				150.0,
+				170.0,
+				180.0,
+				160.0
+			],
+			"file": "res://game/whispering_forest/assets/combat-vfx/ice-16/ice.png",
+			"frame_sha256": [
+				"ebe83eedb4b2cbd1570f6a19c5286ca4b15a081cceec800f241594eb542125f6",
+				"bf07531a1a2da75a685a160f2b34fc1b73e23b1b21273a36dcf251b951dac0a8",
+				"7458c94e44a102daa46da56120a264fc2e470afc2bda5778b6b6f6b9eb820832",
+				"7bc617fb7735201ea6bce4e9b334508b1bb3f3bd22f7d52d61c03580e0a7156b",
+				"09d97c54c05a089ecfe6c0482f4cfec39a99dd10e7e00e3c0e1300385e900cd9",
+				"047c9f649be6b0db1b2b47cd0eebc5940f81c4b502dc8f472a14e71ee8dba4fd",
+				"3c78a7be26c797baef0c7ec3a08d1122a6aede84d36a186227ac9dc73eb72f5d",
+				"fda312615d8a7f12eaf86f92728aa7bb847d353c11a0b953741b5d18283ccbfc",
+				"95e4ca60a72235ab6fd44a2e634b4547e7c0458bf636a37a5a7a0a66c19518ba",
+				"143e68acfffadfa035c68d44102a19e69bc0fd08b096b1139b0d021205921840",
+				"d63ce63de69898c83e4822268ac7a6f10f48e8b7f6a76b2c852e1767a0732283",
+				"770769335c4584ef10cbebcf34cf27ad2dada85a3101fdd409afbbcdc8c28a69",
+				"55c2eed6e09a72eca2194bb5ea764da43d72550e24587463798883d1367e7ffa",
+				"45c5b3232c02d734c07bf0478b31fc284b750ec0d1d0d5f4afb77545739b4363",
+				"98d0fe6ef33286e95acbcd26952b2882d97c0b66d6895923bbf39a8831f5ccad",
+				"e1997ce5d55e1f1f8e7e7eb9f280b870911c17b33f8592ef944339fbb88d7431"
+			],
+			"frames": 16.0,
+			"heights_metres": [
+				0.0,
+				0.0,
+				0.0,
+				0.0,
+				0.0,
+				0.0,
+				0.1,
+				0.8,
+				2.0,
+				3.1,
+				3.1,
+				3.1,
+				3.1,
+				3.1,
+				3.1,
+				3.1
+			],
+			"peak_frame": 9.0,
+			"pivot": [
+				192.0,
+				297.817962646484
+			],
+			"runtime_scale": 0.5,
+			"sha256": "77b9fc0618f348f4cac5bc7a6ba007536425f4b32c50d8632cf809795333b205",
+			"times": [
+				0.0,
+				0.04,
+				0.08,
+				0.12,
+				0.16,
+				0.2,
+				0.24,
+				0.3,
+				0.36,
+				0.42,
+				0.53,
+				0.65,
+				0.79,
+				0.94,
+				1.11,
+				1.29
+			],
+			"variants": 1
+		}
+	},
+	"profile": {
+		"ambient_color": "e5eff8",
+		"ambient_energy": 0.42,
+		"azimuth_degrees": 45.0,
+		"camera_offset": [
+			12.0,
+			9.79795932769775,
+			12.0
+		],
+		"camera_target": [
+			0.0,
+			3.70000004768372,
+			0.0
+		],
+		"canvas": 2048.0,
+		"door_metres": 2.35,
+		"elevation_degrees": 30.0,
+		"exposure": 1.0,
+		"far": 100.0,
+		"fill_color": "d8e9ff",
+		"fill_energy": 0.16,
+		"fill_rotation": [
+			-30.0,
+			145.0,
+			0.0
+		],
+		"ground_shadow": "runtime_ground_layer",
+		"human_metres": 1.8371173,
+		"key_color": "fffaf1",
+		"key_energy": 1.2,
+		"key_rotation": [
+			-50.0,
+			-57.5,
+			0.0
+		],
+		"logical_units_per_metre": 32.0,
+		"model_self_shadow": true,
+		"msaa": 4.0,
+		"near": 0.1,
+		"output_color": "sRGB",
+		"pixels_per_metre": 90.5096679918781,
+		"projection": "orthographic",
+		"renderer": "forward_plus",
+		"runtime_scale": 0.5,
+		"sha256": "efca02c18801f93d44f7eb38db1a1706e32f794cc3f596bd6bf13895ec0bcb0b",
+		"shadow_bias": 0.025,
+		"shadow_distance": 48.0,
+		"shadow_normal_bias": 0.45,
+		"source": "res://game/whispering_forest/art/city/render_config.gd",
+		"ssao_intensity": 2.0,
+		"ssao_power": 1.3,
+		"ssao_radius": 1.2,
+		"storey_metres": 3.4,
+		"supersample": 2.0,
+		"tonemap": "linear",
+		"transparent": true,
+		"version": "bellwake-daylight-v3"
+	},
+	"sources": {
+		"res://game/whispering_forest/art/combat/ice-16/author_ice.lua": "c4ab5a85e5bac3dc70248ff790b8e681a12e767178cff6552068d3dff2743a20",
+		"res://game/whispering_forest/art/combat/ice-16/ice-spear-16.aseprite": "097711ca4ee141947138c0194f636014b580eb959e6f06bad2062f5c38a23828",
+		"res://game/whispering_forest/art/combat/ice_emerge.gdshader": "daed3d380be34dbe5da023cc220f11f2dcf86e4aa01b2a80315d3207ff3cf77e",
+		"res://game/whispering_forest/art/combat/ice_motion.gd": "d3bda7a56e8293538c89639820afc4b429f822173445149775c6a940662a59e4",
+		"res://game/whispering_forest/art/combat/ice_spear_16.gd": "a021456372353f2c1d09df64fe67e4665d06a3151d1b79aea5678c4ebafadfe1",
+		"res://game/whispering_forest/assets/combat-vfx/ice-16/aseprite.json": "c9f80d083cb8bc8a328fa6635894165e6c7efb8efbd2f67150ec6952871be5f8",
+		"res://game/whispering_forest/tools/bake_ice_16.gd": "e92492ddfd8e74388da540b5dd436ddd11f5e8b1beff4dfe8bb8d57a67916205",
+		"res://game/whispering_forest/tools/register_ice_16.gd": "5f6b7d80c6d646dd4123d9b2dd8abbd4beceaaad80ade96a1e12ce142544df95"
+	},
+	"tool": "Aseprite 1.3.18.3-dev"
+}

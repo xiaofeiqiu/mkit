@@ -1,0 +1,13 @@
+{
+  "origin": "User-supplied recording, explicitly assigned to level-one ice; not original synthesis.",
+  "original_filename": "cgefc15.wav",
+  "source": "art/audio/ice-v6/user-supplied/ice-level-1-source.wav",
+  "source_sha256": "50e492d4319bd404fdedcffdc8dbc47416f4e7b6b20b9f6270d191fbc57b7e88",
+  "file": "hit-level-1.wav",
+  "sha256": "841d734fb2d27c7fa12f834556e58e27d0b4567ba6d07be4debff479625c0a51",
+  "duration": 1.130702947845805,
+  "sample_rate": 48000,
+  "channels": 2,
+  "gain_db": -2,
+  "trigger": "At the maximum ice-pillar height, with damage and freeze; once per cast."
+}

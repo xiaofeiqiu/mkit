@@ -1,0 +1,2409 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/whispering_forest/art/city/civic_model.gd" id="1_88nvt"]
+[ext_resource type="Shader" path="res://game/whispering_forest/art/city/painted_limestone.gdshader" id="2_qb072"]
+[ext_resource type="Texture2D" path="res://game/whispering_forest/art/city/materials/wallstone.png" id="3_o1pf2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pvgof"]
+render_priority = 0
+shader = ExtResource("2_qb072")
+shader_parameter/paint = ExtResource("3_o1pf2")
+shader_parameter/stone_color = Color(0.7254902, 0.7490196, 0.68235296, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_04okp"]
+top_radius = 1.295
+bottom_radius = 1.295
+height = 0.24
+radial_segments = 20
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ftdpc"]
+cull_mode = 2
+specular_mode = 2
+albedo_color = Color(0.52156866, 0.5529412, 0.5176471, 1)
+roughness = 0.92
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_debs0"]
+top_radius = 1.1
+bottom_radius = 1.1
+height = 5.0
+radial_segments = 20
+
+[sub_resource type="BoxMesh" id="BoxMesh_02ddb"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hs268"]
+render_priority = 0
+shader = ExtResource("2_qb072")
+shader_parameter/paint = ExtResource("3_o1pf2")
+shader_parameter/stone_color = Color(0.7882353, 0.7882353, 0.72156864, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w6okp"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yflsn"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0kp56"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wvait"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2o17i"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_at4ms"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g0bln"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_frrkv"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qa461"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cchsq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ohrpq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_k58ay"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fbsw3"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jbu1s"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hclra"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_si2lw"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lsb8w"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7iti2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yw3bu"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w1o6i"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6pg4k"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1wa3m"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cybli"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kbsch"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4x2yj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8rhoj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s1gmw"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pah01"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_t72kb"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_105b1"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rckb6"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_le8sc"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gqux6"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_eht64"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_627j7"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bb165"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_umato"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_e7dpo"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_45wmf"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_16x6m"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dmwmg"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5huti"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_amhib"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lyqn3"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gjn3e"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s4jot"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p2ria"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pckbg"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_146ju"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_duuee"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_f12dn"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bsb4p"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jcg1g"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sksim"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1dvr4"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qhxlc"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a0qkd"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8dmgn"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7kgtw"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_eb5xp"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pkwam"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_uvgym"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_y5kfm"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qhr6t"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n6o4u"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n0sac"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mu8xi"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r0iub"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ul37u"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n3pyx"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oyuur"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dtewt"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_paxfm"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ilv3b"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2gjmk"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_81i4f"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7ucge"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rq2i7"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oshly"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_l7bqq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2jmbn"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jgsgj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_svg17"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oln8i"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6b8fu"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_x1d4r"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8dfnu"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gcvcq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jqff1"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lmvsk"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_eotfj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6w7ey"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gm04h"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3kwp2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gqnju"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_opajh"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bs0lw"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oqlcy"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jvacn"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s4rt1"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dalex"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mpo8m"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_21y2l"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n6wc1"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nid8l"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r6b35"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ruarn"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qxf7d"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ru8pl"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_uai1t"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_suro5"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sgbnd"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a7rk4"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wja2m"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ta82a"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wm37r"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_00pnl"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_homrj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rr1uu"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q7n85"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fyv3b"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n5nwq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ndna3"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5ld3i"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4q542"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yaxe6"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8i51b"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3xcj2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5uakb"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ldh1t"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_507id"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o6pv7"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qvsp2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jmp8v"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j4dmb"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4pnh2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_asom3"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_d8vmj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_uwd0e"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sgqqt"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_b2twq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i80se"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nbudh"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xlntd"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6s6dy"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2n4ma"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p47sy"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oifvt"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8wuu0"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j5ikj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2m8ni"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bdnsu"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ex3kp"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4kuvi"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8q8g7"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nroyn"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ju6up"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q4hfq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r7aa0"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_uvsjc"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7ggds"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_joslm"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5e2q4"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_20gs3"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3oqva"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2bie8"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_c67hf"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cc63y"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h2jtp"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4gmo2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i801d"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_a6r1q"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kb8jh"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wnkgh"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xi3bc"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8vbkc"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pljeq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_niasj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lwopb"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cdi8r"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s1g5d"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yvjsq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pkx1s"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ratng"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5i58r"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1m6ue"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ee1go"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ssdrl"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_chmtx"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_m63pw"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_874bw"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0tr23"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gv2qi"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p848a"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2p8lj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gtk7t"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0pcwb"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xp5kt"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_to6vr"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3i4bi"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_soxs6"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_otjyi"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_m41ok"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8tnni"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_peinh"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o4tc8"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_isl27"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bldrr"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_se7po"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7ba3p"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2e2dj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gprup"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5x61r"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lwam0"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_luxx7"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0li8y"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0srnd"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vfqc6"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3wvxe"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ywfw2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wrcv0"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pt0i2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3aemo"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h3uvf"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vimdq"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j3djc"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_digpl"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n57d0"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4tnyj"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qadwl"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pgvl2"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5rikh"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ynq0m"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gkjtk"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gnmxi"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fqo0r"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_miv4x"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2a2bw"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i18qr"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_omhks"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s5h0w"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cdio7"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vwmyx"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oy7nb"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hfj07"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_t6mfu"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tgbds"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o7biy"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p2mlm"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lkxou"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3crsd"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r2wah"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_c62qf"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hm86h"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2mcx4"]
+size = Vector3(0.14, 0.2995, 0.43455282)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hid0t"]
+render_priority = 0
+shader = ExtResource("2_qb072")
+shader_parameter/paint = ExtResource("3_o1pf2")
+shader_parameter/stone_color = Color(0.8666667, 0.8627451, 0.79607844, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_o3odn"]
+top_radius = 1.17
+bottom_radius = 1.17
+height = 0.12
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_815n5"]
+top_radius = 1.21
+bottom_radius = 1.21
+height = 0.13
+radial_segments = 20
+
+[sub_resource type="BoxMesh" id="BoxMesh_i577w"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3cvuc"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dyhdw"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xrjgi"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ojfey"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wp6eo"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pwfge"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fccqh"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bdvxo"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_01f45"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4v12m"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kqc7q"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6b34b"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_x62gd"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0jrsa"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_57b7y"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i4oa5"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wpno5"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jdgml"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vy4lb"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w5yio"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_c5fqr"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_71o6n"]
+size = Vector3(0.3, 0.5, 0.28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cd68p"]
+size = Vector3(0.36, 0.07, 0.34)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o10p1"]
+cull_mode = 2
+specular_mode = 2
+albedo_color = Color(0.28235295, 0.3372549, 0.3529412, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="BoxMesh_7fju2"]
+size = Vector3(0.07, 0.65, 0.016)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xd28w"]
+size = Vector3(0.28, 0.08, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0spgo"]
+size = Vector3(0.07, 0.65, 0.016)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j8gd3"]
+size = Vector3(0.28, 0.08, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7optp"]
+size = Vector3(0.07, 0.65, 0.016)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fmdo8"]
+size = Vector3(0.28, 0.08, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w42q6"]
+size = Vector3(0.07, 0.65, 0.016)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r7ihn"]
+size = Vector3(0.28, 0.08, 0.12)
+
+[node name="TowerCorner" type="Node3D" unique_id=376992100]
+script = ExtResource("1_88nvt")
+metadata/asset_id = "tower_corner"
+metadata/ground_size = Vector2(0, 0)
+metadata/ground_corner = Vector3(0, 0, 0)
+metadata/door_ground = Vector3(0, 0, 0)
+metadata/height = 5.67
+metadata/module_spec = {
+"height": 5.0,
+"radius": 36.0,
+"type": "tower"
+}
+
+[node name="RoundMasonryTower" type="Node3D" parent="." unique_id=353225615]
+
+[node name="Detail_0000" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=284926244]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("CylinderMesh_04okp")
+
+[node name="Detail_0001" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1508318166]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+material_override = SubResource("StandardMaterial3D_ftdpc")
+mesh = SubResource("CylinderMesh_debs0")
+
+[node name="Detail_0002" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1087098689]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 0.15625, 0)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_02ddb")
+
+[node name="Detail_0003" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1747692830]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 0.15625, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_w6okp")
+
+[node name="Detail_0004" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1100460030]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 0.15625, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_yflsn")
+
+[node name="Detail_0005" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1831972800]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 0.15625, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_0kp56")
+
+[node name="Detail_0006" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=561555085]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 0.15625, 1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_wvait")
+
+[node name="Detail_0007" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1140605026]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 0.15625, 0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_2o17i")
+
+[node name="Detail_0008" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=337196694]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 0.15625, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_at4ms")
+
+[node name="Detail_0009" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=456966252]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 0.15625, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_g0bln")
+
+[node name="Detail_0010" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=171440358]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 0.15625, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_frrkv")
+
+[node name="Detail_0011" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1606385290]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 0.15625, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_qa461")
+
+[node name="Detail_0012" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1302330601]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 0.15625, -0.74599767)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_cchsq")
+
+[node name="Detail_0013" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=908424255]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 0.15625, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ohrpq")
+
+[node name="Detail_0014" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=639354476]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 0.15625, -1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_k58ay")
+
+[node name="Detail_0015" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1612116153]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 0.15625, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_fbsw3")
+
+[node name="Detail_0016" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1267451668]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 0.15625, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_jbu1s")
+
+[node name="Detail_0017" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1135059974]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 0.15625, -0.40373102)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_hclra")
+
+[node name="Detail_0018" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2132526650]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 0.46875, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_si2lw")
+
+[node name="Detail_0019" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2050200207]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 0.46875, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_lsb8w")
+
+[node name="Detail_0020" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1041554901]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 0.46875, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_7iti2")
+
+[node name="Detail_0021" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=796369822]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 0.46875, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_yw3bu")
+
+[node name="Detail_0022" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1298331890]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 0.46875, 1.0347285)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_w1o6i")
+
+[node name="Detail_0023" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1862743613]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 0.46875, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_6pg4k")
+
+[node name="Detail_0024" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1913070156]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 0.46875, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_1wa3m")
+
+[node name="Detail_0025" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=735213220]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 0.46875, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_cybli")
+
+[node name="Detail_0026" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=667680069]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 0.46875, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_kbsch")
+
+[node name="Detail_0027" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1000111253]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 0.46875, -0.5861266)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_4x2yj")
+
+[node name="Detail_0028" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=653426450]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 0.46875, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_8rhoj")
+
+[node name="Detail_0029" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=752591767]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 0.46875, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_s1gmw")
+
+[node name="Detail_0030" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=332368565]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 0.46875, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pah01")
+
+[node name="Detail_0031" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1376677607]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 0.46875, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_t72kb")
+
+[node name="Detail_0032" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=487355820]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 0.46875, -0.5861266)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_105b1")
+
+[node name="Detail_0033" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1029771853]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 0.46875, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_rckb6")
+
+[node name="Detail_0034" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1982970415]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 0.78125, 0)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_le8sc")
+
+[node name="Detail_0035" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1091252838]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 0.78125, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_gqux6")
+
+[node name="Detail_0036" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1844802531]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 0.78125, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_eht64")
+
+[node name="Detail_0037" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=521422731]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 0.78125, 0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_627j7")
+
+[node name="Detail_0038" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=503983971]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 0.78125, 1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_bb165")
+
+[node name="Detail_0039" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=8239043]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 0.78125, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_umato")
+
+[node name="Detail_0040" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1008238758]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 0.78125, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_e7dpo")
+
+[node name="Detail_0041" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1657205441]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 0.78125, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_45wmf")
+
+[node name="Detail_0042" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1088145188]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 0.78125, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_16x6m")
+
+[node name="Detail_0043" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=233544305]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 0.78125, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_dmwmg")
+
+[node name="Detail_0044" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=908236166]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 0.78125, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_5huti")
+
+[node name="Detail_0045" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1953216131]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 0.78125, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_amhib")
+
+[node name="Detail_0046" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=457216407]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 0.78125, -1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_lyqn3")
+
+[node name="Detail_0047" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1171185374]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 0.78125, -0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_gjn3e")
+
+[node name="Detail_0048" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1172738195]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 0.78125, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_s4jot")
+
+[node name="Detail_0049" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1097709851]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 0.78125, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_p2ria")
+
+[node name="Detail_0050" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1620028747]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 1.09375, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pckbg")
+
+[node name="Detail_0051" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=425046125]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 1.09375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_146ju")
+
+[node name="Detail_0052" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=684794139]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 1.09375, 0.8772004)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_duuee")
+
+[node name="Detail_0053" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1728734304]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 1.09375, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_f12dn")
+
+[node name="Detail_0054" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=617937976]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 1.09375, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_bsb4p")
+
+[node name="Detail_0055" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=590525983]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 1.09375, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_jcg1g")
+
+[node name="Detail_0056" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1463202736]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 1.09375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_sksim")
+
+[node name="Detail_0057" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1247994938]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 1.09375, 0.20582029)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_1dvr4")
+
+[node name="Detail_0058" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=583515750]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 1.09375, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_qhxlc")
+
+[node name="Detail_0059" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=113770405]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 1.09375, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_a0qkd")
+
+[node name="Detail_0060" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=889402837]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 1.09375, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_8dmgn")
+
+[node name="Detail_0061" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1783188488]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 1.09375, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_7kgtw")
+
+[node name="Detail_0062" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1116265420]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 1.09375, -1.0347285)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_eb5xp")
+
+[node name="Detail_0063" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=582487221]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 1.09375, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pkwam")
+
+[node name="Detail_0064" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1105464658]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 1.09375, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_uvgym")
+
+[node name="Detail_0065" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1137231549]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 1.09375, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_y5kfm")
+
+[node name="Detail_0066" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=746528757]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 1.40625, 0)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_qhr6t")
+
+[node name="Detail_0067" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=694082502]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 1.40625, 0.40373102)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_n6o4u")
+
+[node name="Detail_0068" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=41963548]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 1.40625, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_n0sac")
+
+[node name="Detail_0069" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1706947502]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 1.40625, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_mu8xi")
+
+[node name="Detail_0070" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=267106903]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 1.40625, 1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_r0iub")
+
+[node name="Detail_0071" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=570275646]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 1.40625, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ul37u")
+
+[node name="Detail_0072" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=17101939]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 1.40625, 0.74599767)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_n3pyx")
+
+[node name="Detail_0073" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=933276069]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 1.40625, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_oyuur")
+
+[node name="Detail_0074" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1710025140]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 1.40625, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_dtewt")
+
+[node name="Detail_0075" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1798670153]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 1.40625, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_paxfm")
+
+[node name="Detail_0076" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=130700098]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 1.40625, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ilv3b")
+
+[node name="Detail_0077" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=305290723]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 1.40625, -0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_2gjmk")
+
+[node name="Detail_0078" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1008314464]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 1.40625, -1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_81i4f")
+
+[node name="Detail_0079" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=321745841]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 1.40625, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_7ucge")
+
+[node name="Detail_0080" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2085920035]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 1.40625, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_rq2i7")
+
+[node name="Detail_0081" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1878502933]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 1.40625, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_oshly")
+
+[node name="Detail_0082" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=892204246]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 1.71875, 0.20582029)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_l7bqq")
+
+[node name="Detail_0083" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=69533728]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 1.71875, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_2jmbn")
+
+[node name="Detail_0084" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=533879211]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 1.71875, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_jgsgj")
+
+[node name="Detail_0085" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1786726724]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 1.71875, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_svg17")
+
+[node name="Detail_0086" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=368639949]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 1.71875, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_oln8i")
+
+[node name="Detail_0087" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1203852646]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 1.71875, 0.8772004)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_6b8fu")
+
+[node name="Detail_0088" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2039335082]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 1.71875, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_x1d4r")
+
+[node name="Detail_0089" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1720026650]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 1.71875, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_8dfnu")
+
+[node name="Detail_0090" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=903028894]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 1.71875, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_gcvcq")
+
+[node name="Detail_0091" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=475457929]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 1.71875, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_jqff1")
+
+[node name="Detail_0092" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1139874911]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 1.71875, -0.8772004)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_lmvsk")
+
+[node name="Detail_0093" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=738059762]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 1.71875, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_eotfj")
+
+[node name="Detail_0094" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1979719544]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 1.71875, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_6w7ey")
+
+[node name="Detail_0095" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=465759956]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 1.71875, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_gm04h")
+
+[node name="Detail_0096" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=5682857]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 1.71875, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_3kwp2")
+
+[node name="Detail_0097" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1930324434]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 1.71875, -0.20582029)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_gqnju")
+
+[node name="Detail_0098" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=117589358]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 2.03125, 0)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_opajh")
+
+[node name="Detail_0099" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=903330457]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 2.03125, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_bs0lw")
+
+[node name="Detail_0100" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1247309960]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 2.03125, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_oqlcy")
+
+[node name="Detail_0101" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=946680100]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 2.03125, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_jvacn")
+
+[node name="Detail_0102" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1923989807]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 2.03125, 1.055)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_s4rt1")
+
+[node name="Detail_0103" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=938897607]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 2.03125, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_dalex")
+
+[node name="Detail_0104" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=821883251]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 2.03125, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_mpo8m")
+
+[node name="Detail_0105" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1255271075]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 2.03125, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_21y2l")
+
+[node name="Detail_0106" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2022991067]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 2.03125, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_n6wc1")
+
+[node name="Detail_0107" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1545342356]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 2.03125, -0.40373102)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_nid8l")
+
+[node name="Detail_0108" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=459639055]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 2.03125, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_r6b35")
+
+[node name="Detail_0109" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1657354731]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 2.03125, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ruarn")
+
+[node name="Detail_0110" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=258648159]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 2.03125, -1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_qxf7d")
+
+[node name="Detail_0111" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=595596871]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 2.03125, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ru8pl")
+
+[node name="Detail_0112" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1107190348]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 2.03125, -0.74599767)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_uai1t")
+
+[node name="Detail_0113" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1277222824]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 2.03125, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_suro5")
+
+[node name="Detail_0114" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=179859713]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 2.34375, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_sgbnd")
+
+[node name="Detail_0115" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=389588768]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 2.34375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_a7rk4")
+
+[node name="Detail_0116" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2005139214]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 2.34375, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_wja2m")
+
+[node name="Detail_0117" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=904000740]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 2.34375, 1.0347285)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_ta82a")
+
+[node name="Detail_0118" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=313325261]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 2.34375, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_wm37r")
+
+[node name="Detail_0119" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=261975739]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 2.34375, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_00pnl")
+
+[node name="Detail_0120" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1995021471]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 2.34375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_homrj")
+
+[node name="Detail_0121" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1732360541]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 2.34375, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_rr1uu")
+
+[node name="Detail_0122" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=35908183]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 2.34375, -0.20582029)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_q7n85")
+
+[node name="Detail_0123" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1997114041]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 2.34375, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_fyv3b")
+
+[node name="Detail_0124" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1635156646]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 2.34375, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_n5nwq")
+
+[node name="Detail_0125" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1041284252]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 2.34375, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ndna3")
+
+[node name="Detail_0126" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=702378782]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 2.34375, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_5ld3i")
+
+[node name="Detail_0127" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1410597090]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 2.34375, -0.8772004)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_4q542")
+
+[node name="Detail_0128" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1795532255]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 2.34375, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_yaxe6")
+
+[node name="Detail_0129" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1153827479]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 2.34375, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_8i51b")
+
+[node name="Detail_0130" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1364654156]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 2.65625, 0)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_3xcj2")
+
+[node name="Detail_0131" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=571219481]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 2.65625, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_5uakb")
+
+[node name="Detail_0132" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=151701923]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 2.65625, 0.74599767)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_ldh1t")
+
+[node name="Detail_0133" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=278091462]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 2.65625, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_507id")
+
+[node name="Detail_0134" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=670355792]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 2.65625, 1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_o6pv7")
+
+[node name="Detail_0135" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=727452371]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 2.65625, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_qvsp2")
+
+[node name="Detail_0136" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1215882845]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 2.65625, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_jmp8v")
+
+[node name="Detail_0137" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1130839606]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 2.65625, 0.40373102)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_j4dmb")
+
+[node name="Detail_0138" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1505548692]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 2.65625, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_4pnh2")
+
+[node name="Detail_0139" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=77645446]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 2.65625, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_asom3")
+
+[node name="Detail_0140" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=822344218]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 2.65625, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_d8vmj")
+
+[node name="Detail_0141" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1279456823]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 2.65625, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_uwd0e")
+
+[node name="Detail_0142" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=140555188]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 2.65625, -1.055)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_sgqqt")
+
+[node name="Detail_0143" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=96273470]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 2.65625, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_b2twq")
+
+[node name="Detail_0144" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=905936368]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 2.65625, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_i80se")
+
+[node name="Detail_0145" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=645963468]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 2.65625, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_nbudh")
+
+[node name="Detail_0146" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=676472396]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 2.96875, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_xlntd")
+
+[node name="Detail_0147" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=259445223]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 2.96875, 0.5861266)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_6s6dy")
+
+[node name="Detail_0148" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2134173104]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 2.96875, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_2n4ma")
+
+[node name="Detail_0149" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1302709729]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 2.96875, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_p47sy")
+
+[node name="Detail_0150" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1141664630]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 2.96875, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_oifvt")
+
+[node name="Detail_0151" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=58716842]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 2.96875, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_8wuu0")
+
+[node name="Detail_0152" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=992379227]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 2.96875, 0.5861266)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_j5ikj")
+
+[node name="Detail_0153" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1711439970]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 2.96875, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_2m8ni")
+
+[node name="Detail_0154" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2068990204]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 2.96875, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_bdnsu")
+
+[node name="Detail_0155" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1592067459]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 2.96875, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ex3kp")
+
+[node name="Detail_0156" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1614572844]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 2.96875, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_4kuvi")
+
+[node name="Detail_0157" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=60194039]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 2.96875, -1.0347285)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_8q8g7")
+
+[node name="Detail_0158" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2102058992]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 2.96875, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_nroyn")
+
+[node name="Detail_0159" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1024461281]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 2.96875, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ju6up")
+
+[node name="Detail_0160" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=983569740]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 2.96875, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_q4hfq")
+
+[node name="Detail_0161" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=681490233]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 2.96875, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_r7aa0")
+
+[node name="Detail_0162" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=821384264]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 3.28125, 0)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_uvsjc")
+
+[node name="Detail_0163" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=607962808]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 3.28125, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_7ggds")
+
+[node name="Detail_0164" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=775628786]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 3.28125, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_joslm")
+
+[node name="Detail_0165" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1495133167]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 3.28125, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_5e2q4")
+
+[node name="Detail_0166" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2092127668]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 3.28125, 1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_20gs3")
+
+[node name="Detail_0167" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1479719958]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 3.28125, 0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_3oqva")
+
+[node name="Detail_0168" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1326006953]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 3.28125, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_2bie8")
+
+[node name="Detail_0169" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=647684594]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 3.28125, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_c67hf")
+
+[node name="Detail_0170" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=941230581]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 3.28125, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_cc63y")
+
+[node name="Detail_0171" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1418149051]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 3.28125, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_h2jtp")
+
+[node name="Detail_0172" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1211376760]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 3.28125, -0.74599767)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_4gmo2")
+
+[node name="Detail_0173" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=239909615]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 3.28125, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_i801d")
+
+[node name="Detail_0174" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1163015222]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 3.28125, -1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_a6r1q")
+
+[node name="Detail_0175" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=690195244]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 3.28125, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_kb8jh")
+
+[node name="Detail_0176" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1419338215]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 3.28125, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_wnkgh")
+
+[node name="Detail_0177" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1075794416]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 3.28125, -0.40373102)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_xi3bc")
+
+[node name="Detail_0178" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=830323466]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 3.59375, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_8vbkc")
+
+[node name="Detail_0179" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=859310572]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 3.59375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pljeq")
+
+[node name="Detail_0180" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=756266230]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 3.59375, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_niasj")
+
+[node name="Detail_0181" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1385951287]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 3.59375, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_lwopb")
+
+[node name="Detail_0182" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=242397740]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 3.59375, 1.0347285)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_cdi8r")
+
+[node name="Detail_0183" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1756045508]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 3.59375, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_s1g5d")
+
+[node name="Detail_0184" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2047484428]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 3.59375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_yvjsq")
+
+[node name="Detail_0185" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=937659904]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 3.59375, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pkx1s")
+
+[node name="Detail_0186" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1506347373]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 3.59375, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ratng")
+
+[node name="Detail_0187" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1431897144]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 3.59375, -0.5861266)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_5i58r")
+
+[node name="Detail_0188" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=202619821]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 3.59375, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_1m6ue")
+
+[node name="Detail_0189" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1801267359]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 3.59375, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ee1go")
+
+[node name="Detail_0190" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=32380647]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 3.59375, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ssdrl")
+
+[node name="Detail_0191" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1852287652]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 3.59375, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_chmtx")
+
+[node name="Detail_0192" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1451116685]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 3.59375, -0.5861266)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_m63pw")
+
+[node name="Detail_0193" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=581592497]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 3.59375, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_874bw")
+
+[node name="Detail_0194" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1200116827]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 3.90625, 0)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_0tr23")
+
+[node name="Detail_0195" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1569696046]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 3.90625, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_gv2qi")
+
+[node name="Detail_0196" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=133323999]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 3.90625, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_p848a")
+
+[node name="Detail_0197" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1267292882]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 3.90625, 0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_2p8lj")
+
+[node name="Detail_0198" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=90607630]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 3.90625, 1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_gtk7t")
+
+[node name="Detail_0199" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=213435176]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 3.90625, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_0pcwb")
+
+[node name="Detail_0200" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1500009033]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 3.90625, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_xp5kt")
+
+[node name="Detail_0201" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1921427525]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 3.90625, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_to6vr")
+
+[node name="Detail_0202" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1551685065]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 3.90625, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_3i4bi")
+
+[node name="Detail_0203" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=934418571]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 3.90625, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_soxs6")
+
+[node name="Detail_0204" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2139081871]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 3.90625, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_otjyi")
+
+[node name="Detail_0205" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=151473936]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 3.90625, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_m41ok")
+
+[node name="Detail_0206" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1565312470]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 3.90625, -1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_8tnni")
+
+[node name="Detail_0207" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=881848246]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 3.90625, -0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_peinh")
+
+[node name="Detail_0208" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1466311798]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 3.90625, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_o4tc8")
+
+[node name="Detail_0209" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=733342099]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 3.90625, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_isl27")
+
+[node name="Detail_0210" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1883214425]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 4.21875, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_bldrr")
+
+[node name="Detail_0211" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1783187361]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 4.21875, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_se7po")
+
+[node name="Detail_0212" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1999195380]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 4.21875, 0.8772004)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_7ba3p")
+
+[node name="Detail_0213" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1373522227]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 4.21875, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_2e2dj")
+
+[node name="Detail_0214" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1403042908]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 4.21875, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_gprup")
+
+[node name="Detail_0215" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1845995463]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 4.21875, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_5x61r")
+
+[node name="Detail_0216" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=456149538]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 4.21875, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_lwam0")
+
+[node name="Detail_0217" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1647857906]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 4.21875, 0.20582029)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_luxx7")
+
+[node name="Detail_0218" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2052500617]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 4.21875, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_0li8y")
+
+[node name="Detail_0219" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=281515359]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 4.21875, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_0srnd")
+
+[node name="Detail_0220" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=533237873]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 4.21875, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_vfqc6")
+
+[node name="Detail_0221" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1358483527]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 4.21875, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_3wvxe")
+
+[node name="Detail_0222" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=32510913]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 4.21875, -1.0347285)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_ywfw2")
+
+[node name="Detail_0223" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1830474987]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 4.21875, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_wrcv0")
+
+[node name="Detail_0224" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=321090264]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 4.21875, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pt0i2")
+
+[node name="Detail_0225" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=301393445]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 4.21875, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_3aemo")
+
+[node name="Detail_0226" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1976892476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.055, 4.53125, 0)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_h3uvf")
+
+[node name="Detail_0227" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=527924212]
+transform = Transform3D(0.9238795, 0, -0.38268346, 0, 1, 0, 0.38268346, 0, 0.9238795, 0.9746929, 4.53125, 0.40373102)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_vimdq")
+
+[node name="Detail_0228" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=325522523]
+transform = Transform3D(0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, 0.70710677, 0.74599767, 4.53125, 0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_j3djc")
+
+[node name="Detail_0229" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1148548241]
+transform = Transform3D(0.38268343, 0, -0.9238795, 0, 1, 0, 0.9238795, 0, 0.38268343, 0.40373102, 4.53125, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_digpl")
+
+[node name="Detail_0230" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=834294148]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.460012e-17, 4.53125, 1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_n57d0")
+
+[node name="Detail_0231" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=755431899]
+transform = Transform3D(-0.3826834, 0, -0.92387956, 0, 1, 0, 0.92387956, 0, -0.3826834, -0.40373102, 4.53125, 0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_4tnyj")
+
+[node name="Detail_0232" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=46157222]
+transform = Transform3D(-0.70710677, 0, -0.70710677, 0, 1, 0, 0.70710677, 0, -0.70710677, -0.74599767, 4.53125, 0.74599767)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_qadwl")
+
+[node name="Detail_0233" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1654593517]
+transform = Transform3D(-0.9238795, 0, -0.3826835, 0, 1, 0, 0.3826835, 0, -0.9238795, -0.9746929, 4.53125, 0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pgvl2")
+
+[node name="Detail_0234" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1729773805]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.055, 4.53125, 1.2920024e-16)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_5rikh")
+
+[node name="Detail_0235" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=174586290]
+transform = Transform3D(-0.9238795, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, -0.9238795, -0.9746929, 4.53125, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ynq0m")
+
+[node name="Detail_0236" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1241845364]
+transform = Transform3D(-0.7071068, 0, 0.7071067, 0, 1, 0, -0.7071067, 0, -0.7071068, -0.74599767, 4.53125, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_gkjtk")
+
+[node name="Detail_0237" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=513315111]
+transform = Transform3D(-0.38268358, 0, 0.9238795, 0, 1, 0, -0.9238795, 0, -0.38268358, -0.40373102, 4.53125, -0.9746929)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_gnmxi")
+
+[node name="Detail_0238" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=267526364]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9380036e-16, 4.53125, -1.055)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_fqo0r")
+
+[node name="Detail_0239" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=860959652]
+transform = Transform3D(0.3826836, 0, 0.92387944, 0, 1, 0, -0.92387944, 0, 0.3826836, 0.40373102, 4.53125, -0.9746929)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_miv4x")
+
+[node name="Detail_0240" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=407510705]
+transform = Transform3D(0.70710665, 0, 0.7071069, 0, 1, 0, -0.7071069, 0, 0.70710665, 0.74599767, 4.53125, -0.74599767)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_2a2bw")
+
+[node name="Detail_0241" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=86597754]
+transform = Transform3D(0.92387956, 0, 0.38268343, 0, 1, 0, -0.38268343, 0, 0.92387956, 0.9746929, 4.53125, -0.40373102)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_i18qr")
+
+[node name="Detail_0242" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=756455950]
+transform = Transform3D(0.98078525, 0, -0.19509032, 0, 1, 0, 0.19509032, 0, 0.98078525, 1.0347285, 4.84375, 0.20582029)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_omhks")
+
+[node name="Detail_0243" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2127387137]
+transform = Transform3D(0.8314696, 0, -0.55557024, 0, 1, 0, 0.55557024, 0, 0.8314696, 0.8772004, 4.84375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_s5h0w")
+
+[node name="Detail_0244" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1143459175]
+transform = Transform3D(0.55557024, 0, -0.8314696, 0, 1, 0, 0.8314696, 0, 0.55557024, 0.5861266, 4.84375, 0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_cdio7")
+
+[node name="Detail_0245" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1364540238]
+transform = Transform3D(0.19509035, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, 0.19509035, 0.20582029, 4.84375, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_vwmyx")
+
+[node name="Detail_0246" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=36908617]
+transform = Transform3D(-0.19509032, 0, -0.98078525, 0, 1, 0, 0.98078525, 0, -0.19509032, -0.20582029, 4.84375, 1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_oy7nb")
+
+[node name="Detail_0247" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1736401926]
+transform = Transform3D(-0.5555702, 0, -0.83146966, 0, 1, 0, 0.83146966, 0, -0.5555702, -0.5861266, 4.84375, 0.8772004)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_hfj07")
+
+[node name="Detail_0248" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=379824374]
+transform = Transform3D(-0.83146966, 0, -0.5555702, 0, 1, 0, 0.5555702, 0, -0.83146966, -0.8772004, 4.84375, 0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_t6mfu")
+
+[node name="Detail_0249" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1225153998]
+transform = Transform3D(-0.9807853, 0, -0.19509031, 0, 1, 0, 0.19509031, 0, -0.9807853, -1.0347285, 4.84375, 0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_tgbds")
+
+[node name="Detail_0250" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1106028137]
+transform = Transform3D(-0.9807853, 0, 0.19509025, 0, 1, 0, -0.19509025, 0, -0.9807853, -1.0347285, 4.84375, -0.20582029)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_o7biy")
+
+[node name="Detail_0251" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1969121123]
+transform = Transform3D(-0.83146954, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, -0.83146954, -0.8772004, 4.84375, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_p2mlm")
+
+[node name="Detail_0252" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2049535374]
+transform = Transform3D(-0.5555704, 0, 0.8314695, 0, 1, 0, -0.8314695, 0, -0.5555704, -0.5861266, 4.84375, -0.8772004)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_lkxou")
+
+[node name="Detail_0253" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2029074913]
+transform = Transform3D(-0.19509038, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, -0.19509038, -0.20582029, 4.84375, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_3crsd")
+
+[node name="Detail_0254" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=427236518]
+transform = Transform3D(0.19509041, 0, 0.98078525, 0, 1, 0, -0.98078525, 0, 0.19509041, 0.20582029, 4.84375, -1.0347285)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_r2wah")
+
+[node name="Detail_0255" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1678866171]
+transform = Transform3D(0.55557007, 0, 0.8314697, 0, 1, 0, -0.8314697, 0, 0.55557007, 0.5861266, 4.84375, -0.8772004)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_c62qf")
+
+[node name="Detail_0256" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=960574776]
+transform = Transform3D(0.8314696, 0, 0.5555703, 0, 1, 0, -0.5555703, 0, 0.8314696, 0.8772004, 4.84375, -0.5861266)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_hm86h")
+
+[node name="Detail_0257" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=828283923]
+transform = Transform3D(0.9807853, 0, 0.19509023, 0, 1, 0, -0.19509023, 0, 0.9807853, 1.0347285, 4.84375, -0.20582029)
+material_override = SubResource("ShaderMaterial_pvgof")
+mesh = SubResource("BoxMesh_2mcx4")
+
+[node name="Detail_0258" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=857184899]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.85, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("CylinderMesh_o3odn")
+
+[node name="Detail_0259" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1839968460]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.035, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("CylinderMesh_815n5")
+
+[node name="Detail_0260" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=172138195]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.045, 5.37, 0)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_i577w")
+
+[node name="Detail_0261" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0260" unique_id=979380527]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_3cvuc")
+
+[node name="Detail_0262" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1144516755]
+transform = Transform3D(0.8660254, 0, -0.5, 0, 1, 0, 0.5, 0, 0.8660254, 0.9049966, 5.37, 0.5225)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_dyhdw")
+
+[node name="Detail_0263" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0262" unique_id=1038258526]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_xrjgi")
+
+[node name="Detail_0264" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1078011337]
+transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 0.5225, 5.37, 0.9049966)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_ojfey")
+
+[node name="Detail_0265" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0264" unique_id=418237923]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_wp6eo")
+
+[node name="Detail_0266" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2025027578]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.3987794e-17, 5.37, 1.045)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_pwfge")
+
+[node name="Detail_0267" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0266" unique_id=1540627834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_fccqh")
+
+[node name="Detail_0268" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1309362548]
+transform = Transform3D(-0.50000006, 0, -0.8660254, 0, 1, 0, 0.8660254, 0, -0.50000006, -0.5225, 5.37, 0.9049966)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_bdvxo")
+
+[node name="Detail_0269" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0268" unique_id=1880356643]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_01f45")
+
+[node name="Detail_0270" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1779239162]
+transform = Transform3D(-0.8660254, 0, -0.50000006, 0, 1, 0, 0.50000006, 0, -0.8660254, -0.9049966, 5.37, 0.5225)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_4v12m")
+
+[node name="Detail_0271" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0270" unique_id=341037402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_kqc7q")
+
+[node name="Detail_0272" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1419865386]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -1.045, 5.37, 1.2797559e-16)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_6b34b")
+
+[node name="Detail_0273" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0272" unique_id=1039772426]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_x62gd")
+
+[node name="Detail_0274" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=59665026]
+transform = Transform3D(-0.8660254, 0, 0.49999997, 0, 1, 0, -0.49999997, 0, -0.8660254, -0.9049966, 5.37, -0.5225)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_0jrsa")
+
+[node name="Detail_0275" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0274" unique_id=1310297227]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_57b7y")
+
+[node name="Detail_0276" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=915899057]
+transform = Transform3D(-0.4999999, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, -0.4999999, -0.5225, 5.37, -0.9049966)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_i4oa5")
+
+[node name="Detail_0277" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0276" unique_id=844517388]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_wpno5")
+
+[node name="Detail_0278" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=1301904776]
+transform = Transform3D(1.1924881e-08, 0, 1, 0, 1, 0, -1, 0, 1.1924881e-08, -1.9196338e-16, 5.37, -1.045)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_jdgml")
+
+[node name="Detail_0279" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0278" unique_id=1798407049]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_vy4lb")
+
+[node name="Detail_0280" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=471559056]
+transform = Transform3D(0.4999999, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.4999999, 0.5225, 5.37, -0.9049966)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_w5yio")
+
+[node name="Detail_0281" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0280" unique_id=1869600384]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_c5fqr")
+
+[node name="Detail_0282" type="MeshInstance3D" parent="RoundMasonryTower" unique_id=2108215994]
+transform = Transform3D(0.8660253, 0, 0.5000002, 0, 1, 0, -0.5000002, 0, 0.8660253, 0.9049966, 5.37, -0.5225)
+material_override = SubResource("ShaderMaterial_hs268")
+mesh = SubResource("BoxMesh_71o6n")
+
+[node name="Detail_0283" type="MeshInstance3D" parent="RoundMasonryTower/Detail_0282" unique_id=2083340741]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_cd68p")
+
+[node name="DeepArrowSlit" type="Node3D" parent="RoundMasonryTower" unique_id=100388412]
+
+[node name="Detail_0284" type="MeshInstance3D" parent="RoundMasonryTower/DeepArrowSlit" unique_id=1123189666]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 1.137)
+material_override = SubResource("StandardMaterial3D_o10p1")
+mesh = SubResource("BoxMesh_7fju2")
+
+[node name="Detail_0285" type="MeshInstance3D" parent="RoundMasonryTower/DeepArrowSlit" unique_id=1394764722]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.96, 1.151)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_xd28w")
+
+[node name="@Node3D@260" type="Node3D" parent="RoundMasonryTower" unique_id=651372949]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
+
+[node name="Detail_0286" type="MeshInstance3D" parent="RoundMasonryTower/@Node3D@260" unique_id=542814682]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 1.137)
+material_override = SubResource("StandardMaterial3D_o10p1")
+mesh = SubResource("BoxMesh_0spgo")
+
+[node name="Detail_0287" type="MeshInstance3D" parent="RoundMasonryTower/@Node3D@260" unique_id=1277304159]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.96, 1.151)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_j8gd3")
+
+[node name="@Node3D@261" type="Node3D" parent="RoundMasonryTower" unique_id=495493272]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="Detail_0288" type="MeshInstance3D" parent="RoundMasonryTower/@Node3D@261" unique_id=1498566466]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 1.137)
+material_override = SubResource("StandardMaterial3D_o10p1")
+mesh = SubResource("BoxMesh_7optp")
+
+[node name="Detail_0289" type="MeshInstance3D" parent="RoundMasonryTower/@Node3D@261" unique_id=988675629]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.96, 1.151)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_fmdo8")
+
+[node name="@Node3D@262" type="Node3D" parent="RoundMasonryTower" unique_id=1581037767]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 0, 0, 0)
+
+[node name="Detail_0290" type="MeshInstance3D" parent="RoundMasonryTower/@Node3D@262" unique_id=297224606]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 1.137)
+material_override = SubResource("StandardMaterial3D_o10p1")
+mesh = SubResource("BoxMesh_w42q6")
+
+[node name="Detail_0291" type="MeshInstance3D" parent="RoundMasonryTower/@Node3D@262" unique_id=789218351]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.96, 1.151)
+material_override = SubResource("ShaderMaterial_hid0t")
+mesh = SubResource("BoxMesh_r7ihn")

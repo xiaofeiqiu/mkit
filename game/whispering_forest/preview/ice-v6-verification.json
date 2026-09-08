@@ -1,0 +1,10 @@
+{
+  "duration": "9.033333",
+  "frames": "271",
+  "audio_peak_dbfs": -4.263,
+  "verified_casts": 2,
+  "peak_pose_one_based": 5,
+  "damage_and_sound_same_update": true,
+  "quiet_during_growth": true,
+  "source_unmodified": true
+}

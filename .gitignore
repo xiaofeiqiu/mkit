@@ -3,3 +3,6 @@
 /android/
 __pycache__/
 docs/generated/
+.DS_Store
+*.log
+*.blend[0-9]*

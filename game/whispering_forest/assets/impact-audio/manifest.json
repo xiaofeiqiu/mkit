@@ -1,0 +1,146 @@
+{
+  "physical-0": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "fire-0": {
+    "seconds": 0.5,
+    "peak_dbfs": -1.72
+  },
+  "wind-0": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "earth-0": {
+    "seconds": 0.68,
+    "peak_dbfs": -1.72
+  },
+  "water-0": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "critical-0": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "meteor-0": {
+    "seconds": 1.35,
+    "peak_dbfs": -1.72
+  },
+  "death-0": {
+    "seconds": 0.85,
+    "peak_dbfs": -1.72
+  },
+  "launch-0": {
+    "seconds": 0.34,
+    "peak_dbfs": -5.04
+  },
+  "dodge-0": {
+    "seconds": 0.34,
+    "peak_dbfs": -5.04
+  },
+  "step-grass-0": {
+    "seconds": 0.3,
+    "peak_dbfs": -5.68
+  },
+  "step-concrete-0": {
+    "seconds": 0.3,
+    "peak_dbfs": -5.68
+  },
+  "physical-1": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "fire-1": {
+    "seconds": 0.5,
+    "peak_dbfs": -1.72
+  },
+  "wind-1": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "earth-1": {
+    "seconds": 0.68,
+    "peak_dbfs": -1.72
+  },
+  "water-1": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "critical-1": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "meteor-1": {
+    "seconds": 1.35,
+    "peak_dbfs": -1.72
+  },
+  "death-1": {
+    "seconds": 0.85,
+    "peak_dbfs": -1.72
+  },
+  "launch-1": {
+    "seconds": 0.34,
+    "peak_dbfs": -5.04
+  },
+  "dodge-1": {
+    "seconds": 0.34,
+    "peak_dbfs": -5.04
+  },
+  "step-grass-1": {
+    "seconds": 0.3,
+    "peak_dbfs": -5.68
+  },
+  "step-concrete-1": {
+    "seconds": 0.3,
+    "peak_dbfs": -5.68
+  },
+  "physical-2": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "fire-2": {
+    "seconds": 0.5,
+    "peak_dbfs": -1.72
+  },
+  "wind-2": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "earth-2": {
+    "seconds": 0.68,
+    "peak_dbfs": -1.72
+  },
+  "water-2": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "critical-2": {
+    "seconds": 0.34,
+    "peak_dbfs": -1.72
+  },
+  "meteor-2": {
+    "seconds": 1.35,
+    "peak_dbfs": -1.72
+  },
+  "death-2": {
+    "seconds": 0.85,
+    "peak_dbfs": -1.72
+  },
+  "launch-2": {
+    "seconds": 0.34,
+    "peak_dbfs": -5.04
+  },
+  "dodge-2": {
+    "seconds": 0.34,
+    "peak_dbfs": -5.04
+  },
+  "step-grass-2": {
+    "seconds": 0.3,
+    "peak_dbfs": -5.68
+  },
+  "step-concrete-2": {
+    "seconds": 0.3,
+    "peak_dbfs": -5.68
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-06",
+  "profile": "bellwake-daylight-v3",
+  "profile_sha256": "efca02c18801f93d44f7eb38db1a1706e32f794cc3f596bd6bf13895ec0bcb0b",
+  "active_pack": "res://game/whispering_forest/assets/city-reference-remake/",
+  "checks": [
+    {
+      "check": "city-assets",
+      "passed": true,
+      "results": [
+        "WF_CITY_ASSETS_OK: 168 frames, 30 editable Blender sources, 198 scene objects"
+      ]
+    },
+    {
+      "check": "city-gameplay",
+      "passed": true,
+      "results": [
+        "WF_SMOKE_OK: planned city / frontage routes / wall and bridge topology / click navigation, eight-direction walking/idle/foot pivots, summoned city, 5 waystones, safe city, quest teleport, return button/re-entry, Q101 turn-in, separate practice, collision, cooldown, rage, meteor, save/reload, v1 migration"
+      ]
+    },
+    {
+      "check": "combat",
+      "passed": true,
+      "results": [
+        "WF_FEEL_OK: 44 checks; release timing, moving cast, hitstop, stun, recoil, collision, boss poise, audio gates, death, city isolation",
+        "WF_COMBAT_OK: damage timing, AOE, tornado ticks/reflection/budget, L1-L10, cards, hurt/death, rage, hordes, 180/720/900s, boss victory/timeout, save and city isolation"
+      ]
+    },
+    {
+      "check": "character-frames",
+      "passed": true,
+      "results": [
+        "WF_PERFORMANCE_ASSETS_OK: 2368 complete transparent frames; full idle/walk/run sequences in 8 directions; shared render profile and file hashes; 36 distinct stereo sounds with onset and headroom"
+      ]
+    },
+    {
+      "check": "character-geometry",
+      "passed": true,
+      "results": [
+        "WF_HEAD_STABILITY: range 0.823 px; adjacent baked frame 0.253 px; extra 4x bob 0.000 px at game density",
+        "WF_MOTION_GEOMETRY_OK: 640 foot poses + 1120 staff poses; 8 facing rays; shared 2:1 camera; IK error 0.000000; stance slide 0.000000; staff tilt 1.76 degrees; floor clearance 0.0426 metres"
+      ]
+    },
+    {
+      "check": "city-tour",
+      "passed": true,
+      "results": [
+        "WF_CITY_TOUR_OK: districts, waystone travel, gate arch and bridge walk"
+      ]
+    }
+  ],
+  "visual_evidence": [
+    "preview/city-daylight-live.png",
+    "preview/city-daylight-market.png",
+    "preview/city-daylight-gate.png",
+    "preview/city-daylight-overview.png",
+    "preview/mage-daylight-eight-directions.png",
+    "preview/city-daylight-tour.mp4"
+  ],
+  "visual_status": "Inspected in actual game. Final user aesthetic acceptance remains separate from technical verification."
+}

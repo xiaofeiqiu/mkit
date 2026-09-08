@@ -1,0 +1,21 @@
+{
+  "status": "technical_checks_passed",
+  "revision": "opaque white ice and solid fracture",
+  "frames": 16,
+  "editable_layers": 4,
+  "duration_ms": 1450.0,
+  "hit_time_seconds": 0.42,
+  "gameplay_capture_fps": 30,
+  "gameplay_hit_seconds": [
+    0.433333333333333,
+    0.433333333333332
+  ],
+  "gameplay_peak_frame_zero_based": 9,
+  "appearance": "opaque white ice body and opaque moving fragments; no source or runtime alpha fade",
+  "art_review": "white peak inspected in actual grass scene; user feedback remains authoritative",
+  "other_skill_migration": "pending; other skills unchanged in this revision",
+  "verification_log": "ice-16-verification.log",
+  "gameplay_video": "ice-16-solid-gameplay.mp4",
+  "opacity_gpu_samples": 1034,
+  "opacity_log": "ice-16-opacity.log"
+}

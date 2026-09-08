@@ -1,0 +1,54 @@
+{
+  "baker_house": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "apothecary": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "forge": {
+    "continuous_plaster_surfaces": 0,
+    "exported_colors_valid": true
+  },
+  "guild": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "inn": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "market_hall": {
+    "continuous_plaster_surfaces": 0,
+    "exported_colors_valid": true
+  },
+  "pet_lodge": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "garden_house": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "townhouse": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "garden_house_sage": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "garden_house_clay": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "garden_house_ash": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  },
+  "townhouse_mauve": {
+    "continuous_plaster_surfaces": 4,
+    "exported_colors_valid": true
+  }
+}

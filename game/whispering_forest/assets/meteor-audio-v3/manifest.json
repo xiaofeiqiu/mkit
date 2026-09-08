@@ -1,0 +1,107 @@
+{
+  "format": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "bits": 16
+  },
+  "clips": {
+    "fall-small": {
+      "seconds": 0.95,
+      "peak_dbfs": -7.33,
+      "rms_dbfs": -24.09,
+      "layers": [
+        "wind",
+        "grit"
+      ],
+      "sha256": "ffb83ffbe86fbf73410ef42b5862ce4cc25135224ec91ca09b67820f89d68c26"
+    },
+    "rock-small": {
+      "seconds": 1.1,
+      "peak_dbfs": -3.61,
+      "rms_dbfs": -25.9,
+      "layers": [
+        "contact",
+        "weight",
+        "debris"
+      ],
+      "sha256": "fd720fbdbb6639bb90766542ce5f6d4b49656740fb10744f249e017358e8d616"
+    },
+    "fall-full": {
+      "seconds": 0.95,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -19.38,
+      "layers": [
+        "wind",
+        "grit"
+      ],
+      "sha256": "b3538eaa9f9a3b5b17da00d9c18efb77853b7bd96b5cd2198c79fff5e41f0b1a"
+    },
+    "rock-full": {
+      "seconds": 1.5,
+      "peak_dbfs": -1.11,
+      "rms_dbfs": -19.41,
+      "layers": [
+        "contact",
+        "weight",
+        "debris"
+      ],
+      "sha256": "bc82a446cda539576d3be6b446b71fe9d25ac923577dcc05a8266d86d5192fee"
+    },
+    "ultimate-fall-full": {
+      "seconds": 1.05,
+      "peak_dbfs": -2.62,
+      "rms_dbfs": -16.32,
+      "layers": [
+        "wind",
+        "grit",
+        "fire"
+      ],
+      "sha256": "c35b05182f8a844d91bd9484e8eaa84db8946421b3dcec6820cf3222ff94a0ad"
+    },
+    "ultimate-impact-full": {
+      "seconds": 2.15,
+      "peak_dbfs": -1.11,
+      "rms_dbfs": -19.3,
+      "layers": [
+        "contact",
+        "weight",
+        "debris",
+        "fire"
+      ],
+      "sha256": "61760e7d2ddef4f68a9da701b0c964f065924afccd11be1eb08eb00b47c60e2c"
+    }
+  },
+  "sources": {
+    "art/impact-sources/rpg/cloth1.ogg": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d",
+    "art/impact-sources/impact/impactMining_003.ogg": "4237fa2cd80364ad81cd0af44f67d7497f1c5edcc7bdb02cd22be2ba4580c83d",
+    "art/impact-sources/impact/impactMining_001.ogg": "61235a18de3f3d92118235398222dbf51d448f1be70b1c8bc962b10b86f2d9c6",
+    "art/impact-sources/impact/impactSoft_heavy_001.ogg": "4d0096364ba9e46119d2ff6df493fdc101bd2e1efae061da5e5f77a53b3fdcb6",
+    "art/impact-sources/impact/impactMining_000.ogg": "36b4ea107222d073c67ca64dde26944975609202d5090b2f2021213c1a7e35cd",
+    "art/impact-sources/impact/impactMining_002.ogg": "059558ec751115ca6b1441e00f0adc837c1a3eeb0a066b109e0fd879fc5d0b0c"
+  },
+  "reference_analysis": {
+    "陨石1.wav": {
+      "seconds": 1.1308390022675736,
+      "sha256": "b2602f997a97680e8bb9edd54bff34a2e11e1355f5c5799d25c63d127e8e16d0",
+      "energy_bands_hz": {
+        "0-160": 0.2351,
+        "160-500": 0.7435,
+        "500-1800": 0.0208,
+        "1800-5000": 0.0006,
+        "5000-11025": 0.0
+      }
+    },
+    "陨石2.wav": {
+      "seconds": 1.3726984126984128,
+      "sha256": "f17500e82312cb9e541be8c5661eac1c8946222016dc5b17460dea449299e2cd",
+      "energy_bands_hz": {
+        "0-160": 0.8967,
+        "160-500": 0.0324,
+        "500-1800": 0.0075,
+        "1800-5000": 0.056,
+        "5000-11025": 0.0075
+      }
+    }
+  },
+  "exporter_sha256": "a42844a457cdd271ca02b8bd66992cc819bffcf819933a8f0c83ece054241f7b"
+}

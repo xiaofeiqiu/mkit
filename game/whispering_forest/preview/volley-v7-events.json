@@ -1,0 +1,639 @@
+[
+	{
+		"index": 3,
+		"releases": [
+			{
+				"at": 0.5,
+				"cast_id": 1,
+				"index": 3,
+				"level": 1,
+				"ordinal": 0,
+				"planned_at": 0.5,
+				"target": [
+					40.0,
+					-60.0
+				]
+			},
+			{
+				"at": 0.7,
+				"cast_id": 1,
+				"index": 3,
+				"level": 1,
+				"ordinal": 1,
+				"planned_at": 0.7,
+				"target": [
+					110.0,
+					-60.0
+				]
+			},
+			{
+				"at": 0.9,
+				"cast_id": 1,
+				"index": 3,
+				"level": 1,
+				"ordinal": 2,
+				"planned_at": 0.9,
+				"target": [
+					110.0,
+					10.0
+				]
+			},
+			{
+				"at": 1.1,
+				"cast_id": 1,
+				"index": 3,
+				"level": 1,
+				"ordinal": 3,
+				"planned_at": 1.1,
+				"target": [
+					40.0,
+					10.0
+				]
+			},
+			{
+				"at": 1.3,
+				"cast_id": 1,
+				"index": 3,
+				"level": 1,
+				"ordinal": 4,
+				"planned_at": 1.3,
+				"target": [
+					-30.0,
+					10.0
+				]
+			}
+		],
+		"sounds": [
+			{
+				"at": 1.66666666666667,
+				"duration": 1.13070833333333,
+				"kind": "ice",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/ice-audio-v6/hit-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 1.86666666666667,
+				"duration": 1.13070833333333,
+				"kind": "ice",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/ice-audio-v6/hit-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 2.06666666666667,
+				"duration": 1.13070833333333,
+				"kind": "ice",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/ice-audio-v6/hit-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 2.26666666666667,
+				"duration": 1.13070833333333,
+				"kind": "ice",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/ice-audio-v6/hit-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 2.46666666666667,
+				"duration": 1.13070833333333,
+				"kind": "ice",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/ice-audio-v6/hit-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			}
+		],
+		"start": 0.5
+	},
+	{
+		"index": 2,
+		"releases": [
+			{
+				"at": 5.49999999999999,
+				"cast_id": 2,
+				"index": 2,
+				"level": 1,
+				"ordinal": 0,
+				"planned_at": 5.49999999999999,
+				"target": [
+					40.0,
+					-60.0
+				]
+			},
+			{
+				"at": 5.69999999999999,
+				"cast_id": 2,
+				"index": 2,
+				"level": 1,
+				"ordinal": 1,
+				"planned_at": 5.69999999999999,
+				"target": [
+					110.0,
+					-60.0
+				]
+			},
+			{
+				"at": 5.89999999999999,
+				"cast_id": 2,
+				"index": 2,
+				"level": 1,
+				"ordinal": 2,
+				"planned_at": 5.89999999999999,
+				"target": [
+					110.0,
+					10.0
+				]
+			},
+			{
+				"at": 6.09999999999999,
+				"cast_id": 2,
+				"index": 2,
+				"level": 1,
+				"ordinal": 3,
+				"planned_at": 6.09999999999999,
+				"target": [
+					40.0,
+					10.0
+				]
+			},
+			{
+				"at": 6.29999999999999,
+				"cast_id": 2,
+				"index": 2,
+				"level": 1,
+				"ordinal": 4,
+				"planned_at": 6.29999999999999,
+				"target": [
+					-30.0,
+					10.0
+				]
+			}
+		],
+		"sounds": [
+			{
+				"at": 5.49999999999999,
+				"duration": 0.95,
+				"kind": "fall",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-small.wav",
+				"pitch": 1.0,
+				"volume_db": -9.19381999969482
+			},
+			{
+				"at": 5.69999999999999,
+				"duration": 0.95,
+				"kind": "fall",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-small.wav",
+				"pitch": 1.0,
+				"volume_db": -9.19381999969482
+			},
+			{
+				"at": 5.89999999999999,
+				"duration": 0.95,
+				"kind": "fall",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-small.wav",
+				"pitch": 1.0,
+				"volume_db": -9.19381999969482
+			},
+			{
+				"at": 6.09999999999999,
+				"duration": 0.95,
+				"kind": "fall",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-small.wav",
+				"pitch": 1.0,
+				"volume_db": -9.19381999969482
+			},
+			{
+				"at": 6.29999999999999,
+				"duration": 0.95,
+				"kind": "fall",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-small.wav",
+				"pitch": 1.0,
+				"volume_db": -9.19381999969482
+			},
+			{
+				"at": 6.46666666666665,
+				"duration": 1.06587675431316,
+				"kind": "rock",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-small.wav",
+				"pitch": 1.03201425075531,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 6.66666666666665,
+				"duration": 1.07745661230148,
+				"kind": "rock",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-small.wav",
+				"pitch": 1.02092278003693,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 6.86666666666665,
+				"duration": 1.07973481553059,
+				"kind": "rock",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-small.wav",
+				"pitch": 1.01876866817474,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 7.06666666666665,
+				"duration": 1.06774431582612,
+				"kind": "rock",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-small.wav",
+				"pitch": 1.03020918369293,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 7.26666666666665,
+				"duration": 1.06750739448763,
+				"kind": "rock",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-small.wav",
+				"pitch": 1.03043782711029,
+				"volume_db": -8.19381999969482
+			}
+		],
+		"start": 5.49999999999999
+	},
+	{
+		"index": 1,
+		"releases": [
+			{
+				"at": 9.49999999999998,
+				"cast_id": 3,
+				"index": 1,
+				"level": 1,
+				"ordinal": 0,
+				"planned_at": 9.49999999999998,
+				"target": [
+					40.0,
+					-60.0
+				]
+			},
+			{
+				"at": 9.69999999999998,
+				"cast_id": 3,
+				"index": 1,
+				"level": 1,
+				"ordinal": 1,
+				"planned_at": 9.69999999999998,
+				"target": [
+					110.0,
+					-60.0
+				]
+			},
+			{
+				"at": 9.89999999999998,
+				"cast_id": 3,
+				"index": 1,
+				"level": 1,
+				"ordinal": 2,
+				"planned_at": 9.89999999999998,
+				"target": [
+					110.0,
+					10.0
+				]
+			},
+			{
+				"at": 10.1,
+				"cast_id": 3,
+				"index": 1,
+				"level": 1,
+				"ordinal": 3,
+				"planned_at": 10.1,
+				"target": [
+					40.0,
+					10.0
+				]
+			},
+			{
+				"at": 10.3,
+				"cast_id": 3,
+				"index": 1,
+				"level": 1,
+				"ordinal": 4,
+				"planned_at": 10.3,
+				"target": [
+					-30.0,
+					10.0
+				]
+			}
+		],
+		"sounds": [
+			{
+				"at": 9.49999999999998,
+				"duration": 0.679193239465813,
+				"kind": "wind",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-small.wav",
+				"pitch": 1.03063452243805,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 9.53333333333331,
+				"kind": "wind-loop",
+				"level": 1
+			},
+			{
+				"at": 9.69999999999998,
+				"duration": 0.688410624830741,
+				"kind": "wind",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-small.wav",
+				"pitch": 1.01683497428894,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 9.89999999999998,
+				"duration": 0.686004574667919,
+				"kind": "wind",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-small.wav",
+				"pitch": 1.02040135860443,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 10.1,
+				"duration": 0.683836126933034,
+				"kind": "wind",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-small.wav",
+				"pitch": 1.02363705635071,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 10.3,
+				"duration": 0.676546241883814,
+				"kind": "wind",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-small.wav",
+				"pitch": 1.03466689586639,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 10.5,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 10.8333333333333,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 11.3666666666666,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 11.6,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 12.2333333333333,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 12.7666666666666,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 13.1,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 13.7666666666666,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 14.0,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 14.5666666666666,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 14.8666666666666,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 15.3,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 15.6333333333333,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 16.1,
+				"duration": 0.695708333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 17.7,
+				"duration": 0.685316835694021,
+				"kind": "wind",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-small.wav",
+				"pitch": 1.02142536640167,
+				"volume_db": -13.0
+			}
+		],
+		"start": 9.49999999999998
+	},
+	{
+		"index": 0,
+		"releases": [
+			{
+				"at": 20.0000000000002,
+				"cast_id": 4,
+				"index": 0,
+				"level": 1,
+				"ordinal": 0,
+				"planned_at": 20.0000000000002,
+				"target": [
+					40.0,
+					-60.0
+				]
+			},
+			{
+				"at": 20.2000000000002,
+				"cast_id": 4,
+				"index": 0,
+				"level": 1,
+				"ordinal": 1,
+				"planned_at": 20.2000000000002,
+				"target": [
+					110.0,
+					-60.0
+				]
+			},
+			{
+				"at": 20.4000000000002,
+				"cast_id": 4,
+				"index": 0,
+				"level": 1,
+				"ordinal": 2,
+				"planned_at": 20.4000000000002,
+				"target": [
+					110.0,
+					10.0
+				]
+			},
+			{
+				"at": 20.6000000000002,
+				"cast_id": 4,
+				"index": 0,
+				"level": 1,
+				"ordinal": 3,
+				"planned_at": 20.6000000000002,
+				"target": [
+					40.0,
+					10.0
+				]
+			},
+			{
+				"at": 20.8000000000002,
+				"cast_id": 4,
+				"index": 0,
+				"level": 1,
+				"ordinal": 4,
+				"planned_at": 20.8000000000002,
+				"target": [
+					-30.0,
+					10.0
+				]
+			}
+		],
+		"sounds": [
+			{
+				"at": 20.0000000000002,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 20.2000000000002,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 20.4000000000002,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 20.6000000000002,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			},
+			{
+				"at": 20.8000000000002,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -8.19381999969482
+			}
+		],
+		"start": 20.0000000000002
+	}
+]

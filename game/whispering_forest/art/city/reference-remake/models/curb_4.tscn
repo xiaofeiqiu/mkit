@@ -1,0 +1,56 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/whispering_forest/art/city/civic_model.gd" id="1_bsncs"]
+[ext_resource type="Shader" path="res://game/whispering_forest/art/city/painted_limestone.gdshader" id="2_8s8c7"]
+[ext_resource type="Texture2D" path="res://game/whispering_forest/art/city/materials/wallstone.png" id="3_jplb2"]
+[ext_resource type="Shader" path="res://game/whispering_forest/art/city/reference-remake/painted_surface.gdshader" id="4_rpyl6"]
+[ext_resource type="Texture2D" path="res://game/whispering_forest/art/city/reference-remake/materials/limestone.png" id="5_rnbyg"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kga8s"]
+render_priority = 0
+shader = ExtResource("2_8s8c7")
+shader_parameter/paint = ExtResource("3_jplb2")
+shader_parameter/stone_color = Color(0.8666667, 0.8627451, 0.79607844, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_inix6"]
+size = Vector3(0.125, 0.112, 0.13)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bxtcq"]
+render_priority = 0
+shader = ExtResource("4_rpyl6")
+shader_parameter/base_color = Color(0.8666667, 0.8627451, 0.79607844, 1)
+shader_parameter/paint = ExtResource("5_rnbyg")
+shader_parameter/has_paint = true
+shader_parameter/paint_mean = Vector3(0.66337997, 0.62130475, 0.5453689)
+shader_parameter/paint_strength = 0.72
+shader_parameter/surface_kind = 0.0
+shader_parameter/roughness_value = 0.92
+
+[sub_resource type="BoxMesh" id="BoxMesh_1hfdl"]
+size = Vector3(0.119, 0.016, 0.105)
+
+[node name="Curb4" type="Node3D" unique_id=1614291077]
+script = ExtResource("1_bsncs")
+metadata/asset_id = "curb_4"
+metadata/ground_size = Vector2(0, 0)
+metadata/ground_corner = Vector3(0, 0, 0)
+metadata/door_ground = Vector3(0, 0, 0)
+metadata/height = 0.12
+metadata/module_spec = {
+"height": 0.12,
+"length": 4,
+"type": "curb"
+}
+metadata/connectors = [Vector3(-0.0625, 0, 0), Vector3(0.0625, 0, 0)]
+
+[node name="Detail_0000" type="MeshInstance3D" parent="." unique_id=1025635392]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.056, 0)
+material_override = SubResource("ShaderMaterial_kga8s")
+mesh = SubResource("BoxMesh_inix6")
+surface_material_override/0 = SubResource("ShaderMaterial_bxtcq")
+
+[node name="Detail_0001" type="MeshInstance3D" parent="Detail_0000" unique_id=1967486469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.052, 0)
+material_override = SubResource("ShaderMaterial_kga8s")
+mesh = SubResource("BoxMesh_1hfdl")
+surface_material_override/0 = SubResource("ShaderMaterial_bxtcq")

@@ -1,0 +1,533 @@
+{
+	"clips": {
+		"earth": {
+			"anchor": "projected model origin; no per-frame centering",
+			"bounds": [
+				[
+					[
+						144,
+						145,
+						95,
+						96
+					],
+					[
+						142,
+						146,
+						100,
+						93
+					],
+					[
+						143,
+						144,
+						98,
+						97
+					],
+					[
+						146,
+						142,
+						93,
+						99
+					],
+					[
+						145,
+						142,
+						95,
+						99
+					],
+					[
+						141,
+						144,
+						102,
+						95
+					],
+					[
+						143,
+						144,
+						96,
+						96
+					],
+					[
+						146,
+						141,
+						93,
+						103
+					]
+				],
+				[
+					[
+						131,
+						148,
+						119,
+						87
+					],
+					[
+						142,
+						143,
+						104,
+						101
+					],
+					[
+						149,
+						136,
+						86,
+						115
+					],
+					[
+						144,
+						139,
+						99,
+						104
+					],
+					[
+						132,
+						148,
+						123,
+						88
+					],
+					[
+						138,
+						142,
+						106,
+						99
+					],
+					[
+						149,
+						129,
+						87,
+						123
+					],
+					[
+						140,
+						138,
+						100,
+						108
+					]
+				],
+				[
+					[
+						149,
+						136,
+						88,
+						114
+					],
+					[
+						141,
+						142,
+						103,
+						101
+					],
+					[
+						131,
+						146,
+						122,
+						90
+					],
+					[
+						139,
+						140,
+						108,
+						102
+					],
+					[
+						150,
+						130,
+						84,
+						124
+					],
+					[
+						142,
+						136,
+						100,
+						110
+					],
+					[
+						134,
+						149,
+						115,
+						86
+					],
+					[
+						139,
+						143,
+						104,
+						98
+					]
+				],
+				[
+					[
+						141,
+						142,
+						100,
+						99
+					],
+					[
+						144,
+						139,
+						95,
+						106
+					],
+					[
+						142,
+						142,
+						100,
+						103
+					],
+					[
+						143,
+						142,
+						98,
+						99
+					],
+					[
+						143,
+						142,
+						97,
+						100
+					],
+					[
+						148,
+						144,
+						89,
+						96
+					],
+					[
+						142,
+						145,
+						100,
+						95
+					],
+					[
+						141,
+						148,
+						103,
+						87
+					]
+				],
+				[
+					[
+						143,
+						149,
+						101,
+						88
+					],
+					[
+						145,
+						146,
+						95,
+						94
+					],
+					[
+						152,
+						139,
+						81,
+						103
+					],
+					[
+						146,
+						145,
+						92,
+						95
+					],
+					[
+						143,
+						151,
+						100,
+						82
+					],
+					[
+						143,
+						148,
+						94,
+						88
+					],
+					[
+						148,
+						141,
+						85,
+						99
+					],
+					[
+						144,
+						146,
+						95,
+						95
+					]
+				],
+				[
+					[
+						143,
+						139,
+						97,
+						104
+					],
+					[
+						143,
+						141,
+						98,
+						101
+					],
+					[
+						141,
+						144,
+						103,
+						98
+					],
+					[
+						142,
+						144,
+						99,
+						96
+					],
+					[
+						144,
+						140,
+						95,
+						104
+					],
+					[
+						143,
+						143,
+						100,
+						100
+					],
+					[
+						141,
+						146,
+						103,
+						95
+					],
+					[
+						144,
+						140,
+						97,
+						103
+					]
+				]
+			],
+			"cell": 384,
+			"file": "res://game/whispering_forest/assets/combat-vfx/solid-8/earth.png",
+			"frames": 8,
+			"pivot": [
+				192.0,
+				192.0
+			],
+			"runtime_scale": 0.5,
+			"sha256": "d02875766a8e31793eda3a6010ec542ea786ff6b0474f357c4faa35e38473b48",
+			"variants": 6
+		},
+		"ice": {
+			"anchor": "projected model origin; no per-frame centering",
+			"bounds": [
+				[
+					[
+						169,
+						286,
+						45,
+						21
+					],
+					[
+						114,
+						260,
+						152,
+						71
+					],
+					[
+						112,
+						254,
+						155,
+						78
+					],
+					[
+						108,
+						168,
+						165,
+						166
+					],
+					[
+						105,
+						31,
+						170,
+						304
+					],
+					[
+						120,
+						74,
+						140,
+						254
+					],
+					[
+						132,
+						123,
+						121,
+						203
+					],
+					[
+						133,
+						128,
+						119,
+						197
+					]
+				]
+			],
+			"cell": 384,
+			"file": "res://game/whispering_forest/assets/combat-vfx/solid-8/ice.png",
+			"frames": 8,
+			"heights_metres": [
+				0.0,
+				0.0,
+				0.55,
+				1.65,
+				3.4,
+				2.85,
+				2.22,
+				2.16
+			],
+			"pivot": [
+				192.0,
+				297.817962646484
+			],
+			"runtime_scale": 0.5,
+			"sha256": "32aa35e5dee2cea037f0679c7310aa855a77525b5d723a84fd70459aa9e927d0",
+			"times": [
+				0.0,
+				0.2,
+				0.45,
+				0.72,
+				1.15,
+				1.62,
+				1.95,
+				2.3
+			],
+			"variants": 1
+		},
+		"wind": {
+			"anchor": "projected model origin; no per-frame centering",
+			"bounds": [
+				[
+					[
+						118,
+						89,
+						144,
+						213
+					],
+					[
+						117,
+						91,
+						141,
+						210
+					],
+					[
+						121,
+						90,
+						145,
+						212
+					],
+					[
+						124,
+						91,
+						137,
+						212
+					],
+					[
+						118,
+						97,
+						145,
+						206
+					],
+					[
+						122,
+						104,
+						142,
+						198
+					],
+					[
+						116,
+						95,
+						143,
+						207
+					],
+					[
+						119,
+						97,
+						137,
+						206
+					]
+				]
+			],
+			"cell": 384,
+			"file": "res://game/whispering_forest/assets/combat-vfx/solid-8/wind.png",
+			"frames": 8,
+			"pivot": [
+				192.0,
+				297.817962646484
+			],
+			"runtime_scale": 0.5,
+			"sha256": "a68f14e5ec936d3398730d844ab7585609b2c424d80596c29ae443ad9e8e82f9",
+			"variants": 1
+		}
+	},
+	"frames": 8,
+	"profile": {
+		"ambient_color": "e5eff8",
+		"ambient_energy": 0.42,
+		"azimuth_degrees": 45,
+		"camera_offset": [
+			12.0,
+			9.79795932769775,
+			12.0
+		],
+		"camera_target": [
+			0.0,
+			3.70000004768372,
+			0.0
+		],
+		"canvas": 2048,
+		"door_metres": 2.35,
+		"elevation_degrees": 30,
+		"exposure": 1.0,
+		"far": 100.0,
+		"fill_color": "d8e9ff",
+		"fill_energy": 0.16,
+		"fill_rotation": [
+			-30.0,
+			145.0,
+			0.0
+		],
+		"ground_shadow": "runtime_ground_layer",
+		"human_metres": 1.8371173,
+		"key_color": "fffaf1",
+		"key_energy": 1.2,
+		"key_rotation": [
+			-50.0,
+			-57.5,
+			0.0
+		],
+		"logical_units_per_metre": 32.0,
+		"model_self_shadow": true,
+		"msaa": 4,
+		"near": 0.1,
+		"output_color": "sRGB",
+		"pixels_per_metre": 90.5096679918781,
+		"projection": "orthographic",
+		"renderer": "forward_plus",
+		"runtime_scale": 0.5,
+		"sha256": "efca02c18801f93d44f7eb38db1a1706e32f794cc3f596bd6bf13895ec0bcb0b",
+		"shadow_bias": 0.025,
+		"shadow_distance": 48.0,
+		"shadow_normal_bias": 0.45,
+		"source": "res://game/whispering_forest/art/city/render_config.gd",
+		"ssao_intensity": 2.0,
+		"ssao_power": 1.3,
+		"ssao_radius": 1.2,
+		"storey_metres": 3.4,
+		"supersample": 2.0,
+		"tonemap": "linear",
+		"transparent": true,
+		"version": "bellwake-daylight-v3"
+	},
+	"sources": {
+		"res://game/whispering_forest/art/combat/solid_spell_model.gd": "4a28fe3f380f3280dc39bfa666b7cc3e62753535b58d334992b5468f9eadb28d",
+		"res://game/whispering_forest/art/combat/stone_weather.gdshader": "42f4f929484acfcdc9b1c8c2c1122d8cbd036bc1d4d1e40d2da0e71db3f02fdf",
+		"res://game/whispering_forest/tools/bake_solid_spells.gd": "724582314e0b8a75edf01d8cf6dbba2a44585612994966536af8af11c0bddc19"
+	}
+}

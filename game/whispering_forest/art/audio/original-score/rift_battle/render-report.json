@@ -1,0 +1,142 @@
+{
+  "title": "Riftbound - Against the Closing Gate",
+  "seconds": 106.666752,
+  "bpm": 144,
+  "key": "Dm",
+  "bars": 64,
+  "sample_rate": 48000,
+  "channels": 2,
+  "gain_db": 11.469999999999999,
+  "master_lufs": -17.0,
+  "master_true_peak_db": -3.06,
+  "ogg_lufs": -16.99,
+  "ogg_true_peak_db": -3.15,
+  "loudness_range_lu": 4.1,
+  "loop_sample_jump": 0.0005230605602264404,
+  "family_mix_gain_db": {
+    "strings": 10,
+    "bass": 3,
+    "brass": -2,
+    "percussion": -4,
+    "atmosphere": 13,
+    "accents": 4
+  },
+  "parts": [
+    {
+      "name": "String ostinato",
+      "gm_program_0_based": 48,
+      "group": "strings",
+      "note_count": 921
+    },
+    {
+      "name": "Solo violin",
+      "gm_program_0_based": 40,
+      "group": "strings",
+      "note_count": 173
+    },
+    {
+      "name": "Cellos",
+      "gm_program_0_based": 42,
+      "group": "bass",
+      "note_count": 512
+    },
+    {
+      "name": "Double bass",
+      "gm_program_0_based": 43,
+      "group": "bass",
+      "note_count": 256
+    },
+    {
+      "name": "French horns",
+      "gm_program_0_based": 60,
+      "group": "brass",
+      "note_count": 291
+    },
+    {
+      "name": "Trumpets",
+      "gm_program_0_based": 56,
+      "group": "brass",
+      "note_count": 120
+    },
+    {
+      "name": "Trombones",
+      "gm_program_0_based": 57,
+      "group": "brass",
+      "note_count": 120
+    },
+    {
+      "name": "Timpani",
+      "gm_program_0_based": 47,
+      "group": "percussion",
+      "note_count": 168
+    },
+    {
+      "name": "Wordless choir",
+      "gm_program_0_based": 52,
+      "group": "atmosphere",
+      "note_count": 36
+    },
+    {
+      "name": "Orchestral percussion",
+      "gm_program_0_based": 48,
+      "group": "percussion",
+      "note_count": 903
+    },
+    {
+      "name": "Tubular bells",
+      "gm_program_0_based": 14,
+      "group": "accents",
+      "note_count": 4
+    },
+    {
+      "name": "Taiko",
+      "gm_program_0_based": 116,
+      "group": "percussion",
+      "note_count": 240
+    },
+    {
+      "name": "Harp",
+      "gm_program_0_based": 46,
+      "group": "accents",
+      "note_count": 64
+    }
+  ],
+  "sections": [
+    {
+      "bar": 1,
+      "label": "A - pursuit",
+      "seconds": 0.0
+    },
+    {
+      "bar": 9,
+      "label": "A2 - counterattack",
+      "seconds": 13.333344
+    },
+    {
+      "bar": 17,
+      "label": "B - fighting forward",
+      "seconds": 26.666688
+    },
+    {
+      "bar": 25,
+      "label": "B2 - rising pressure",
+      "seconds": 40.000032
+    },
+    {
+      "bar": 33,
+      "label": "C - heartbeat / held breath",
+      "seconds": 53.333376
+    },
+    {
+      "bar": 41,
+      "label": "A3 - renewed assault",
+      "seconds": 66.66672
+    },
+    {
+      "bar": 57,
+      "label": "D - closing gate / dominant return",
+      "seconds": 93.333408
+    }
+  ],
+  "qa_scope": "Signal, timing and integration checks; not a claim of human listening or reference-quality parity."
+}

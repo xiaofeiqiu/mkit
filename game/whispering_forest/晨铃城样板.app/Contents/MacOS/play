@@ -1,0 +1,5 @@
+#!/bin/zsh
+set -eu
+launcher_dir="${0:A:h}"
+sample_dir="${launcher_dir:h:h:h}"
+exec "$sample_dir/Play Bellwake Sample.command" "$@"

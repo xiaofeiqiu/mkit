@@ -1,0 +1,14 @@
+PASS: 512x480, 13 editable layers, exact RGBA match after reopening, content bounds [57,42]-[463,419], 149377 transparent / 96383 painted pixels (0 partial alpha)
+hidden  00 · Warm paper (optional)
+visible 01 · Irregular cobbled footing
+visible 02 · Ground shadow and contact
+visible 03 · Weathered limestone and limewash
+visible 04 · Aged oak posts, braces and joinery
+visible 05 · Recessed leaded windows and shutters
+visible 06 · Oak arch, ironwork and worn entry stones
+visible 07 · Overlapping clay tiles / eave carpentry
+visible 08 · Gabled dormer and carved window
+visible 09 · Soot-darkened masonry chimney
+visible 10 · Wrought lantern and overflowing window box
+visible 11 · Garden herbs, ivy and grass fringe
+visible 12 · Oak garden fence / barrel / terracotta pots

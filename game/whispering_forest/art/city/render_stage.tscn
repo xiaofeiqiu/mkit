@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/whispering_forest/art/city/render_stage.gd" id="1_cx81c"]
+
+[sub_resource type="Environment" id="Environment_6nx85"]
+background_mode = 1
+background_color = Color(0, 0, 0, 0)
+ambient_light_source = 2
+ambient_light_color = Color(0.89411765, 0.92156863, 0.9411765, 1)
+ambient_light_energy = 0.46
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_power = 1.3
+
+[node name="BellwakeAssetStage" type="Node3D" unique_id=305658845]
+script = ExtResource("1_cx81c")
+
+[node name="SharedDaylight" type="WorldEnvironment" parent="." unique_id=1249954268]
+environment = SubResource("Environment_6nx85")
+
+[node name="SharedUpperLeftSun" type="DirectionalLight3D" parent="." unique_id=1684380390]
+transform = Transform3D(0.19594625, 0.7511944, -0.630327, 0, 0.64278764, 0.76604444, 0.98061466, -0.15010354, 0.12595183, 0, 0, 0)
+light_color = Color(1, 0.99215686, 0.95686275, 1)
+light_energy = 0.86
+shadow_enabled = true
+shadow_bias = 0.025
+shadow_normal_bias = 0.45
+directional_shadow_max_distance = 48.0
+
+[node name="CoolSkyFill" type="DirectionalLight3D" parent="." unique_id=240962757]
+transform = Transform3D(-0.81915206, -0.28678823, 0.49673176, 0, 0.8660254, 0.5, -0.57357645, 0.40957603, -0.7094065, 0, 0, 0)
+light_color = Color(0.84705883, 0.9137255, 1, 1)
+light_energy = 0.12
+
+[node name="Locked_2_to_1_Orthographic" type="Camera3D" parent="." unique_id=1679336308]
+transform = Transform3D(0.70710677, -0.3535534, 0.6123724, 0, 0.8660254, 0.50000006, -0.70710677, -0.3535534, 0.6123724, 12, 13.497959, 12)
+projection = 1
+current = true
+size = 22.627417
+near = 0.1
+far = 100.0

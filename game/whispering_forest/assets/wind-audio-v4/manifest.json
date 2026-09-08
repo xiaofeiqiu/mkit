@@ -1,0 +1,25 @@
+{
+  "origin": "User-supplied wind hit recordings; not original synthesis or CC0 stock.",
+  "clips": [
+    {
+      "file": "assets/wind-audio-v4/hit-small.wav",
+      "source": "art/audio/wind-v4/user-supplied/wind-hit-level-1-source.wav",
+      "source_sha256": "90ac49ab1197d2ca3674526aab1d01be8cd7b35d4816b3c42720a7f25c560ec3",
+      "sha256": "d990f2b8a8d86a76481044de802dddad9fe690efe5194ab122620dad977b3207",
+      "source_level": 1,
+      "duration": 0.6956916099773243,
+      "gain_db": -2,
+      "peak": 0.78204345703125
+    },
+    {
+      "file": "assets/wind-audio-v4/hit-full.wav",
+      "source": "art/audio/wind-v4/user-supplied/wind-hit-level-10-source.wav",
+      "source_sha256": "42472cc5482f6dddb2e1e3b54fe53f44bd9311e457e742cd990eb05221578f7b",
+      "sha256": "a3e6272e80a4b2bd894b634efabed6c1e22cc0a993a56ec0465943db7da79df2",
+      "source_level": 10,
+      "duration": 0.9570068027210884,
+      "gain_db": -1,
+      "peak": 0.907684326171875
+    }
+  ]
+}

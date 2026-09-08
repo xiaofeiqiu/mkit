@@ -1,0 +1,61 @@
+{
+  "fall-small": {
+    "peak_dbfs": -7.33,
+    "rms_dbfs": -24.09,
+    "first_50ms_rms_dbfs": -38.06,
+    "layers": [
+      "wind",
+      "grit"
+    ]
+  },
+  "rock-small": {
+    "peak_dbfs": -3.61,
+    "rms_dbfs": -25.9,
+    "first_50ms_rms_dbfs": -14.11,
+    "layers": [
+      "contact",
+      "weight",
+      "debris"
+    ]
+  },
+  "fall-full": {
+    "peak_dbfs": -3.74,
+    "rms_dbfs": -19.38,
+    "first_50ms_rms_dbfs": -34.18,
+    "layers": [
+      "wind",
+      "grit"
+    ]
+  },
+  "rock-full": {
+    "peak_dbfs": -1.11,
+    "rms_dbfs": -19.41,
+    "first_50ms_rms_dbfs": -9.65,
+    "layers": [
+      "contact",
+      "weight",
+      "debris"
+    ]
+  },
+  "ultimate-fall-full": {
+    "peak_dbfs": -2.62,
+    "rms_dbfs": -16.32,
+    "first_50ms_rms_dbfs": -28.16,
+    "layers": [
+      "wind",
+      "grit",
+      "fire"
+    ]
+  },
+  "ultimate-impact-full": {
+    "peak_dbfs": -1.11,
+    "rms_dbfs": -19.3,
+    "first_50ms_rms_dbfs": -9.7,
+    "layers": [
+      "contact",
+      "weight",
+      "debris",
+      "fire"
+    ]
+  }
+}

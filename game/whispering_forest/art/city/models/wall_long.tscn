@@ -1,0 +1,1188 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/whispering_forest/art/city/civic_model.gd" id="1_irw5m"]
+[ext_resource type="Shader" path="res://game/whispering_forest/art/city/painted_limestone.gdshader" id="2_7damj"]
+[ext_resource type="Texture2D" path="res://game/whispering_forest/art/city/materials/wallstone.png" id="3_7gvg6"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gxr4x"]
+cull_mode = 2
+specular_mode = 2
+albedo_color = Color(0.52156866, 0.5529412, 0.5176471, 1)
+roughness = 0.92
+
+[sub_resource type="BoxMesh" id="BoxMesh_1orby"]
+size = Vector3(2.9355261, 3.35, 1.075)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h0x4f"]
+render_priority = 0
+shader = ExtResource("2_7damj")
+shader_parameter/paint = ExtResource("3_7gvg6")
+shader_parameter/stone_color = Color(0.7254902, 0.7490196, 0.68235296, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_iangw"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cpr41"]
+render_priority = 0
+shader = ExtResource("2_7damj")
+shader_parameter/paint = ExtResource("3_7gvg6")
+shader_parameter/stone_color = Color(0.8666667, 0.8627451, 0.79607844, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_aukxm"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ug7dq"]
+render_priority = 0
+shader = ExtResource("2_7damj")
+shader_parameter/paint = ExtResource("3_7gvg6")
+shader_parameter/stone_color = Color(0.7882353, 0.7882353, 0.72156864, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_14fes"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qyquv"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_poioa"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6l2e0"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yhque"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w8u7x"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yw110"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xpg5p"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_aa4fx"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s3a2d"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p3ey5"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2hrh4"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ofj6s"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_alim1"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bq5sn"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n3xtu"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rw8q8"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xs8pi"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5mtdx"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6ss35"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_m8gmn"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vrgo2"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nsi5a"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_t2hys"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q5lsu"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8itrq"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yisad"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_dmf24"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xcj6q"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tw3sx"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0056u"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h83uq"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q7ts8"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_75s1k"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_u1b52"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_xx4oj"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tcp6l"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6pv7y"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n11cx"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6rfr7"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2hi4p"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_saewl"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ibert"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6d06p"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5yv4e"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8w77w"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6o63x"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_er01g"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fb51q"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jcs2v"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kfp4f"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gaj4s"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4bog3"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_drp46"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_r2slw"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7ppxs"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6ybw8"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ewja5"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_oqmm6"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3svdf"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_un3so"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jjebd"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n4ele"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rj55m"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3g84g"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6q4xn"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_d3qps"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tov2e"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_n2p3y"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p25d8"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yqvbo"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7hqs4"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gmcr0"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pt8of"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_djlli"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hdtl3"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6knk4"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_elvnr"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2o1gl"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7oxrw"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lxs5v"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gjjur"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1lg3q"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6btkc"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yex7d"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ygpi1"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0ok05"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p8ngx"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hrdi2"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gpcxp"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_f2kxh"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_m6ib1"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yc8av"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_i0twc"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_374dn"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jrqd6"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_glreq"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4rsdc"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rm0do"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mqso6"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ubkst"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rlywr"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_reuyf"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_k7je6"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wcilb"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_umfjh"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rltaa"]
+size = Vector3(0.2700526, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ybm50"]
+size = Vector3(0.23505262, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_l5sdl"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_182rv"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_owqqn"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w4pua"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p8f03"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jlq26"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kw3n1"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_diklq"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_frdd1"]
+size = Vector3(0.56610525, 0.28354543, 1.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_agw8l"]
+size = Vector3(0.5311052, 0.035, 1.075)
+
+[sub_resource type="BoxMesh" id="BoxMesh_aciwk"]
+size = Vector3(2.9605262, 0.2, 1.27)
+
+[sub_resource type="BoxMesh" id="BoxMesh_4fwch"]
+size = Vector3(2.9605262, 0.13, 1.17)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1xoej"]
+size = Vector3(2.9605262, 0.35, 0.22)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3wchh"]
+size = Vector3(0.43, 0.45, 0.29)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wnls1"]
+size = Vector3(0.395, 0.035, 0.265)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nsjh7"]
+size = Vector3(0.48, 0.06, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_h3836"]
+size = Vector3(0.43, 0.45, 0.29)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s3j3d"]
+size = Vector3(0.395, 0.035, 0.265)
+
+[sub_resource type="BoxMesh" id="BoxMesh_q5rs5"]
+size = Vector3(0.48, 0.06, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gbjyc"]
+size = Vector3(0.43, 0.45, 0.29)
+
+[sub_resource type="BoxMesh" id="BoxMesh_shnm8"]
+size = Vector3(0.395, 0.035, 0.265)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3p7dv"]
+size = Vector3(0.48, 0.06, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1uqff"]
+size = Vector3(2.9605262, 0.35, 0.22)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1cnpv"]
+size = Vector3(0.43, 0.45, 0.29)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hg56e"]
+size = Vector3(0.395, 0.035, 0.265)
+
+[sub_resource type="BoxMesh" id="BoxMesh_bue0i"]
+size = Vector3(0.48, 0.06, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7b6r2"]
+size = Vector3(0.43, 0.45, 0.29)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ko3ls"]
+size = Vector3(0.395, 0.035, 0.265)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o43al"]
+size = Vector3(0.48, 0.06, 0.34)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sdvga"]
+size = Vector3(0.43, 0.45, 0.29)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1jgpg"]
+size = Vector3(0.395, 0.035, 0.265)
+
+[sub_resource type="BoxMesh" id="BoxMesh_c1wi7"]
+size = Vector3(0.48, 0.06, 0.34)
+
+[node name="WallLong" type="Node3D" unique_id=1222560489]
+script = ExtResource("1_irw5m")
+metadata/asset_id = "wall_long"
+metadata/ground_size = Vector2(0, 0)
+metadata/ground_corner = Vector3(0, 0, 0)
+metadata/door_ground = Vector3(0, 0, 0)
+metadata/height = 4.1
+metadata/module_spec = {
+"length": 94.73684210526316,
+"type": "wall"
+}
+metadata/connectors = [Vector3(-1.4802631, 0, 0), Vector3(1.4802631, 0, 0)]
+
+[node name="CoursedCurtainWall" type="Node3D" parent="." unique_id=201750079]
+
+[node name="Detail_0000" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1134547552]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.675, 0)
+material_override = SubResource("StandardMaterial3D_gxr4x")
+mesh = SubResource("BoxMesh_1orby")
+
+[node name="Detail_0001" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1535002540]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 0.15227272, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_iangw")
+
+[node name="Detail_0002" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=50227414]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 0.27604544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_aukxm")
+
+[node name="Detail_0003" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=865787077]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 0.15227272, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_14fes")
+
+[node name="Detail_0004" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1444225606]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 0.27604544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_qyquv")
+
+[node name="Detail_0005" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1389487660]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 0.15227272, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_poioa")
+
+[node name="Detail_0006" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1410985397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 0.27604544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_6l2e0")
+
+[node name="Detail_0007" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=774734581]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 0.15227272, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_yhque")
+
+[node name="Detail_0008" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1769376025]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 0.27604544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_w8u7x")
+
+[node name="Detail_0009" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1169820517]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 0.15227272, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_yw110")
+
+[node name="Detail_0010" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=450477408]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 0.27604544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_xpg5p")
+
+[node name="Detail_0011" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=133992626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 0.45681816, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_aa4fx")
+
+[node name="Detail_0012" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1306359636]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 0.5805909, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_s3a2d")
+
+[node name="Detail_0013" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=969980137]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 0.45681816, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_p3ey5")
+
+[node name="Detail_0014" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1621216897]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 0.5805909, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_2hrh4")
+
+[node name="Detail_0015" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=268106402]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 0.45681816, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_ofj6s")
+
+[node name="Detail_0016" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1970026616]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 0.5805909, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_alim1")
+
+[node name="Detail_0017" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1739366373]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 0.45681816, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_bq5sn")
+
+[node name="Detail_0018" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1545776756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 0.5805909, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_n3xtu")
+
+[node name="Detail_0019" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1269478705]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 0.45681816, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_rw8q8")
+
+[node name="Detail_0020" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=2072117589]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 0.5805909, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_xs8pi")
+
+[node name="Detail_0021" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=825881334]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 0.45681816, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_5mtdx")
+
+[node name="Detail_0022" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=734353701]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 0.5805909, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_6ss35")
+
+[node name="Detail_0023" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=334580098]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 0.7613636, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_m8gmn")
+
+[node name="Detail_0024" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1385978333]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 0.88513637, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_vrgo2")
+
+[node name="Detail_0025" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=694074583]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 0.7613636, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_nsi5a")
+
+[node name="Detail_0026" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=602485093]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 0.88513637, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_t2hys")
+
+[node name="Detail_0027" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1706926804]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 0.7613636, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_q5lsu")
+
+[node name="Detail_0028" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1761908886]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 0.88513637, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_8itrq")
+
+[node name="Detail_0029" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1142968768]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 0.7613636, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_yisad")
+
+[node name="Detail_0030" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1274004560]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 0.88513637, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_dmf24")
+
+[node name="Detail_0031" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=594594013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 0.7613636, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_xcj6q")
+
+[node name="Detail_0032" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=904778657]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 0.88513637, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_tw3sx")
+
+[node name="Detail_0033" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1891228475]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 1.065909, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_0056u")
+
+[node name="Detail_0034" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=547675660]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 1.1896818, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_h83uq")
+
+[node name="Detail_0035" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1818950134]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 1.065909, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_q7ts8")
+
+[node name="Detail_0036" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1505537355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 1.1896818, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_75s1k")
+
+[node name="Detail_0037" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1358666377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 1.065909, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_u1b52")
+
+[node name="Detail_0038" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1313664991]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 1.1896818, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_xx4oj")
+
+[node name="Detail_0039" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1592966090]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 1.065909, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_tcp6l")
+
+[node name="Detail_0040" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=686202597]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 1.1896818, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_6pv7y")
+
+[node name="Detail_0041" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1513501574]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 1.065909, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_n11cx")
+
+[node name="Detail_0042" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=303587262]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 1.1896818, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_6rfr7")
+
+[node name="Detail_0043" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1768289459]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 1.065909, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_2hi4p")
+
+[node name="Detail_0044" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1149621707]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 1.1896818, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_saewl")
+
+[node name="Detail_0045" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=524152503]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 1.3704545, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_ibert")
+
+[node name="Detail_0046" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1010827252]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 1.4942273, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_6d06p")
+
+[node name="Detail_0047" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1709463107]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 1.3704545, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_5yv4e")
+
+[node name="Detail_0048" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=275464219]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 1.4942273, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_8w77w")
+
+[node name="Detail_0049" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1746799931]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 1.3704545, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_6o63x")
+
+[node name="Detail_0050" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=549085051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 1.4942273, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_er01g")
+
+[node name="Detail_0051" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=36502705]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 1.3704545, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_fb51q")
+
+[node name="Detail_0052" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=579258000]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 1.4942273, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_jcs2v")
+
+[node name="Detail_0053" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=172277854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 1.3704545, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_kfp4f")
+
+[node name="Detail_0054" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1750751562]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 1.4942273, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_gaj4s")
+
+[node name="Detail_0055" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=740100796]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 1.675, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_4bog3")
+
+[node name="Detail_0056" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=314400138]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 1.7987727, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_drp46")
+
+[node name="Detail_0057" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=245766843]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 1.675, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_r2slw")
+
+[node name="Detail_0058" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=819527647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 1.7987727, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_7ppxs")
+
+[node name="Detail_0059" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=41514790]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 1.675, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_6ybw8")
+
+[node name="Detail_0060" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1658903216]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 1.7987727, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_ewja5")
+
+[node name="Detail_0061" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1754749129]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 1.675, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_oqmm6")
+
+[node name="Detail_0062" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1983912637]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 1.7987727, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_3svdf")
+
+[node name="Detail_0063" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1250496294]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 1.675, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_un3so")
+
+[node name="Detail_0064" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=124190565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 1.7987727, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_jjebd")
+
+[node name="Detail_0065" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=967392324]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 1.675, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_n4ele")
+
+[node name="Detail_0066" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1495730986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 1.7987727, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_rj55m")
+
+[node name="Detail_0067" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1076489954]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 1.9795454, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_3g84g")
+
+[node name="Detail_0068" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1434892968]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 2.103318, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_6q4xn")
+
+[node name="Detail_0069" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1716917026]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 1.9795454, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_d3qps")
+
+[node name="Detail_0070" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1616410282]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 2.103318, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_tov2e")
+
+[node name="Detail_0071" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=645462957]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 1.9795454, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_n2p3y")
+
+[node name="Detail_0072" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1359211828]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 2.103318, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_p25d8")
+
+[node name="Detail_0073" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1134787765]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 1.9795454, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_yqvbo")
+
+[node name="Detail_0074" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=416110902]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 2.103318, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_7hqs4")
+
+[node name="Detail_0075" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=356727254]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 1.9795454, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_gmcr0")
+
+[node name="Detail_0076" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1668083481]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 2.103318, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_pt8of")
+
+[node name="Detail_0077" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1380331820]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 2.2840908, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_djlli")
+
+[node name="Detail_0078" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=317847827]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 2.4078634, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_hdtl3")
+
+[node name="Detail_0079" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1112412036]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 2.2840908, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_6knk4")
+
+[node name="Detail_0080" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1883870763]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 2.4078634, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_elvnr")
+
+[node name="Detail_0081" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1851615967]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 2.2840908, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_2o1gl")
+
+[node name="Detail_0082" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=615497995]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 2.4078634, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_7oxrw")
+
+[node name="Detail_0083" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1369552942]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 2.2840908, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_lxs5v")
+
+[node name="Detail_0084" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1885054996]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 2.4078634, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_gjjur")
+
+[node name="Detail_0085" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=465446677]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 2.2840908, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_1lg3q")
+
+[node name="Detail_0086" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1376015625]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 2.4078634, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_6btkc")
+
+[node name="Detail_0087" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1986353527]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 2.2840908, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_yex7d")
+
+[node name="Detail_0088" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=446999377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 2.4078634, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_ygpi1")
+
+[node name="Detail_0089" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1437724852]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 2.5886364, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_0ok05")
+
+[node name="Detail_0090" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=645720242]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 2.712409, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_p8ngx")
+
+[node name="Detail_0091" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=781402510]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 2.5886364, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_hrdi2")
+
+[node name="Detail_0092" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1917954665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 2.712409, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_gpcxp")
+
+[node name="Detail_0093" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1098669799]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 2.5886364, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_f2kxh")
+
+[node name="Detail_0094" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=430467493]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 2.712409, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_m6ib1")
+
+[node name="Detail_0095" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1958133702]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 2.5886364, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_yc8av")
+
+[node name="Detail_0096" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1331766495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 2.712409, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_i0twc")
+
+[node name="Detail_0097" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=979484042]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 2.5886364, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_374dn")
+
+[node name="Detail_0098" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=2023207892]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 2.712409, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_jrqd6")
+
+[node name="Detail_0099" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=336624205]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 2.8931818, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_glreq")
+
+[node name="Detail_0100" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1576778443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3322368, 3.0169544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_4rsdc")
+
+[node name="Detail_0101" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1803215430]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 2.8931818, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_rm0do")
+
+[node name="Detail_0102" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1852554397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.88815784, 3.0169544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_mqso6")
+
+[node name="Detail_0103" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=971076747]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 2.8931818, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_ubkst")
+
+[node name="Detail_0104" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1693695957]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.29605263, 3.0169544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_rlywr")
+
+[node name="Detail_0105" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=895796220]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 2.8931818, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_reuyf")
+
+[node name="Detail_0106" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1059722075]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.29605263, 3.0169544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_k7je6")
+
+[node name="Detail_0107" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=2020636951]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 2.8931818, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_wcilb")
+
+[node name="Detail_0108" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=524610765]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.88815784, 3.0169544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_umfjh")
+
+[node name="Detail_0109" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1905176076]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 2.8931818, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_rltaa")
+
+[node name="Detail_0110" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1622771187]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3322368, 3.0169544, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_ybm50")
+
+[node name="Detail_0111" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=265347540]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 3.1977272, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_l5sdl")
+
+[node name="Detail_0112" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1061026151]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1842105, 3.3214998, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_182rv")
+
+[node name="Detail_0113" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1581909031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 3.1977272, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_owqqn")
+
+[node name="Detail_0114" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=2081549216]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.59210527, 3.3214998, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_w4pua")
+
+[node name="Detail_0115" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=900866709]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 3.1977272, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_p8f03")
+
+[node name="Detail_0116" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1637486425]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.110223e-16, 3.3214998, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_jlq26")
+
+[node name="Detail_0117" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=953095281]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 3.1977272, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_kw3n1")
+
+[node name="Detail_0118" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=34754022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59210527, 3.3214998, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_diklq")
+
+[node name="Detail_0119" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1006296946]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 3.1977272, 0)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_frdd1")
+
+[node name="Detail_0120" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=2038218001]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1842105, 3.3214998, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_agw8l")
+
+[node name="BatteredFoundation" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=196321499]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_aciwk")
+
+[node name="StoneWallWalk" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1722000089]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.36, 0)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_4fwch")
+
+[node name="Parapet" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1590192782]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.58, -0.44)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_1xoej")
+
+[node name="Detail_0124" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1447022642]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9868421, 3.94, -0.44)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_3wchh")
+
+[node name="Detail_0125" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=542588253]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9868421, 4.147, -0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_wnls1")
+
+[node name="Detail_0126" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=30364671]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9868421, 4.17, -0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_nsjh7")
+
+[node name="Detail_0127" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1392744023]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.94, -0.44)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_h3836")
+
+[node name="Detail_0128" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1870270072]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.147, -0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_s3j3d")
+
+[node name="Detail_0129" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1552437396]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.17, -0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_q5rs5")
+
+[node name="Detail_0130" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1622954589]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9868421, 3.94, -0.44)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_gbjyc")
+
+[node name="Detail_0131" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1311588859]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9868421, 4.147, -0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_shnm8")
+
+[node name="Detail_0132" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=883532280]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9868421, 4.17, -0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_3p7dv")
+
+[node name="@MeshInstance3D@257" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=442301349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.58, 0.44)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_1uqff")
+
+[node name="Detail_0134" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=301402905]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9868421, 3.94, 0.44)
+material_override = SubResource("ShaderMaterial_h0x4f")
+mesh = SubResource("BoxMesh_1cnpv")
+
+[node name="Detail_0135" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=814070638]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9868421, 4.147, 0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_hg56e")
+
+[node name="Detail_0136" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1072857055]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9868421, 4.17, 0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_bue0i")
+
+[node name="Detail_0137" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1105420035]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.94, 0.44)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_7b6r2")
+
+[node name="Detail_0138" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=2004746190]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.147, 0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_ko3ls")
+
+[node name="Detail_0139" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1976499495]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.17, 0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_o43al")
+
+[node name="Detail_0140" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=395367382]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9868421, 3.94, 0.44)
+material_override = SubResource("ShaderMaterial_ug7dq")
+mesh = SubResource("BoxMesh_sdvga")
+
+[node name="Detail_0141" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1591134963]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9868421, 4.147, 0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_1jgpg")
+
+[node name="Detail_0142" type="MeshInstance3D" parent="CoursedCurtainWall" unique_id=1165011079]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9868421, 4.17, 0.44)
+material_override = SubResource("ShaderMaterial_cpr41")
+mesh = SubResource("BoxMesh_c1wi7")

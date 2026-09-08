@@ -1,0 +1,13 @@
+{
+  "duration": "24.033333",
+  "frames": "721",
+  "video": "h264",
+  "audio": "aac",
+  "sample_rate": "48000",
+  "peak_dbfs": -0.586,
+  "hit_events": {
+    "1": 12,
+    "10": 20
+  },
+  "render_errors": false
+}

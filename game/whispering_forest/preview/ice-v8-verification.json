@@ -1,0 +1,14 @@
+{
+  "duration": "9.033333",
+  "frames": "271",
+  "audio_peak_dbfs": -0.102,
+  "verified_casts": 2,
+  "peak_pose_one_based": 5,
+  "damage_and_sound_same_update": true,
+  "quiet_during_growth": true,
+  "source_unmodified": true,
+  "source_name": "冰1.wav",
+  "source_sha256": "dc1c5f234d300ab24867a7eb835b70ca7dea589bbd00750bb0bf07c291e18bb4",
+  "runtime_sha256": "c20d94f3683859f6b1c2953593bdd12c3ac18e2f30ade58c96e9708e2e16c3da",
+  "artistic_listening_approval": "pending user audition"
+}

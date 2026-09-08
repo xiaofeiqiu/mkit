@@ -1,0 +1,33 @@
+{
+  "method": "imagegen built-in",
+  "reference": "/var/folders/y4/rwzljltx10v6qf6dww0ry69r0000gn/T/codex-clipboard-ec4b9d39-2c40-4694-90ec-abe1e4089d89.png",
+  "use": "Flat surface textures on editable 3D meshes; never used as whole-city background",
+  "prompts": [
+    {
+      "key": "limestone",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square base-color material texture for an editable 3D model in a detailed nostalgic Japanese fantasy isometric RPG. Match the attached reference's refined, lightly hand-painted, aged craft material quality, soft natural palette and restrained detail. This is a FLAT unlit surface texture, NOT an isometric object, illustration, sheet of objects or city image. Edge-to-edge material only, orthographic straight-on, no perspective, no cast shadows, no directional baked lighting, no text, no border, no watermark. 1024x1024, high quality, seamless all four edges. Material: pale warm-grey carved limestone surface, very fine mineral grain, subtle ochre and cool grey mottling, faint shallow chips and occasional hairline fissures. Single continuous stone material, no brick courses, NO mortar lines, no large blocks, no large cracks. Mostly light ivory-grey neutral albedo; localized faint moss-green weathering on at most 3 percent. The model will supply masonry joints and carved edges."
+    },
+    {
+      "key": "oak",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square base-color material texture for an editable 3D model in a detailed nostalgic Japanese fantasy isometric RPG. Match the attached reference's refined, lightly hand-painted, aged craft material quality, soft natural palette and restrained detail. This is a FLAT unlit surface texture, NOT an isometric object, illustration, sheet of objects or city image. Edge-to-edge material only, orthographic straight-on, no perspective, no cast shadows, no directional baked lighting, no text, no border, no watermark. 1024x1024, high quality, seamless all four edges. Material: aged medium warm brown oak, narrow gently wavering longitudinal grain running vertically, subtle grey dry edges and occasional fine growth rings, a few small dark pin knots. Rich matte wood grain painted with economy and softened edges, not photoreal photography. Single uninterrupted wood surface, no plank seams, no hardware, no text. Model provides timber beams and joints."
+    },
+    {
+      "key": "cobblestone",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square base-color material texture for an editable 3D model in a detailed nostalgic Japanese fantasy isometric RPG. Match the attached reference's refined, lightly hand-painted, aged craft material quality, soft natural palette and restrained detail. This is a FLAT unlit surface texture, NOT an isometric object, illustration, sheet of objects or city image. Edge-to-edge material only, orthographic straight-on, no perspective, no cast shadows, no directional baked lighting, no text, no border, no watermark. 1024x1024, high quality, seamless all four edges. Material: cool medium grey old town carriageway, carefully laid small rectangular granite setts in staggered running-bond courses, individual stones about twice as wide as long, slightly varying cut dimensions and subtle smooth worn tops, narrow pale-grey dust joints. Subtle muted per-stone variation, sparse worn beige repairs. Flat TOP VIEW of a seamless walkable pavement albedo, no curbs, plants, props or road markings. Tiny chips and few moss specks, restrained hand-painted fantasy material. No black mortar, no high contrast speckle noise."
+    }
+  ],
+  "additional_materials": [
+    {
+      "key": "flagstone",
+      "prompt": "Use case: stylized-concept. A single seamless 1024x1024 top-down unlit base color texture for pale sandstone pedestrian paving in a detailed nostalgic Japanese fantasy RPG, matching the supplied reference. Close tessellation of rectangular slabs and a few square slabs of varied sizes in naturally interlocking courses. Light warm ivory grey sandstone with fine mineral grain, shallow worn chipped edges, tiny restrained moss traces in narrow grey joints, subtle beige and grey stone variation. Restrained lightly hand-painted craftsmanship. Edge-to-edge pavement only. Surface material for 3D ground, not an isometric asset or scene. NO perspective, lighting gradients, cast shadows, plants, curbs, objects, labels or border. No large random cracked Voronoi polygons, no black grout. Seamless in both axes."
+    },
+    {
+      "key": "limewash",
+      "prompt": "Use case: stylized-concept. A single seamless square 1024x1024 flat unlit base color texture for aged pale cream lime plaster walls of a detailed nostalgic Japanese fantasy medieval house, matching the supplied reference's fine painted material quality. Pale warm ivory, subtle softly troweled plaster grain and sparse shallow chipped patches exposing a slightly darker sandy layer, small barely visible hairline age marks. Predominantly intact inhabited and maintained wall; no ruin, no peeling paint flakes, no bricks or mortar joints, no windows, beams or objects. Delicate natural low-contrast hand-painted variation, no directional light, no cast shadows, no perspective, no border, text or watermark. Edge-to-edge surface, seamless all sides."
+    }
+  ],
+  "additional_sources": {
+    "flagstone.png": "/Users/dev/.codex/generated_images/01a076ea-a04b-7cb3-93aa-deb792a4a5fe/exec-88e4fea7-7ea8-47a9-9dc8-80b7adac1927.png",
+    "limewash.png": "/Users/dev/.codex/generated_images/01a076ea-a04b-7cb3-93aa-deb792a4a5fe/exec-9fa6f067-d241-4293-9aa9-a623762e56af.png"
+  }
+}

@@ -1,0 +1,20 @@
+{
+	"res://game/whispering_forest/art/city/reference-remake/bake_assets.gd": "18ff9fb38c7e21fa09dbf0eab9620a6f335cfbf09de48e2020d3fc5847ff5b9f",
+	"res://game/whispering_forest/art/city/reference-remake/materials/cobblestone.png": "6772a671ebc6528aa8dee20cbbc2c2934764524b23289df8219177a5ba3fb828",
+	"res://game/whispering_forest/art/city/reference-remake/materials/cobblestone.png.import": "d903cb9564f803275c32f02e4c11ae12004e8b54f308134902c3ba4279630642",
+	"res://game/whispering_forest/art/city/reference-remake/materials/flagstone.png": "7054b98e350333aaed47b3280786d333014daf3414a01ce1c2c11d9522f6183d",
+	"res://game/whispering_forest/art/city/reference-remake/materials/flagstone.png.import": "24b25ce6b78a0c5f2e89671ea454b053852d20bbefdbe37b4f2618eee1868aa1",
+	"res://game/whispering_forest/art/city/reference-remake/materials/limestone.png": "fc58cb9298b5e7625cf91ca57491c04a6790468106985be50400c5de874de70a",
+	"res://game/whispering_forest/art/city/reference-remake/materials/limestone.png.import": "469963303c04d11a94229e1fa9e6c586009e33e365f053c3824e58507fbb6407",
+	"res://game/whispering_forest/art/city/reference-remake/materials/limewash-weathered.png": "578f24f56e92855c812cf1bd53b20b8fb92e05e3e13fcfc0f51ad7123d13b9bc",
+	"res://game/whispering_forest/art/city/reference-remake/materials/limewash-weathered.png.import": "6a11f4beb40a46b6617ffbfccbf837769fad86965119a71a621a97b2a039c9f9",
+	"res://game/whispering_forest/art/city/reference-remake/materials/limewash.png": "00fed636dce7d14e1376dbce1999b96fd27a06db8df89509c4b28306cf855e35",
+	"res://game/whispering_forest/art/city/reference-remake/materials/limewash.png.import": "df18d4ac5510627761ae2efe77eb7b5e136fa2bf1bc5d7fedf6a02eb7f2869eb",
+	"res://game/whispering_forest/art/city/reference-remake/materials/oak.png": "0f905f757a22252e44911bee31ca3231897d6f04d06f8941d3906d1f746a4ef9",
+	"res://game/whispering_forest/art/city/reference-remake/materials/oak.png.import": "7e5b3667b1d300f0030d76804c57f7ee5f6fa8990a74fd0f0b8def9d13e33298",
+	"res://game/whispering_forest/art/city/reference-remake/materials/roof-mineral-painted.png": "f22ee648d276924722122fe72b910cfb4dbfc3ae3942be592bf1492f40da2ec9",
+	"res://game/whispering_forest/art/city/reference-remake/materials/roof-mineral-painted.png.import": "19c09e3b8ac4e1c3b93d992679f4bca004fae7b718af8be273cd2d7a0b5bfdd5",
+	"res://game/whispering_forest/art/city/reference-remake/painted_surface.gdshader": "93fb3dadd4511ed8617bc3a0626b5e572bb213c97106fc466952d07dda86df13",
+	"res://game/whispering_forest/art/city/reference-remake/projected_shadow.gd": "eff63b755669a5244ef26de0bb6617005100309fe270fa90fe2af5f2bcb3aa88",
+	"res://game/whispering_forest/art/city/reference-remake/soft_ground_shadow.gdshader": "7966caa45270ee3c01c35b7e6b91711b0b54f7bbcea11ecf7c8b5a402f06a4d8"
+}

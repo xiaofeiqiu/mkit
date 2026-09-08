@@ -1,0 +1,499 @@
+{
+  "guild": {
+    "category": "building",
+    "door": [
+      -150.4,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      300.799987792969,
+      163.199996948242
+    ],
+    "height_metres": 13.25
+  },
+  "forge": {
+    "category": "building",
+    "door": [
+      -91.2,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      182.399993896484,
+      160.0
+    ],
+    "height_metres": 5.85
+  },
+  "apothecary": {
+    "category": "building",
+    "door": [
+      -67.2,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      172.800003051758,
+      153.600006103516
+    ],
+    "height_metres": 9.15
+  },
+  "inn": {
+    "category": "building",
+    "door": [
+      -92.8,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      185.600006103516,
+      153.600006103516
+    ],
+    "height_metres": 9.4
+  },
+  "market_hall": {
+    "category": "building",
+    "door": [
+      -105.6,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      211.199996948242,
+      102.400001525879
+    ],
+    "height_metres": 5.75
+  },
+  "pet_lodge": {
+    "category": "building",
+    "door": [
+      -91.2,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      182.399993896484,
+      140.800003051758
+    ],
+    "height_metres": 5.8
+  },
+  "garden_house": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.9
+  },
+  "townhouse": {
+    "category": "building",
+    "door": [
+      -89.6,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      179.199996948242,
+      147.199996948242
+    ],
+    "height_metres": 9.5
+  },
+  "baker_house": {
+    "category": "building",
+    "door": [
+      -96.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      192.0,
+      153.600006103516
+    ],
+    "height_metres": 9.2
+  },
+  "garden_house_sage": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.9
+  },
+  "garden_house_clay": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.9
+  },
+  "garden_house_ash": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.9
+  },
+  "townhouse_mauve": {
+    "category": "building",
+    "door": [
+      -89.6,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      179.199996948242,
+      147.199996948242
+    ],
+    "height_metres": 9.5
+  },
+  "linden": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.6
+  },
+  "linden_young": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 3.55
+  },
+  "linden_lean": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.8
+  },
+  "birch": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.55
+  },
+  "spruce": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.25
+  },
+  "cypress": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.25
+  },
+  "garden_tree": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 3.6
+  },
+  "wall_long": {
+    "category": "civic",
+    "connectors": [
+      [
+        -47.3684196472168,
+        0.0,
+        0.0
+      ],
+      [
+        47.3684196472168,
+        0.0,
+        0.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.1,
+    "module_spec": {
+      "length": 94.7368421052632,
+      "type": "wall"
+    }
+  },
+  "wall_north": {
+    "category": "civic",
+    "connectors": [
+      [
+        -44.625,
+        0.0,
+        0.0
+      ],
+      [
+        44.625,
+        0.0,
+        0.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.1,
+    "module_spec": {
+      "length": 89.25,
+      "type": "wall"
+    }
+  },
+  "wall_south": {
+    "category": "civic",
+    "connectors": [
+      [
+        -45.2857131958008,
+        0.0,
+        0.0
+      ],
+      [
+        45.2857131958008,
+        0.0,
+        0.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.1,
+    "module_spec": {
+      "length": 90.5714285714286,
+      "type": "wall"
+    }
+  },
+  "tower_corner": {
+    "category": "civic",
+    "connectors": [],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.67,
+    "module_spec": {
+      "height": 5.0,
+      "radius": 36.0,
+      "type": "tower"
+    }
+  },
+  "tower_curtain": {
+    "category": "civic",
+    "connectors": [],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.32,
+    "module_spec": {
+      "height": 4.65,
+      "radius": 30.0,
+      "type": "tower"
+    }
+  },
+  "gatehouse": {
+    "aperture": {
+      "clear_height_metres": 2.15,
+      "depth": 62.0,
+      "half_width": 66.0
+    },
+    "category": "civic",
+    "connectors": [
+      [
+        0.0,
+        0.0,
+        -95.0
+      ],
+      [
+        0.0,
+        0.0,
+        95.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.4,
+    "module_spec": {
+      "height": 5.0,
+      "type": "gate"
+    }
+  }
+}

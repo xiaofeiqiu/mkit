@@ -1,0 +1,10 @@
+{
+  "duration": "7.533333",
+  "video_frames": "226",
+  "audio_peak_dbfs": -3.214,
+  "effect_duration": 1.1307083333333334,
+  "verified_casts": 3,
+  "endpoint_tolerance_seconds": 0.03333333333333333,
+  "source_audio_unmodified": true,
+  "original_synthesis": true
+}

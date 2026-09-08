@@ -1,0 +1,101 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://game/whispering_forest/art/city/civic_model.gd" id="1_2gc5d"]
+[ext_resource type="Shader" path="res://game/whispering_forest/art/city/painted_limestone.gdshader" id="2_btm4t"]
+[ext_resource type="Texture2D" path="res://game/whispering_forest/art/city/materials/wallstone.png" id="3_6i73o"]
+[ext_resource type="Shader" path="res://game/whispering_forest/art/city/reference-remake/painted_surface.gdshader" id="4_agh8p"]
+[ext_resource type="Texture2D" path="res://game/whispering_forest/art/city/reference-remake/materials/limestone.png" id="5_xs8b1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mafj4"]
+render_priority = 0
+shader = ExtResource("2_btm4t")
+shader_parameter/paint = ExtResource("3_6i73o")
+shader_parameter/stone_color = Color(0.8666667, 0.8627451, 0.79607844, 1)
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_312a4"]
+_surfaces = [{
+"aabb": AABB(-0.5, 0.015, -0.25, 1, 0.105, 0.5),
+"attribute_data": PackedByteArray("AAAAv4/CdTwAAAA/j8J1PAAAAD+PwvU9AAAAv4/CdTwAAAA/j8L1PQAAAL+PwvU9"),
+"format": 34359738391,
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAv4/CdTwAAIC+AAAAP4/CdTwAAIC+AAAAP4/C9T0AAIA+AAAAv4/CdTwAAIC+AAAAP4/C9T0AAIA+AAAAv4/C9T0AAIA+Npb//4AEB7M2lv//gAQHszaW//+ABAezNpb//4AEB7M2lv//gAQHszaW//+ABAez")
+}]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bxtcq"]
+render_priority = 0
+shader = ExtResource("4_agh8p")
+shader_parameter/base_color = Color(0.8666667, 0.8627451, 0.79607844, 1)
+shader_parameter/paint = ExtResource("5_xs8b1")
+shader_parameter/has_paint = true
+shader_parameter/paint_mean = Vector3(0.66337997, 0.62130475, 0.5453689)
+shader_parameter/paint_strength = 0.72
+shader_parameter/surface_kind = 0.0
+shader_parameter/roughness_value = 0.92
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_c3nbf"]
+render_priority = 0
+shader = ExtResource("2_btm4t")
+shader_parameter/paint = ExtResource("3_6i73o")
+shader_parameter/stone_color = Color(0.7882353, 0.7882353, 0.72156864, 1)
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_pof80"]
+_surfaces = [{
+"aabb": AABB(-0.5, 0, -0.25, 1e-05, 0.12, 0.5),
+"attribute_data": PackedByteArray("AAAAvwAAAAAAAAC/j8J1PAAAAL+PwvU9AAAAvwAAAAAAAAC/j8L1PQAAAL8AAAAA"),
+"format": 34359738391,
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAvwAAAAAAAIC+AAAAv4/CdTwAAIC+AAAAv4/C9T0AAIA+AAAAvwAAAAAAAIC+AAAAv4/C9T0AAIA+AAAAvwAAAAAAAIA+AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/")
+}]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vvw06"]
+render_priority = 0
+shader = ExtResource("4_agh8p")
+shader_parameter/base_color = Color(0.7882353, 0.7882353, 0.72156864, 1)
+shader_parameter/paint = ExtResource("5_xs8b1")
+shader_parameter/has_paint = true
+shader_parameter/paint_mean = Vector3(0.66337997, 0.62130475, 0.5453689)
+shader_parameter/paint_strength = 0.72
+shader_parameter/surface_kind = 0.0
+shader_parameter/roughness_value = 0.92
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_q1d24"]
+_surfaces = [{
+"aabb": AABB(0.5, 0, -0.25, 1e-05, 0.12, 0.5),
+"attribute_data": PackedByteArray("AAAAPwAAAAAAAAA/j8J1PAAAAD+PwvU9AAAAPwAAAAAAAAA/j8L1PQAAAD8AAAAA"),
+"format": 34359738391,
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAPwAAAAAAAIC+AAAAP4/CdTwAAIC+AAAAP4/C9T0AAIA+AAAAPwAAAAAAAIC+AAAAP4/C9T0AAIA+AAAAPwAAAAAAAIA+AAD/f/9//78AAP9//3//vwAA/3//f/+/AAD/f/9//78AAP9//3//vwAA/3//f/+/")
+}]
+
+[node name="CurbRamp" type="Node3D" unique_id=2128672421]
+script = ExtResource("1_2gc5d")
+metadata/asset_id = "curb_ramp"
+metadata/ground_size = Vector2(0, 0)
+metadata/ground_corner = Vector3(0, 0, 0)
+metadata/door_ground = Vector3(0, 0, 0)
+metadata/height = 0.12
+metadata/module_spec = {
+"height": 0.12,
+"type": "ramp"
+}
+
+[node name="SlopedAccessibleThreshold" type="MeshInstance3D" parent="." unique_id=809984549]
+material_override = SubResource("ShaderMaterial_mafj4")
+mesh = SubResource("ArrayMesh_312a4")
+surface_material_override/0 = SubResource("ShaderMaterial_bxtcq")
+
+[node name="Detail_0001" type="MeshInstance3D" parent="." unique_id=1026466711]
+material_override = SubResource("ShaderMaterial_c3nbf")
+mesh = SubResource("ArrayMesh_pof80")
+surface_material_override/0 = SubResource("ShaderMaterial_vvw06")
+
+[node name="Detail_0002" type="MeshInstance3D" parent="." unique_id=914041582]
+material_override = SubResource("ShaderMaterial_c3nbf")
+mesh = SubResource("ArrayMesh_q1d24")
+surface_material_override/0 = SubResource("ShaderMaterial_vvw06")

@@ -1,0 +1,48 @@
+{
+  "duration": "23.033333",
+  "frames": "691",
+  "audio_peak_dbfs": -3.216,
+  "casts": {
+    "3": {
+      "release_offsets": [
+        0.0,
+        0.2,
+        0.4,
+        0.6,
+        0.8
+      ],
+      "main_cues": 5
+    },
+    "2": {
+      "release_offsets": [
+        0.0,
+        0.2,
+        0.4,
+        0.6,
+        0.8
+      ],
+      "main_cues": 5
+    },
+    "1": {
+      "release_offsets": [
+        0.0,
+        0.2,
+        0.4,
+        0.6,
+        0.8
+      ],
+      "main_cues": 6
+    },
+    "0": {
+      "release_offsets": [
+        0.0,
+        0.2,
+        0.4,
+        0.6,
+        0.8
+      ],
+      "main_cues": 5
+    }
+  },
+  "errors": false
+}

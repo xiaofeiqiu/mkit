@@ -1,0 +1,36 @@
+[
+	{
+		"damage_at": 0.433333333333333,
+		"events": [
+			{
+				"at": 0.933333333333333,
+				"duration": 0.791708333333333,
+				"kind": "ice",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/ice-audio-v8/hit-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -4.0
+			}
+		],
+		"pose_at_hit": 9.0,
+		"start": 0.5,
+		"take": 1
+	},
+	{
+		"damage_at": 0.433333333333332,
+		"events": [
+			{
+				"at": 3.43333333333333,
+				"duration": 0.791708333333333,
+				"kind": "ice",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/ice-audio-v8/hit-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -4.0
+			}
+		],
+		"pose_at_hit": 9.0,
+		"start": 3.0,
+		"take": 2
+	}
+]

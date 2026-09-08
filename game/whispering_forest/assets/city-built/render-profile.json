@@ -1,0 +1,58 @@
+{
+	"ambient_color": "e4ebf0",
+	"ambient_energy": 0.46,
+	"azimuth_degrees": 45,
+	"camera_offset": [
+		12.0,
+		9.79795932769775,
+		12.0
+	],
+	"camera_target": [
+		0.0,
+		3.70000004768372,
+		0.0
+	],
+	"canvas": 2048,
+	"door_metres": 2.35,
+	"elevation_degrees": 30,
+	"exposure": 1.0,
+	"far": 100.0,
+	"fill_color": "d8e9ff",
+	"fill_energy": 0.12,
+	"fill_rotation": [
+		-30.0,
+		145.0,
+		0.0
+	],
+	"ground_shadow": "runtime_ground_layer",
+	"human_metres": 1.8371173,
+	"key_color": "fffdf4",
+	"key_energy": 0.86,
+	"key_rotation": [
+		-50.0,
+		-78.6999969482422,
+		0.0
+	],
+	"logical_units_per_metre": 32.0,
+	"model_self_shadow": true,
+	"msaa": 4,
+	"near": 0.1,
+	"output_color": "sRGB",
+	"pixels_per_metre": 90.5096679918781,
+	"projection": "orthographic",
+	"renderer": "forward_plus",
+	"runtime_scale": 0.5,
+	"sha256": "f62878cb6d1b2b0cddd6bf29ebd494df9735fa8905811ec7732d749e2be1ed28",
+	"shadow_bias": 0.025,
+	"shadow_distance": 48.0,
+	"shadow_normal_bias": 0.45,
+	"source": "res://game/whispering_forest/art/city/render_config.gd",
+	"ssao_intensity": 2.0,
+	"ssao_power": 1.3,
+	"ssao_radius": 1.2,
+	"storey_metres": 3.4,
+	"supersample": 2.0,
+	"tonemap": "linear",
+	"transparent": true,
+	"version": "bellwake-2to1-v2"
+}

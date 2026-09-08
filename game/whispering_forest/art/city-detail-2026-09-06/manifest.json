@@ -1,0 +1,182 @@
+{
+  "status": "Independent visual studies; not integrated into runtime",
+  "sourceTool": "built-in imagegen",
+  "copies": [
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-98097dcd-115e-4c74-a06d-16d23d815bf1.png",
+      "to": "sources/round1/01-baker-sw.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-98097dcd-115e-4c74-a06d-16d23d815bf1.png",
+      "to": "01-baker-sw.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-7a86a9b5-11af-42aa-a10d-65b78e82bf21.png",
+      "to": "sources/round1/02-apothecary-se.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-7a86a9b5-11af-42aa-a10d-65b78e82bf21.png",
+      "to": "02-apothecary-se.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-d9c46eed-c440-4d04-9df9-9f785d696cce.png",
+      "to": "sources/round1/03-residence-ne-rear.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-d9c46eed-c440-4d04-9df9-9f785d696cce.png",
+      "to": "03-residence-ne-rear.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-fde6e8a8-e8c8-410f-b7fb-aa41831c5ba2.png",
+      "to": "sources/round1/04-workshop-nw-rear.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-fde6e8a8-e8c8-410f-b7fb-aa41831c5ba2.png",
+      "to": "04-workshop-nw-rear.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-8d048e90-14de-4585-936b-aee26d6f1203.png",
+      "to": "sources/round1/05-gate-wall-module.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-8d048e90-14de-4585-936b-aee26d6f1203.png",
+      "to": "05-gate-wall-module.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-202df9cd-0563-4cbf-9242-a8fe2168a2d3.png",
+      "to": "sources/round1/06-road-curb-corner.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-b1d197fa-7532-4d8d-b353-78fe4f2b0e03.png",
+      "to": "06-road-curb-corner.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-bdedc6f8-2df9-4a54-9ccf-4164e2ca7a17.png",
+      "to": "sources/round1/07-courtyard-planting.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-54b12d91-c9ea-463b-814b-e0ad881e2426.png",
+      "to": "07-courtyard-planting.png"
+    },
+    {
+      "from": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-b891d528-8791-4147-990c-9e0a5aa5b9b8.png",
+      "to": "sources/tree-structure.png"
+    },
+    {
+      "from": "/var/folders/y4/rwzljltx10v6qf6dww0ry69r0000gn/T/codex-clipboard-ca474bce-2ba5-493a-aa9a-6b23665c2c04.png",
+      "to": "sources/reference-tree.png"
+    }
+  ],
+  "assets": [
+    {
+      "id": "01-baker-sw",
+      "file": "01-baker-sw.png",
+      "selectedSource": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-98097dcd-115e-4c74-a06d-16d23d815bf1.png",
+      "hasAlpha": true,
+      "role": "Original RGBA retained; background-cleanup RGB revision not selected",
+      "scaleCalibrated": false,
+      "runtimeIntegrated": false,
+      "width": 1240,
+      "height": 1269,
+      "pngColorType": 6,
+      "sha256": "095e7b4fa2fb12ad94aaded243d9fd79d8bd4ba1b2e8e1b8cf46d26409fd86a3"
+    },
+    {
+      "id": "02-apothecary-se",
+      "file": "02-apothecary-se.png",
+      "selectedSource": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-7a86a9b5-11af-42aa-a10d-65b78e82bf21.png",
+      "hasAlpha": true,
+      "role": "Original RGBA retained; background-cleanup RGB revision not selected",
+      "scaleCalibrated": false,
+      "runtimeIntegrated": false,
+      "width": 1536,
+      "height": 1024,
+      "pngColorType": 6,
+      "sha256": "6f3f6d2df6a09b26a3540d1440181c11cb776b28252843e374bf50b0bb4c6f33"
+    },
+    {
+      "id": "03-residence-ne-rear",
+      "file": "03-residence-ne-rear.png",
+      "selectedSource": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-d9c46eed-c440-4d04-9df9-9f785d696cce.png",
+      "hasAlpha": true,
+      "role": "Original RGBA retained; background-cleanup RGB revision not selected",
+      "scaleCalibrated": false,
+      "runtimeIntegrated": false,
+      "width": 1536,
+      "height": 1024,
+      "pngColorType": 6,
+      "sha256": "69c9d82c8b803bc2098c90dd8f5e011b1946d404ba40cc98099a3f021a44e4da"
+    },
+    {
+      "id": "04-workshop-nw-rear",
+      "file": "04-workshop-nw-rear.png",
+      "selectedSource": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-fde6e8a8-e8c8-410f-b7fb-aa41831c5ba2.png",
+      "hasAlpha": true,
+      "role": "Original RGBA retained; background-cleanup RGB revision not selected",
+      "scaleCalibrated": false,
+      "runtimeIntegrated": false,
+      "width": 1536,
+      "height": 1024,
+      "pngColorType": 6,
+      "sha256": "c5dd50bae0e3aa00c8e03e284295d0fb286788edf4a58e4e2ec63cc1c3a21506"
+    },
+    {
+      "id": "05-gate-wall-module",
+      "file": "05-gate-wall-module.png",
+      "selectedSource": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-8d048e90-14de-4585-936b-aee26d6f1203.png",
+      "hasAlpha": true,
+      "role": "Original RGBA retained; background-cleanup RGB revision not selected",
+      "scaleCalibrated": false,
+      "runtimeIntegrated": false,
+      "width": 1536,
+      "height": 1024,
+      "pngColorType": 6,
+      "sha256": "895c00e69e7b0bf2907589e53aab53864d36e6e476d8ce1c702797b7c0d4c517"
+    },
+    {
+      "id": "06-road-curb-corner",
+      "file": "06-road-curb-corner.png",
+      "selectedSource": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-b1d197fa-7532-4d8d-b353-78fe4f2b0e03.png",
+      "hasAlpha": false,
+      "role": "Lower curb / revised material visual study; baked checkerboard, not an importable sprite",
+      "scaleCalibrated": false,
+      "runtimeIntegrated": false,
+      "width": 1536,
+      "height": 1024,
+      "pngColorType": 2,
+      "sha256": "d31972f915b11e959dda99fe8ada07ce18b4d4839bedfcd0d03ac4dfabe2e695"
+    },
+    {
+      "id": "07-courtyard-planting",
+      "file": "07-courtyard-planting.png",
+      "selectedSource": "/Users/dev/.codex/generated_images/01a076ea-5d16-7431-a601-a03b5e822597/exec-54b12d91-c9ea-463b-814b-e0ad881e2426.png",
+      "hasAlpha": false,
+      "role": "Irregular tree structure with reference-based palette; baked checkerboard, not an importable sprite",
+      "scaleCalibrated": false,
+      "runtimeIntegrated": false,
+      "width": 1304,
+      "height": 1206,
+      "pngColorType": 2,
+      "sha256": "b0b7d1003027e77d572f08a2626dd3dde55696a3e3d81d179229044ce4c9e876"
+    }
+  ],
+  "references": [
+    {
+      "source": "/var/folders/y4/rwzljltx10v6qf6dww0ry69r0000gn/T/codex-clipboard-ca474bce-2ba5-493a-aa9a-6b23665c2c04.png",
+      "archive": "sources/reference-tree.png",
+      "role": "User's original foliage rendering and palette reference"
+    }
+  ],
+  "revisionInputs": {
+    "revision-prompts.json": "sources/round1/<id>.png; actual calls initially used copies at root before replacement",
+    "tree-structure-revision.txt": [
+      "sources/round1/07-courtyard-planting.png",
+      "01-baker-sw.png"
+    ],
+    "tree-reference-revision.txt": [
+      "sources/tree-structure.png",
+      "sources/reference-tree.png",
+      "01-baker-sw.png"
+    ]
+  }
+}

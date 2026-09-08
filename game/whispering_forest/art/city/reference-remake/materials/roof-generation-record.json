@@ -1,0 +1,11 @@
+{
+  "generator": "built-in imagegen",
+  "reference": "/var/folders/y4/rwzljltx10v6qf6dww0ry69r0000gn/T/codex-clipboard-dc33b3fe-28a9-4e45-b7f2-2f0e2b5ad7b5.png",
+  "original": "/Users/dev/.codex/generated_images/01a076ea-a04b-7cb3-93aa-deb792a4a5fe/exec-fc548c83-791a-4de4-8a38-66271f27cefd.png",
+  "asset": "roof-mineral-painted.png",
+  "usage": "Unlit surface of individually modelled roof tiles; roof pigment comes from the building palette.",
+  "prompt": "Use case: stylized-concept. Asset type: seamless unlit base-color material texture, square, for the SURFACE of individual 3D fantasy roof tiles. The attached image is only a reference for the nostalgic Japanese RPG hand-painted rough ceramic/slate surface quality and dense readable material detail. Generate ONE flat 2D material swatch filling the entire square. Neutral desaturated gray warm/cool mineral surface, value around medium gray; short directional dry-brush mineral striations, fine fired-clay aggregate, shallow pits, delicate layered flakes, small chalky scuffs and restrained dark pinpricks, grouped medium-scale weathering; tactile hand-painted videogame texture, NOT a photograph. The finished material will be tinted terracotta, slate blue, muted green or plum by the game shader. Keep subtle low-frequency pigment variation and painterly light/dark grain so the material remains visible on 8-pixel wide roof tiles. No full individual tile boundaries, no tile grid, no rows, no roof, no buildings, no objects, no perspective, no contact or cast shadows, no directional light, no glossy highlights, no text, no border. Avoid flat smooth plastic, avoid television noise and big peeling plaster islands. Truly seamless both axes.",
+  "integration": "palette roof material -> 13 editable Blender buildings -> shared Godot stage -> active city sprites",
+  "filtering": "Mipmap generation enabled; anisotropic minification; fine surface relief limited to 1.5mm, layering in solid geometry",
+  "asset_sha256": "f22ee648d276924722122fe72b910cfb4dbfc3ae3942be592bf1492f40da2ec9"
+}

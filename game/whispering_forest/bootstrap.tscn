@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/whispering_forest/scripts/bootstrap.gd" id="1"]
+
+[node name="WhisperingForestBootstrap" type="Node"]
+script = ExtResource("1")
+initial_scene_path = "res://game/whispering_forest/village.tscn"

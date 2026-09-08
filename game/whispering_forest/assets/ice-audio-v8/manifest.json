@@ -1,0 +1,13 @@
+{
+  "origin": "Local recording \u51b01.wav, selected by filename after the incorrect-ice-audio report; not synthesis.",
+  "original_filename": "\u51b01.wav",
+  "source": "art/audio/ice-v8/user-supplied/ice-level-1-source.wav",
+  "source_sha256": "dc1c5f234d300ab24867a7eb835b70ca7dea589bbd00750bb0bf07c291e18bb4",
+  "file": "hit-level-1.wav",
+  "sha256": "c20d94f3683859f6b1c2953593bdd12c3ac18e2f30ade58c96e9708e2e16c3da",
+  "duration": 0.7917006802721088,
+  "sample_rate": 48000,
+  "channels": 2,
+  "gain_db": -2,
+  "trigger": "At each ice pillar's maximum height; sequential pillars keep independent timing."
+}

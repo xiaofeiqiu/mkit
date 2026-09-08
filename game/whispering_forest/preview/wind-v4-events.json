@@ -1,0 +1,294 @@
+[
+	{
+		"events": [
+			{
+				"at": 0.5,
+				"kind": "wind",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-small.wav",
+				"pitch": 1.0211615562439,
+				"volume_db": -4.0
+			},
+			{
+				"at": 0.533333333333333,
+				"kind": "wind-loop",
+				"level": 1
+			},
+			{
+				"at": 1.0,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 1.3,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 1.76666666666667,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 2.06666666666667,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 2.6,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 3.43333333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 3.66666666666666,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 4.13333333333333,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 4.49999999999999,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 4.99999999999999,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 5.26666666666666,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			},
+			{
+				"at": 5.79999999999999,
+				"kind": "wind-hit",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-small.wav",
+				"pitch": 1.0,
+				"volume_db": -7.0
+			}
+		],
+		"level": 1
+	},
+	{
+		"events": [
+			{
+				"at": 11.0,
+				"kind": "wind",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/wind-full.wav",
+				"pitch": 0.966016113758087,
+				"volume_db": -2.0
+			},
+			{
+				"at": 11.0333333333333,
+				"kind": "wind-loop",
+				"level": 10
+			},
+			{
+				"at": 11.2333333333333,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 11.4666666666666,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 12.2,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 12.4666666666666,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 13.1666666666666,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 13.4333333333333,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 14.2666666666666,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 14.6,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 15.2333333333333,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 15.5666666666666,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 16.2,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 16.5333333333333,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 17.2,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 17.5,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 18.2333333333334,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 18.5333333333334,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 19.2333333333334,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 19.5333333333335,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 20.2666666666668,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 20.6000000000002,
+				"kind": "wind-hit",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/wind-audio-v4/hit-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			}
+		],
+		"level": 10
+	}
+]

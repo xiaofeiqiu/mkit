@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/whispering_forest/art/city/civic_model.gd" id="1_nsitd"]
+[ext_resource type="Shader" path="res://game/whispering_forest/art/city/painted_limestone.gdshader" id="2_yftd0"]
+[ext_resource type="Texture2D" path="res://game/whispering_forest/art/city/materials/wallstone.png" id="3_artna"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u64cj"]
+render_priority = 0
+shader = ExtResource("2_yftd0")
+shader_parameter/paint = ExtResource("3_artna")
+shader_parameter/stone_color = Color(0.8666667, 0.8627451, 0.79607844, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_w274i"]
+size = Vector3(0.0625, 0.112, 0.13)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hn4a8"]
+size = Vector3(0.0565, 0.016, 0.105)
+
+[node name="Curb2" type="Node3D" unique_id=2094643010]
+script = ExtResource("1_nsitd")
+metadata/asset_id = "curb_2"
+metadata/ground_size = Vector2(0, 0)
+metadata/ground_corner = Vector3(0, 0, 0)
+metadata/door_ground = Vector3(0, 0, 0)
+metadata/height = 0.12
+metadata/module_spec = {
+"height": 0.12,
+"length": 2,
+"type": "curb"
+}
+metadata/connectors = [Vector3(-0.03125, 0, 0), Vector3(0.03125, 0, 0)]
+
+[node name="Detail_0000" type="MeshInstance3D" parent="." unique_id=1861477900]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.056, 0)
+material_override = SubResource("ShaderMaterial_u64cj")
+mesh = SubResource("BoxMesh_w274i")
+
+[node name="Detail_0001" type="MeshInstance3D" parent="Detail_0000" unique_id=1606720375]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.052, 0)
+material_override = SubResource("ShaderMaterial_u64cj")
+mesh = SubResource("BoxMesh_hn4a8")

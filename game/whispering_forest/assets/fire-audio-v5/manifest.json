@@ -1,0 +1,18 @@
+{
+  "source": "Original filtered-noise and pressure-resonance synthesis; reference audio is not sampled.",
+  "reference": {
+    "filename": "cgefc15.wav",
+    "sha256": "50e492d4319bd404fdedcffdc8dbc47416f4e7b6b20b9f6270d191fbc57b7e88",
+    "duration": 1.130702947845805,
+    "rms_dbfs": -15.14514165613103
+  },
+  "file": "fire-level-1.wav",
+  "sha256": "ee14d4b8c08e865895b594edbdb69bc6de7051600ecf05fb385b4602a3570f33",
+  "sample_rate": 48000,
+  "channels": 2,
+  "frames": 54274,
+  "duration": 1.1307083333333334,
+  "peak_dbfs": -1.2096149476276294,
+  "rms_dbfs": -16.05180320248623,
+  "timing": "The runtime derives the 8-pose visual lifetime from this exact stream length, at pitch 1.0."
+}

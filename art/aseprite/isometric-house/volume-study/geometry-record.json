@@ -1,0 +1,36 @@
+{
+  "canvas": [
+    640,
+    640
+  ],
+  "orthographic_scale": 9.6,
+  "camera_elevation_degrees": 30,
+  "camera_azimuth_degrees": 45,
+  "front_wall_thickness_m": 0.3,
+  "window_glass_setback_m": 0.284,
+  "door_setback_m": 0.238,
+  "tile_arch_height_m": [
+    0.012,
+    0.02
+  ],
+  "tile_lap_lift_m": 0.088,
+  "tile_thickness_m": 0.025,
+  "renderer": "Blender Cycles CPU, 64 samples",
+  "objects": 1929,
+  "groups": {
+    "1": "01 Stone footing",
+    "2": "02 Plaster walls and reveals",
+    "3": "03 Foundation masonry",
+    "4": "04 Oak framing",
+    "5": "05 Recessed windows",
+    "6": "06 Stone door arch",
+    "7": "07 Oak door and ironwork",
+    "8": "08 Main curved roof tiles",
+    "9": "09 Dormer",
+    "10": "10 Chimney",
+    "11": "11 Entry and lantern",
+    "12": "12 Garden and pots",
+    "13": "13 Fence and barrel"
+  },
+  "source": "cottage-volume.blend"
+}

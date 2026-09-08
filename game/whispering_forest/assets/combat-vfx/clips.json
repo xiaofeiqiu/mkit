@@ -1,0 +1,159 @@
+{
+  "fire": {
+    "frame_count": 8,
+    "pages": [
+      {
+        "file": "fire-grow-32.png",
+        "columns": 4,
+        "rows": 4,
+        "count": 4,
+        "source_indices": [
+          0,
+          4,
+          9,
+          12
+        ],
+        "canvas": [
+          320,
+          320
+        ],
+        "regions": [
+          [
+            139,
+            139,
+            37,
+            37
+          ],
+          [
+            96,
+            398,
+            122,
+            123
+          ],
+          [
+            344,
+            656,
+            256,
+            234
+          ],
+          [
+            10,
+            949,
+            293,
+            271
+          ]
+        ],
+        "pivots": [
+          [
+            18.5,
+            18.5
+          ],
+          [
+            61.0,
+            61.5
+          ],
+          [
+            128.0,
+            117.0
+          ],
+          [
+            146.5,
+            135.5
+          ]
+        ],
+        "source_sha256": "a26b1c419e5f389feb3952c57c6805a5939bc2383cfd086529f5b0804a63362b"
+      },
+      {
+        "file": "fire-fade-32.png",
+        "columns": 4,
+        "rows": 4,
+        "count": 4,
+        "source_indices": [
+          3,
+          7,
+          11,
+          15
+        ],
+        "canvas": [
+          320,
+          320
+        ],
+        "regions": [
+          [
+            944,
+            28,
+            279,
+            278
+          ],
+          [
+            957,
+            343,
+            262,
+            259
+          ],
+          [
+            968,
+            655,
+            235,
+            246
+          ],
+          [
+            998,
+            979,
+            165,
+            194
+          ]
+        ],
+        "pivots": [
+          [
+            139.5,
+            139.0
+          ],
+          [
+            131.0,
+            129.5
+          ],
+          [
+            117.5,
+            123.0
+          ],
+          [
+            82.5,
+            97.0
+          ]
+        ],
+        "source_sha256": "3eb0d402505c0eda8fd1e189c7ec20d62bbfb70ccaad6ac789a0d70672275d64"
+      }
+    ],
+    "times": [
+      0,
+      0.15,
+      0.36,
+      0.65,
+      1.05,
+      1.4,
+      1.85,
+      2.4
+    ]
+  },
+  "wind": {
+    "frame_count": 8,
+    "type": "model_frames"
+  },
+  "ice": {
+    "frame_count": 16,
+    "type": "aseprite_frames"
+  },
+  "earth": {
+    "frame_count": 8,
+    "type": "model_frames",
+    "variants": 6
+  },
+  "ultimate": {
+    "frame_count": 8,
+    "shares": [
+      "earth",
+      "fire"
+    ]
+  }
+}

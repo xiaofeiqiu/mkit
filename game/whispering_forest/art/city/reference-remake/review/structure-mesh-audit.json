@@ -1,0 +1,492 @@
+[
+  {
+    "asset": "baker_house",
+    "openings": 12,
+    "mesh_rays": 24,
+    "approach_metres": 1.005,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.63,
+          0.24,
+          -1.8450000953674377,
+          2.63,
+          2.93,
+          1.6650000953674375
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.77,
+          2.93,
+          -1.9600000953674377,
+          2.77,
+          5.27,
+          1.7800000953674375
+        ]
+      },
+      {
+        "volume": "Bakery attic dormer",
+        "bounds_metres": [
+          0.014000000000000012,
+          6.18,
+          0.15500000000000008,
+          1.094,
+          7.04,
+          1.0250000000000001
+        ]
+      }
+    ]
+  },
+  {
+    "asset": "apothecary",
+    "openings": 14,
+    "mesh_rays": 28,
+    "approach_metres": 1.0849999999999995,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.330000047683719,
+          0.24,
+          -1.9250000953674375,
+          1.3420000286102316,
+          2.93,
+          1.5850000953674377
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.470000047683719,
+          2.93,
+          -2.0400000953674375,
+          1.4820000286102317,
+          5.27,
+          1.7000000953674377
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          1.3320000286102318,
+          0.24,
+          -0.764000032424929,
+          2.470000047683719,
+          3.37,
+          2.0500000953674373
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 1.8999999999999995
+      }
+    ]
+  },
+  {
+    "asset": "forge",
+    "openings": 4,
+    "mesh_rays": 8,
+    "approach_metres": 0.75,
+    "volumes": [
+      {
+        "volume": "Smith enclosed workroom",
+        "bounds_metres": [
+          -2.6199999046325626,
+          0.24,
+          -2.1900000000000004,
+          -0.20959999237060511,
+          3.12,
+          1.8700000000000003
+        ]
+      },
+      {
+        "feature": "open workplace with unequal roof heights"
+      }
+    ]
+  },
+  {
+    "asset": "guild",
+    "openings": 14,
+    "mesh_rays": 28,
+    "approach_metres": 0.8599999999999999,
+    "volumes": [
+      {
+        "volume": "Guild central hall",
+        "bounds_metres": [
+          -2.369099898910524,
+          0.24,
+          -2.2499999523162812,
+          2.369099898910524,
+          5.65,
+          2.089999952316281
+        ]
+      },
+      {
+        "volume": "Guild stepped side wing",
+        "bounds_metres": [
+          -4.46999980926514,
+          0.24,
+          -2.15999995422363,
+          -2.23499990463257,
+          3.25,
+          1.079999977111815
+        ]
+      },
+      {
+        "volume": "Guild stepped side wing",
+        "bounds_metres": [
+          2.23499990463257,
+          0.24,
+          -2.15999995422363,
+          4.46999980926514,
+          3.85,
+          1.079999977111815
+        ]
+      }
+    ]
+  },
+  {
+    "asset": "inn",
+    "openings": 16,
+    "mesh_rays": 32,
+    "approach_metres": 1.0849999999999995,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.5300000953674373,
+          0.24,
+          -1.9250000953674375,
+          0.9814000400543236,
+          2.93,
+          1.5850000953674377
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.6700000953674374,
+          2.93,
+          -2.0400000953674375,
+          1.1214000400543234,
+          5.27,
+          1.7000000953674377
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.9714000400543235,
+          0.24,
+          -0.764000032424929,
+          2.6700000953674374,
+          2.55,
+          2.0500000953674373
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 2.7199999999999998
+      },
+      {
+        "volume": "Inn paired dormer",
+        "bounds_metres": [
+          -1.9734080574493442,
+          6.18,
+          0.024999999999999967,
+          -1.2434080574493442,
+          7.01,
+          0.895
+        ]
+      },
+      {
+        "volume": "Inn paired dormer",
+        "bounds_metres": [
+          -0.3051919978637695,
+          6.18,
+          0.024999999999999967,
+          0.4248080021362305,
+          7.01,
+          0.895
+        ]
+      }
+    ]
+  },
+  {
+    "asset": "market_hall",
+    "openings": 1,
+    "mesh_rays": 2,
+    "approach_metres": 0.75,
+    "volumes": [
+      {
+        "volume": "Raised market clerestory",
+        "bounds_metres": [
+          -1.2279999809265125,
+          3.57,
+          -0.606000010013581,
+          1.2279999809265125,
+          4.15,
+          0.4860000100135809
+        ]
+      },
+      {
+        "feature": "open workplace with unequal roof heights"
+      }
+    ]
+  },
+  {
+    "asset": "pet_lodge",
+    "openings": 9,
+    "mesh_rays": 18,
+    "approach_metres": 1.085,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.4799999046325625,
+          0.24,
+          -1.7250000476837188,
+          0.9603999599456761,
+          2.93,
+          1.385000047683719
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.9503999599456763,
+          0.24,
+          -0.6960000162124644,
+          2.6199999046325626,
+          2.55,
+          1.8500000476837188
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ]
+  },
+  {
+    "asset": "garden_house",
+    "openings": 9,
+    "mesh_rays": 18,
+    "approach_metres": 1.085,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.13,
+          0.24,
+          -1.6249999046325625,
+          0.8133999999999997,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.8033999999999999,
+          0.24,
+          -0.6619999675750714,
+          2.27,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ]
+  },
+  {
+    "asset": "townhouse",
+    "openings": 11,
+    "mesh_rays": 22,
+    "approach_metres": 1.005,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.429999952316281,
+          0.24,
+          -1.7449999523162811,
+          2.429999952316281,
+          2.93,
+          1.564999952316281
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.569999952316281,
+          2.93,
+          -1.8599999523162811,
+          2.569999952316281,
+          5.27,
+          1.679999952316281
+        ]
+      },
+      {
+        "volume": "Townhouse cross gable",
+        "bounds_metres": [
+          -0.74,
+          6.18,
+          0.13500000000000006,
+          0.74,
+          7.04,
+          1.0050000000000001
+        ]
+      }
+    ]
+  },
+  {
+    "asset": "garden_house_sage",
+    "openings": 9,
+    "mesh_rays": 18,
+    "approach_metres": 1.085,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.13,
+          0.24,
+          -1.6249999046325625,
+          0.8133999999999997,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.8033999999999999,
+          0.24,
+          -0.6619999675750714,
+          2.27,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ]
+  },
+  {
+    "asset": "garden_house_clay",
+    "openings": 9,
+    "mesh_rays": 18,
+    "approach_metres": 1.085,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.13,
+          0.24,
+          -1.6249999046325625,
+          0.8133999999999997,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.8033999999999999,
+          0.24,
+          -0.6619999675750714,
+          2.27,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ]
+  },
+  {
+    "asset": "garden_house_ash",
+    "openings": 9,
+    "mesh_rays": 18,
+    "approach_metres": 1.085,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -0.8133999999999997,
+          0.24,
+          -1.6249999046325625,
+          2.13,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          -2.27,
+          0.24,
+          -0.6619999675750714,
+          -0.8033999999999999,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ]
+  },
+  {
+    "asset": "townhouse_mauve",
+    "openings": 11,
+    "mesh_rays": 22,
+    "approach_metres": 1.005,
+    "volumes": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.429999952316281,
+          0.24,
+          -1.7449999523162811,
+          2.429999952316281,
+          2.93,
+          1.564999952316281
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.569999952316281,
+          2.93,
+          -1.8599999523162811,
+          2.569999952316281,
+          5.27,
+          1.679999952316281
+        ]
+      },
+      {
+        "volume": "Townhouse cross gable",
+        "bounds_metres": [
+          -0.74,
+          6.18,
+          0.13500000000000006,
+          0.74,
+          7.04,
+          1.0050000000000001
+        ]
+      }
+    ]
+  }
+]

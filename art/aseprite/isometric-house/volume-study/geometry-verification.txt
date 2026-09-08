@@ -1,0 +1,9 @@
+PASS Door leaf : first visible surface = Arched green oak door plank.004 , setback = 0.238 m
+PASS Front recessed glazing : first visible surface = Raised lead glazing strip.004 , setback = 0.2413 m
+PASS Side recessed glazing : first visible surface = Uneven green glass pane.003 , setback = 0.256 m
+PASS: main roof uses independent closed curved tile meshes; source has 30 cm thick walls
+Blender 4.1.1 (hash e1743a0317bc built 2024-04-16 00:06:22)
+Read prefs: "/Users/dev/Library/Application Support/Blender/4.1/config/userpref.blend"
+Read blend: "/Users/dev/workspace/gamedev/mkit/art/aseprite/isometric-house/volume-study/cottage-volume.blend"
+
+Blender quit

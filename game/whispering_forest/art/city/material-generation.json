@@ -1,0 +1,55 @@
+{
+  "date": "2026-09-06",
+  "provider": "image_gen.imagegen",
+  "entries": [
+    {
+      "name": "slate",
+      "source": "/Users/dev/.codex/generated_images/01a073dc-a412-7591-aa97-655bf55e0bb6/exec-68d09e2e-7c8b-410a-b494-8a4a145fd4c6.png",
+      "prompt": "A seamless square tileable single blue-grey slate surface material swatch for UV mapping onto individual 3D roof tiles in a premium classic fantasy Japanese RPG town. NOT a pattern of roof tiles: the entire canvas is continuous slate mineral surface, NO tile seams or grid. Flat straight-on albedo, no perspective, no objects, no cast shadows. Color deep muted steel blue #425e7b with restrained hand-painted fine mineral striation and gentle blue variation; crisp fine detail, matte. Even illumination edge to edge. No lettering, no frame. Opaque.",
+      "reference_inputs": [],
+      "use": "surface material on shared-projection model or ground"
+    },
+    {
+      "name": "plaster",
+      "source": "/Users/dev/.codex/generated_images/01a073dc-a412-7591-aa97-655bf55e0bb6/exec-a03cdbc4-ae48-4f92-9367-fffb6c59ccaa.png",
+      "prompt": "A seamless square tileable texture of matte ivory lime plaster for UV mapping onto a 3D fantasy medieval town building. Strict flat straight-on surface swatch with NO perspective, NO objects, NO geometry, NO directional cast shadows, NO ambient occlusion. Bright cool-neutral ivory #e2dec8 with very subtle hand-painted irregular mineral stippling and weathering, fine brushwork like premium classic Japanese RPG pre-rendered town materials. Uniform illumination and uniform average brightness edge to edge. No brown yellow patina, no cracks, no lettering. Opaque image. The entire canvas is the single plaster surface.",
+      "reference_inputs": [],
+      "use": "surface material on shared-projection model or ground"
+    },
+    {
+      "name": "wood",
+      "source": "/Users/dev/.codex/generated_images/01a073dc-a412-7591-aa97-655bf55e0bb6/exec-f62f9316-de70-4a84-a0a7-7d78380de04b.png",
+      "prompt": "A seamless square tileable material swatch of lightly weathered dark walnut timber for UV mapping onto 3D timber frame beams and carved doors in a classic Japanese fantasy RPG town. Flat straight-on albedo surface only. All subtle wood grain runs vertically, no board joints, no border, NO perspective, NO object or beam silhouette, NO directional lighting, NO cast shadows. Hand-painted detailed fine grain, warm medium-dark neutral walnut brown #75523a, delicate growth variation and very small knots, restrained contrast. Matte nonphotographic traditional rendered game texture, not a photo. Opaque. Whole canvas is one continuous wood surface.",
+      "reference_inputs": [],
+      "use": "surface material on shared-projection model or ground"
+    },
+    {
+      "name": "foliage",
+      "source": "/Users/dev/.codex/generated_images/01a073dc-a412-7591-aa97-655bf55e0bb6/exec-20d0d5e6-9934-49d6-b333-c305f4f2eef0.png",
+      "prompt": "Seamless square albedo texture swatch for UV mapping onto 3D broadleaf tree canopy clusters in a classic Japanese fantasy RPG. Entire image is a dense intricate tapestry of very small fresh green linden leaves, overlapping layers but evenly diffuse lit. No tree shape, no trunk, no branches, no sky, no border, no perspective convergence, no directional cast shadows or highlights. Hand-painted detailed game material, delicate small veins, deep emerald and medium fresh green #4d874c to #81ac67, never yellow or olive. Tiny leaves and fine detail throughout, consistent average color at every edge, no empty gaps, opaque. This is only a surface texture: model geometry and the shared game camera supply the tree's volume.",
+      "reference_inputs": [],
+      "use": "surface material on shared-projection model or ground"
+    },
+    {
+      "name": "street",
+      "source": "/Users/dev/.codex/generated_images/01a073dc-a412-7591-aa97-655bf55e0bb6/exec-6cbf4315-9de9-4e73-b53a-1cc8b0b051fa.png",
+      "prompt": "A seamless square 2D game surface texture of old blue-grey stone street paving, true top-down orthographic material swatch, no scene and no perspective. Carefully interlocking rectangular herringbone paving stones, aged smooth slate-blue grey stone, fine recessed joints, softened chipped edges with subtle bevel highlights and joint occlusion, occasional repaired or slightly lighter stones, restrained dust in joints. Premium detailed hand-painted pre-rendered classic Japanese RPG town texture, legible small stones and rich tactile depth, not photorealistic, not low-poly. Muted indigo-grey #57697d with cool stone variations, no oversaturated purple, no yellow tint. Even neutral daylight material lighting, no directional object shadows, no border, no text, no objects, tileable all edges.",
+      "reference_inputs": [],
+      "use": "surface material on shared-projection model or ground"
+    },
+    {
+      "name": "flagstone",
+      "source": "/Users/dev/.codex/generated_images/01a073dc-a412-7591-aa97-655bf55e0bb6/exec-8b0ae9e8-32ad-4f0f-86e2-761c9bd2a808.png",
+      "prompt": "A seamless square 2D game paving surface material, true straight top-down orthographic texture with no perspective. Old pale silver-grey limestone sidewalk flagstones in irregular fitted polygons, larger rounded worn stones with chipped bevel edges and darker tiny gap stones, fine cracks, restrained moss dots in joints, tactile shallow relief and hand-painted depth. Premium classic Japanese RPG town sidewalk material, softly luminous cool grey #c1cbd0 and restrained white highlights, dark blue grey joints, no blue saturation, no yellow patina. Fine detailed game texture, not photorealistic, not cartoon flat. No roads, no curb, no objects, no cast shadows, no text, no border. Repeatable entire surface.",
+      "reference_inputs": [],
+      "use": "surface material on shared-projection model or ground"
+    },
+    {
+      "name": "wallstone",
+      "source": "/Users/dev/.codex/generated_images/01a073dc-a412-7591-aa97-655bf55e0bb6/exec-e83971ab-7931-4b93-bcac-3db44484fab4.png",
+      "prompt": "A seamless square albedo surface swatch of old sturdy castle masonry for mapping to 3D walls. Direct flat frontal view, NO perspective and NO wall silhouette. Large irregular courses of heavy cool grey limestone blocks with recessed dark mortar, individually chipped softened edges, subtle pits and hairline cracks, a few darker repaired blocks, faint soot/damp mineral stains, tiny moss in crevices. Real sense of old dense heavy masonry rendered as premium detailed hand-painted classic Japanese RPG material. Desaturated cream-silver-grey #b8b9ae, cooler grey recesses, weathered but maintained city wall, not ruins and not clean white foam blocks. No dramatic light or object shadows. No border, text, gate, roof or battlement. Texture fills whole canvas, seamless at edges.",
+      "reference_inputs": [],
+      "use": "surface material on shared-projection model or ground"
+    }
+  ]
+}

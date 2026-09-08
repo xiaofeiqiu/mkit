@@ -1,0 +1,111 @@
+{
+	"cell": 384,
+	"duration_seconds": 1.45,
+	"frames": 16,
+	"heights_metres": [
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		0.1,
+		0.8,
+		2.0,
+		3.1,
+		3.1,
+		3.1,
+		3.1,
+		3.1,
+		3.1,
+		3.1
+	],
+	"peak_frame": 9,
+	"pivot": [
+		192.0,
+		297.817962646484
+	],
+	"profile": {
+		"ambient_color": "e5eff8",
+		"ambient_energy": 0.42,
+		"azimuth_degrees": 45,
+		"camera_offset": [
+			12.0,
+			9.79795932769775,
+			12.0
+		],
+		"camera_target": [
+			0.0,
+			3.70000004768372,
+			0.0
+		],
+		"canvas": 2048,
+		"door_metres": 2.35,
+		"elevation_degrees": 30,
+		"exposure": 1.0,
+		"far": 100.0,
+		"fill_color": "d8e9ff",
+		"fill_energy": 0.16,
+		"fill_rotation": [
+			-30.0,
+			145.0,
+			0.0
+		],
+		"ground_shadow": "runtime_ground_layer",
+		"human_metres": 1.8371173,
+		"key_color": "fffaf1",
+		"key_energy": 1.2,
+		"key_rotation": [
+			-50.0,
+			-57.5,
+			0.0
+		],
+		"logical_units_per_metre": 32.0,
+		"model_self_shadow": true,
+		"msaa": 4,
+		"near": 0.1,
+		"output_color": "sRGB",
+		"pixels_per_metre": 90.5096679918781,
+		"projection": "orthographic",
+		"renderer": "forward_plus",
+		"runtime_scale": 0.5,
+		"sha256": "efca02c18801f93d44f7eb38db1a1706e32f794cc3f596bd6bf13895ec0bcb0b",
+		"shadow_bias": 0.025,
+		"shadow_distance": 48.0,
+		"shadow_normal_bias": 0.45,
+		"source": "res://game/whispering_forest/art/city/render_config.gd",
+		"ssao_intensity": 2.0,
+		"ssao_power": 1.3,
+		"ssao_radius": 1.2,
+		"storey_metres": 3.4,
+		"supersample": 2.0,
+		"tonemap": "linear",
+		"transparent": true,
+		"version": "bellwake-daylight-v3"
+	},
+	"runtime_scale": 0.5,
+	"sources": {
+		"res://game/whispering_forest/art/combat/ice_emerge.gdshader": "daed3d380be34dbe5da023cc220f11f2dcf86e4aa01b2a80315d3207ff3cf77e",
+		"res://game/whispering_forest/art/combat/ice_motion.gd": "d3bda7a56e8293538c89639820afc4b429f822173445149775c6a940662a59e4",
+		"res://game/whispering_forest/art/combat/ice_spear_16.gd": "a021456372353f2c1d09df64fe67e4665d06a3151d1b79aea5678c4ebafadfe1",
+		"res://game/whispering_forest/tools/bake_ice_16.gd": "e92492ddfd8e74388da540b5dd436ddd11f5e8b1beff4dfe8bb8d57a67916205"
+	},
+	"times": [
+		0.0,
+		0.04,
+		0.08,
+		0.12,
+		0.16,
+		0.2,
+		0.24,
+		0.3,
+		0.36,
+		0.42,
+		0.53,
+		0.65,
+		0.79,
+		0.94,
+		1.11,
+		1.29
+	]
+}

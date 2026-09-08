@@ -1,0 +1,124 @@
+[
+	{
+		"events": [
+			{
+				"at": 0.666666666666667,
+				"kind": "fall",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-small.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 1.63333333333334,
+				"kind": "rock",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-small.wav",
+				"pitch": 1.0364705324173,
+				"volume_db": -4.0
+			}
+		],
+		"level": 1,
+		"skill": "earth"
+	},
+	{
+		"events": [
+			{
+				"at": 4.83333333333333,
+				"kind": "fall",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-full.wav",
+				"pitch": 1.0,
+				"volume_db": -6.61236000061035
+			},
+			{
+				"at": 5.03333333333333,
+				"kind": "fall",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-full.wav",
+				"pitch": 1.0,
+				"volume_db": -6.61236000061035
+			},
+			{
+				"at": 5.19999999999999,
+				"kind": "fall",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-full.wav",
+				"pitch": 1.0,
+				"volume_db": -6.61236000061035
+			},
+			{
+				"at": 5.39999999999999,
+				"kind": "fall",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/fall-full.wav",
+				"pitch": 1.0,
+				"volume_db": -6.61236000061035
+			},
+			{
+				"at": 5.79999999999999,
+				"kind": "rock",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-full.wav",
+				"pitch": 0.966827690601349,
+				"volume_db": -5.61236000061035
+			},
+			{
+				"at": 5.96666666666666,
+				"kind": "rock",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-full.wav",
+				"pitch": 0.980182588100433,
+				"volume_db": -5.61236000061035
+			},
+			{
+				"at": 6.16666666666665,
+				"kind": "rock",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-full.wav",
+				"pitch": 0.975561022758484,
+				"volume_db": -5.61236000061035
+			},
+			{
+				"at": 6.33333333333332,
+				"kind": "rock",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/rock-full.wav",
+				"pitch": 0.979121208190918,
+				"volume_db": -5.61236000061035
+			}
+		],
+		"level": 10,
+		"skill": "earth"
+	},
+	{
+		"events": [
+			{
+				"at": 8.83333333333331,
+				"kind": "ultimate-seal",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/spell-audio-v2/ultimate-seal-full.wav",
+				"pitch": 1.0,
+				"volume_db": -5.0
+			},
+			{
+				"at": 9.09999999999998,
+				"kind": "ultimate-fall",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/ultimate-fall-full.wav",
+				"pitch": 1.0,
+				"volume_db": -2.0
+			},
+			{
+				"at": 10.1333333333333,
+				"kind": "ultimate-impact",
+				"level": 10,
+				"path": "res://game/whispering_forest/assets/meteor-audio-v3/ultimate-impact-full.wav",
+				"pitch": 0.968819141387939,
+				"volume_db": -2.0
+			}
+		],
+		"level": 10,
+		"skill": "ultimate"
+	}
+]

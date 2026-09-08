@@ -1,0 +1,131 @@
+{
+  "title": "Bellwake - Sunlit Promenade",
+  "seconds": 110.769216,
+  "bpm": 104,
+  "key": "D",
+  "bars": 48,
+  "sample_rate": 48000,
+  "channels": 2,
+  "gain_db": 12.32,
+  "master_lufs": -18.0,
+  "master_true_peak_db": -5.21,
+  "ogg_lufs": -17.97,
+  "ogg_true_peak_db": -5.2,
+  "loudness_range_lu": 3.9,
+  "loop_sample_jump": 0.00031270086765289307,
+  "family_mix_gain_db": {
+    "woodwinds": -3,
+    "strings": 7,
+    "plucked": 3,
+    "bass": 1,
+    "accents": 7,
+    "percussion": 6
+  },
+  "parts": [
+    {
+      "name": "Flute",
+      "gm_program_0_based": 73,
+      "group": "woodwinds",
+      "note_count": 154
+    },
+    {
+      "name": "Oboe",
+      "gm_program_0_based": 68,
+      "group": "woodwinds",
+      "note_count": 96
+    },
+    {
+      "name": "Clarinet",
+      "gm_program_0_based": 71,
+      "group": "woodwinds",
+      "note_count": 70
+    },
+    {
+      "name": "Legato strings",
+      "gm_program_0_based": 48,
+      "group": "strings",
+      "note_count": 144
+    },
+    {
+      "name": "Pizzicato",
+      "gm_program_0_based": 45,
+      "group": "strings",
+      "note_count": 184
+    },
+    {
+      "name": "Harp",
+      "gm_program_0_based": 46,
+      "group": "plucked",
+      "note_count": 144
+    },
+    {
+      "name": "Nylon guitar",
+      "gm_program_0_based": 24,
+      "group": "plucked",
+      "note_count": 384
+    },
+    {
+      "name": "Double bass",
+      "gm_program_0_based": 43,
+      "group": "bass",
+      "note_count": 120
+    },
+    {
+      "name": "French horns",
+      "gm_program_0_based": 60,
+      "group": "accents",
+      "note_count": 18
+    },
+    {
+      "name": "Light percussion",
+      "gm_program_0_based": 0,
+      "group": "percussion",
+      "note_count": 561
+    },
+    {
+      "name": "Glockenspiel",
+      "gm_program_0_based": 9,
+      "group": "accents",
+      "note_count": 20
+    },
+    {
+      "name": "Bassoon",
+      "gm_program_0_based": 70,
+      "group": "bass",
+      "note_count": 28
+    }
+  ],
+  "sections": [
+    {
+      "bar": 1,
+      "label": "A - morning streets / flute",
+      "seconds": 0.0
+    },
+    {
+      "bar": 9,
+      "label": "A2 - woodwind answers",
+      "seconds": 18.461536
+    },
+    {
+      "bar": 17,
+      "label": "B - garden courtyard / clarinet",
+      "seconds": 36.923072
+    },
+    {
+      "bar": 25,
+      "label": "B2 - open square",
+      "seconds": 55.384608
+    },
+    {
+      "bar": 33,
+      "label": "A reprise - full promenade",
+      "seconds": 73.846144
+    },
+    {
+      "bar": 45,
+      "label": "turnaround / seamless return",
+      "seconds": 101.538448
+    }
+  ],
+  "qa_scope": "Signal, timing and integration checks; not a claim of human listening or reference-quality parity."
+}

@@ -1,0 +1,3676 @@
+{
+  "baker_house": {
+    "category": "building",
+    "door": [
+      -96.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      192.0,
+      153.600006103516
+    ],
+    "height_metres": 7.819999694824219,
+    "entry_metres": [
+      0.0,
+      0,
+      1.7950000953674374
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.63,
+          0.24,
+          -1.8450000953674377,
+          2.63,
+          2.93,
+          1.6650000953674375
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.77,
+          2.93,
+          -1.9600000953674377,
+          2.77,
+          5.27,
+          1.7800000953674375
+        ]
+      },
+      {
+        "volume": "Bakery attic dormer",
+        "bounds_metres": [
+          0.014000000000000012,
+          6.18,
+          0.15500000000000008,
+          1.094,
+          7.04,
+          1.0250000000000001
+        ]
+      }
+    ],
+    "through_opening_count": 12,
+    "opening_mesh_ray_checks": 24,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.005,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/baker_house.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/baker_house.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "b6764e",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "wall_long": {
+    "category": "civic",
+    "connectors": [
+      [
+        -47.3684196472168,
+        0.0,
+        0.0
+      ],
+      [
+        47.3684196472168,
+        0.0,
+        0.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.302499999999999,
+    "module_spec": {
+      "length": 94.7368421052632,
+      "type": "wall"
+    },
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/wall_long.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/wall_long.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "linden": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.5818328857421875,
+    "entry_metres": [
+      0,
+      0,
+      0
+    ],
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/linden.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/linden.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "apothecary": {
+    "category": "building",
+    "door": [
+      -67.2,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      172.800003051758,
+      153.600006103516
+    ],
+    "height_metres": 7.7375,
+    "entry_metres": [
+      0.6000000476837188,
+      0,
+      1.7150000953674378
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.330000047683719,
+          0.24,
+          -1.9250000953674375,
+          1.3420000286102316,
+          2.93,
+          1.5850000953674377
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.470000047683719,
+          2.93,
+          -2.0400000953674375,
+          1.4820000286102317,
+          5.27,
+          1.7000000953674377
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          1.3320000286102318,
+          0.24,
+          -0.764000032424929,
+          2.470000047683719,
+          3.37,
+          2.0500000953674373
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 1.8999999999999995
+      }
+    ],
+    "through_opening_count": 14,
+    "opening_mesh_ray_checks": 28,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.0849999999999995,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/apothecary.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/apothecary.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "718164",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "forge": {
+    "category": "building",
+    "door": [
+      -91.2,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      182.399993896484,
+      160.0
+    ],
+    "height_metres": 6.507499999999999,
+    "entry_metres": [
+      0,
+      0,
+      2.3200000000000003
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Smith enclosed workroom",
+        "bounds_metres": [
+          -2.6199999046325626,
+          0.24,
+          -2.1900000000000004,
+          -0.20959999237060511,
+          3.12,
+          1.8700000000000003
+        ]
+      },
+      {
+        "feature": "open workplace with unequal roof heights"
+      }
+    ],
+    "through_opening_count": 4,
+    "opening_mesh_ray_checks": 8,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 0.75,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/forge.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/forge.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "657077",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "gatehouse": {
+    "aperture": {
+      "clear_height_metres": 2.15,
+      "depth": 62.0,
+      "half_width": 66.0
+    },
+    "category": "civic",
+    "connectors": [
+      [
+        0.0,
+        0.0,
+        -95.0
+      ],
+      [
+        0.0,
+        0.0,
+        95.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 6.84,
+    "module_spec": {
+      "height": 5.0,
+      "type": "gate"
+    },
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/gatehouse.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/gatehouse.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "birch": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.585882186889648,
+    "entry_metres": [
+      0,
+      0,
+      0
+    ],
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/birch.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/birch.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "guild": {
+    "category": "building",
+    "door": [
+      -150.4,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      300.799987792969,
+      163.199996948242
+    ],
+    "height_metres": 10.949999809265137,
+    "entry_metres": [
+      0,
+      0,
+      2.089999952316281
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Guild central hall",
+        "bounds_metres": [
+          -2.369099898910524,
+          0.24,
+          -2.2499999523162812,
+          2.369099898910524,
+          5.65,
+          2.089999952316281
+        ]
+      },
+      {
+        "volume": "Guild stepped side wing",
+        "bounds_metres": [
+          -4.46999980926514,
+          0.24,
+          -2.15999995422363,
+          -2.23499990463257,
+          3.25,
+          1.079999977111815
+        ]
+      },
+      {
+        "volume": "Guild stepped side wing",
+        "bounds_metres": [
+          2.23499990463257,
+          0.24,
+          -2.15999995422363,
+          4.46999980926514,
+          3.85,
+          1.079999977111815
+        ]
+      }
+    ],
+    "through_opening_count": 14,
+    "opening_mesh_ray_checks": 28,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 0.8599999999999999,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/guild.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/guild.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "526c85",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "inn": {
+    "category": "building",
+    "door": [
+      -92.8,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      185.600006103516,
+      153.600006103516
+    ],
+    "height_metres": 7.789999961853027,
+    "entry_metres": [
+      9.536743750260257e-08,
+      0,
+      1.7150000953674378
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.5300000953674373,
+          0.24,
+          -1.9250000953674375,
+          0.9814000400543236,
+          2.93,
+          1.5850000953674377
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.6700000953674374,
+          2.93,
+          -2.0400000953674375,
+          1.1214000400543234,
+          5.27,
+          1.7000000953674377
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.9714000400543235,
+          0.24,
+          -0.764000032424929,
+          2.6700000953674374,
+          2.55,
+          2.0500000953674373
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 2.7199999999999998
+      },
+      {
+        "volume": "Inn paired dormer",
+        "bounds_metres": [
+          -1.9734080574493442,
+          6.18,
+          0.024999999999999967,
+          -1.2434080574493442,
+          7.01,
+          0.895
+        ]
+      },
+      {
+        "volume": "Inn paired dormer",
+        "bounds_metres": [
+          -0.3051919978637695,
+          6.18,
+          0.024999999999999967,
+          0.4248080021362305,
+          7.01,
+          0.895
+        ]
+      }
+    ],
+    "through_opening_count": 16,
+    "opening_mesh_ray_checks": 32,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.0849999999999995,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/inn.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/inn.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "806378",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "market_hall": {
+    "category": "building",
+    "door": [
+      -105.6,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      211.199996948242,
+      102.400001525879
+    ],
+    "height_metres": 4.920000076293945,
+    "entry_metres": [
+      0,
+      0,
+      1.4200000238418595
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Raised market clerestory",
+        "bounds_metres": [
+          -1.2279999809265125,
+          3.57,
+          -0.606000010013581,
+          1.2279999809265125,
+          4.15,
+          0.4860000100135809
+        ]
+      },
+      {
+        "feature": "open workplace with unequal roof heights"
+      }
+    ],
+    "through_opening_count": 1,
+    "opening_mesh_ray_checks": 2,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 0.75,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/market_hall.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/market_hall.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "a7805f",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "pet_lodge": {
+    "category": "building",
+    "door": [
+      -91.2,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      182.399993896484,
+      140.800003051758
+    ],
+    "height_metres": 5.5375,
+    "entry_metres": [
+      -9.536743750260257e-08,
+      0,
+      1.5150000476837189
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.4799999046325625,
+          0.24,
+          -1.7250000476837188,
+          0.9603999599456761,
+          2.93,
+          1.385000047683719
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.9503999599456763,
+          0.24,
+          -0.6960000162124644,
+          2.6199999046325626,
+          2.55,
+          1.8500000476837188
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ],
+    "through_opening_count": 9,
+    "opening_mesh_ray_checks": 18,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.085,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/pet_lodge.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/pet_lodge.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "7b886c",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "garden_house": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.5375,
+    "entry_metres": [
+      0.0,
+      0,
+      1.4149999046325625
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.13,
+          0.24,
+          -1.6249999046325625,
+          0.8133999999999997,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.8033999999999999,
+          0.24,
+          -0.6619999675750714,
+          2.27,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ],
+    "through_opening_count": 9,
+    "opening_mesh_ray_checks": 18,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.085,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/garden_house.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/garden_house.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "777e72",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "townhouse": {
+    "category": "building",
+    "door": [
+      -89.6,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      179.199996948242,
+      147.199996948242
+    ],
+    "height_metres": 7.819999694824219,
+    "entry_metres": [
+      -4.7683718751301285e-08,
+      0,
+      1.694999952316281
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.429999952316281,
+          0.24,
+          -1.7449999523162811,
+          2.429999952316281,
+          2.93,
+          1.564999952316281
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.569999952316281,
+          2.93,
+          -1.8599999523162811,
+          2.569999952316281,
+          5.27,
+          1.679999952316281
+        ]
+      },
+      {
+        "volume": "Townhouse cross gable",
+        "bounds_metres": [
+          -0.74,
+          6.18,
+          0.13500000000000006,
+          0.74,
+          7.04,
+          1.0050000000000001
+        ]
+      }
+    ],
+    "through_opening_count": 11,
+    "opening_mesh_ray_checks": 22,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.005,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/townhouse.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/townhouse.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "617680",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "garden_house_sage": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.5375,
+    "entry_metres": [
+      0.0,
+      0,
+      1.4149999046325625
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.13,
+          0.24,
+          -1.6249999046325625,
+          0.8133999999999997,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.8033999999999999,
+          0.24,
+          -0.6619999675750714,
+          2.27,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ],
+    "through_opening_count": 9,
+    "opening_mesh_ray_checks": 18,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.085,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/garden_house_sage.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/garden_house_sage.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "7d8b76",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "garden_house_clay": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.5375,
+    "entry_metres": [
+      0.0,
+      0,
+      1.4149999046325625
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.13,
+          0.24,
+          -1.6249999046325625,
+          0.8133999999999997,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          0.8033999999999999,
+          0.24,
+          -0.6619999675750714,
+          2.27,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ],
+    "through_opening_count": 9,
+    "opening_mesh_ray_checks": 18,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.085,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/garden_house_clay.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/garden_house_clay.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "ab7558",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "garden_house_ash": {
+    "category": "building",
+    "door": [
+      -80.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      160.0,
+      134.399993896484
+    ],
+    "height_metres": 5.5375,
+    "entry_metres": [
+      0.0,
+      0,
+      1.4149999046325625
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -0.8133999999999997,
+          0.24,
+          -1.6249999046325625,
+          2.13,
+          2.93,
+          1.2849999046325626
+        ]
+      },
+      {
+        "volume": "Lower attached side room",
+        "bounds_metres": [
+          -2.27,
+          0.24,
+          -0.6619999675750714,
+          -0.8033999999999999,
+          2.55,
+          1.7499999046325625
+        ]
+      },
+      {
+        "feature": "attached lower side room",
+        "height_difference": 0.52
+      }
+    ],
+    "through_opening_count": 9,
+    "opening_mesh_ray_checks": 18,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.085,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/garden_house_ash.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/garden_house_ash.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "737e80",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "townhouse_mauve": {
+    "category": "building",
+    "door": [
+      -89.6,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      179.199996948242,
+      147.199996948242
+    ],
+    "height_metres": 7.819999694824219,
+    "entry_metres": [
+      -4.7683718751301285e-08,
+      0,
+      1.694999952316281
+    ],
+    "structure_revision": "occupied-volumes-v1",
+    "structure_features": [
+      {
+        "volume": "Recessed ground storey",
+        "bounds_metres": [
+          -2.429999952316281,
+          0.24,
+          -1.7449999523162811,
+          2.429999952316281,
+          2.93,
+          1.564999952316281
+        ]
+      },
+      {
+        "volume": "Projecting upper storey",
+        "bounds_metres": [
+          -2.569999952316281,
+          2.93,
+          -1.8599999523162811,
+          2.569999952316281,
+          5.27,
+          1.679999952316281
+        ]
+      },
+      {
+        "volume": "Townhouse cross gable",
+        "bounds_metres": [
+          -0.74,
+          6.18,
+          0.13500000000000006,
+          0.74,
+          7.04,
+          1.0050000000000001
+        ]
+      }
+    ],
+    "through_opening_count": 11,
+    "opening_mesh_ray_checks": 22,
+    "opening_depth_metres": 0.28,
+    "entrance_approach_metres": 1.005,
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/townhouse_mauve.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/townhouse_mauve.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d0c5ad",
+        "texture": "limewash-weathered.png"
+      },
+      "plaster_edge": {
+        "color": "ddd1b6",
+        "texture": "limestone.png"
+      },
+      "plaster_undercoat": {
+        "color": "a99c84",
+        "texture": "limestone.png"
+      },
+      "exposed_stone": {
+        "color": "9e9e8b",
+        "texture": "limestone.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "886c7e",
+        "texture": "roof-mineral-painted.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "d59ab34cdf63f8e09b8cf242926bb2ec3c28a6900c547960d3e7f59b5f5f0401",
+    "architecture_source": "res://game/whispering_forest/art/city/reference-remake/architecture_depth.py",
+    "architecture_sha256": "bd885bb1042bcaec2e3a99829bc0f90c064ce7664f77d2cdf033fad64328e82f"
+  },
+  "linden_young": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 3.5962703227996826,
+    "entry_metres": [
+      0,
+      0,
+      0
+    ],
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/linden_young.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/linden_young.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "linden_lean": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.7961273193359375,
+    "entry_metres": [
+      0,
+      0,
+      0
+    ],
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/linden_lean.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/linden_lean.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "spruce": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.241832256317139,
+    "entry_metres": [
+      0,
+      0,
+      0
+    ],
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/spruce.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/spruce.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "cypress": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.266450881958008,
+    "entry_metres": [
+      0,
+      0,
+      0
+    ],
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/cypress.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/cypress.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "garden_tree": {
+    "category": "environment",
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 3.616671562194824,
+    "entry_metres": [
+      0,
+      0,
+      0
+    ],
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/garden_tree.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/garden_tree.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "wall_north": {
+    "category": "civic",
+    "connectors": [
+      [
+        -44.625,
+        0.0,
+        0.0
+      ],
+      [
+        44.625,
+        0.0,
+        0.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.302499999999999,
+    "module_spec": {
+      "length": 89.25,
+      "type": "wall"
+    },
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/wall_north.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/wall_north.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "wall_south": {
+    "category": "civic",
+    "connectors": [
+      [
+        -45.2857131958008,
+        0.0,
+        0.0
+      ],
+      [
+        45.2857131958008,
+        0.0,
+        0.0
+      ]
+    ],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 4.302499999999999,
+    "module_spec": {
+      "length": 90.5714285714286,
+      "type": "wall"
+    },
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/wall_south.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/wall_south.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "tower_corner": {
+    "category": "civic",
+    "connectors": [],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 6.085,
+    "module_spec": {
+      "height": 5.0,
+      "radius": 36.0,
+      "type": "tower"
+    },
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/tower_corner.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/tower_corner.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  },
+  "tower_curtain": {
+    "category": "civic",
+    "connectors": [],
+    "door": [
+      0.0,
+      24.0
+    ],
+    "door_normal": [
+      0.0,
+      1.0
+    ],
+    "footprint": [
+      0.0,
+      0.0
+    ],
+    "height_metres": 5.785,
+    "module_spec": {
+      "height": 4.65,
+      "radius": 30.0,
+      "type": "tower"
+    },
+    "geometry": "res://game/whispering_forest/art/city/reference-remake/models/tower_curtain.glb",
+    "blend": "res://game/whispering_forest/art/city/reference-remake/editable/tower_curtain.blend",
+    "materials": {
+      "limestone": {
+        "color": "d5d0b9",
+        "texture": "limestone.png"
+      },
+      "limestone_light": {
+        "color": "e0dac8",
+        "texture": "limestone.png"
+      },
+      "limestone_dark": {
+        "color": "a3a590",
+        "texture": "limestone.png"
+      },
+      "mortar": {
+        "color": "9a9885",
+        "texture": null
+      },
+      "plaster": {
+        "color": "d9ccb0",
+        "texture": "limewash.png"
+      },
+      "oak": {
+        "color": "bc9870",
+        "texture": "oak.png"
+      },
+      "oak_dark": {
+        "color": "82664c",
+        "texture": "oak.png"
+      },
+      "roof": {
+        "color": "687b79",
+        "texture": "limestone.png"
+      },
+      "roof_edge": {
+        "color": "64716b",
+        "texture": "limestone.png"
+      },
+      "iron": {
+        "color": "3e4544",
+        "texture": null
+      },
+      "brass": {
+        "color": "b69350",
+        "texture": null
+      },
+      "glass": {
+        "color": "526864",
+        "texture": null
+      },
+      "glass_light": {
+        "color": "879b90",
+        "texture": null
+      },
+      "recess": {
+        "color": "343d37",
+        "texture": null
+      },
+      "cloth": {
+        "color": "e5d3ad",
+        "texture": null
+      },
+      "awning": {
+        "color": "a5533d",
+        "texture": null
+      },
+      "leaf": {
+        "color": "648b5b",
+        "texture": null
+      },
+      "leaf_dark": {
+        "color": "4b7055",
+        "texture": null
+      },
+      "flower": {
+        "color": "cdad98",
+        "texture": null
+      },
+      "bread": {
+        "color": "c69a5d",
+        "texture": null
+      },
+      "ember": {
+        "color": "e8a052",
+        "texture": null
+      },
+      "banner": {
+        "color": "516e88",
+        "texture": null
+      }
+    },
+    "authoring_sha256": "14de48ac3ffaf6e0ca6142f55030fc8917d1dfa58ea5b2a2c28a9afd0f6f3122"
+  }
+}

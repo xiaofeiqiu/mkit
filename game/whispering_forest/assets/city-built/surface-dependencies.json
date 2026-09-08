@@ -1,0 +1,13 @@
+{
+	"res://game/whispering_forest/art/city/materials/flagstone.png": "ad69f689fab50fef5546f2336d89e86de0904205c53aa2e7c81513337746d013",
+	"res://game/whispering_forest/art/city/materials/foliage.png": "2d895466dbc4452db3d51ab12be11fe8b456ad1423e42f32a85fdac4eb02400f",
+	"res://game/whispering_forest/art/city/materials/plaster.png": "ca78ca13bdc7cf1720c8c4483cbd7fc08aabb5187d018ae260d4444aefc8c38a",
+	"res://game/whispering_forest/art/city/materials/slate.png": "5ab257f680d98eccbd8675d0deb8f3ee86752ba85e759bac5568fed9312050b2",
+	"res://game/whispering_forest/art/city/materials/street.png": "678a93a370d26587de82922a32a9c6c75a02de19056dc4a8d47c202efd534418",
+	"res://game/whispering_forest/art/city/materials/wallstone.png": "194f09d4c9321f01d997234bb938411abba3c531381a1e941d8f6e14335388f3",
+	"res://game/whispering_forest/art/city/materials/wood.png": "86c33fa3b573cd2794e5f8260ca7d8cb30c313b958184c2f53e4fd1a08ddaf83",
+	"res://game/whispering_forest/art/city/painted_foliage.gdshader": "9254a65c76ed8b4978cbb11150871c746bff0456b70bb8c9ac21abe59d43ae41",
+	"res://game/whispering_forest/art/city/painted_limestone.gdshader": "411a3dc1ab53b71b6899eb900a94cd7195294ef502ecc9eebb75b3e46368d09e",
+	"res://game/whispering_forest/art/city/painted_slate.gdshader": "9529aee7aca2c3bacbc734648e9247384c8ee9391a1579a30c8c907bb3e81730",
+	"res://game/whispering_forest/assets/city-v2/masonry.png": "6392e8e27e175b852171b07b01746f3ce1f941886c3558233e902b7a394b63dc"
+}

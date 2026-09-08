@@ -97,3 +97,9 @@ cookbook-fields:
 
 .NOTPARALLEL:
 .PHONY: check test run editor clean clean-cache reimport ut ut-kernel ut-modules int demo-test docs-server docs-xml docs-html docs-api docs-check layering contract-check cookbook-fields
+.PHONY: forest-sample forest-test
+forest-sample:
+	$(GODOT) --path . --rendering-method gl_compatibility --resolution 1280x720 --scene res://game/whispering_forest/bootstrap.tscn
+
+forest-test:
+	GODOT="$(GODOT)" python3 game/whispering_forest/tools/verify.py

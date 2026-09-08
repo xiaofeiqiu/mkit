@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "generator": "tools/compose_music.py",
+  "instrument_library": "GeneralUser GS 2.0.3",
+  "license": "art/audio/vendor/GeneralUser-GS-LICENSE.txt",
+  "composition": "Original authored MIDI; no reference recording samples used.",
+  "tracks": [
+    {
+      "id": "bellwake_city",
+      "title_zh": "晨铃城·晴日回廊",
+      "title_en": "Bellwake - Sunlit Promenade",
+      "file": "bellwake_city.ogg",
+      "sha256": "501b9679a080f68b4f03b80e90ad8f1565639f97f020052277260922dc552a18",
+      "duration_seconds": 110.769216,
+      "bpm": 104,
+      "loop": true,
+      "loop_offset": 0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "lufs": -17.97,
+      "true_peak_db": -5.2,
+      "instrument_parts": 12
+    },
+    {
+      "id": "rift_battle",
+      "title_zh": "裂隙交锋",
+      "title_en": "Riftbound - Against the Closing Gate",
+      "file": "rift_battle.ogg",
+      "sha256": "384d83814f8fb077de717accb3379b27d930d2a477e0ea46cf123cf5d535d0a5",
+      "duration_seconds": 106.666752,
+      "bpm": 144,
+      "loop": true,
+      "loop_offset": 0,
+      "channels": 2,
+      "sample_rate": 48000,
+      "lufs": -16.99,
+      "true_peak_db": -3.15,
+      "instrument_parts": 13
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+[
+	{
+		"events": [
+			{
+				"at": 0.5,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -4.0
+			}
+		],
+		"last_visible": 1.1,
+		"sound_length": 1.13070833333333,
+		"start": 0.5,
+		"take": 1
+	},
+	{
+		"events": [
+			{
+				"at": 3.0,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -4.0
+			}
+		],
+		"last_visible": 1.1,
+		"sound_length": 1.13070833333333,
+		"start": 3.0,
+		"take": 2
+	},
+	{
+		"events": [
+			{
+				"at": 5.49999999999999,
+				"duration": 1.13070833333333,
+				"kind": "fire-sequence",
+				"level": 1,
+				"path": "res://game/whispering_forest/assets/fire-audio-v5/fire-level-1.wav",
+				"pitch": 1.0,
+				"volume_db": -4.0
+			}
+		],
+		"last_visible": 1.1,
+		"sound_length": 1.13070833333333,
+		"start": 5.49999999999999,
+		"take": 3
+	}
+]

@@ -1,0 +1,41 @@
+extends RefCounted
+
+# Registration measured on the original 1254px artwork. The two ground-edge
+# slopes belong to the u and v axes, not to sloping roof ridges. All vertical
+# walls remain vertical; only the sprite's native drawing basis is corrected.
+const REGIONS = preload("res://game/whispering_forest/assets/city-v2/regions.gd").FRAMES
+const BUILDINGS := {
+	"guild": {"slopes":Vector2(0.333,-0.579),"door":Vector2(449,1140),"base":[Vector2(150,980),Vector2(260,1077),Vector2(560,1200),Vector2(646,1152),Vector2(833,1204),Vector2(1096,1052)]},
+	"forge": {"slopes":Vector2(0.387,-0.422),"door":Vector2(782,1165),"base":[Vector2(87,999),Vector2(650,1217),Vector2(784,1173),Vector2(1157,1004)]},
+	"apothecary": {"slopes":Vector2(0.333,-0.525),"door":Vector2(554,1187),"base":[Vector2(230,1040),Vector2(576,1191),Vector2(786,1161),Vector2(945,1136),Vector2(1181,1012)]},
+	"inn": {"slopes":Vector2(0.488,-0.478),"door":Vector2(400,1116),"base":[Vector2(130,948),Vector2(399,1116),Vector2(434,1099),Vector2(550,1153),Vector2(671,1096),Vector2(716,1125),Vector2(1140,923)]},
+	"market_hall": {"slopes":Vector2(0.369,-0.616),"door":Vector2(535,1030),"base":[Vector2(48,816),Vector2(160,882),Vector2(312,945),Vector2(350,924),Vector2(460,1005),Vector2(610,1058),Vector2(648,1035),Vector2(741,1072),Vector2(887,988),Vector2(963,1024),Vector2(1033,1009),Vector2(1205,903)]},
+	"pet_lodge": {"slopes":Vector2(0.501,-0.463),"door":Vector2(360,960),"base":[Vector2(47,767),Vector2(379,969),Vector2(418,949),Vector2(650,1069),Vector2(788,1006),Vector2(837,1045),Vector2(880,1038),Vector2(1230,876)]},
+	"garden_house": {"slopes":Vector2(0.434,-0.707),"door":Vector2(274,997),"base":[Vector2(80,920),Vector2(350,1037),Vector2(405,1000),Vector2(760,1170),Vector2(1194,863)]},
+	"townhouse": {"slopes":Vector2(0.280,-0.600),"door":Vector2(320,1080),"base":[Vector2(152,994),Vector2(326,1085),Vector2(384,1054),Vector2(534,1111),Vector2(590,1090),Vector2(595,1128),Vector2(731,1181),Vector2(789,1153),Vector2(861,1197),Vector2(1120,1038)]},
+	"baker_house": {"slopes":Vector2(0.662,-0.307),"door":Vector2(307,1144),"base":[Vector2(98,1010),Vector2(447,1241),Vector2(1164,1021)]},
+}
+
+static func basis(asset: String) -> Transform2D:
+	var slopes: Vector2 = BUILDINGS[asset].slopes
+	var vertical := 1.0/(slopes.x-slopes.y)
+	return Transform2D(Vector2(1,0.5-vertical*slopes.x),Vector2(0,vertical),Vector2.ZERO)
+
+static func source_bounds(asset: String) -> Rect2:
+	var projection := basis(asset)
+	var points: Array = BUILDINGS[asset].base
+	var rect := Rect2(WFIso.unproject(projection*points[0]),Vector2.ZERO)
+	for point in points: rect = rect.expand(WFIso.unproject(projection*point))
+	return rect
+
+static func scale_for(asset: String,width: float) -> float:
+	return width/float(REGIONS[asset].region[2])
+
+static func footprint(asset: String,width: float) -> Vector2:
+	return source_bounds(asset).size*scale_for(asset,width)
+
+static func pivot(asset: String) -> Vector2:
+	return basis(asset).affine_inverse()*WFIso.project(source_bounds(asset).end)
+
+static func door_offset(asset: String,width: float) -> Vector2:
+	return (WFIso.unproject(basis(asset)*BUILDINGS[asset].door)-source_bounds(asset).end)*scale_for(asset,width)

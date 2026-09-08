@@ -1,0 +1,15 @@
+PASS 640x640, 15 layers, RGBA round-trip matches beauty image; bounds [34,93]-[593,585]
+01 Stone paving: 22618 pixels
+02 Thick plaster walls / window reveals: 14416 pixels
+03 Foundation blocks: 4162 pixels
+04 Projecting oak framing: 17369 pixels
+05 Recessed glass / frames / sills: 20177 pixels
+06 Solid stone arch / jambs: 6950 pixels
+07 Inset oak door / ironwork: 3233 pixels
+08 Curved overlapping clay tiles: 42085 pixels
+09 Solid dormer: 6491 pixels
+10 Hollow stone chimney: 4282 pixels
+11 Entry steps / lantern: 3739 pixels
+12 Garden / flower boxes: 6983 pixels
+13 Fence / barrel: 4280 pixels
+Antialiasing fringe: 1955 pixels

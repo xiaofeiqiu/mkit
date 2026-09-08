@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whispering Forest 设计评估</title>
+<style>
+  :root {
+    --bg: #faf7f2;
+    --text: #2b2620;
+    --muted: #6b6255;
+    --accent: #7a5c3e;
+    --accent-bg: #f0e6d6;
+    --card-bg: #ffffff;
+    --border: #e6ddcc;
+    --good: #3f7a4d;
+    --risk: #a4552c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1a16;
+      --text: #ece6da;
+      --muted: #a89d8a;
+      --accent: #d9b98a;
+      --accent-bg: #332c22;
+      --card-bg: #262219;
+      --border: #3a3327;
+      --good: #7fbf8c;
+      --risk: #e0925a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.75;
+    padding: 0 20px 80px;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  header {
+    padding: 48px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  header .eyebrow {
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 28px;
+    margin: 8px 0 4px;
+  }
+  header .sub {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  h2 {
+    font-size: 19px;
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent-bg);
+  }
+  h3 {
+    font-size: 15px;
+    margin: 24px 0 10px;
+    color: var(--accent);
+  }
+  p { margin: 0 0 14px; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .verdict {
+    font-size: 15.5px;
+  }
+  ul { padding-left: 20px; margin: 0 0 8px; }
+  li { margin-bottom: 10px; }
+  li:last-child { margin-bottom: 0; }
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 5px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .tag.good { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
+  .tag.risk { background: color-mix(in srgb, var(--risk) 18%, transparent); color: var(--risk); }
+  strong { color: var(--text); }
+  ol { padding-left: 20px; }
+  ol li { margin-bottom: 12px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .priority {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 4px;
+  }
+  .priority span {
+    background: var(--accent-bg);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .priority .arrow { color: var(--muted); font-weight: 400; padding: 6px 0; }
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Game Design Review</div>
+  <h1>《Project Whispering Forest》设计评估</h1>
+  <div class="sub">可玩性与上头度分析 · 基于 gdd.md v0.1</div>
+</header>
+
+<h2>设计决策更新</h2>
+<div class="card">
+  <p style="margin-bottom:12px">以下两项建议已被采纳，并已写入 <code>gdd.md</code>：</p>
+  <ul>
+    <li><span class="tag good">已采纳</span><strong>宠物图鉴</strong>：按副本展示已捕获 / 剪影未捕获宠物，不暴露具体掉率或保底进度，用于强化收集驱动并与称号系统联动。写入 GDD 10.4 节，UI 原则（16）与技术结构（18，<code>PetCodexState</code>）同步更新。</li>
+    <li><span class="tag good">已采纳</span><strong>局内即时反馈缺失 → 远征强化（Expedition Boon）</strong>：每个战斗节点清空后触发一次三选一临时强化（技能强化 / 机制强化 / 资源强化），任务结束重置，不影响回城后的永久属性成长；被强化的技能图标即时叠加光效反馈，结算画面回顾本局强化组合与高光数据。写入 GDD 12.2 节，5.2、16、18、19、20 节同步更新。详见下方"重设计方案"。</li>
+  </ul>
+</div>
+
+<h2>核心判断</h2>
+<div class="card verdict">
+  <p>这份 GDD 的可玩性骨架是稳的：<strong>半自动战斗 + 地图探索 + 掉落驱动 Build 重组</strong>，这套组合本身就是被 PoE / Diablo 系验证过的强粘性循环。核心概念清晰，"不做什么"的边界划得很实在，系统之间的依赖关系（职业只限武器、宠物不进 Build、魔石二选一）也经过深思熟虑。</p>
+  <p style="margin-bottom:0">真正的风险不在"设计理念对不对"，而在<strong>半自动战斗会不会显得没有参与感</strong>——文档自己在第 19 节把这列为 P0 问题，说明策划者已经意识到这是最大的不确定项，这个自我认知是对的。</p>
+</div>
+
+<h2>可玩性评估</h2>
+
+<h3><span class="tag good">优势</span>做得好的地方</h3>
+<div class="card">
+  <ul>
+    <li><strong>三层奖励结构</strong>（高频魔石 / 中频技能石 / 低频宠物蛋）本质上是把"确定性收益"和"随机惊喜"叠在一起，这是可变比率强化里最耐玩的配比，比纯保底或纯随机都更抗疲劳。</li>
+    <li><strong>宠物与 Build 强制解耦</strong>：这个决定很聪明。宠物系统一旦提供数值加成，就会被"最优解"绑架，玩家会为了效率去刷不喜欢的宠物；现在宠物纯粹是收集和陪伴向，情感驱动和数值驱动被彻底分开，两条线都能各自专注。</li>
+    <li><strong>隐藏软保底</strong>（Boss 宠）：避免了"刷了 50 次没有"的挫败感，同时不让玩家把游戏当计数器玩，这是对的取舍。</li>
+    <li><strong>地区异变 + 路线变体</strong>：直接针对"重复副本会腻"这个 ARPG 老问题给出机制解，而不是只靠数值膨胀。</li>
+  </ul>
+</div>
+
+<h3><span class="tag risk">风险</span>需要在原型阶段重点验证</h3>
+<div class="card">
+  <ul>
+    <li><strong>半自动战斗的参与感</strong>——普攻和"大部分技能"都自动释放，玩家手操只剩移动 / 闪避 / 大招。如果技能优先级和触发条件对玩家来说是"黑箱"，走位选择的意义会被削弱。建议原型里给玩家一点点对自动化的间接控制权，比如可以调整技能触发优先级顺序，这样即使技能是自动放的，玩家仍然感觉是"我在设计这场战斗"，而不是在看 AI 表演。</li>
+    <li><strong>五层 Build + 两套克制体系的认知负荷</strong>：职业 / 技能石 / Rune / 装备 / 属性石，加上元素克制和种族克制两套独立维度，对新玩家是不小的信息量。第一章的教学节奏（一个 NPC 带一个系统）设计得不错，但要盯紧"5 秒看懂一件装备"这个 P1 验收标准，这是复杂度是否失控的最直接信号。</li>
+    <li><strong>局内即时反馈的缺失</strong>：副本内不升级、不加属性，所有成长都回城结算。这个决定让战斗 HUD 干净，但也意味着局内唯一的即时爽感来源就是掉落本身的呈现——技能石解锁瞬间、Merge 成功瞬间必须做得足够"响"（音效 / 特效 / 短暂慢动作），不然一整局下来玩家会觉得"打了半天但什么都没变化"。<span class="tag good" style="margin-left:6px">已通过远征强化重设计解决 ↓</span></li>
+  </ul>
+</div>
+
+<h3>重设计方案：远征强化 / Expedition Boon</h3>
+<div class="card">
+  <p><strong>目标</strong>：在不违反"局内不手动分配基础属性"这条既定原则的前提下，给每一局提供一条看得见的临时强度曲线，弥补属性成长延后到回城结算带来的空窗期。</p>
+  <table>
+    <tr><th>要素</th><th>设计</th></tr>
+    <tr><td>触发节点</td><td>地图上每个战斗节点清空后（分岔战斗区域 / 精英遭遇后 / 迷宫房间通关后）触发一次三选一强化卡；同一局内不重复提供已选过的卡片。</td></tr>
+    <tr><td>技能强化</td><td>为当前已装备的某个技能追加一条本局限定的行为改变，例如"额外一发投射物""命中后短暂灼烧"。</td></tr>
+    <tr><td>机制强化</td><td>改变战斗动作本身的即时反馈，例如"闪避后 0.5 秒内下次攻击必定暴击""连续命中 3 次触发范围爆发"。</td></tr>
+    <tr><td>资源强化</td><td>本局内掉落率、魔石 / 材料产出临时提升，直接回应"打了半天材料没多多少"的顾虑。</td></tr>
+    <tr><td>呈现要求</td><td>选择后立即给被强化技能图标叠加可见光效或徽记，短暂 UI 卡片 + 独立音效；玩家应在下次使用该技能时明显感觉到差异。</td></tr>
+    <tr><td>重置与结算</td><td>任务结束后重置，不影响回城后的永久成长；结算画面回顾本局强化组合与高光数据（最大单次伤害、最长连击等），把过程变成可回顾的战绩。</td></tr>
+    <tr><td>与局外 Build 协同</td><td>已装备 Fireball 的玩家更容易在强化池中看到 Fireball 相关强化权重提升，让"这局的临时 Build"感觉是永久 Build 的自然延伸，而非独立小游戏。</td></tr>
+  </table>
+  <p style="margin-bottom:0">这套设计同时服务了 Design Pillar 03「Low Input, High Choice」——每个战斗节点后新增一次轻量决策点，直接提高了局内的选择密度，这本身也是常见的良性上头手段。</p>
+</div>
+
+<h2>提升上头 / 上瘾度的建议</h2>
+<div class="card">
+  <p>因为设计原则里明确拒绝体力 / 广告 / 抽卡这类外部强迫机制，能用的手段只剩下"让内在循环本身更抓人"，这恰恰是更难但更良性的方向。几个具体建议：</p>
+  <ul>
+    <li><strong>把隐藏进度变成半可见的进度条</strong>：调查度、Merge 进度、委派升级这些目前都是"达到里程碑才提示"。可以在回城结算界面加一条"距离下一次解锁还差多少"的进度条（不暴露 Boss 宠的精确概率，但可以暴露调查度 / Merge 阶段进度）。这是"还差一点"心理（goal-gradient effect）里最有效也最不需要耍花招的一招，Hades 的骨灰进度条、大多数 roguelite 的"下把更强"提示都是这个原理。</li>
+    <li><span class="tag good">已采纳</span><strong>加一个宠物图鉴 / 未捕获展示</strong>：文档目前没有明确的"图鉴"UI。哪怕只是"你在这个副本见过但还没抓到的宠物剪影"，也能利用蔡格尼克效应（未完成的事更容易让人惦记），这是宝可梦式收集游戏最基础也最有效的钩子，成本很低，性价比很高。</li>
+    <li><strong>副本结束提供"继续深入 vs 回城"的分支</strong>：目前的节奏是"进本 - 走地图 - Boss - 结算"，一局 8-15 分钟。可以在 Boss 战后加一个可选的"再深入一层，风险更高、掉落更好"的选择（类似 Diablo 的 Nephalem Rift 加注机制），让专注玩家的单次 session 可以自然拉长，而休闲玩家仍然可以见好就收，两种玩家都不用被迫适应对方的节奏。</li>
+    <li><strong>给自动战斗加一个"手感确认"层</strong>：既然战斗手感是最大风险项，原型阶段建议专门做一版对比测试——同一个技能配两组差异明显的 Rune，直接问测试者"感觉换了一把武器"还是"感觉只是数字变了"，这是文档里 P0 问题"Rune 是否真的改变手感"的最快验证方法，别等到内容做多了才发现 Rune 设计得太保守。</li>
+    <li><strong>故事悬念作为长线钩子，节奏已经设计得不错</strong>：前三章"怀疑但不确定"的递进结构，配合每章明显不同的地貌和音乐编制，能提供一条独立于战斗循环的长期好奇心驱动。这条线不需要改，但要警惕对话量在实现阶段膨胀——1-3 句的规则最好写进制作规范里强制执行，不然"重要揭露才 6-10 句"这种例外条款在实际写作时很容易变成常态。</li>
+  </ul>
+</div>
+
+<h2>优先级建议</h2>
+<div class="card">
+  <p style="margin-bottom:10px">如果只能先做一件事去验证"上头"与否，建议按下面的顺序验证，这四项加起来成本不高，但直接决定了 vertical slice 能不能验证"这游戏好玩"这个最根本的问题，其余系统（委派、异变、九章剧情）都建立在这个循环成立的前提上。</p>
+  <div class="priority">
+    <span>技能石掉落 + Merge 的即时反馈呈现</span>
+    <span class="arrow">→</span>
+    <span>Rune 手感对比测试</span>
+    <span class="arrow">→</span>
+    <span>宠物自动战斗的存在感</span>
+    <span class="arrow">→</span>
+    <span>回城结算界面的进度可见化</span>
+  </div>
+</div>
+
+<footer>
+  基于 game-design/gdd.md（v0.1 · 2026-09-05）的评估 · 由 Claude Code 生成
+</footer>
+
+</div>
+</body>
+</html>

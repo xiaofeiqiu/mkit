@@ -1,0 +1,77 @@
+{
+  "date": "2026-09-06",
+  "revision": "v0.9-architecture-depth-and-roof",
+  "active_pack": "res://game/whispering_forest/assets/city-reference-remake/",
+  "profile": "bellwake-daylight-v3",
+  "profile_sha256": "efca02c18801f93d44f7eb38db1a1706e32f794cc3f596bd6bf13895ec0bcb0b",
+  "surface_signature": "7519004f05fc7074757263d09a62c1d82fd23373c79848662ffb5d8797252532",
+  "updated_buildings": [
+    "baker_house",
+    "apothecary",
+    "forge",
+    "guild",
+    "inn",
+    "market_hall",
+    "pet_lodge",
+    "garden_house",
+    "townhouse",
+    "garden_house_sage",
+    "garden_house_clay",
+    "garden_house_ash",
+    "townhouse_mauve"
+  ],
+  "checks": {
+    "wall_mesh_openings": {
+      "passed": true,
+      "openings": 128,
+      "independent_ray_checks": 256
+    },
+    "active_city_assets": {
+      "passed": true,
+      "frames": 168,
+      "blender_sources": 30,
+      "scene_objects": 198
+    },
+    "city_gameplay": {
+      "passed": true,
+      "result": "WF_SMOKE_OK: planned city / frontage routes / wall and bridge topology / click navigation, eight-direction walking/idle/foot pivots, summoned city, 5 waystones, safe city, quest teleport, return button/re-entry, Q101 turn-in, separate practice, collision, cooldown, rage, meteor, save/reload, v1 migration"
+    },
+    "actual_game_capture": {
+      "passed": true,
+      "asset_override": false,
+      "views": [
+        "overview",
+        "guild",
+        "market",
+        "inn",
+        "gate"
+      ],
+      "hud_capture": true
+    }
+  },
+  "visual_evidence": [
+    "preview/architecture-depth-comparison.png",
+    "preview/city-daylight-market.png",
+    "preview/city-daylight-guild.png",
+    "preview/city-daylight-inn.png",
+    "preview/city-daylight-gate.png",
+    "preview/city-daylight-overview.png",
+    "preview/city-daylight-live.png"
+  ],
+  "references": [
+    "references/inn-structure.png",
+    "references/bakery-structure.png",
+    "references/roof-wall-material.png"
+  ],
+  "source_notes": [
+    "architecture_depth.py drives the 13 current building models; source and render hashes are validated.",
+    "Fixed UV/color buffer handling retained; imagegen roof material uses mipmaps and modest normal relief to avoid pixel noise.",
+    "Door thresholds remain tied to geometry; approaches and frontage paving account for recessed entrances.",
+    "Existing building anchors/lot collision envelopes, city road layout, camera, light, character and combat source are unchanged.",
+    "Legacy city walls, trees and small props were rebaked, not structurally rebuilt in this revision.",
+    "Previous v0.7 city-tour video and v0.8 comparison remain historical. Aesthetic acceptance belongs to the user."
+  ],
+  "environment_notes": [
+    "Headless local verification logged the macOS certificate-store warning and raw source-image loader warnings; all asset assertions passed."
+  ]
+}
